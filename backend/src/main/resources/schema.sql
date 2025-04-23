@@ -31,6 +31,17 @@ CREATE TABLE users (
     FOREIGN KEY (household_id) REFERENCES households(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- HOUSEHOLD MEMBERS
+CREATE TABLE household_member (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    household_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    type ENUM('child', 'adult', 'pet') NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (household_id) REFERENCES households(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- GROUPS
 CREATE TABLE groups (
     id INT AUTO_INCREMENT PRIMARY KEY,
