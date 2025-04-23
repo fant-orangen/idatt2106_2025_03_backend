@@ -2,7 +2,7 @@
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- HOUSEHOLDS
 CREATE TABLE households (
@@ -10,7 +10,7 @@ CREATE TABLE households (
     name VARCHAR(255),
     population_count INT NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- USERS
 CREATE TABLE users (
@@ -24,12 +24,12 @@ CREATE TABLE users (
     home_latitude DECIMAL(10,7),
     home_longitude DECIMAL(10,7),
     privacy_accepted_at DATETIME,
-    email_verified TINYINT(1) NOT NULL DEFAULT 0,
-    location_sharing_enabled TINYINT(1) NOT NULL DEFAULT 0,
+    email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    location_sharing_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(id),
     FOREIGN KEY (household_id) REFERENCES households(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- HOUSEHOLD MEMBERS
 CREATE TABLE household_member (
@@ -37,10 +37,10 @@ CREATE TABLE household_member (
     household_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    type ENUM('child', 'adult', 'pet') NOT NULL,
+    type VARCHAR(10) NOT NULL CHECK (type IN ('child', 'adult', 'pet')),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (household_id) REFERENCES households(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- GROUPS
 CREATE TABLE groups (
@@ -49,7 +49,7 @@ CREATE TABLE groups (
     created_by_user_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- INVITATIONS (for both households & groups)
 CREATE TABLE invitations (
@@ -65,7 +65,7 @@ CREATE TABLE invitations (
     FOREIGN KEY (inviter_user_id) REFERENCES users(id),
     FOREIGN KEY (household_id) REFERENCES households(id),
     FOREIGN KEY (group_id) REFERENCES groups(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- GROUP MEMBERSHIPS (households join crisis‐supply groups)
 CREATE TABLE group_memberships (
@@ -77,13 +77,13 @@ CREATE TABLE group_memberships (
     FOREIGN KEY (group_id) REFERENCES groups(id),
     FOREIGN KEY (household_id) REFERENCES households(id),
     FOREIGN KEY (invited_by_user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- PRODUCT CATALOG
 CREATE TABLE product_types (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -92,7 +92,7 @@ CREATE TABLE products (
     description TEXT,
     FOREIGN KEY (product_type_id) REFERENCES product_types(id),
     UNIQUE KEY (product_type_id, name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- HOUSEHOLD INVENTORY
 CREATE TABLE household_inventory (
@@ -103,10 +103,10 @@ CREATE TABLE household_inventory (
     quantity DECIMAL(10,2) NOT NULL,
     expiration_date DATE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (household_id) REFERENCES households(id),
     FOREIGN KEY (product_id) REFERENCES products(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- GROUP SUPPLY CONTRIBUTIONS
 CREATE TABLE group_inventory_contributions (
@@ -121,7 +121,7 @@ CREATE TABLE group_inventory_contributions (
     FOREIGN KEY (group_id) REFERENCES groups(id),
     FOREIGN KEY (household_id) REFERENCES households(id),
     FOREIGN KEY (product_id) REFERENCES products(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- MEETING PLACES (user/household–defined POIs)
 CREATE TABLE meeting_places (
@@ -135,13 +135,13 @@ CREATE TABLE meeting_places (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (household_id) REFERENCES households(id),
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- SYSTEM‐MANAGED POINTS OF INTEREST
 CREATE TABLE poi_types (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 CREATE TABLE points_of_interest (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -155,25 +155,25 @@ CREATE TABLE points_of_interest (
     contact_info TEXT,
     created_by_user_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (poi_type_id) REFERENCES poi_types(id),
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- CRISIS EVENTS & EPICENTERS
 CREATE TABLE crisis_events (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    severity ENUM('green','yellow','red') NOT NULL DEFAULT 'green',
+    severity VARCHAR(10) NOT NULL DEFAULT 'green' CHECK (severity IN ('green','yellow','red')),
     epicenter_latitude DECIMAL(10,7) NOT NULL,
     epicenter_longitude DECIMAL(10,7) NOT NULL,
     start_time DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by_user_id INT NOT NULL,
-    active TINYINT(1) NOT NULL DEFAULT 1,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- SCENARIO THEMES (admin‐managed crisis scenarios)
 CREATE TABLE scenario_themes (
@@ -182,9 +182,9 @@ CREATE TABLE scenario_themes (
     description TEXT,
     created_by_user_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- GAMIFICATION ACTIVITIES & USER LOG
 CREATE TABLE gamification_activities (
@@ -194,30 +194,30 @@ CREATE TABLE gamification_activities (
     description TEXT,
     created_by_user_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 CREATE TABLE user_gamification_activities (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     activity_id INT NOT NULL,
-    status ENUM('pending','completed','failed') NOT NULL DEFAULT 'pending',
+    status VARCHAR(10) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','completed','failed')),
     score INT,
     completed_at DATETIME,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (activity_id) REFERENCES gamification_activities(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- POST‐CRISIS REFLECTIONS
 CREATE TABLE reflections (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     content TEXT NOT NULL,
-    shared TINYINT(1) NOT NULL DEFAULT 0,
+    shared BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- NEWS ARTICLES
 CREATE TABLE news_articles (
@@ -227,43 +227,43 @@ CREATE TABLE news_articles (
     published_at DATETIME NOT NULL,
     created_by_user_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- EMAIL TOKEN MANAGEMENT (verification & password reset)
 CREATE TABLE email_tokens (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     token VARCHAR(255) NOT NULL UNIQUE,
-    type ENUM('verification','reset') NOT NULL,
+    type VARCHAR(15) NOT NULL CHECK (type IN ('verification','reset')),
     expires_at DATETIME NOT NULL,
     used_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- NOTIFICATION SETTINGS & LOG
 CREATE TABLE notification_preferences (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    preference_type ENUM('expiration_reminder','crisis_alert','location_request') NOT NULL,
-    enabled TINYINT(1) NOT NULL DEFAULT 1,
+    preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request')),
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY (user_id, preference_type),
     FOREIGN KEY (user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    preference_type ENUM('expiration_reminder','crisis_alert','location_request') NOT NULL,
-    target_type ENUM('inventory','event','location_request') NOT NULL,
+    preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request')),
+    target_type VARCHAR(20) NOT NULL CHECK (target_type IN ('inventory','event','location_request')),
     target_id INT,
     notify_at DATETIME NOT NULL,
     sent_at DATETIME,
     read_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);

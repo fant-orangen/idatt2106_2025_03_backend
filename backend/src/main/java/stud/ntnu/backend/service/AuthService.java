@@ -51,7 +51,7 @@ public class AuthService {
     // Get user details to include in the response
     User user = userRepository.findByEmail(authRequest.getEmail())
         .orElseThrow(() -> new BadCredentialsException("User not found"));
-       
+
     // Create and return the response
     return new AuthResponseDto(
         jwt,
