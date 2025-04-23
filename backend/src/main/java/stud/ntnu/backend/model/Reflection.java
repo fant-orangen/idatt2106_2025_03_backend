@@ -2,9 +2,15 @@ package stud.ntnu.backend.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "reflections")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Reflection {
 
   @Id
@@ -30,53 +36,8 @@ public class Reflection {
     createdAt = LocalDateTime.now();
   }
 
-  // Constructors
-  public Reflection() {
-  }
-
   public Reflection(User user, String content) {
     this.user = user;
     this.content = content;
-  }
-
-  // Getters and Setters
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public User getUser() {
-    return user;
-  }
-
-  public void setUser(User user) {
-    this.user = user;
-  }
-
-  public String getContent() {
-    return content;
-  }
-
-  public void setContent(String content) {
-    this.content = content;
-  }
-
-  public Boolean getShared() {
-    return shared;
-  }
-
-  public void setShared(Boolean shared) {
-    this.shared = shared;
-  }
-
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
   }
 }

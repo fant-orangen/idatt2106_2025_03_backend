@@ -2,9 +2,15 @@ package stud.ntnu.backend.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "group_memberships")
+@Getter
+@Setter
+@NoArgsConstructor
 public class GroupMembership {
 
   @EmbeddedId
@@ -33,55 +39,10 @@ public class GroupMembership {
     joinedAt = LocalDateTime.now();
   }
 
-  // Constructors
-  public GroupMembership() {
-  }
-
   public GroupMembership(Group group, Household household, User invitedByUser) {
     this.id = new GroupMembershipId(group.getId(), household.getId());
     this.group = group;
     this.household = household;
     this.invitedByUser = invitedByUser;
-  }
-
-  // Getters and Setters
-  public GroupMembershipId getId() {
-    return id;
-  }
-
-  public void setId(GroupMembershipId id) {
-    this.id = id;
-  }
-
-  public Group getGroup() {
-    return group;
-  }
-
-  public void setGroup(Group group) {
-    this.group = group;
-  }
-
-  public Household getHousehold() {
-    return household;
-  }
-
-  public void setHousehold(Household household) {
-    this.household = household;
-  }
-
-  public User getInvitedByUser() {
-    return invitedByUser;
-  }
-
-  public void setInvitedByUser(User invitedByUser) {
-    this.invitedByUser = invitedByUser;
-  }
-
-  public LocalDateTime getJoinedAt() {
-    return joinedAt;
-  }
-
-  public void setJoinedAt(LocalDateTime joinedAt) {
-    this.joinedAt = joinedAt;
   }
 }

@@ -4,10 +4,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @Getter
+@NoArgsConstructor
 @Entity
 @Table(name = "households")
 public class Household {
@@ -33,10 +35,6 @@ public class Household {
   @PrePersist
   protected void onCreate() {
     createdAt = LocalDateTime.now();
-  }
-
-  // Constructors
-  public Household() {
   }
 
   public Household(String name, Integer populationCount) {

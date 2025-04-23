@@ -1,9 +1,15 @@
 package stud.ntnu.backend.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "products")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Product {
 
   @Id
@@ -20,46 +26,9 @@ public class Product {
   @Column(name = "description", columnDefinition = "TEXT")
   private String description;
 
-  // Constructors
-  public Product() {
-  }
-
   public Product(ProductType productType, String name, String description) {
     this.productType = productType;
     this.name = name;
-    this.description = description;
-  }
-
-  // Getters and Setters
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public ProductType getProductType() {
-    return productType;
-  }
-
-  public void setProductType(ProductType productType) {
-    this.productType = productType;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
     this.description = description;
   }
 }

@@ -3,9 +3,15 @@ package stud.ntnu.backend.model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "points_of_interest")
+@Getter
+@Setter
+@NoArgsConstructor
 public class PointOfInterest {
 
   @Id
@@ -60,10 +66,6 @@ public class PointOfInterest {
     updatedAt = LocalDateTime.now();
   }
 
-  // Constructors
-  public PointOfInterest() {
-  }
-
   public PointOfInterest(PoiType poiType, String name, BigDecimal latitude, BigDecimal longitude,
       User createdByUser) {
     this.poiType = poiType;
@@ -71,102 +73,5 @@ public class PointOfInterest {
     this.latitude = latitude;
     this.longitude = longitude;
     this.createdByUser = createdByUser;
-  }
-
-  // Getters and Setters
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public PoiType getPoiType() {
-    return poiType;
-  }
-
-  public void setPoiType(PoiType poiType) {
-    this.poiType = poiType;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public BigDecimal getLatitude() {
-    return latitude;
-  }
-
-  public void setLatitude(BigDecimal latitude) {
-    this.latitude = latitude;
-  }
-
-  public BigDecimal getLongitude() {
-    return longitude;
-  }
-
-  public void setLongitude(BigDecimal longitude) {
-    this.longitude = longitude;
-  }
-
-  public String getAddress() {
-    return address;
-  }
-
-  public void setAddress(String address) {
-    this.address = address;
-  }
-
-  public String getOpeningHours() {
-    return openingHours;
-  }
-
-  public void setOpeningHours(String openingHours) {
-    this.openingHours = openingHours;
-  }
-
-  public String getContactInfo() {
-    return contactInfo;
-  }
-
-  public void setContactInfo(String contactInfo) {
-    this.contactInfo = contactInfo;
-  }
-
-  public User getCreatedByUser() {
-    return createdByUser;
-  }
-
-  public void setCreatedByUser(User createdByUser) {
-    this.createdByUser = createdByUser;
-  }
-
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
-  }
-
-  public LocalDateTime getUpdatedAt() {
-    return updatedAt;
-  }
-
-  public void setUpdatedAt(LocalDateTime updatedAt) {
-    this.updatedAt = updatedAt;
   }
 }

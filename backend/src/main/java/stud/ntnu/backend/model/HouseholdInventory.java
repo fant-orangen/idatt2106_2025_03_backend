@@ -4,9 +4,15 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "household_inventory")
+@Getter
+@Setter
+@NoArgsConstructor
 public class HouseholdInventory {
 
   @Id
@@ -49,10 +55,6 @@ public class HouseholdInventory {
     updatedAt = LocalDateTime.now();
   }
 
-  // Constructors
-  public HouseholdInventory() {
-  }
-
   public HouseholdInventory(Household household, Product product, BigDecimal quantity) {
     this.household = household;
     this.product = product;
@@ -63,70 +65,5 @@ public class HouseholdInventory {
     this.household = household;
     this.customName = customName;
     this.quantity = quantity;
-  }
-
-  // Getters and Setters
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public Household getHousehold() {
-    return household;
-  }
-
-  public void setHousehold(Household household) {
-    this.household = household;
-  }
-
-  public Product getProduct() {
-    return product;
-  }
-
-  public void setProduct(Product product) {
-    this.product = product;
-  }
-
-  public String getCustomName() {
-    return customName;
-  }
-
-  public void setCustomName(String customName) {
-    this.customName = customName;
-  }
-
-  public BigDecimal getQuantity() {
-    return quantity;
-  }
-
-  public void setQuantity(BigDecimal quantity) {
-    this.quantity = quantity;
-  }
-
-  public LocalDate getExpirationDate() {
-    return expirationDate;
-  }
-
-  public void setExpirationDate(LocalDate expirationDate) {
-    this.expirationDate = expirationDate;
-  }
-
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
-  }
-
-  public LocalDateTime getUpdatedAt() {
-    return updatedAt;
-  }
-
-  public void setUpdatedAt(LocalDateTime updatedAt) {
-    this.updatedAt = updatedAt;
   }
 }

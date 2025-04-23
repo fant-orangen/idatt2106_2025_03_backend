@@ -2,9 +2,15 @@ package stud.ntnu.backend.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "notification_preferences")
+@Getter
+@Setter
+@NoArgsConstructor
 public class NotificationPreference {
 
   @Id
@@ -46,61 +52,8 @@ public class NotificationPreference {
     EXPIRATION_REMINDER, CRISIS_ALERT, LOCATION_REQUEST
   }
 
-  // Constructors
-  public NotificationPreference() {
-  }
-
   public NotificationPreference(User user, PreferenceType preferenceType) {
     this.user = user;
     this.preferenceType = preferenceType;
-  }
-
-  // Getters and Setters
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public User getUser() {
-    return user;
-  }
-
-  public void setUser(User user) {
-    this.user = user;
-  }
-
-  public PreferenceType getPreferenceType() {
-    return preferenceType;
-  }
-
-  public void setPreferenceType(PreferenceType preferenceType) {
-    this.preferenceType = preferenceType;
-  }
-
-  public Boolean getEnabled() {
-    return enabled;
-  }
-
-  public void setEnabled(Boolean enabled) {
-    this.enabled = enabled;
-  }
-
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
-  }
-
-  public LocalDateTime getUpdatedAt() {
-    return updatedAt;
-  }
-
-  public void setUpdatedAt(LocalDateTime updatedAt) {
-    this.updatedAt = updatedAt;
   }
 }

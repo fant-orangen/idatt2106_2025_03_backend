@@ -2,9 +2,15 @@ package stud.ntnu.backend.model;
 
 import jakarta.persistence.*;
 import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "poi_types")
+@Getter
+@Setter
+@NoArgsConstructor
 public class PoiType {
 
   @Id
@@ -17,36 +23,7 @@ public class PoiType {
   @OneToMany(mappedBy = "poiType")
   private List<PointOfInterest> pointsOfInterest;
 
-  // Constructors
-  public PoiType() {
-  }
-
   public PoiType(String name) {
     this.name = name;
-  }
-
-  // Getters and Setters
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public List<PointOfInterest> getPointsOfInterest() {
-    return pointsOfInterest;
-  }
-
-  public void setPointsOfInterest(List<PointOfInterest> pointsOfInterest) {
-    this.pointsOfInterest = pointsOfInterest;
   }
 }

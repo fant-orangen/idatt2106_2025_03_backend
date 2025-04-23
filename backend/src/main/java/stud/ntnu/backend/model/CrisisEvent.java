@@ -3,9 +3,15 @@ package stud.ntnu.backend.model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "crisis_events")
+@Getter
+@Setter
+@NoArgsConstructor
 public class CrisisEvent {
 
   @Id
@@ -47,10 +53,6 @@ public class CrisisEvent {
     updatedAt = LocalDateTime.now();
   }
 
-  // Constructors
-  public CrisisEvent() {
-  }
-
   public CrisisEvent(String name, BigDecimal epicenterLatitude, BigDecimal epicenterLongitude,
       LocalDateTime startTime, User createdByUser) {
     this.name = name;
@@ -64,86 +66,5 @@ public class CrisisEvent {
   // Enum for severity
   public enum Severity {
     GREEN, YELLOW, RED
-  }
-
-  // Getters and Setters
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public Severity getSeverity() {
-    return severity;
-  }
-
-  public void setSeverity(Severity severity) {
-    this.severity = severity;
-  }
-
-  public BigDecimal getEpicenterLatitude() {
-    return epicenterLatitude;
-  }
-
-  public void setEpicenterLatitude(BigDecimal epicenterLatitude) {
-    this.epicenterLatitude = epicenterLatitude;
-  }
-
-  public BigDecimal getEpicenterLongitude() {
-    return epicenterLongitude;
-  }
-
-  public void setEpicenterLongitude(BigDecimal epicenterLongitude) {
-    this.epicenterLongitude = epicenterLongitude;
-  }
-
-  public LocalDateTime getStartTime() {
-    return startTime;
-  }
-
-  public void setStartTime(LocalDateTime startTime) {
-    this.startTime = startTime;
-  }
-
-  public LocalDateTime getUpdatedAt() {
-    return updatedAt;
-  }
-
-  public void setUpdatedAt(LocalDateTime updatedAt) {
-    this.updatedAt = updatedAt;
-  }
-
-  public User getCreatedByUser() {
-    return createdByUser;
-  }
-
-  public void setCreatedByUser(User createdByUser) {
-    this.createdByUser = createdByUser;
-  }
-
-  public Boolean getActive() {
-    return active;
-  }
-
-  public void setActive(Boolean active) {
-    this.active = active;
   }
 }

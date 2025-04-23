@@ -2,9 +2,15 @@ package stud.ntnu.backend.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "user_gamification_activities")
+@Getter
+@Setter
+@NoArgsConstructor
 public class UserGamificationActivity {
 
   @Id
@@ -29,10 +35,6 @@ public class UserGamificationActivity {
   @Column(name = "completed_at")
   private LocalDateTime completedAt;
 
-  // Constructors
-  public UserGamificationActivity() {
-  }
-
   public UserGamificationActivity(User user, GamificationActivity activity) {
     this.user = user;
     this.activity = activity;
@@ -41,54 +43,5 @@ public class UserGamificationActivity {
   // Enum for status
   public enum Status {
     PENDING, COMPLETED, FAILED
-  }
-
-  // Getters and Setters
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public User getUser() {
-    return user;
-  }
-
-  public void setUser(User user) {
-    this.user = user;
-  }
-
-  public GamificationActivity getActivity() {
-    return activity;
-  }
-
-  public void setActivity(GamificationActivity activity) {
-    this.activity = activity;
-  }
-
-  public Status getStatus() {
-    return status;
-  }
-
-  public void setStatus(Status status) {
-    this.status = status;
-  }
-
-  public Integer getScore() {
-    return score;
-  }
-
-  public void setScore(Integer score) {
-    this.score = score;
-  }
-
-  public LocalDateTime getCompletedAt() {
-    return completedAt;
-  }
-
-  public void setCompletedAt(LocalDateTime completedAt) {
-    this.completedAt = completedAt;
   }
 }

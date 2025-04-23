@@ -3,9 +3,15 @@ package stud.ntnu.backend.model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "meeting_places")
+@Getter
+@Setter
+@NoArgsConstructor
 public class MeetingPlace {
 
   @Id
@@ -41,10 +47,6 @@ public class MeetingPlace {
     createdAt = LocalDateTime.now();
   }
 
-  // Constructors
-  public MeetingPlace() {
-  }
-
   public MeetingPlace(Household household, String name, BigDecimal latitude, BigDecimal longitude,
       User createdByUser) {
     this.household = household;
@@ -52,70 +54,5 @@ public class MeetingPlace {
     this.latitude = latitude;
     this.longitude = longitude;
     this.createdByUser = createdByUser;
-  }
-
-  // Getters and Setters
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public Household getHousehold() {
-    return household;
-  }
-
-  public void setHousehold(Household household) {
-    this.household = household;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public BigDecimal getLatitude() {
-    return latitude;
-  }
-
-  public void setLatitude(BigDecimal latitude) {
-    this.latitude = latitude;
-  }
-
-  public BigDecimal getLongitude() {
-    return longitude;
-  }
-
-  public void setLongitude(BigDecimal longitude) {
-    this.longitude = longitude;
-  }
-
-  public String getAddress() {
-    return address;
-  }
-
-  public void setAddress(String address) {
-    this.address = address;
-  }
-
-  public User getCreatedByUser() {
-    return createdByUser;
-  }
-
-  public void setCreatedByUser(User createdByUser) {
-    this.createdByUser = createdByUser;
-  }
-
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
   }
 }
