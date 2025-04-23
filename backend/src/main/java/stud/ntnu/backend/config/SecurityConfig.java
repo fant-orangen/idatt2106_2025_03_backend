@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,112 +29,105 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    /**
-     * <h3>Password Encoder</h3>
-     * <p>Provides BCrypt password encoding functionality.</p>
-     *
-     * @return configured {@link BCryptPasswordEncoder} instance
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  /**
+   * <h3>Password Encoder</h3>
+   * <p>Provides BCrypt password encoding functionality.</p>
+   *
+   * @return configured {@link BCryptPasswordEncoder} instance
+   */
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
-    /**
-     * <h3>User Details Service</h3>
-     * <p>Temporary in-memory user details service for development.</p>
-     * <p>This should be replaced with a real implementation that loads users from the database.</p>
-     *
-     * @return configured {@link UserDetailsService}
-     */
-    @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User.builder()
-            .username("user@example.com")
-            .password(passwordEncoder().encode("password"))
-            .roles("USER")
-            .build();
+  /**
+   * <h3>User Details Service</h3>
+   * <p>The custom user details service is injected by Spring.</p>
+   * <p>It loads users from the database.</p>
+   */
+  private final UserDetailsService userDetailsService;
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-        UserDetails admin = User.builder()
-            .username("admin@example.com")
-            .password(passwordEncoder().encode("admin"))
-            .roles("ADMIN", "USER")
-            .build();
+  public SecurityConfig(UserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
+      this.userDetailsService = userDetailsService;
+      this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+  }
 
-        return new InMemoryUserDetailsManager(user, admin);
-    }
+  /**
+   * <h3>Authentication Provider</h3>
+   * <p>Configures DAO authentication with user details service and password encoder.</p>
+   *
+   * @return configured {@link DaoAuthenticationProvider}
+   */
+  @Bean
+  public DaoAuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+    provider.setUserDetailsService(userDetailsService);
+    provider.setPasswordEncoder(passwordEncoder());
+    return provider;
+  }
 
-    /**
-     * <h3>Authentication Provider</h3>
-     * <p>Configures DAO authentication with user details service and password encoder.</p>
-     *
-     * @return configured {@link DaoAuthenticationProvider}
-     */
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService());
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
-    }
+  /**
+   * <h3>Authentication Manager</h3>
+   * <p>Creates and configures the authentication manager.</p>
+   *
+   * @param authenticationConfiguration the authentication configuration
+   * @return configured {@link AuthenticationManager}
+   * @throws Exception if configuration fails
+   */
+  @Bean
+  public AuthenticationManager authenticationManager(
+      AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    return authenticationConfiguration.getAuthenticationManager();
+  }
 
-    /**
-     * <h3>Authentication Manager</h3>
-     * <p>Creates and configures the authentication manager.</p>
-     *
-     * @param authenticationConfiguration the authentication configuration
-     * @return configured {@link AuthenticationManager}
-     * @throws Exception if configuration fails
-     */
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
+  /**
+   * <h3>Security Filter Chain</h3>
+   * <p>Defines the security filter chain configuration.</p>
+   *
+   * @param http the HTTP security builder
+   * @return configured {@link SecurityFilterChain}
+   * @throws Exception if configuration fails
+   */
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session ->
+            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> 
+            auth.requestMatchers("/h2-console/**", "/swagger-ui/**", "/swagger-ui.html", 
+                                "/v3/api-docs/**", "/actuator/health", "/auth/**", "/api/auth/**").permitAll()
+                .anyRequest().authenticated());
 
-    /**
-     * <h3>Security Filter Chain</h3>
-     * <p>Defines the security filter chain configuration.</p>
-     *
-     * @param http the HTTP security builder
-     * @return configured {@link SecurityFilterChain}
-     * @throws Exception if configuration fails
-     */
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> 
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> 
-                auth.requestMatchers("/h2-console/**", "/swagger-ui/**", "/swagger-ui.html", 
-                                    "/v3/api-docs/**", "/actuator/health", "/auth/**").permitAll()
-                    .anyRequest().authenticated());
+    // Allow H2 console frame options
+    http.headers(headers -> 
+        headers.frameOptions(frameOptions -> frameOptions.disable()));
 
-        // Allow H2 console frame options
-        http.headers(headers -> 
-            headers.frameOptions(frameOptions -> frameOptions.disable()));
+    // Add JWT authentication filter
+    http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+    return http.build();
+  }
 
-    /**
-     * <h3>CORS Configuration</h3>
-     * <p>Configures Cross-Origin Resource Sharing settings.</p>
-     *
-     * @return configured {@link CorsConfigurationSource}
-     */
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:8080"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true);
+  /**
+   * <h3>CORS Configuration</h3>
+   * <p>Configures Cross-Origin Resource Sharing settings.</p>
+   *
+   * @return configured {@link CorsConfigurationSource}
+   */
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(
+        Arrays.asList("http://localhost:5173", "http://localhost:8080"));
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+    configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+  }
 }
