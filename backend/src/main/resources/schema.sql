@@ -91,7 +91,7 @@ CREATE TABLE products (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     FOREIGN KEY (product_type_id) REFERENCES product_types(id),
-    UNIQUE KEY (product_type_id, name)
+    UNIQUE (product_type_id, name)
 );
 
 -- HOUSEHOLD INVENTORY
@@ -251,7 +251,7 @@ CREATE TABLE notification_preferences (
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY (user_id, preference_type),
+    UNIQUE (user_id, preference_type),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
