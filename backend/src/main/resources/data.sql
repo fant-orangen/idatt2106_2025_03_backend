@@ -99,9 +99,9 @@ VALUES (3, 'Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
 
 -- CRISIS EVENTS
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, start_time, created_by_user_id, active)
-VALUES ('Flood Warning', 'Potential flooding in downtown area', 'yellow', 63.4300, 10.3950, NOW(), 1, TRUE);
+VALUES ('Flood Warning', 'Potential flooding in downtown area', 'yellow', 63.4300, 10.3950, CURRENT_TIMESTAMP, 1, TRUE);
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, start_time, created_by_user_id, active)
-VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 63.4250, 10.3900, DATE_ADD(NOW(), INTERVAL 1 DAY), 1, TRUE);
+VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 63.4250, 10.3900, CURRENT_TIMESTAMP + INTERVAL '1' DAY, 1, TRUE);
 
 -- SCENARIO THEMES
 INSERT INTO scenario_themes (name, description, created_by_user_id)
@@ -121,11 +121,11 @@ VALUES ('Join Group', 'Community', 'Join a community preparedness group', 1);
 
 -- USER GAMIFICATION ACTIVITIES
 INSERT INTO user_gamification_activities (user_id, activity_id, status, score, completed_at)
-VALUES (2, 1, 'completed', 100, NOW());
+VALUES (2, 1, 'completed', 100, CURRENT_TIMESTAMP);
 INSERT INTO user_gamification_activities (user_id, activity_id, status)
 VALUES (2, 2, 'pending');
 INSERT INTO user_gamification_activities (user_id, activity_id, status, score, completed_at)
-VALUES (3, 3, 'completed', 50, NOW());
+VALUES (3, 3, 'completed', 50, CURRENT_TIMESTAMP);
 
 -- NOTIFICATION PREFERENCES
 INSERT INTO notification_preferences (user_id, preference_type, enabled)
@@ -141,6 +141,6 @@ VALUES (4, 'location_request', FALSE);
 
 -- NEWS ARTICLES
 INSERT INTO news_articles (title, content, published_at, created_by_user_id)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', NOW(), 1);
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1);
 INSERT INTO news_articles (title, content, published_at, created_by_user_id)
-VALUES ('New Emergency Response Guidelines', 'The city has updated its emergency response guidelines. Key changes include...', DATE_SUB(NOW(), INTERVAL 2 DAY), 1);
+VALUES ('New Emergency Response Guidelines', 'The city has updated its emergency response guidelines. Key changes include...', CURRENT_TIMESTAMP - INTERVAL '2' DAY, 1);
