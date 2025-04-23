@@ -20,7 +20,6 @@ VALUES (3, 'sarah@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB
 INSERT INTO users (id, email, password_hash, role_id, household_id, name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled) 
 VALUES (4, 'mike@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 1, 3, 'Mike Brown', '789 Pine St, Elsewhere', 63.4105, 10.3851, TRUE, FALSE);
 
-
 -- HOUSEHOLD MEMBERS
 INSERT INTO household_member (id, household_id, name, description, type) VALUES (1, 1, 'Emma Smith', 'Daughter', 'child');
 INSERT INTO household_member (id, household_id, name, description, type) VALUES (2, 1, 'James Smith', 'Son', 'child');
