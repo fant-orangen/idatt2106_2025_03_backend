@@ -2,6 +2,7 @@
 INSERT INTO roles (id, name) VALUES (1, 'USER');
 INSERT INTO roles (id, name) VALUES (2, 'ADMIN');
 
+
 -- HOUSEHOLDS
 INSERT INTO households (id, name, population_count) VALUES (1, 'Smith Family', 4);
 INSERT INTO households (id, name, population_count) VALUES (2, 'Johnson Household', 3);
