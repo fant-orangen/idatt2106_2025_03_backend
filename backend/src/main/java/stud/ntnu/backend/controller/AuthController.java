@@ -57,7 +57,6 @@ public class AuthController {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
-
   /**
    * Handles the email verification request.
    * Receives the token sent via the verification link in the email.
@@ -67,7 +66,19 @@ public class AuthController {
    */
   @GetMapping("/verify")
   public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
-    // TODO: Implement the call to the service layer to handle verification logic
-    return ResponseEntity.ok("Verification endpoint reached. Token: " + token);
+    try {
+      authService.verifyEmail(token);
+      // On success, return HTTP 200 OK with a success message
+      return ResponseEntity.ok().body("Email successfully verified.");
+    } catch (IllegalArgumentException | IllegalStateException e) {
+      // Catch specific exceptions for invalid/expired/used tokens
+      // Return HTTP 400 Bad Request with the error message from the service
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+      // Catch any other unexpected errors during the process
+      // Log the error for debugging
+      // Return HTTP 500 Internal Server Error
+      return ResponseEntity.status(500).body("An unexpected error occurred during email verification.");
+    }
   }
 }
