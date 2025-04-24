@@ -238,7 +238,7 @@ CREATE TABLE email_tokens (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     token VARCHAR(255) NOT NULL UNIQUE,
-    type VARCHAR(15) NOT NULL CHECK (type IN ('verification','reset')),
+    type VARCHAR(15) NOT NULL CHECK (type IN ('VERIFICATION','RESET')),
     expires_at DATETIME NOT NULL,
     used_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

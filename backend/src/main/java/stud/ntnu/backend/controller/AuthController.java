@@ -3,6 +3,8 @@ package stud.ntnu.backend.controller;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,6 +59,30 @@ public class AuthController {
     } catch (IllegalArgumentException e) {
       log.info("User registration failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+  /**
+   * Handles the email verification request.
+   * Receives the token sent via the verification link in the email.
+   *
+   * @param token The verification token from the request parameter.
+   * @return ResponseEntity indicating success or failure of the verification.
+   */
+  @GetMapping("/verify")
+  public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
+    try {
+      authService.verifyEmail(token);
+      // On success, return HTTP 200 OK with a success message
+      return ResponseEntity.ok().body("Email successfully verified.");
+    } catch (IllegalArgumentException | IllegalStateException e) {
+      // Catch specific exceptions for invalid/expired/used tokens
+      // Return HTTP 400 Bad Request with the error message from the service
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+      // Catch any other unexpected errors during the process
+      // Log the error for debugging
+      // Return HTTP 500 Internal Server Error
+      return ResponseEntity.status(500).body("An unexpected error occurred during email verification.");
     }
   }
 }
