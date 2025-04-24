@@ -2,7 +2,7 @@ package stud.ntnu.backend.service;
 
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.repository.ScenarioThemeRepository;
-import stud.ntnu.backend.model.ScenarioTheme;
+import stud.ntnu.backend.model.map.ScenarioTheme;
 
 import java.util.List;
 import java.util.Optional;

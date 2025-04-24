@@ -2,7 +2,7 @@ package stud.ntnu.backend.service;
 
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.repository.InvitationRepository;
-import stud.ntnu.backend.model.Invitation;
+import stud.ntnu.backend.model.household.Invitation;
 
 import java.util.List;
 import java.util.Optional;

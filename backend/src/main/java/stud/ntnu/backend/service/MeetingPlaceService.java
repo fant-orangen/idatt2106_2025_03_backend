@@ -2,7 +2,7 @@ package stud.ntnu.backend.service;
 
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.repository.MeetingPlaceRepository;
-import stud.ntnu.backend.model.MeetingPlace;
+import stud.ntnu.backend.model.map.MeetingPlace;
 
 import java.util.List;
 import java.util.Optional;
