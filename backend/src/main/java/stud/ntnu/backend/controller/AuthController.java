@@ -2,6 +2,8 @@ package stud.ntnu.backend.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,5 +56,18 @@ public class AuthController {
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
+
+  /**
+   * Handles the email verification request.
+   * Receives the token sent via the verification link in the email.
+   *
+   * @param token The verification token from the request parameter.
+   * @return ResponseEntity indicating success or failure of the verification.
+   */
+  @GetMapping("/verify")
+  public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
+    // TODO: Implement the call to the service layer to handle verification logic
+    return ResponseEntity.ok("Verification endpoint reached. Token: " + token);
   }
 }
