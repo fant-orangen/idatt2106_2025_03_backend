@@ -1,6 +1,7 @@
 -- ROLES
 INSERT INTO roles (id, name) VALUES (1, 'USER');
 INSERT INTO roles (id, name) VALUES (2, 'ADMIN');
+INSERT INTO roles (id, name) VALUES (3, 'SUPERADMIN');
 
 -- HOUSEHOLDS
 INSERT INTO households (id, name, population_count) VALUES (1, 'Smith Family', 4);
@@ -8,17 +9,17 @@ INSERT INTO households (id, name, population_count) VALUES (2, 'Johnson Househol
 INSERT INTO households (id, name, population_count) VALUES (3, 'Brown Residence', 2);
 
 -- USERS (password_hash is 'password' for all users)
-INSERT INTO users (id, email, password_hash, role_id, household_id, name, email_verified, location_sharing_enabled) 
-VALUES (1, 'admin@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 2, NULL, 'Admin User', TRUE, FALSE);
+INSERT INTO users (id, email, password_hash, role_id, household_id, first_name, last_name, email_verified, location_sharing_enabled) 
+VALUES (1, 'admin@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 2, NULL, 'Admin', 'User', TRUE, FALSE);
 
-INSERT INTO users (id, email, password_hash, role_id, household_id, name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled) 
-VALUES (2, 'john@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 1, 1, 'John Smith', '123 Main St, Anytown', 63.4305, 10.3951, TRUE, TRUE);
+INSERT INTO users (id, email, password_hash, role_id, household_id, first_name, last_name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled) 
+VALUES (2, 'alice@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 1, 1, 'Alice', 'L', '123 Main St, Anytown', 63.4305, 10.3951, TRUE, TRUE);
 
-INSERT INTO users (id, email, password_hash, role_id, household_id, name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled) 
-VALUES (3, 'sarah@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 1, 2, 'Sarah Johnson', '456 Oak Ave, Somewhere', 63.4205, 10.4051, TRUE, TRUE);
+INSERT INTO users (id, email, password_hash, role_id, household_id, first_name, last_name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled) 
+VALUES (3, 'sarah@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 1, 2, 'Sarah', 'Johnson', '456 Oak Ave, Somewhere', 63.4205, 10.4051, TRUE, TRUE);
 
-INSERT INTO users (id, email, password_hash, role_id, household_id, name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled) 
-VALUES (4, 'mike@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 1, 3, 'Mike Brown', '789 Pine St, Elsewhere', 63.4105, 10.3851, TRUE, FALSE);
+INSERT INTO users (id, email, password_hash, role_id, household_id, first_name, last_name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled) 
+VALUES (4, 'mike@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 1, 3, 'Mike', 'Brown', '789 Pine St, Elsewhere', 63.4105, 10.3851, TRUE, FALSE);
 
 -- HOUSEHOLD MEMBERS
 INSERT INTO household_member (id, household_id, name, description, type) VALUES (1, 1, 'Emma Smith', 'Daughter', 'child');

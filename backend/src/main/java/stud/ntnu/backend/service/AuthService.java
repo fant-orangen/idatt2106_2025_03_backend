@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.dto.AuthRequestDto;
 import stud.ntnu.backend.dto.AuthResponseDto;
+import stud.ntnu.backend.dto.RegisterRequestDto;
 import stud.ntnu.backend.model.Role;
 import stud.ntnu.backend.model.User;
 import stud.ntnu.backend.repository.UserRepository;
@@ -69,14 +70,17 @@ public class AuthService {
   /**
    * Register a new user with the USER role.
    *
-   * @param registrationRequest the registration request containing email and password
+   * @param registrationRequest the registration request containing email, password, name, and
+   *                            optional home address and location coordinates
    * @throws IllegalArgumentException if a user with the given email already exists
    */
-  public void register(AuthRequestDto registrationRequest) {
+  public void register(RegisterRequestDto registrationRequest) {
     // Check if user already exists
     if (userRepository.existsByEmail(registrationRequest.getEmail())) {
       throw new IllegalArgumentException("User with this email already exists");
     }
+
+    // Validation is now handled by annotations and @Valid in the controller
 
     // Create a new user with USER role (ID 1)
     Role userRole = new Role();
@@ -88,6 +92,13 @@ public class AuthService {
         passwordEncoder.encode(registrationRequest.getPassword()),
         userRole
     );
+
+    // Set additional fields
+    newUser.setFirstName(registrationRequest.getFirstName());
+    newUser.setLastName(registrationRequest.getLastName());
+    newUser.setHomeAddress(registrationRequest.getHomeAddress());
+    newUser.setHomeLatitude(registrationRequest.getHomeLatitude());
+    newUser.setHomeLongitude(registrationRequest.getHomeLongitude());
 
     // Save the user
     userRepository.save(newUser);

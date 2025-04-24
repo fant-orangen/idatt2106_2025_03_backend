@@ -27,8 +27,11 @@ public class User {
   @JoinColumn(name = "household_id")
   private Household household;
 
-  @Column(name = "name")
-  private String name;
+  @Column(name = "first_name")
+  private String firstName;
+
+  @Column(name = "last_name")
+  private String lastName;
 
   @Column(name = "home_address", columnDefinition = "TEXT")
   private String homeAddress;
@@ -111,12 +114,41 @@ public class User {
     this.household = household;
   }
 
-  public String getName() {
-    return name;
+  public String getFirstName() {
+    return firstName;
   }
 
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+  }
+
+  public String getLastName() {
+    return lastName;
+  }
+
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
+  }
+
+  // For backward compatibility
+  public String getName() {
+    if (firstName != null && lastName != null) {
+      return firstName + " " + lastName;
+    } else if (firstName != null) {
+      return firstName;
+    } else if (lastName != null) {
+      return lastName;
+    }
+    return null;
+  }
+
+  // For backward compatibility
   public void setName(String name) {
-    this.name = name;
+    if (name != null) {
+      String[] parts = name.split(" ", 2);
+      this.firstName = parts[0];
+      this.lastName = parts.length > 1 ? parts[1] : "";
+    }
   }
 
   public String getHomeAddress() {
