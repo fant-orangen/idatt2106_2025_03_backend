@@ -1,19 +1,18 @@
 package stud.ntnu.backend.service;
 
 import org.springframework.stereotype.Service;
-import stud.ntnu.backend.dto.InventoryItemCreateDto;
-import stud.ntnu.backend.dto.InventoryItemDto;
-import stud.ntnu.backend.dto.InventoryItemUpdateDto;
-import stud.ntnu.backend.dto.InventoryStatusDto;
+import stud.ntnu.backend.dto.inventory.InventoryItemCreateDto;
+import stud.ntnu.backend.dto.inventory.InventoryItemDto;
+import stud.ntnu.backend.dto.inventory.InventoryItemUpdateDto;
+import stud.ntnu.backend.dto.inventory.InventoryStatusDto;
 import stud.ntnu.backend.repository.HouseholdInventoryRepository;
 import stud.ntnu.backend.repository.ProductRepository;
 import stud.ntnu.backend.repository.UserRepository;
-import stud.ntnu.backend.model.Household;
-import stud.ntnu.backend.model.HouseholdInventory;
-import stud.ntnu.backend.model.Product;
-import stud.ntnu.backend.model.User;
+import stud.ntnu.backend.model.household.Household;
+import stud.ntnu.backend.model.household.HouseholdInventory;
+import stud.ntnu.backend.model.inventory.Product;
+import stud.ntnu.backend.model.user.User;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -139,7 +138,8 @@ public class InventoryService {
     }
 
     // Get inventory items for the household
-    List<HouseholdInventory> inventoryItems = householdInventoryRepository.findByHouseholdId(household.getId());
+    List<HouseholdInventory> inventoryItems = householdInventoryRepository.findByHouseholdId(
+        household.getId());
 
     // Convert to DTOs
     return inventoryItems.stream()
@@ -150,10 +150,11 @@ public class InventoryService {
   /**
    * Creates a new inventory item for a user's household.
    *
-   * @param email the email of the user
+   * @param email     the email of the user
    * @param createDto the inventory item creation DTO
    * @return the created inventory item
-   * @throws IllegalStateException if the user is not found, doesn't have a household, or the product is not found
+   * @throws IllegalStateException if the user is not found, doesn't have a household, or the
+   *                               product is not found
    */
   public InventoryItemDto createInventoryItem(String email, InventoryItemCreateDto createDto) {
     User user = userRepository.findByEmail(email)
@@ -176,7 +177,8 @@ public class InventoryService {
       inventoryItem = new HouseholdInventory(household, product, createDto.getQuantity());
     } else if (createDto.getCustomName() != null && !createDto.getCustomName().trim().isEmpty()) {
       // Create a custom inventory item
-      inventoryItem = new HouseholdInventory(household, createDto.getCustomName(), createDto.getQuantity());
+      inventoryItem = new HouseholdInventory(household, createDto.getCustomName(),
+          createDto.getQuantity());
     } else {
       throw new IllegalStateException("Either productId or customName must be provided");
     }
@@ -194,14 +196,16 @@ public class InventoryService {
   /**
    * Updates an inventory item for a user's household.
    *
-   * @param email the email of the user
-   * @param id the ID of the inventory item
+   * @param email     the email of the user
+   * @param id        the ID of the inventory item
    * @param updateDto the inventory item update DTO
    * @return the updated inventory item
-   * @throws IllegalStateException if the user is not found, doesn't have a household, the inventory item is not found,
-   *                              the inventory item doesn't belong to the user's household, or the product is not found
+   * @throws IllegalStateException if the user is not found, doesn't have a household, the inventory
+   *                               item is not found, the inventory item doesn't belong to the
+   *                               user's household, or the product is not found
    */
-  public InventoryItemDto updateInventoryItem(String email, Integer id, InventoryItemUpdateDto updateDto) {
+  public InventoryItemDto updateInventoryItem(String email, Integer id,
+      InventoryItemUpdateDto updateDto) {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"));
 
@@ -255,9 +259,10 @@ public class InventoryService {
    * Deletes an inventory item for a user's household.
    *
    * @param email the email of the user
-   * @param id the ID of the inventory item
-   * @throws IllegalStateException if the user is not found, doesn't have a household, the inventory item is not found,
-   *                              or the inventory item doesn't belong to the user's household
+   * @param id    the ID of the inventory item
+   * @throws IllegalStateException if the user is not found, doesn't have a household, the inventory
+   *                               item is not found, or the inventory item doesn't belong to the
+   *                               user's household
    */
   public void deleteInventoryItem(String email, Integer id) {
     User user = userRepository.findByEmail(email)
@@ -298,7 +303,8 @@ public class InventoryService {
     }
 
     // Get inventory items for the household
-    List<HouseholdInventory> inventoryItems = householdInventoryRepository.findByHouseholdId(household.getId());
+    List<HouseholdInventory> inventoryItems = householdInventoryRepository.findByHouseholdId(
+        household.getId());
 
     // Calculate product type counts
     Map<String, Integer> productTypeCounts = new HashMap<>();

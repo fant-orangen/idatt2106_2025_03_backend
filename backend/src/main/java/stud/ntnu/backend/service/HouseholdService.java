@@ -3,13 +3,13 @@ package stud.ntnu.backend.service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import stud.ntnu.backend.dto.HouseholdCreateRequestDto;
-import stud.ntnu.backend.dto.HouseholdDto;
-import stud.ntnu.backend.dto.HouseholdInviteResponseDto;
+import stud.ntnu.backend.dto.household.HouseholdCreateRequestDto;
+import stud.ntnu.backend.dto.household.HouseholdDto;
+import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
 import stud.ntnu.backend.repository.HouseholdRepository;
 import stud.ntnu.backend.repository.UserRepository;
-import stud.ntnu.backend.model.Household;
-import stud.ntnu.backend.model.User;
+import stud.ntnu.backend.model.household.Household;
+import stud.ntnu.backend.model.user.User;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -192,22 +192,22 @@ public class HouseholdService {
 
     // Find the invitation by token
     HouseholdInvitation invitation = invitations.stream()
-        .filter(inv -> inv.getToken().equals(token))
+        .filter(inv -> inv.token().equals(token))
         .findFirst()
         .orElseThrow(() -> new IllegalStateException("Invalid token"));
 
     // Check if the invitation is for the current user
-    if (!invitation.getInviteeEmail().equals(email)) {
+    if (!invitation.inviteeEmail().equals(email)) {
       throw new IllegalStateException("Token is not for this user");
     }
 
     // Check if the invitation has expired
-    if (invitation.getExpiresAt().isBefore(LocalDateTime.now())) {
+    if (invitation.expiresAt().isBefore(LocalDateTime.now())) {
       throw new IllegalStateException("Token has expired");
     }
 
     // Find the household
-    Household household = householdRepository.findById(invitation.getHouseholdId())
+    Household household = householdRepository.findById(invitation.householdId())
         .orElseThrow(() -> new IllegalStateException("Household not found"));
 
     // Update the user with the new household
@@ -215,33 +215,9 @@ public class HouseholdService {
     userRepository.save(user);
 
     // Remove the invitation
-    invitations.removeIf(inv -> inv.getToken().equals(token));
+    invitations.removeIf(inv -> inv.token().equals(token));
 
     return household;
-  }
-
-  /**
-   * Updates the population count of a household.
-   *
-   * @param email the email of the user updating the population count
-   * @param populationCount the new population count
-   * @return the updated household
-   * @throws IllegalStateException if the user is not found or doesn't have a household
-   */
-  public Household updateHouseholdPopulation(String email, Integer populationCount) {
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new IllegalStateException("User not found"));
-
-    Household household = user.getHousehold();
-    if (household == null) {
-      throw new IllegalStateException("User doesn't have a household");
-    }
-
-    // Update the population count
-    household.setPopulationCount(populationCount);
-
-    // Save the household
-    return householdRepository.save(household);
   }
 
   /**
@@ -290,35 +266,10 @@ public class HouseholdService {
   }
 
   /**
-   * Class representing a household invitation.
-   */
-  private static class HouseholdInvitation {
-    private final String token;
-    private final String inviteeEmail;
-    private final Integer householdId;
-    private final LocalDateTime expiresAt;
+     * Class representing a household invitation.
+     */
+    private record HouseholdInvitation(String token, String inviteeEmail, Integer householdId,
+                                       LocalDateTime expiresAt) {
 
-    public HouseholdInvitation(String token, String inviteeEmail, Integer householdId, LocalDateTime expiresAt) {
-      this.token = token;
-      this.inviteeEmail = inviteeEmail;
-      this.householdId = householdId;
-      this.expiresAt = expiresAt;
-    }
-
-    public String getToken() {
-      return token;
-    }
-
-    public String getInviteeEmail() {
-      return inviteeEmail;
-    }
-
-    public Integer getHouseholdId() {
-      return householdId;
-    }
-
-    public LocalDateTime getExpiresAt() {
-      return expiresAt;
-    }
   }
 }

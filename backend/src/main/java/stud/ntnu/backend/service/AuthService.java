@@ -7,11 +7,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import stud.ntnu.backend.dto.AuthRequestDto;
-import stud.ntnu.backend.dto.AuthResponseDto;
-import stud.ntnu.backend.dto.RegisterRequestDto;
-import stud.ntnu.backend.model.Role;
-import stud.ntnu.backend.model.User;
+import stud.ntnu.backend.dto.auth.AuthRequestDto;
+import stud.ntnu.backend.dto.auth.AuthResponseDto;
+import stud.ntnu.backend.dto.auth.RegisterRequestDto;
+import stud.ntnu.backend.model.user.Role;
+import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.UserRepository;
 import stud.ntnu.backend.util.JwtUtil;
 

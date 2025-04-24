@@ -7,10 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import stud.ntnu.backend.dto.InventoryItemCreateDto;
-import stud.ntnu.backend.dto.InventoryItemDto;
-import stud.ntnu.backend.dto.InventoryItemUpdateDto;
-import stud.ntnu.backend.dto.InventoryStatusDto;
+import stud.ntnu.backend.dto.inventory.InventoryItemCreateDto;
+import stud.ntnu.backend.dto.inventory.InventoryItemDto;
+import stud.ntnu.backend.dto.inventory.InventoryItemUpdateDto;
+import stud.ntnu.backend.dto.inventory.InventoryStatusDto;
 import stud.ntnu.backend.service.InventoryService;
 
 import java.util.List;

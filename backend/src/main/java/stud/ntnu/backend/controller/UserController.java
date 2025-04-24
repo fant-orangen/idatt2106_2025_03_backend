@@ -4,11 +4,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import stud.ntnu.backend.dto.UserProfileDto;
-import stud.ntnu.backend.dto.UserPreferencesDto;
-import stud.ntnu.backend.dto.UserHistoryDto;
-import stud.ntnu.backend.dto.UserUpdateDto;
-import stud.ntnu.backend.model.User;
+import stud.ntnu.backend.dto.user.UserProfileDto;
+import stud.ntnu.backend.dto.user.UserPreferencesDto;
+import stud.ntnu.backend.dto.user.UserHistoryDto;
+import stud.ntnu.backend.dto.user.UserUpdateDto;
 import stud.ntnu.backend.service.UserService;
 
 /**

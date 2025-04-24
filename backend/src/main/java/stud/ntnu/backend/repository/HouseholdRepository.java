@@ -2,7 +2,7 @@ package stud.ntnu.backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import stud.ntnu.backend.model.Household;
+import stud.ntnu.backend.model.household.Household;
 
 /**
  * Repository interface for Household entity operations.

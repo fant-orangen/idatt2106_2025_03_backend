@@ -7,8 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import stud.ntnu.backend.dto.*;
-import stud.ntnu.backend.model.Household;
+import stud.ntnu.backend.dto.household.HouseholdCreateRequestDto;
+import stud.ntnu.backend.dto.household.HouseholdDto;
+import stud.ntnu.backend.dto.household.HouseholdInviteRequestDto;
+import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
+import stud.ntnu.backend.dto.household.HouseholdJoinRequestDto;
+import stud.ntnu.backend.dto.household.HouseholdSwitchRequestDto;
+import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.service.HouseholdService;
 
 /**
@@ -106,27 +111,6 @@ public class HouseholdController {
       return ResponseEntity.ok(household);
     } catch (IllegalStateException e) {
       log.info("Household join failed: {}", e.getMessage());
-      return ResponseEntity.badRequest().body(e.getMessage());
-    }
-  }
-
-  /**
-   * Updates the population count of the authenticated user's household.
-   *
-   * @param requestDto the household population update request
-   * @return ResponseEntity with the updated household if successful, or an error message if the
-   * user is not found or doesn't have a household
-   */
-  @PatchMapping("/population")
-  public ResponseEntity<?> updateHouseholdPopulation(@Valid @RequestBody HouseholdPopulationUpdateDto requestDto) {
-    try {
-      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-      String email = authentication.getName();
-
-      Household household = householdService.updateHouseholdPopulation(email, requestDto.getPopulationCount());
-      return ResponseEntity.ok(household);
-    } catch (IllegalStateException e) {
-      log.info("Household population update failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }

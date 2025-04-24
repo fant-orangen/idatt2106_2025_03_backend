@@ -2,13 +2,13 @@ package stud.ntnu.backend.service;
 
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.repository.UserRepository;
-import stud.ntnu.backend.model.User;
-import stud.ntnu.backend.dto.UserProfileDto;
-import stud.ntnu.backend.dto.UserUpdateDto;
-import stud.ntnu.backend.dto.UserPreferencesDto;
-import stud.ntnu.backend.dto.UserHistoryDto;
-import stud.ntnu.backend.dto.UserHistoryDto.GamificationActivityDto;
-import stud.ntnu.backend.dto.UserHistoryDto.ReflectionDto;
+import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.dto.user.UserProfileDto;
+import stud.ntnu.backend.dto.user.UserUpdateDto;
+import stud.ntnu.backend.dto.user.UserPreferencesDto;
+import stud.ntnu.backend.dto.user.UserHistoryDto;
+import stud.ntnu.backend.dto.user.UserHistoryDto.GamificationActivityDto;
+import stud.ntnu.backend.dto.user.UserHistoryDto.ReflectionDto;
 
 import java.util.ArrayList;
 import java.util.List;
