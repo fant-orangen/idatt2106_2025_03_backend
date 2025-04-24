@@ -2,13 +2,18 @@ package stud.ntnu.backend.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Data Transfer Object for authentication requests. Contains the email and password for user
  * login.
  */
+@Setter
+@Getter
 public class AuthRequestDto {
 
+  // Getters and setters
   @NotBlank(message = "Email is required")
   @Email(message = "Email should be valid")
   private String email;
@@ -26,20 +31,4 @@ public class AuthRequestDto {
     this.password = password;
   }
 
-  // Getters and setters
-  public String getEmail() {
-    return email;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
-  }
 }
