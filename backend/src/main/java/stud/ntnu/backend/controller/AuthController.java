@@ -1,6 +1,7 @@
 package stud.ntnu.backend.controller;
 
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +23,8 @@ import stud.ntnu.backend.service.AuthService;
 public class AuthController {
 
   private final AuthService authService;
+
+  private Logger log = org.slf4j.LoggerFactory.getLogger(AuthController.class);
 
   public AuthController(AuthService authService) {
     this.authService = authService;
@@ -52,6 +55,7 @@ public class AuthController {
       authService.register(registrationRequest);
       return ResponseEntity.ok().build();
     } catch (IllegalArgumentException e) {
+      log.info("User registration failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
