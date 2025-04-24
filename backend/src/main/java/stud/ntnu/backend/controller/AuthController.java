@@ -32,6 +32,7 @@ public class AuthController {
     this.authService = authService;
   }
 
+
   /**
    * Authenticate a user and generate a JWT token.
    *
