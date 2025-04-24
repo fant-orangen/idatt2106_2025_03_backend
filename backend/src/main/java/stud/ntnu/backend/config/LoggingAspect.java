@@ -49,21 +49,27 @@ public class LoggingAspect {
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
         // Log the request
         logRequest(joinPoint);
-        
+
         try {
             // Execute the method and get the result
             Object result = joinPoint.proceed();
-            
+
             // Log the response
             logResponse(joinPoint, result);
-            
+
             return result;
         } catch (Exception e) {
             // Log the error and rethrow
-            log.error("Error in {}.{}(): {}", 
-                    joinPoint.getSignature().getDeclaringTypeName(),
-                    joinPoint.getSignature().getName(), 
-                    e.getMessage());
+            String className = joinPoint.getSignature().getDeclaringTypeName();
+            String methodName = joinPoint.getSignature().getName();
+
+            log.error("\n┌─────────────────────────────────────────────────────────────────────────────┐" +
+                     "\n│ API PROCESSING ERROR                                                         │" +
+                     "\n├─────────────────────────────────────────────────────────────────────────────┤" +
+                     "\n│ Endpoint: {}.{}()                                                           " +
+                     "\n│ Error: {}                                                                   " +
+                     "\n└─────────────────────────────────────────────────────────────────────────────┘", 
+                    className, methodName, e.getMessage());
             throw e;
         }
     }
@@ -76,10 +82,18 @@ public class LoggingAspect {
      */
     @AfterThrowing(pointcut = "controllerPointcut()", throwing = "e")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable e) {
-        log.error("Exception in {}.{}() with cause = {}", 
-                joinPoint.getSignature().getDeclaringTypeName(),
-                joinPoint.getSignature().getName(), 
-                e.getCause() != null ? e.getCause() : "NULL");
+        String className = joinPoint.getSignature().getDeclaringTypeName();
+        String methodName = joinPoint.getSignature().getName();
+        String cause = e.getCause() != null ? e.getCause().toString() : "NULL";
+
+        log.error("\n┌─────────────────────────────────────────────────────────────────────────────┐" +
+                 "\n│ API EXCEPTION THROWN                                                         │" +
+                 "\n├─────────────────────────────────────────────────────────────────────────────┤" +
+                 "\n│ Endpoint: {}.{}()                                                           " +
+                 "\n│ Exception: {}                                                               " +
+                 "\n│ Cause: {}                                                                   " +
+                 "\n└─────────────────────────────────────────────────────────────────────────────┘", 
+                className, methodName, e.getClass().getName(), cause);
     }
 
     /**
@@ -90,11 +104,16 @@ public class LoggingAspect {
     private void logRequest(JoinPoint joinPoint) {
         String className = joinPoint.getSignature().getDeclaringTypeName();
         String methodName = joinPoint.getSignature().getName();
-        
+
         // Extract request body parameters if available
         String requestParams = extractRequestParams(joinPoint);
-        
-        log.info("API Request received: {}.{}() with parameters [{}]", 
+
+        log.info("\n┌─────────────────────────────────────────────────────────────────────────────┐" +
+                 "\n│ API REQUEST RECEIVED                                                         │" +
+                 "\n├─────────────────────────────────────────────────────────────────────────────┤" +
+                 "\n│ Endpoint: {}.{}()                                                           " +
+                 "\n│ Parameters: [{}]                                                            " +
+                 "\n└─────────────────────────────────────────────────────────────────────────────┘", 
                 className, methodName, requestParams);
     }
 
@@ -107,19 +126,29 @@ public class LoggingAspect {
     private void logResponse(JoinPoint joinPoint, Object result) {
         String className = joinPoint.getSignature().getDeclaringTypeName();
         String methodName = joinPoint.getSignature().getName();
-        
+
         boolean isError = false;
+        String status = "SUCCESS";
+        String statusCode = "";
+
         if (result instanceof ResponseEntity) {
             ResponseEntity<?> responseEntity = (ResponseEntity<?>) result;
             isError = responseEntity.getStatusCode().isError();
+            statusCode = responseEntity.getStatusCode().toString();
+            status = isError ? "ERROR" : "SUCCESS";
         }
-        
-        if (isError) {
-            log.info("API Response sent from {}.{}(): ERROR with status {}", 
-                    className, methodName, ((ResponseEntity<?>) result).getStatusCode());
-        } else {
-            log.info("API Response sent from {}.{}(): SUCCESS", className, methodName);
-        }
+
+        String headerTitle = isError ? "API RESPONSE ERROR" : "API RESPONSE SUCCESS";
+
+        log.info("\n┌─────────────────────────────────────────────────────────────────────────────┐" +
+                 "\n│ {}{}│" +
+                 "\n├─────────────────────────────────────────────────────────────────────────────┤" +
+                 "\n│ Endpoint: {}.{}()                                                           " +
+                 "\n│ Status: {}                                                                  " +
+                 (statusCode.isEmpty() ? "" : "\n│ Status Code: {}                                                             ") +
+                 "\n└─────────────────────────────────────────────────────────────────────────────┘", 
+                 headerTitle, " ".repeat(Math.max(0, 75 - headerTitle.length())),
+                 className, methodName, status, statusCode);
     }
 
     /**
@@ -133,7 +162,7 @@ public class LoggingAspect {
         if (args == null || args.length == 0) {
             return "no parameters";
         }
-        
+
         return Arrays.stream(args)
                 .map(arg -> arg == null ? "null" : arg.toString())
                 .collect(Collectors.joining(", "));
