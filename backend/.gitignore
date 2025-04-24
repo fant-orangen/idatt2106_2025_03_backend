@@ -31,6 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-# Keystore – inneholder private SSL-nøkler
-src/main/resources/keystore.p12
