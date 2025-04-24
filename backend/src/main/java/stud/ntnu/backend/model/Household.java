@@ -22,6 +22,9 @@ public class Household {
   @Column(name = "name")
   private String name;
 
+  @Column(name = "address", columnDefinition = "TEXT", nullable = false)
+  private String address;
+
   @Column(name = "population_count", nullable = false)
   private Integer populationCount = 1;
 
@@ -35,6 +38,12 @@ public class Household {
   @PrePersist
   protected void onCreate() {
     createdAt = LocalDateTime.now();
+  }
+
+  public Household(String name, String address, Integer populationCount) {
+    this.name = name;
+    this.address = address;
+    this.populationCount = populationCount;
   }
 
   public Household(String name, Integer populationCount) {

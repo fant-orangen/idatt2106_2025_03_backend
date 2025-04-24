@@ -8,6 +8,7 @@ CREATE TABLE roles (
 CREATE TABLE households (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255),
+    address TEXT NOT NULL,
     population_count INT NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
