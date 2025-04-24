@@ -2,7 +2,7 @@ package stud.ntnu.backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import stud.ntnu.backend.model.Product;
+import stud.ntnu.backend.model.inventory.Product;
 
 /**
  * Repository interface for Product entity operations.

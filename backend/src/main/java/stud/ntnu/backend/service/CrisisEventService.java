@@ -2,7 +2,7 @@ package stud.ntnu.backend.service;
 
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.repository.CrisisEventRepository;
-import stud.ntnu.backend.model.CrisisEvent;
+import stud.ntnu.backend.model.map.CrisisEvent;
 
 import java.util.List;
 import java.util.Optional;

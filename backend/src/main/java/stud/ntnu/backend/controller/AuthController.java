@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import stud.ntnu.backend.dto.AuthRequestDto;
-import stud.ntnu.backend.dto.AuthResponseDto;
-import stud.ntnu.backend.dto.RegisterRequestDto;
+import stud.ntnu.backend.dto.auth.AuthRequestDto;
+import stud.ntnu.backend.dto.auth.AuthResponseDto;
+import stud.ntnu.backend.dto.auth.RegisterRequestDto;
 import stud.ntnu.backend.service.AuthService;
 
 /**
