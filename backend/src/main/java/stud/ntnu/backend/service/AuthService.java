@@ -70,8 +70,8 @@ public class AuthService {
   /**
    * Register a new user with the USER role.
    *
-   * @param registrationRequest the registration request containing email, password, name,
-   *                           and optional home address and location coordinates
+   * @param registrationRequest the registration request containing email, password, name, and
+   *                            optional home address and location coordinates
    * @throws IllegalArgumentException if a user with the given email already exists
    */
   public void register(RegisterRequestDto registrationRequest) {
@@ -94,7 +94,8 @@ public class AuthService {
     );
 
     // Set additional fields
-    newUser.setName(registrationRequest.getName());
+    newUser.setFirstName(registrationRequest.getFirstName());
+    newUser.setLastName(registrationRequest.getLastName());
     newUser.setHomeAddress(registrationRequest.getHomeAddress());
     newUser.setHomeLatitude(registrationRequest.getHomeLatitude());
     newUser.setHomeLongitude(registrationRequest.getHomeLongitude());

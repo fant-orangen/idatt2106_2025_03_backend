@@ -42,7 +42,7 @@ public class AuthController {
   /**
    * Register a new user with the USER role.
    *
-   * @param registrationRequest the registration request containing email, password, name,
+   * @param registrationRequest the registration request containing email, password, firstName, lastName,
    *                           and optional home address and location coordinates
    * @return ResponseEntity with status 200 OK if successful
    */
