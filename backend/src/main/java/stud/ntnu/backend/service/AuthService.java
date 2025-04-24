@@ -19,6 +19,9 @@ import stud.ntnu.backend.model.User;
 import stud.ntnu.backend.repository.EmailTokenRepository;
 import stud.ntnu.backend.repository.UserRepository;
 import stud.ntnu.backend.util.JwtUtil;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service for handling authentication-related operations.
@@ -32,6 +35,7 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final EmailService emailService;
   private final EmailTokenRepository emailTokenRepository;
+  private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
   public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
       UserRepository userRepository, PasswordEncoder passwordEncoder,
@@ -92,11 +96,9 @@ public class AuthService {
       throw new IllegalArgumentException("User with this email already exists");
     }
 
-    // Validation is now handled by annotations and @Valid in the controller
-
     // Create a new user with USER role (ID 1)
     Role userRole = new Role();
-    userRole.setId(1); // USER role ID from data.sql
+    userRole.setId(1);
 
     // Create the user with hashed password
     User newUser = new User(
@@ -113,11 +115,11 @@ public class AuthService {
     newUser.setHomeLongitude(registrationRequest.getHomeLongitude());
 
     // Save the user
-    User savedUser = userRepository.save(newUser); // Assuming save returns the saved user
+    User savedUser = userRepository.save(newUser);
 
     // Generate verification token
     String token = UUID.randomUUID().toString();
-    LocalDateTime expiresAt = LocalDateTime.now().plusHours(24); // Token valid for 24 hours
+    LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
 
     // Create and save the EmailToken
     EmailToken verificationToken = new EmailToken(
@@ -130,5 +132,48 @@ public class AuthService {
 
     // Send the verification email
     emailService.sendVerificationEmail(savedUser, token);
+  }
+
+  /**
+   * Verifies a user's email address using the provided token.
+   *
+   * @param token The verification token string.
+   * @throws IllegalArgumentException if the token is invalid or not found.
+   * @throws IllegalStateException if the token is expired or already used.
+   */
+  @Transactional
+  public void verifyEmail(String token) {
+    // 1. Find the token
+    Optional<EmailToken> tokenOptional = emailTokenRepository.findByToken(token);
+    if (tokenOptional.isEmpty()) {
+      throw new IllegalArgumentException("Invalid verification token");
+    }
+    EmailToken emailToken = tokenOptional.get();
+
+    // 2. Validate the token
+    if (emailToken.getUsedAt() != null) {
+      throw new IllegalStateException("Token has already been used");
+    }
+    if (emailToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+      throw new IllegalStateException("Token has expired");
+    }
+    if (emailToken.getType() != EmailToken.TokenType.VERIFICATION) {
+      throw new IllegalStateException("Invalid token type");
+    }
+
+
+    // 3. Activate the user
+    User user = emailToken.getUser();
+    if (user == null) {
+      throw new IllegalStateException("Token is not associated with a user");
+    }
+    user.setEmailVerified(true);
+    userRepository.save(user);
+
+    // 4. Mark token as used
+    emailToken.setUsedAt(LocalDateTime.now());
+    emailTokenRepository.save(emailToken);
+
+    log.info("Email verified successfully for user: {}", user.getEmail());
   }
 }
