@@ -8,7 +8,7 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-import stud.ntnu.backend.model.User;
+import stud.ntnu.backend.model.user.User;
 
 /**
  * Service responsible for handling email sending operations, such as verification emails.
