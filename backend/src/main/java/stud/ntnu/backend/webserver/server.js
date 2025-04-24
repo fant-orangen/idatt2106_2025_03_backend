@@ -1,4 +1,7 @@
-// run by: node server.js
+/**
+ * Set up HTTPS-server with Node.js and Express.
+ */
+
 const https = require('https');
 const fs = require('fs');
 const express = require('express');
@@ -11,8 +14,8 @@ app.get('/', (req, res) => {
 
 // Read certificate and key
 const options = {
-    key: fs.readFileSync('path/to/your/server.key'),
-    cert: fs.readFileSync('path/to/your/server.cert') // endre disse til der hvor key osv ligger
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert')
 };
 
 // Create the HTTPS server
