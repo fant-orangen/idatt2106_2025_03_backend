@@ -50,7 +50,8 @@ public class InventoryController {
       Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
 
       // Get product types for the household
-      Page<ProductTypeDto> productTypes = productService.getProductTypesByHousehold(householdId, pageable);
+      Page<ProductTypeDto> productTypes = productService.getProductTypesByHousehold(householdId,
+          pageable);
       return ResponseEntity.ok(productTypes);
     } catch (Exception e) {
       log.error("Error getting product types", e);
@@ -101,15 +102,24 @@ public class InventoryController {
   }
 
   /**
-   * Add a new batch to an existing product.
-   * TODO: UNTESTED!
+   * Add a new batch to an existing product. Validates that the product type belongs to the user's
+   * household.
+   * TODO: Untested!
+   *
    * @param createDto the DTO containing the product batch information
    * @return 200 OK
    */
   @PostMapping("/product-batches")
   public ResponseEntity<?> createProductBatch(@Valid @RequestBody ProductBatchCreateDto createDto) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+
     try {
-      productService.createProductBatch(createDto);
+      // Get the user's household ID
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+
+      // Validate that the product type belongs to the user's household
+      productService.createProductBatch(createDto, householdId);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       log.error("Error creating product batch", e);
@@ -119,7 +129,7 @@ public class InventoryController {
 
   /**
    * Reduce the number of units in an existing batch.
-   * TODO: UNTESTED!
+   *
    * @param batchId   the ID of the batch
    * @param updateDto the DTO containing the update information
    * @return 200 OK
@@ -139,7 +149,7 @@ public class InventoryController {
 
   /**
    * Delete an existing batch.
-   * TODO: UNTESTED!
+   *
    * @param batchId the ID of the batch
    * @return 200 OK
    */
@@ -150,6 +160,31 @@ public class InventoryController {
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       log.error("Error deleting product batch", e);
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Delete a product type and all its associated batches.
+   * Validates that the product type belongs to the user's household.
+   *
+   * @param productTypeId the ID of the product type to delete
+   * @return 200 OK if successful, 400 Bad Request with error message otherwise
+   */
+  @DeleteMapping("/product-types/{productTypeId}")
+  public ResponseEntity<?> deleteProductType(@PathVariable Integer productTypeId) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+
+    try {
+      // Get the user's household ID
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+
+      // Delete the product type, validating household ownership
+      productService.deleteProductType(productTypeId, householdId);
+      return ResponseEntity.ok().build();
+    } catch (Exception e) {
+      log.error("Error deleting product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }

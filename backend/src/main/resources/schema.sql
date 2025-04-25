@@ -100,21 +100,7 @@ CREATE TABLE product_batch (
     date_added DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expiration_time DATETIME,
     number INT NOT NULL,
-    FOREIGN KEY (product_type_id) REFERENCES product_types(id)
-);
-
--- HOUSEHOLD INVENTORY
-CREATE TABLE household_inventory (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    household_id INT NOT NULL,
-    product_id INT,
-    custom_name VARCHAR(255),
-    quantity DECIMAL(10,2) NOT NULL,
-    expiration_date DATE,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (household_id) REFERENCES households(id),
-    FOREIGN KEY (product_id) REFERENCES product_batch(id)
+    FOREIGN KEY (product_type_id) REFERENCES product_types(id) ON DELETE CASCADE
 );
 
 -- GROUP SUPPLY CONTRIBUTIONS
@@ -127,9 +113,9 @@ CREATE TABLE group_inventory_contributions (
     quantity DECIMAL(10,2) NOT NULL,
     expiration_date DATE,
     contributed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (group_id) REFERENCES groups(id),
-    FOREIGN KEY (household_id) REFERENCES households(id),
-    FOREIGN KEY (product_id) REFERENCES product_batch(id)
+    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES product_batch(id) ON DELETE CASCADE
 );
 
 -- MEETING PLACES (user/household–defined POIs)
