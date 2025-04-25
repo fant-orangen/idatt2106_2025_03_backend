@@ -84,6 +84,29 @@ public class PoiController {
                 .map(PoiItemDto::fromEntity)
                 .toList();
     }
+    /**
+     * Retrieves the nearest point of interest of a specific type from a given location.
+     *
+     * @param id        the ID of the point of interest type
+     * @param latitude  the latitude of the location
+     * @param longitude the longitude of the location
+     * @return the nearest point of interest of the specified type
+     */
+    @GetMapping("/type/nearest/{id}")
+    public PoiItemDto getNearestPointOfInterestByType(
+            @PathVariable int id,
+            @RequestParam double latitude,
+            @RequestParam double longitude) {
+        return poiService.getPointsOfInterestByTypeId(id)
+                .stream()
+                .min((poi1, poi2) -> Double.compare(
+                        LocationUtil.calculateDistance(latitude, longitude,
+                                poi1.getLatitude().doubleValue(), poi1.getLongitude().doubleValue()),
+                        LocationUtil.calculateDistance(latitude, longitude,
+                                poi2.getLatitude().doubleValue(), poi2.getLongitude().doubleValue())))
+                .map(PoiItemDto::fromEntity)
+                .orElse(null);
+    }
 
 
 }
