@@ -76,7 +76,7 @@ public class InventoryController {
 
   /**
    * Add a new type of product.
-   *
+   * TODO: UNTESTED!
    * @param createDto the DTO containing the product type information
    * @return 200 OK
    */
@@ -102,7 +102,7 @@ public class InventoryController {
 
   /**
    * Add a new batch to an existing product.
-   *
+   * TODO: UNTESTED!
    * @param createDto the DTO containing the product batch information
    * @return 200 OK
    */
@@ -119,7 +119,7 @@ public class InventoryController {
 
   /**
    * Reduce the number of units in an existing batch.
-   *
+   * TODO: UNTESTED!
    * @param batchId   the ID of the batch
    * @param updateDto the DTO containing the update information
    * @return 200 OK
@@ -139,7 +139,7 @@ public class InventoryController {
 
   /**
    * Delete an existing batch.
-   *
+   * TODO: UNTESTED!
    * @param batchId the ID of the batch
    * @return 200 OK
    */
