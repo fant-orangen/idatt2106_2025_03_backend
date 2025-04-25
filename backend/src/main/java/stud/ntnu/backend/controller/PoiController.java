@@ -70,6 +70,7 @@ public class PoiController {
      * @param distance  the distance in meters
      * @return a list of points of interest within the specified distance
      */
+    //To test with postman http://localhost:8080/api/poi/type/nearby?latitude=63.4308&longitude=10.3943&distance=1000
     @GetMapping("/type/nearby")
     public List<PoiItemDto> getPointsOfInterestByTypeIdAndDistance(
             @RequestParam(required = false) Integer id,
