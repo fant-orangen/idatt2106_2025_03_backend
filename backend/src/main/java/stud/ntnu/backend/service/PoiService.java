@@ -9,6 +9,8 @@ import stud.ntnu.backend.model.map.PointOfInterest;
 import java.util.List;
 import java.util.Optional;
 
+import static stud.ntnu.backend.util.LocationUtil.calculateDistance;
+
 /**
  * Service for managing points of interest and POI types. Handles creation, retrieval, updating, and
  * deletion of POIs and POI types.
@@ -95,6 +97,16 @@ public class PoiService {
    */
   public Optional<PoiType> getPoiTypeById(Integer id) {
     return poiTypeRepository.findById(id);
+  }
+
+  public static PointOfInterest findNearestPoi(double latitude, double longitude, List<PointOfInterest> pois) {
+    return pois.stream()
+            .min((poi1, poi2) -> Double.compare(
+                    calculateDistance(latitude, longitude,
+                            poi1.getLatitude().doubleValue(), poi1.getLongitude().doubleValue()),
+                    calculateDistance(latitude, longitude,
+                            poi2.getLatitude().doubleValue(), poi2.getLongitude().doubleValue())))
+            .orElse(null);
   }
 
   /**

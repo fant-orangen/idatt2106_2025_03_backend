@@ -2,6 +2,7 @@ package stud.ntnu.backend.controller;
 
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.poi.PoiItemDto;
+import stud.ntnu.backend.model.map.PointOfInterest;
 import stud.ntnu.backend.service.PoiService;
 import stud.ntnu.backend.util.LocationUtil;
 
@@ -83,6 +84,22 @@ public class PoiController {
                         poi.getLatitude().doubleValue(), poi.getLongitude().doubleValue()) <= distance)
                 .map(PoiItemDto::fromEntity)
                 .toList();
+    }
+    /**
+     * Retrieves the nearest point of interest of a specific type from a given location.
+     *
+     * @param id        the ID of the point of interest type
+     * @param latitude  the latitude of the location
+     * @param longitude the longitude of the location
+     * @return the nearest point of interest of the specified type
+     */
+    @GetMapping("/type/nearest/{id}")
+    public PoiItemDto getNearestPointOfInterestByType(
+            @PathVariable int id,
+            @RequestParam double latitude,
+            @RequestParam double longitude) {
+        PointOfInterest nearestPoi = PoiService.findNearestPoi(latitude, longitude, poiService.getPointsOfInterestByTypeId(id));
+        return nearestPoi != null ? PoiItemDto.fromEntity(nearestPoi) : null;
     }
 
 
