@@ -20,10 +20,22 @@ public class ProductType {
   @Column(name = "name", nullable = false, unique = true)
   private String name;
 
-  @OneToMany(mappedBy = "productType")
-  private List<Product> products;
+  @Column(name = "unit", nullable = false)
+  private String unit;
 
-  public ProductType(String name) {
+  @Column(name = "calories_per_unit")
+  private Double caloriesPerUnit;
+
+  @Column(name = "is_water", nullable = false)
+  private Boolean isWater;
+
+  @OneToMany(mappedBy = "productType")
+  private List<ProductBatch> productBatches;
+
+  public ProductType(String name, String unit, Double caloriesPerUnit, Boolean isWater) {
     this.name = name;
+    this.unit = unit;
+    this.caloriesPerUnit = caloriesPerUnit;
+    this.isWater = isWater;
   }
 }

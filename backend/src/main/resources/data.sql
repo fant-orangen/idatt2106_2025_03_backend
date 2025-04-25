@@ -41,21 +41,21 @@ INSERT INTO group_memberships (group_id, household_id, invited_by_user_id) VALUE
 INSERT INTO group_memberships (group_id, household_id, invited_by_user_id) VALUES (2, 3, 1);
 
 -- PRODUCT TYPES
-INSERT INTO product_types (name) VALUES ('Food');
-INSERT INTO product_types (name) VALUES ('Water');
-INSERT INTO product_types (name) VALUES ('Medicine');
-INSERT INTO product_types (name) VALUES ('Tools');
-INSERT INTO product_types (name) VALUES ('Hygiene');
+INSERT INTO product_types (name, unit, calories_per_unit, is_water) VALUES ('Food', 'kg', 2000.00, FALSE);
+INSERT INTO product_types (name, unit, calories_per_unit, is_water) VALUES ('Water', 'l', 0.00, TRUE);
+INSERT INTO product_types (name, unit, calories_per_unit, is_water) VALUES ('Medicine', 'stk', 0.00, FALSE);
+INSERT INTO product_types (name, unit, calories_per_unit, is_water) VALUES ('Tools', 'stk', 0.00, FALSE);
+INSERT INTO product_types (name, unit, calories_per_unit, is_water) VALUES ('Hygiene', 'stk', 0.00, FALSE);
 
--- PRODUCTS
-INSERT INTO products (product_type_id, name, description) VALUES (1, 'Canned Beans', 'Long shelf life, high protein');
-INSERT INTO products (product_type_id, name, description) VALUES (1, 'Rice', '5kg bag of white rice');
-INSERT INTO products (product_type_id, name, description) VALUES (2, 'Bottled Water', '500ml bottles');
-INSERT INTO products (product_type_id, name, description) VALUES (3, 'First Aid Kit', 'Basic medical supplies');
-INSERT INTO products (product_type_id, name, description) VALUES (3, 'Pain Relievers', 'Generic acetaminophen');
-INSERT INTO products (product_type_id, name, description) VALUES (4, 'Flashlight', 'Battery-powered');
-INSERT INTO products (product_type_id, name, description) VALUES (5, 'Soap', 'Antibacterial hand soap');
-INSERT INTO products (product_type_id, name, description) VALUES (5, 'Toilet Paper', '12-pack');
+-- PRODUCT BATCH
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1' YEAR, 10);
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '2' YEAR, 5);
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '6' MONTH, 24);
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (3, CURRENT_TIMESTAMP, NULL, 1);
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1' YEAR, 2);
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (4, CURRENT_TIMESTAMP, NULL, 2);
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '2' YEAR, 5);
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (5, CURRENT_TIMESTAMP, NULL, 3);
 
 -- HOUSEHOLD INVENTORY
 INSERT INTO household_inventory (household_id, product_id, quantity, expiration_date) VALUES (1, 1, 10, '2025-12-31');
