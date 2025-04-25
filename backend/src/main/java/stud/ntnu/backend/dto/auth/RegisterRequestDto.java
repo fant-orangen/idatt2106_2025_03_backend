@@ -3,12 +3,14 @@ package stud.ntnu.backend.dto.auth;
 import jakarta.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import lombok.Getter;
+import lombok.Setter;
 import stud.ntnu.backend.validation.CoordinatesPair;
 
 /**
  * Data Transfer Object for user registration requests. Extends AuthRequestDto to include additional
  * user information required for registration.
  */
+@Setter
 @Getter
 @CoordinatesPair(latitudeField = "homeLatitude", longitudeField = "homeLongitude",
     message = "Both latitude and longitude must be provided together")
@@ -19,6 +21,9 @@ public class RegisterRequestDto extends AuthRequestDto {
 
   @NotBlank(message = "Last name is required")
   private String lastName;
+
+  @NotBlank(message = "Phone number is required")
+  private String phoneNumber;
 
   // Optional field, no validation needed
   private String homeAddress;
@@ -33,18 +38,19 @@ public class RegisterRequestDto extends AuthRequestDto {
   }
 
   // Constructor with all fields
-  public RegisterRequestDto(String email, String password, String firstName, String lastName, String homeAddress,
+  public RegisterRequestDto(String email, String password, String firstName, String lastName, String phoneNumber, String homeAddress,
       BigDecimal homeLatitude, BigDecimal homeLongitude) {
     super(email, password);
     this.firstName = firstName;
     this.lastName = lastName;
+    this.phoneNumber = phoneNumber;
     this.homeAddress = homeAddress;
     this.homeLatitude = homeLatitude;
     this.homeLongitude = homeLongitude;
   }
 
   // Constructor with combined name for backward compatibility
-  public RegisterRequestDto(String email, String password, String name, String homeAddress,
+  public RegisterRequestDto(String email, String password, String name, String phoneNumber, String homeAddress,
       BigDecimal homeLatitude, BigDecimal homeLongitude) {
     super(email, password);
     if (name != null) {
@@ -52,17 +58,10 @@ public class RegisterRequestDto extends AuthRequestDto {
       this.firstName = parts[0];
       this.lastName = parts.length > 1 ? parts[1] : "";
     }
+    this.phoneNumber = phoneNumber;
     this.homeAddress = homeAddress;
     this.homeLatitude = homeLatitude;
     this.homeLongitude = homeLongitude;
-  }
-
-  public void setFirstName(String firstName) {
-    this.firstName = firstName;
-  }
-
-  public void setLastName(String lastName) {
-    this.lastName = lastName;
   }
 
   // For backward compatibility
@@ -86,15 +85,4 @@ public class RegisterRequestDto extends AuthRequestDto {
     return null;
   }
 
-  public void setHomeAddress(String homeAddress) {
-    this.homeAddress = homeAddress;
-  }
-
-  public void setHomeLatitude(BigDecimal homeLatitude) {
-    this.homeLatitude = homeLatitude;
-  }
-
-  public void setHomeLongitude(BigDecimal homeLongitude) {
-    this.homeLongitude = homeLongitude;
-  }
 }
