@@ -52,7 +52,7 @@ public class ProductService {
    * Get all product types for a specific household.
    *
    * @param householdId the ID of the household
-   * @param pageable pagination information
+   * @param pageable    pagination information
    * @return a page of product types
    */
   public Page<ProductTypeDto> getProductTypesByHousehold(Integer householdId, Pageable pageable) {
@@ -103,16 +103,53 @@ public class ProductService {
   }
 
   /**
-   * Create a new product batch.
+   * Create a new product batch without household validation. This method is kept for backward
+   * compatibility.
    *
    * @param createDto the DTO containing the product batch information
    * @return the created product batch
+   * @deprecated Use {@link #createProductBatch(ProductBatchCreateDto, Integer)} instead
    */
   @Transactional
+  @Deprecated
   public ProductBatchDto createProductBatch(ProductBatchCreateDto createDto) {
+    // This method is kept for backward compatibility
+    // It doesn't perform household validation
     ProductType productType = productTypeRepository.findById(createDto.getProductTypeId())
         .orElseThrow(() -> new NoSuchElementException(
             "Product type not found with ID: " + createDto.getProductTypeId()));
+
+    ProductBatch productBatch = new ProductBatch(
+        productType,
+        LocalDateTime.now(),
+        createDto.getExpirationTime(),
+        createDto.getNumber()
+    );
+
+    ProductBatch savedProductBatch = productBatchRepository.save(productBatch);
+    return convertToDto(savedProductBatch);
+  }
+
+  /**
+   * Create a new product batch with household validation.
+   *
+   * @param createDto   the DTO containing the product batch information
+   * @param householdId the ID of the household to validate against
+   * @return the created product batch
+   * @throws IllegalArgumentException if the product type doesn't belong to the specified household
+   */
+  @Transactional
+  public ProductBatchDto createProductBatch(ProductBatchCreateDto createDto, Integer householdId) {
+    ProductType productType = productTypeRepository.findById(createDto.getProductTypeId())
+        .orElseThrow(() -> new NoSuchElementException(
+            "Product type not found with ID: " + createDto.getProductTypeId()));
+
+    // Validate that the product type belongs to the user's household
+    if (!productType.getHousehold().getId().equals(householdId)) {
+      throw new IllegalArgumentException(
+          "Product type with ID " + createDto.getProductTypeId()
+              + " does not belong to the user's household");
+    }
 
     ProductBatch productBatch = new ProductBatch(
         productType,

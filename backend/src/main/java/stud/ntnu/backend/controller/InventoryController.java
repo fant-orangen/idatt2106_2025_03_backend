@@ -102,14 +102,22 @@ public class InventoryController {
 
   /**
    * Add a new batch to an existing product.
-   * TODO: UNTESTED!
+   * Validates that the product type belongs to the user's household.
+   * TODO: Untested!
    * @param createDto the DTO containing the product batch information
    * @return 200 OK
    */
   @PostMapping("/product-batches")
   public ResponseEntity<?> createProductBatch(@Valid @RequestBody ProductBatchCreateDto createDto) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+
     try {
-      productService.createProductBatch(createDto);
+      // Get the user's household ID
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+
+      // Validate that the product type belongs to the user's household
+      productService.createProductBatch(createDto, householdId);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       log.error("Error creating product batch", e);

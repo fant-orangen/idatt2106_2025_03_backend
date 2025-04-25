@@ -17,12 +17,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductBatchCreateDto {
-    @NotNull(message = "Product type ID is required")
-    private Integer productTypeId;
-    
-    @NotNull(message = "Number of units is required")
-    @Positive(message = "Number of units must be positive")
-    private Integer number;
-    
-    private LocalDateTime expirationTime;
+
+  @NotNull(message = "Product type ID is required")
+  private Integer productTypeId;
+
+  @NotNull(message = "Number of units is required")
+  @Positive(message = "Number of units must be positive")
+  private Integer number;
+
+  private LocalDateTime expirationTime;
 }
