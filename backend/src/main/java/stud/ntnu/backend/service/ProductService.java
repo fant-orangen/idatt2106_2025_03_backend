@@ -103,34 +103,6 @@ public class ProductService {
   }
 
   /**
-   * Create a new product batch without household validation. This method is kept for backward
-   * compatibility.
-   *
-   * @param createDto the DTO containing the product batch information
-   * @return the created product batch
-   * @deprecated Use {@link #createProductBatch(ProductBatchCreateDto, Integer)} instead
-   */
-  @Transactional
-  @Deprecated
-  public ProductBatchDto createProductBatch(ProductBatchCreateDto createDto) {
-    // This method is kept for backward compatibility
-    // It doesn't perform household validation
-    ProductType productType = productTypeRepository.findById(createDto.getProductTypeId())
-        .orElseThrow(() -> new NoSuchElementException(
-            "Product type not found with ID: " + createDto.getProductTypeId()));
-
-    ProductBatch productBatch = new ProductBatch(
-        productType,
-        LocalDateTime.now(),
-        createDto.getExpirationTime(),
-        createDto.getNumber()
-    );
-
-    ProductBatch savedProductBatch = productBatchRepository.save(productBatch);
-    return convertToDto(savedProductBatch);
-  }
-
-  /**
    * Create a new product batch with household validation.
    *
    * @param createDto   the DTO containing the product batch information

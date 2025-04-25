@@ -103,20 +103,6 @@ CREATE TABLE product_batch (
     FOREIGN KEY (product_type_id) REFERENCES product_types(id)
 );
 
--- HOUSEHOLD INVENTORY
-CREATE TABLE household_inventory (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    household_id INT NOT NULL,
-    product_id INT,
-    custom_name VARCHAR(255),
-    quantity DECIMAL(10,2) NOT NULL,
-    expiration_date DATE,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (household_id) REFERENCES households(id),
-    FOREIGN KEY (product_id) REFERENCES product_batch(id)
-);
-
 -- GROUP SUPPLY CONTRIBUTIONS
 CREATE TABLE group_inventory_contributions (
     id INT AUTO_INCREMENT PRIMARY KEY,

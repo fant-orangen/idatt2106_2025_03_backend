@@ -127,7 +127,7 @@ public class InventoryController {
 
   /**
    * Reduce the number of units in an existing batch.
-   * TODO: UNTESTED!
+   *
    * @param batchId   the ID of the batch
    * @param updateDto the DTO containing the update information
    * @return 200 OK
