@@ -98,7 +98,7 @@ public class SecurityConfig {
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> 
             auth.requestMatchers("/h2-console/**", "/swagger-ui/**", "/swagger-ui.html", 
-                                "/v3/api-docs/**", "/actuator/health", "/auth/**", "/api/auth/**").permitAll()
+                                "/v3/api-docs/**", "/actuator/health", "/auth/**", "/api/auth/**", "/api/poi/**", "/poi/**").permitAll()
                 .anyRequest().authenticated());
 
     // Allow H2 console frame options
