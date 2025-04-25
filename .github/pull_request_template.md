@@ -14,16 +14,6 @@
 
 ---
 
-## Screenshots / Visual Changes
-
-<!-- Upload images by dragging & dropping or using Markdown image syntax -->
-
-| Before | After |
-|--------|-------|
-| ![Before](url) | ![After](url) |
-
----
-
 ## Notes for Reviewers
 
 <!-- Optional: extra context for the reviewers, testing instructions, or gotchas -->
