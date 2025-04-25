@@ -2,6 +2,7 @@ package stud.ntnu.backend.controller;
 
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.poi.PoiItemDto;
+import stud.ntnu.backend.model.map.PointOfInterest;
 import stud.ntnu.backend.service.PoiService;
 import stud.ntnu.backend.util.LocationUtil;
 
@@ -97,15 +98,8 @@ public class PoiController {
             @PathVariable int id,
             @RequestParam double latitude,
             @RequestParam double longitude) {
-        return poiService.getPointsOfInterestByTypeId(id)
-                .stream()
-                .min((poi1, poi2) -> Double.compare(
-                        LocationUtil.calculateDistance(latitude, longitude,
-                                poi1.getLatitude().doubleValue(), poi1.getLongitude().doubleValue()),
-                        LocationUtil.calculateDistance(latitude, longitude,
-                                poi2.getLatitude().doubleValue(), poi2.getLongitude().doubleValue())))
-                .map(PoiItemDto::fromEntity)
-                .orElse(null);
+        PointOfInterest nearestPoi = PoiService.findNearestPoi(latitude, longitude, poiService.getPointsOfInterestByTypeId(id));
+        return nearestPoi != null ? PoiItemDto.fromEntity(nearestPoi) : null;
     }
 
 
