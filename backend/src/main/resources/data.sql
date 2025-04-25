@@ -82,6 +82,9 @@ INSERT INTO poi_types (name) VALUES ('Police Station');
 INSERT INTO poi_types (name) VALUES ('Fire Station');
 INSERT INTO poi_types (name) VALUES ('Shelter');
 INSERT INTO poi_types (name) VALUES ('Grocery Store');
+INSERT INTO poi_types (name) VALUES ('Water Distribution Point');
+INSERT INTO poi_types (name) VALUES ('Gas Station');
+INSERT INTO poi_types (name) VALUES ('Pharmacy');
 
 -- POINTS OF INTEREST
 INSERT INTO points_of_interest (poi_type_id, name, description, latitude, longitude, address, created_by_user_id)
@@ -92,6 +95,24 @@ INSERT INTO points_of_interest (poi_type_id, name, description, latitude, longit
 VALUES (4, 'Community Shelter', 'Emergency shelter with capacity for 200 people', 63.4250, 10.3950, '300 Shelter Street, Trondheim', 1);
 INSERT INTO points_of_interest (poi_type_id, name, description, latitude, longitude, address, created_by_user_id)
 VALUES (5, 'SuperMarket', 'Large grocery store with emergency supplies', 63.4270, 10.3930, '400 Market Road, Trondheim', 2);
+INSERT INTO points_of_interest (poi_type_id, name, description, latitude, longitude, address, created_by_user_id)
+VALUES (1, 'St. Olavs Hospital', 'Main university hospital with 24/7 emergency services', 63.4195, 10.4022, 'Mauritz Hansens gate 4, 7030 Trondheim', 1);
+
+INSERT INTO points_of_interest (poi_type_id, name, description, latitude, longitude, address, created_by_user_id)
+VALUES (2, 'Trøndelag Police District', 'Central police station serving Trondheim and surrounding areas', 63.4321, 10.3978, 'Gryta 4, 7005 Trondheim', 1);
+
+INSERT INTO points_of_interest (poi_type_id, name, description, latitude, longitude, address, created_by_user_id)
+VALUES (3, 'Trondheim Fire Station', 'Main fire station providing emergency fire and rescue services', 63.3985, 10.3589, 'Kvenildstrøa 4, 7093 Heimdal, Trondheim', 1);
+
+INSERT INTO points_of_interest (poi_type_id, name, description, latitude, longitude, address, created_by_user_id)
+VALUES (6, 'Vitusapotek Trondheim Torg', 'Central pharmacy offering prescription and over-the-counter medications', 63.4308, 10.3943, 'Kongens gate 11, 7013 Trondheim', 1);
+
+INSERT INTO points_of_interest (poi_type_id, name, description, latitude, longitude, address, created_by_user_id)
+VALUES (7, 'Circle K Tempe', 'Fuel station with convenience store, open 24/7', 63.4080, 10.4140, 'Breidablikkveien 136, 7020 Trondheim', 1);
+
+INSERT INTO points_of_interest (poi_type_id, name, description, latitude, longitude, address, created_by_user_id)
+VALUES (8, 'Jonsvatnet Water Treatment Plant', 'Primary water source and treatment facility for Trondheim', 63.3870, 10.5750, 'Jonsvannsveien 690, 7050 Trondheim', 1);
+
 
 -- MEETING PLACES
 INSERT INTO meeting_places (household_id, name, latitude, longitude, address, created_by_user_id)
