@@ -76,7 +76,7 @@ public class InventoryController {
 
   /**
    * Add a new type of product.
-   * TODO: UNTESTED!
+   *
    * @param createDto the DTO containing the product type information
    * @return 200 OK
    */
