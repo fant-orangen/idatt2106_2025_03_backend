@@ -113,9 +113,9 @@ CREATE TABLE group_inventory_contributions (
     quantity DECIMAL(10,2) NOT NULL,
     expiration_date DATE,
     contributed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (group_id) REFERENCES groups(id),
-    FOREIGN KEY (household_id) REFERENCES households(id),
-    FOREIGN KEY (product_id) REFERENCES product_batch(id)
+    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES product_batch(id) ON DELETE CASCADE
 );
 
 -- MEETING PLACES (user/household–defined POIs)
