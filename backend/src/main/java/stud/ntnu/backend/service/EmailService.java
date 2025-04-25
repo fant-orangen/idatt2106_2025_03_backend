@@ -22,6 +22,7 @@ public class EmailService {
   private final JavaMailSender mailSender;
   private final String senderEmail;
 
+
   /**
    * Constructs the EmailService with necessary dependencies injected by Spring.
    *
