@@ -147,7 +147,7 @@ public class InventoryController {
 
   /**
    * Delete an existing batch.
-   * TODO: UNTESTED!
+   *
    * @param batchId the ID of the batch
    * @return 200 OK
    */
