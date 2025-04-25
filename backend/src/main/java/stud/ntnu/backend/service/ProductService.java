@@ -52,7 +52,7 @@ public class ProductService {
    * Get all product types for a specific household.
    *
    * @param householdId the ID of the household
-   * @param pageable pagination information
+   * @param pageable    pagination information
    * @return a page of product types
    */
   public Page<ProductTypeDto> getProductTypesByHousehold(Integer householdId, Pageable pageable) {
@@ -103,16 +103,25 @@ public class ProductService {
   }
 
   /**
-   * Create a new product batch.
+   * Create a new product batch with household validation.
    *
-   * @param createDto the DTO containing the product batch information
+   * @param createDto   the DTO containing the product batch information
+   * @param householdId the ID of the household to validate against
    * @return the created product batch
+   * @throws IllegalArgumentException if the product type doesn't belong to the specified household
    */
   @Transactional
-  public ProductBatchDto createProductBatch(ProductBatchCreateDto createDto) {
+  public ProductBatchDto createProductBatch(ProductBatchCreateDto createDto, Integer householdId) {
     ProductType productType = productTypeRepository.findById(createDto.getProductTypeId())
         .orElseThrow(() -> new NoSuchElementException(
             "Product type not found with ID: " + createDto.getProductTypeId()));
+
+    // Validate that the product type belongs to the user's household
+    if (!productType.getHousehold().getId().equals(householdId)) {
+      throw new IllegalArgumentException(
+          "Product type with ID " + createDto.getProductTypeId()
+              + " does not belong to the user's household");
+    }
 
     ProductBatch productBatch = new ProductBatch(
         productType,
@@ -159,6 +168,31 @@ public class ProductService {
       throw new NoSuchElementException("Product batch not found with ID: " + batchId);
     }
     productBatchRepository.deleteById(batchId);
+  }
+
+  /**
+   * Delete a product type and all its associated batches.
+   *
+   * @param productTypeId the ID of the product type to delete
+   * @param householdId the ID of the household to validate against
+   * @throws NoSuchElementException if the product type doesn't exist
+   * @throws IllegalArgumentException if the product type doesn't belong to the specified household
+   */
+  @Transactional
+  public void deleteProductType(Integer productTypeId, Integer householdId) {
+    ProductType productType = productTypeRepository.findById(productTypeId)
+        .orElseThrow(() -> new NoSuchElementException(
+            "Product type not found with ID: " + productTypeId));
+
+    // Validate that the product type belongs to the user's household
+    if (!productType.getHousehold().getId().equals(householdId)) {
+      throw new IllegalArgumentException(
+          "Product type with ID " + productTypeId
+              + " does not belong to the user's household");
+    }
+
+    // Delete the product type - associated product batches will be deleted automatically via ON DELETE CASCADE
+    productTypeRepository.deleteById(productTypeId);
   }
 
   /**

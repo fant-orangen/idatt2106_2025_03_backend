@@ -60,16 +60,6 @@ INSERT INTO product_batch (product_type_id, date_added, expiration_time, number)
 INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '2' YEAR, 5);
 INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (5, CURRENT_TIMESTAMP, NULL, 3);
 
--- HOUSEHOLD INVENTORY
-INSERT INTO household_inventory (household_id, product_id, quantity, expiration_date) VALUES (1, 1, 10, '2025-12-31');
-INSERT INTO household_inventory (household_id, product_id, quantity, expiration_date) VALUES (1, 3, 24, '2026-06-30');
-INSERT INTO household_inventory (household_id, product_id, quantity, expiration_date) VALUES (1, 4, 1, NULL);
-INSERT INTO household_inventory (household_id, product_id, quantity, expiration_date) VALUES (2, 2, 2, '2025-10-15');
-INSERT INTO household_inventory (household_id, product_id, quantity, expiration_date) VALUES (2, 5, 1, '2024-08-22');
-INSERT INTO household_inventory (household_id, product_id, quantity, expiration_date) VALUES (3, 6, 2, NULL);
-INSERT INTO household_inventory (household_id, product_id, quantity, expiration_date) VALUES (3, 7, 5, '2026-01-15');
-INSERT INTO household_inventory (household_id, custom_name, quantity, expiration_date) VALUES (1, 'Emergency Candles', 8, NULL);
-
 -- GROUP INVENTORY CONTRIBUTIONS
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (1, 1, 1, 5);
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (1, 2, 2, 1);

@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductTypeCreateDto {
-    @NotNull(message = "Household ID is required")
     private Integer householdId;
 
     @NotBlank(message = "Name is required")
