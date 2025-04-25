@@ -104,6 +104,7 @@ public class AuthService {
     User newUser = new User(
         registrationRequest.getEmail(),
         passwordEncoder.encode(registrationRequest.getPassword()),
+        registrationRequest.getPhoneNumber(),
         userRole
     );
 

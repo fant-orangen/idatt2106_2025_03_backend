@@ -21,6 +21,9 @@ public class User {
   @Column(name = "password_hash", nullable = false)
   private String passwordHash;
 
+  @Column(name = "phone_number", nullable = false)
+  private String phoneNumber;
+
   @ManyToOne
   @JoinColumn(name = "role_id", nullable = false)
   private Role role;
@@ -69,9 +72,10 @@ public class User {
   public User() {
   }
 
-  public User(String email, String passwordHash, Role role) {
+  public User(String email, String passwordHash, String phoneNumber, Role role) {
     this.email = email;
     this.passwordHash = passwordHash;
+    this.phoneNumber = phoneNumber;
     this.role = role;
   }
 
@@ -98,6 +102,14 @@ public class User {
 
   public void setPasswordHash(String passwordHash) {
     this.passwordHash = passwordHash;
+  }
+
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
   }
 
   public Role getRole() {

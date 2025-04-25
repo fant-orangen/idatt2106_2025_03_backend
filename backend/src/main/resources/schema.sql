@@ -18,6 +18,7 @@ CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(20) NOT NULL,
     role_id INT NOT NULL,
     household_id INT,
     first_name VARCHAR(255),
