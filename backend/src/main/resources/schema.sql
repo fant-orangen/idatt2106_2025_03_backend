@@ -84,10 +84,13 @@ CREATE TABLE group_memberships (
 -- PRODUCT CATALOG
 CREATE TABLE product_types (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
+    household_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
     unit VARCHAR(10) NOT NULL CHECK (unit IN ('l', 'stk', 'kg', 'gram', 'dl')),
     calories_per_unit DECIMAL(10,2),
-    is_water BOOLEAN NOT NULL DEFAULT FALSE
+    is_water BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (household_id) REFERENCES households(id),
+    UNIQUE (household_id, name)
 );
 
 CREATE TABLE product_batch (

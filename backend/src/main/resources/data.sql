@@ -41,11 +41,14 @@ INSERT INTO group_memberships (group_id, household_id, invited_by_user_id) VALUE
 INSERT INTO group_memberships (group_id, household_id, invited_by_user_id) VALUES (2, 3, 1);
 
 -- PRODUCT TYPES
-INSERT INTO product_types (name, unit, calories_per_unit, is_water) VALUES ('Food', 'kg', 2000.00, FALSE);
-INSERT INTO product_types (name, unit, calories_per_unit, is_water) VALUES ('Water', 'l', 0.00, TRUE);
-INSERT INTO product_types (name, unit, calories_per_unit, is_water) VALUES ('Medicine', 'stk', 0.00, FALSE);
-INSERT INTO product_types (name, unit, calories_per_unit, is_water) VALUES ('Tools', 'stk', 0.00, FALSE);
-INSERT INTO product_types (name, unit, calories_per_unit, is_water) VALUES ('Hygiene', 'stk', 0.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Food', 'kg', 2000.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Water', 'l', 0.00, TRUE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Medicine', 'stk', 0.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Food', 'kg', 2000.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Water', 'l', 0.00, TRUE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Tools', 'stk', 0.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (3, 'Food', 'kg', 2000.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (3, 'Hygiene', 'stk', 0.00, FALSE);
 
 -- PRODUCT BATCH
 INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1' YEAR, 10);

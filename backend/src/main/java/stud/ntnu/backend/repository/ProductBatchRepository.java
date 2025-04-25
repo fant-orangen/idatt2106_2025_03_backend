@@ -1,5 +1,7 @@
 package stud.ntnu.backend.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.inventory.ProductBatch;
@@ -10,5 +12,13 @@ import stud.ntnu.backend.model.inventory.ProductBatch;
 @Repository
 public interface ProductBatchRepository extends JpaRepository<ProductBatch, Integer> {
     // Basic CRUD operations are provided by JpaRepository
-    // Custom query methods can be added as needed
+
+    /**
+     * Find all product batches for a given product type.
+     *
+     * @param productTypeId the ID of the product type
+     * @param pageable pagination information
+     * @return a page of product batches
+     */
+    Page<ProductBatch> findByProductTypeId(Integer productTypeId, Pageable pageable);
 }

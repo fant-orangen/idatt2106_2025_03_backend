@@ -122,6 +122,25 @@ public class InventoryService {
   }
 
   /**
+   * Gets the household ID for a user by email.
+   *
+   * @param email the email of the user
+   * @return the household ID
+   * @throws IllegalStateException if the user is not found or doesn't have a household
+   */
+  public Integer getHouseholdIdByUserEmail(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    Household household = user.getHousehold();
+    if (household == null) {
+      throw new IllegalStateException("User doesn't have a household");
+    }
+
+    return household.getId();
+  }
+
+  /**
    * Gets the inventory items for a user's household.
    *
    * @param email the email of the user
