@@ -68,6 +68,15 @@ public class PoiService {
   public void deletePointOfInterest(Integer id) {
     pointOfInterestRepository.deleteById(id);
   }
+    /**
+     * Retrieves all points of interest of a specific type.
+     *
+     * @param typeId the ID of the POI type
+     * @return list of points of interest of the specified type
+     */
+  public List<PointOfInterest> getPointsOfInterestByTypeId(Integer typeId) {
+    return pointOfInterestRepository.findByPoiTypeId(typeId);
+  }
 
   /**
    * Retrieves all POI types.

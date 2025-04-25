@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.map.PointOfInterest;
 
+import java.util.List;
+
 /**
  * Repository interface for PointOfInterest entity operations.
  */
@@ -11,4 +13,5 @@ import stud.ntnu.backend.model.map.PointOfInterest;
 public interface PointOfInterestRepository extends JpaRepository<PointOfInterest, Integer> {
     // Basic CRUD operations are provided by JpaRepository
     // Custom query methods can be added as needed
+    List<PointOfInterest> findByPoiTypeId(Integer poiTypeId);
 }
