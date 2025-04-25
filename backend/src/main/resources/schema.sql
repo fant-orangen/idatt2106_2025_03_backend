@@ -84,16 +84,22 @@ CREATE TABLE group_memberships (
 -- PRODUCT CATALOG
 CREATE TABLE product_types (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE
+    household_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    unit VARCHAR(10) NOT NULL CHECK (unit IN ('l', 'stk', 'kg', 'gram', 'dl')),
+    calories_per_unit DECIMAL(10,2),
+    is_water BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (household_id) REFERENCES households(id),
+    UNIQUE (household_id, name)
 );
 
-CREATE TABLE products (
+CREATE TABLE product_batch (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_type_id INT NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    FOREIGN KEY (product_type_id) REFERENCES product_types(id),
-    UNIQUE (product_type_id, name)
+    date_added DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expiration_time DATETIME,
+    number INT NOT NULL,
+    FOREIGN KEY (product_type_id) REFERENCES product_types(id)
 );
 
 -- HOUSEHOLD INVENTORY
@@ -107,7 +113,7 @@ CREATE TABLE household_inventory (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (household_id) REFERENCES households(id),
-    FOREIGN KEY (product_id) REFERENCES products(id)
+    FOREIGN KEY (product_id) REFERENCES product_batch(id)
 );
 
 -- GROUP SUPPLY CONTRIBUTIONS
@@ -122,7 +128,7 @@ CREATE TABLE group_inventory_contributions (
     contributed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (group_id) REFERENCES groups(id),
     FOREIGN KEY (household_id) REFERENCES households(id),
-    FOREIGN KEY (product_id) REFERENCES products(id)
+    FOREIGN KEY (product_id) REFERENCES product_batch(id)
 );
 
 -- MEETING PLACES (user/household–defined POIs)
