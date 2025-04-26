@@ -35,6 +35,9 @@ public class CrisisEvent {
   @Column(name = "epicenter_longitude", nullable = false, precision = 10, scale = 7)
   private BigDecimal epicenterLongitude;
 
+  @Column(name = "radius", precision = 10, scale = 2)
+  private BigDecimal radius;
+
   @Column(name = "start_time", nullable = false)
   private LocalDateTime startTime;
 
@@ -55,10 +58,11 @@ public class CrisisEvent {
   }
 
   public CrisisEvent(String name, BigDecimal epicenterLatitude, BigDecimal epicenterLongitude,
-      LocalDateTime startTime, User createdByUser) {
+      BigDecimal radius, LocalDateTime startTime, User createdByUser) {
     this.name = name;
     this.epicenterLatitude = epicenterLatitude;
     this.epicenterLongitude = epicenterLongitude;
+    this.radius = radius;
     this.startTime = startTime;
     this.createdByUser = createdByUser;
     this.updatedAt = LocalDateTime.now();

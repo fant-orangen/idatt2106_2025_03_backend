@@ -163,6 +163,7 @@ CREATE TABLE crisis_events (
     severity VARCHAR(10) NOT NULL DEFAULT 'green' CHECK (severity IN ('green','yellow','red')),
     epicenter_latitude DECIMAL(10,7) NOT NULL,
     epicenter_longitude DECIMAL(10,7) NOT NULL,
+    radius DECIMAL(10,2),
     start_time DATETIME NOT NULL,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by_user_id INT NOT NULL,
