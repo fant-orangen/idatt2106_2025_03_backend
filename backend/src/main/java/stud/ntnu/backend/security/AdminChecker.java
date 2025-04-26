@@ -5,6 +5,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.service.UserService;
 
+import java.security.Principal;
+
 /**
  * Utility class for checking if a user has administrative privileges.
  */
@@ -42,5 +44,23 @@ public class AdminChecker {
 
     String roleName = user.getRole().getName();
     return "ADMIN".equals(roleName) || "SUPERADMIN".equals(roleName);
+  }
+
+  /**
+   * Checks if the user identified by the Principal has admin or super admin privileges.
+   *
+   * @param principal the Principal object representing the current user
+   * @param userService the user service to retrieve user information
+   * @return true if the user is an admin or super admin, false otherwise
+   * @throws IllegalStateException if the user is not found
+   */
+  public static boolean isCurrentUserAdmin(Principal principal, UserService userService) {
+    // Get the current authenticated user from Principal
+    String email = principal.getName();
+    User currentUser = userService.getUserByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    // Check if the user has ADMIN or SUPERADMIN role
+    return isUserAdmin(currentUser);
   }
 }

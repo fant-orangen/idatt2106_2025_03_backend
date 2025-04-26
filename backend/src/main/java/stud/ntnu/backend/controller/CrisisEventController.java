@@ -2,8 +2,7 @@ package stud.ntnu.backend.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import java.security.Principal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -44,39 +43,26 @@ public class CrisisEventController {
    * crisis events.
    *
    * @param createCrisisEventDto the crisis event information
+   * @param principal the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
   @PostMapping
   public ResponseEntity<?> createCrisisEvent(
-      @Valid @RequestBody CreateCrisisEventDto createCrisisEventDto) {
+      @Valid @RequestBody CreateCrisisEventDto createCrisisEventDto,
+      Principal principal) {
     try {
-      // Check if the current user is an admin using AdminChecker
-      if (!AdminChecker.isCurrentUserAdmin(userService)) {
+      // Check if the current user is an admin using AdminChecker with Principal
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
         return ResponseEntity.status(403).body("Only administrators can create crisis events");
       }
 
-      // Get the current authenticated user
-      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-      String email = authentication.getName();
+      // Get the current authenticated user using Principal
+      String email = principal.getName();
       User currentUser = userService.getUserByEmail(email)
           .orElseThrow(() -> new IllegalStateException("User not found"));
 
-      // Create a new crisis event
-      CrisisEvent crisisEvent = new CrisisEvent(
-          createCrisisEventDto.getName(),
-          createCrisisEventDto.getLatitude(),
-          createCrisisEventDto.getLongitude(),
-          createCrisisEventDto.getRadius(),
-          LocalDateTime.now(),
-          currentUser
-      );
-
-      // Set optional fields
-      crisisEvent.setDescription(createCrisisEventDto.getDescription());
-      crisisEvent.setSeverity(createCrisisEventDto.getSeverity());
-
-      // Save the crisis event
-      CrisisEvent savedCrisisEvent = crisisEventService.saveCrisisEvent(crisisEvent);
+      // Delegate to service for creating the crisis event
+      CrisisEvent savedCrisisEvent = crisisEventService.createCrisisEvent(createCrisisEventDto, currentUser);
 
       return ResponseEntity.ok(savedCrisisEvent);
     } catch (Exception e) {
@@ -90,50 +76,23 @@ public class CrisisEventController {
    *
    * @param id                   the ID of the crisis event to update
    * @param updateCrisisEventDto the crisis event information to update
+   * @param principal            the Principal object representing the current user
    * @return ResponseEntity with the updated crisis event if successful, or an error message if the
    * crisis event is not found or the user is not authorized
    */
   @PutMapping("/{id}")
   public ResponseEntity<?> updateCrisisEvent(
       @PathVariable Integer id,
-      @RequestBody UpdateCrisisEventDto updateCrisisEventDto) {
+      @RequestBody UpdateCrisisEventDto updateCrisisEventDto,
+      Principal principal) {
     try {
-      // Check if the current user is an admin using AdminChecker
-      if (!AdminChecker.isCurrentUserAdmin(userService)) {
+      // Check if the current user is an admin using AdminChecker with Principal
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
         return ResponseEntity.status(403).body("Only administrators can update crisis events");
       }
 
-      // Get the crisis event by ID
-      CrisisEvent crisisEvent = crisisEventService.getCrisisEventById(id)
-          .orElseThrow(() -> new IllegalStateException("Crisis event not found with ID: " + id));
-
-      // Update fields if provided
-      if (updateCrisisEventDto.getName() != null) {
-        crisisEvent.setName(updateCrisisEventDto.getName());
-      }
-
-      if (updateCrisisEventDto.getDescription() != null) {
-        crisisEvent.setDescription(updateCrisisEventDto.getDescription());
-      }
-
-      if (updateCrisisEventDto.getSeverity() != null) {
-        crisisEvent.setSeverity(updateCrisisEventDto.getSeverity());
-      }
-
-      if (updateCrisisEventDto.getLatitude() != null) {
-        crisisEvent.setEpicenterLatitude(updateCrisisEventDto.getLatitude());
-      }
-
-      if (updateCrisisEventDto.getLongitude() != null) {
-        crisisEvent.setEpicenterLongitude(updateCrisisEventDto.getLongitude());
-      }
-
-      if (updateCrisisEventDto.getRadius() != null) {
-        crisisEvent.setRadius(updateCrisisEventDto.getRadius());
-      }
-
-      // Save the updated crisis event
-      CrisisEvent updatedCrisisEvent = crisisEventService.saveCrisisEvent(crisisEvent);
+      // Delegate to service for updating the crisis event
+      CrisisEvent updatedCrisisEvent = crisisEventService.updateCrisisEvent(id, updateCrisisEventDto);
 
       return ResponseEntity.ok(updatedCrisisEvent);
     } catch (Exception e) {
