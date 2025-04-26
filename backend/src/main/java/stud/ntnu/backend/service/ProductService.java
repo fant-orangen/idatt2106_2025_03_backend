@@ -12,9 +12,9 @@ import stud.ntnu.backend.dto.inventory.ProductTypeDto;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.inventory.ProductBatch;
 import stud.ntnu.backend.model.inventory.ProductType;
-import stud.ntnu.backend.repository.HouseholdRepository;
-import stud.ntnu.backend.repository.ProductBatchRepository;
-import stud.ntnu.backend.repository.ProductTypeRepository;
+import stud.ntnu.backend.repository.household.HouseholdRepository;
+import stud.ntnu.backend.repository.inventory.ProductBatchRepository;
+import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;

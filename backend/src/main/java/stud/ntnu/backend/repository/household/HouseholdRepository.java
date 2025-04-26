@@ -1,14 +1,14 @@
-package stud.ntnu.backend.repository;
+package stud.ntnu.backend.repository.household;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import stud.ntnu.backend.model.map.PoiType;
+import stud.ntnu.backend.model.household.Household;
 
 /**
- * Repository interface for PoiType entity operations.
+ * Repository interface for Household entity operations.
  */
 @Repository
-public interface PoiTypeRepository extends JpaRepository<PoiType, Integer> {
+public interface HouseholdRepository extends JpaRepository<Household, Integer> {
     // Basic CRUD operations are provided by JpaRepository
     // Custom query methods can be added as needed
 }

@@ -1,7 +1,7 @@
 package stud.ntnu.backend.service;
 
 import org.springframework.stereotype.Service;
-import stud.ntnu.backend.repository.GroupRepository;
+import stud.ntnu.backend.repository.group.GroupRepository;
 import stud.ntnu.backend.model.group.Group;
 
 import java.util.List;

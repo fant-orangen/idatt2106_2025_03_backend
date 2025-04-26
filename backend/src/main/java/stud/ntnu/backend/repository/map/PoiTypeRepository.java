@@ -1,14 +1,14 @@
-package stud.ntnu.backend.repository;
+package stud.ntnu.backend.repository.map;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import stud.ntnu.backend.model.map.ScenarioTheme;
+import stud.ntnu.backend.model.map.PoiType;
 
 /**
- * Repository interface for ScenarioTheme entity operations.
+ * Repository interface for PoiType entity operations.
  */
 @Repository
-public interface ScenarioThemeRepository extends JpaRepository<ScenarioTheme, Integer> {
+public interface PoiTypeRepository extends JpaRepository<PoiType, Integer> {
     // Basic CRUD operations are provided by JpaRepository
     // Custom query methods can be added as needed
 }

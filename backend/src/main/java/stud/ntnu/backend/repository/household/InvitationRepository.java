@@ -1,14 +1,14 @@
-package stud.ntnu.backend.repository;
+package stud.ntnu.backend.repository.household;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import stud.ntnu.backend.model.map.MeetingPlace;
+import stud.ntnu.backend.model.household.Invitation;
 
 /**
- * Repository interface for MeetingPlace entity operations.
+ * Repository interface for Invitation entity operations.
  */
 @Repository
-public interface MeetingPlaceRepository extends JpaRepository<MeetingPlace, Integer> {
+public interface InvitationRepository extends JpaRepository<Invitation, Integer> {
     // Basic CRUD operations are provided by JpaRepository
     // Custom query methods can be added as needed
 }

@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import stud.ntnu.backend.dto.household.HouseholdCreateRequestDto;
 import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
-import stud.ntnu.backend.repository.HouseholdRepository;
-import stud.ntnu.backend.repository.UserRepository;
+import stud.ntnu.backend.repository.household.HouseholdRepository;
+import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.user.User;
 

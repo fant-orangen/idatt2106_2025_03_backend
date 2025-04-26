@@ -1,8 +1,8 @@
 package stud.ntnu.backend.service;
 
 import org.springframework.stereotype.Service;
-import stud.ntnu.backend.repository.PoiTypeRepository;
-import stud.ntnu.backend.repository.PointOfInterestRepository;
+import stud.ntnu.backend.repository.map.PoiTypeRepository;
+import stud.ntnu.backend.repository.map.PointOfInterestRepository;
 import stud.ntnu.backend.model.map.PoiType;
 import stud.ntnu.backend.model.map.PointOfInterest;
 

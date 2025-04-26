@@ -5,9 +5,8 @@ import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.map.CreateCrisisEventDto;
 import stud.ntnu.backend.dto.map.UpdateCrisisEventDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
-import stud.ntnu.backend.model.map.CrisisEvent.Severity;
 import stud.ntnu.backend.model.user.User;
-import stud.ntnu.backend.repository.CrisisEventRepository;
+import stud.ntnu.backend.repository.map.CrisisEventRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;

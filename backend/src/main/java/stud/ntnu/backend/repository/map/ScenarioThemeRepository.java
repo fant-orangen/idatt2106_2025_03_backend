@@ -1,14 +1,14 @@
-package stud.ntnu.backend.repository;
+package stud.ntnu.backend.repository.map;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import stud.ntnu.backend.model.household.Household;
+import stud.ntnu.backend.model.map.ScenarioTheme;
 
 /**
- * Repository interface for Household entity operations.
+ * Repository interface for ScenarioTheme entity operations.
  */
 @Repository
-public interface HouseholdRepository extends JpaRepository<Household, Integer> {
+public interface ScenarioThemeRepository extends JpaRepository<ScenarioTheme, Integer> {
     // Basic CRUD operations are provided by JpaRepository
     // Custom query methods can be added as needed
 }

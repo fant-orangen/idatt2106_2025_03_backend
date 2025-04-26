@@ -1,7 +1,7 @@
 package stud.ntnu.backend.service;
 
 import org.springframework.stereotype.Service;
-import stud.ntnu.backend.repository.GroupInventoryContributionRepository;
+import stud.ntnu.backend.repository.group.GroupInventoryContributionRepository;
 import stud.ntnu.backend.model.group.GroupInventoryContribution;
 
 import java.util.List;
