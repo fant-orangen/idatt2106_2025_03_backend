@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
@@ -32,6 +33,12 @@ public class Household {
 
   @Column(name = "population_count", nullable = false)
   private Integer populationCount = 1;
+
+  @Column(name = "latitude", precision = 10, scale = 7)
+  private BigDecimal latitude;
+
+  @Column(name = "longitude", precision = 10, scale = 7)
+  private BigDecimal longitude;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;

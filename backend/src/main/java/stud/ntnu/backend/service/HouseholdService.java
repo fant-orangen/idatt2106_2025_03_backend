@@ -106,6 +106,10 @@ public class HouseholdService {
     // Create a new household
     Household household = new Household(requestDto.getName(), requestDto.getAddress(), requestDto.getPopulationCount());
 
+    // Set optional coordinates
+    household.setLatitude(requestDto.getLatitude());
+    household.setLongitude(requestDto.getLongitude());
+
     // Save the household
     household = householdRepository.save(household);
 
@@ -261,6 +265,8 @@ public class HouseholdService {
         household.getName(),
         household.getAddress(),
         household.getPopulationCount(),
+        household.getLatitude(),
+        household.getLongitude(),
         members
     );
   }

@@ -7,6 +7,8 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.math.BigDecimal;
+
 /**
  * Data Transfer Object for household creation requests. Contains the name, address, and population
  * count for a new household.
@@ -25,4 +27,8 @@ public class HouseholdCreateRequestDto {
 
   @Min(value = 1, message = "Population count must be at least 1")
   private Integer populationCount = 1;
+
+  // Optional latitude and longitude
+  private BigDecimal latitude;
+  private BigDecimal longitude;
 }

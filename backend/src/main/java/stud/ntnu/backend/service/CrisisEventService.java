@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.map.CreateCrisisEventDto;
 import stud.ntnu.backend.dto.map.UpdateCrisisEventDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
+import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.map.CrisisEventRepository;
 
@@ -20,14 +21,18 @@ import java.util.Optional;
 public class CrisisEventService {
 
   private final CrisisEventRepository crisisEventRepository;
+  private final NotificationService notificationService;
 
   /**
    * Constructor for dependency injection.
    *
    * @param crisisEventRepository repository for crisis event operations
+   * @param notificationService   service for notification operations
    */
-  public CrisisEventService(CrisisEventRepository crisisEventRepository) {
+  public CrisisEventService(CrisisEventRepository crisisEventRepository,
+      NotificationService notificationService) {
     this.crisisEventRepository = crisisEventRepository;
+    this.notificationService = notificationService;
   }
 
   /**
@@ -97,13 +102,38 @@ public class CrisisEventService {
     crisisEvent.setDescription(createCrisisEventDto.getDescription());
     crisisEvent.setSeverity(createCrisisEventDto.getSeverity());
 
-    // Save directly using the repository
-    return crisisEventRepository.save(crisisEvent);
+    // Save the crisis event
+    CrisisEvent savedCrisisEvent = crisisEventRepository.save(crisisEvent);
+
+    // Create notifications for users within the radius of the crisis event
+    if (savedCrisisEvent.getRadius() != null) {
+      List<User> usersInRadius = notificationService.findUsersWithinRadius(
+          savedCrisisEvent.getEpicenterLatitude(),
+          savedCrisisEvent.getEpicenterLongitude(),
+          savedCrisisEvent.getRadius()
+      );
+
+      // Create and send notifications to users in radius
+      for (User user : usersInRadius) {
+        Notification notification = notificationService.createNotification(
+            user,
+            Notification.PreferenceType.CRISIS_ALERT,
+            Notification.TargetType.EVENT,
+            savedCrisisEvent.getId(),
+            "There is an ongoing crisis." //TODO: improve the description
+        );
+
+        // Send the notification via WebSocket
+        notificationService.sendNotification(notification);
+      }
+    }
+
+    return savedCrisisEvent;
   }
 
   /**
-   * Updates an existing crisis event.
-   * Note: The start time of a crisis event cannot be updated after creation.
+   * Updates an existing crisis event. Note: The start time of a crisis event cannot be updated
+   * after creation.
    *
    * @param id                   the ID of the crisis event to update
    * @param updateCrisisEventDto the DTO containing the update information
