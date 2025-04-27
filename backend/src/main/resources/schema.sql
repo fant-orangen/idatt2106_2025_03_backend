@@ -10,6 +10,8 @@ CREATE TABLE households (
     name VARCHAR(255),
     address TEXT NOT NULL,
     population_count INT NOT NULL DEFAULT 1,
+    latitude DECIMAL(10,7),
+    longitude DECIMAL(10,7),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -160,9 +162,10 @@ CREATE TABLE crisis_events (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    severity VARCHAR(10) NOT NULL DEFAULT 'green' CHECK (severity IN ('green','yellow','red')),
+    severity VARCHAR(10) NOT NULL DEFAULT 'GREEN' CHECK (severity IN ('green','yellow','red')),
     epicenter_latitude DECIMAL(10,7) NOT NULL,
     epicenter_longitude DECIMAL(10,7) NOT NULL,
+    radius DECIMAL(10,2),
     start_time DATETIME NOT NULL,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by_user_id INT NOT NULL,
@@ -256,9 +259,26 @@ CREATE TABLE notifications (
     preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request')),
     target_type VARCHAR(20) NOT NULL CHECK (target_type IN ('inventory','event','location_request')),
     target_id INT,
+    description TEXT DEFAULT NULL,
     notify_at DATETIME NOT NULL,
     sent_at DATETIME,
     read_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+CREATE TABLE crisis_event_changes (
+                                      id INT AUTO_INCREMENT PRIMARY KEY,
+                                      crisis_event_id INT NOT NULL,
+                                      change_type VARCHAR(30) NOT NULL CHECK (change_type IN ('creation', 'level_change', 'description_update', 'epicenter_moved')),
+                                      old_value TEXT,
+                                      new_value TEXT,
+                                      created_by_user_id INT NOT NULL,
+                                      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                      FOREIGN KEY (crisis_event_id) REFERENCES crisis_events(id) ON DELETE CASCADE,
+                                      FOREIGN KEY (created_by_user_id) REFERENCES users(id)
+);
+
+
+

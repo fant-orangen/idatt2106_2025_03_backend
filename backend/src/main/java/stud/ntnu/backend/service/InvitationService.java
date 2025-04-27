@@ -1,7 +1,7 @@
 package stud.ntnu.backend.service;
 
 import org.springframework.stereotype.Service;
-import stud.ntnu.backend.repository.InvitationRepository;
+import stud.ntnu.backend.repository.household.InvitationRepository;
 import stud.ntnu.backend.model.household.Invitation;
 
 import java.util.List;

@@ -1,5 +1,6 @@
 package stud.ntnu.backend.dto.household;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -11,6 +12,8 @@ public class HouseholdDto {
   private String name;
   private String address;
   private Integer populationCount;
+  private BigDecimal latitude;
+  private BigDecimal longitude;
   private List<HouseholdMemberDto> members;
 
   // Default constructor
@@ -19,11 +22,13 @@ public class HouseholdDto {
 
   // Constructor with all fields
   public HouseholdDto(Integer id, String name, String address, Integer populationCount,
-      List<HouseholdMemberDto> members) {
+      BigDecimal latitude, BigDecimal longitude, List<HouseholdMemberDto> members) {
     this.id = id;
     this.name = name;
     this.address = address;
     this.populationCount = populationCount;
+    this.latitude = latitude;
+    this.longitude = longitude;
     this.members = members;
   }
 
@@ -58,6 +63,22 @@ public class HouseholdDto {
 
   public void setPopulationCount(Integer populationCount) {
     this.populationCount = populationCount;
+  }
+
+  public BigDecimal getLatitude() {
+    return latitude;
+  }
+
+  public void setLatitude(BigDecimal latitude) {
+    this.latitude = latitude;
+  }
+
+  public BigDecimal getLongitude() {
+    return longitude;
+  }
+
+  public void setLongitude(BigDecimal longitude) {
+    this.longitude = longitude;
   }
 
   public List<HouseholdMemberDto> getMembers() {

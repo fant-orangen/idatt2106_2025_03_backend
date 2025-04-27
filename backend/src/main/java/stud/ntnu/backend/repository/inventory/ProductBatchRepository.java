@@ -1,4 +1,4 @@
-package stud.ntnu.backend.repository;
+package stud.ntnu.backend.repository.inventory;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

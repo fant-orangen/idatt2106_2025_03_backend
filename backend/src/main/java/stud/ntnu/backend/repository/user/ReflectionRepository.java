@@ -1,14 +1,14 @@
-package stud.ntnu.backend.repository;
+package stud.ntnu.backend.repository.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import stud.ntnu.backend.model.inventory.Product;
+import stud.ntnu.backend.model.user.Reflection;
 
 /**
- * Repository interface for Product entity operations.
+ * Repository interface for Reflection entity operations.
  */
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Integer> {
+public interface ReflectionRepository extends JpaRepository<Reflection, Integer> {
     // Basic CRUD operations are provided by JpaRepository
     // Custom query methods can be added as needed
 }

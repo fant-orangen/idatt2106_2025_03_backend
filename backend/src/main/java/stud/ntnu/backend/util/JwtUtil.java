@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import stud.ntnu.backend.repository.UserRepository;
+import stud.ntnu.backend.repository.user.UserRepository;
 
 /**
  * <h2>JwtUtil</h2>

@@ -49,7 +49,7 @@ public class NotificationPreference {
 
   // Enum for preference type
   public enum PreferenceType {
-    EXPIRATION_REMINDER, CRISIS_ALERT, LOCATION_REQUEST
+    expiration_reminder, crisis_alert, location_request
   }
 
   public NotificationPreference(User user, PreferenceType preferenceType) {

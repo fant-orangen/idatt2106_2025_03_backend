@@ -1,7 +1,7 @@
 package stud.ntnu.backend.service;
 
 import org.springframework.stereotype.Service;
-import stud.ntnu.backend.repository.ReflectionRepository;
+import stud.ntnu.backend.repository.user.ReflectionRepository;
 import stud.ntnu.backend.model.user.Reflection;
 
 import java.util.List;

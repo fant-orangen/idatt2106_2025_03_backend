@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import stud.ntnu.backend.dto.household.HouseholdCreateRequestDto;
 import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
-import stud.ntnu.backend.repository.HouseholdRepository;
-import stud.ntnu.backend.repository.UserRepository;
+import stud.ntnu.backend.repository.household.HouseholdRepository;
+import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.user.User;
 
@@ -105,6 +105,10 @@ public class HouseholdService {
 
     // Create a new household
     Household household = new Household(requestDto.getName(), requestDto.getAddress(), requestDto.getPopulationCount());
+
+    // Set optional coordinates
+    household.setLatitude(requestDto.getLatitude());
+    household.setLongitude(requestDto.getLongitude());
 
     // Save the household
     household = householdRepository.save(household);
@@ -261,6 +265,8 @@ public class HouseholdService {
         household.getName(),
         household.getAddress(),
         household.getPopulationCount(),
+        household.getLatitude(),
+        household.getLongitude(),
         members
     );
   }

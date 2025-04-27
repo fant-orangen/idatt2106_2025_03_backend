@@ -1,5 +1,8 @@
 package stud.ntnu.backend.model.group;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -12,6 +15,7 @@ import stud.ntnu.backend.model.user.User;
 @Getter
 @Setter
 @NoArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Group {
 
   @Id
@@ -23,6 +27,7 @@ public class Group {
 
   @ManyToOne
   @JoinColumn(name = "created_by_user_id", nullable = false)
+  @JsonBackReference
   private User createdByUser;
 
   @Column(name = "created_at", nullable = false, updatable = false)

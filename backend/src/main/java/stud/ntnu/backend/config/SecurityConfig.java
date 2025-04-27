@@ -48,9 +48,10 @@ public class SecurityConfig {
   private final UserDetailsService userDetailsService;
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-  public SecurityConfig(UserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
-      this.userDetailsService = userDetailsService;
-      this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+  public SecurityConfig(UserDetailsService userDetailsService,
+      JwtAuthenticationFilter jwtAuthenticationFilter) {
+    this.userDetailsService = userDetailsService;
+    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
   }
 
   /**
@@ -96,13 +97,17 @@ public class SecurityConfig {
         .csrf(csrf -> csrf.disable())
         .sessionManagement(session ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> 
-            auth.requestMatchers("/h2-console/**", "/swagger-ui/**", "/swagger-ui.html", 
-                                "/v3/api-docs/**", "/actuator/health", "/auth/**", "/api/auth/**", "/api/poi/**", "/poi/**").permitAll()
+        .authorizeHttpRequests(auth ->
+            auth.requestMatchers("/h2-console/**", "/swagger-ui/**", "/swagger-ui.html",
+                    "/v3/api-docs/**", "/actuator/health", "/auth/**", "/api/auth/**", "/api/poi/**",
+                    "/poi/**").permitAll()
+                // Add role-based authorization for admin endpoints
+                .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
+                // Add other admin-only endpoints here with similar pattern
                 .anyRequest().authenticated());
 
     // Allow H2 console frame options
-    http.headers(headers -> 
+    http.headers(headers ->
         headers.frameOptions(frameOptions -> frameOptions.disable()));
 
     // Add JWT authentication filter

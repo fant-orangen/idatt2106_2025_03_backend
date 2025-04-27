@@ -1,5 +1,8 @@
 package stud.ntnu.backend.model.map;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,6 +16,7 @@ import stud.ntnu.backend.model.user.User;
 @Getter
 @Setter
 @NoArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class CrisisEvent {
 
   @Id
@@ -27,13 +31,16 @@ public class CrisisEvent {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "severity", nullable = false)
-  private Severity severity = Severity.GREEN;
+  private Severity severity = Severity.green;
 
   @Column(name = "epicenter_latitude", nullable = false, precision = 10, scale = 7)
   private BigDecimal epicenterLatitude;
 
   @Column(name = "epicenter_longitude", nullable = false, precision = 10, scale = 7)
   private BigDecimal epicenterLongitude;
+
+  @Column(name = "radius", precision = 10, scale = 2)
+  private BigDecimal radius;
 
   @Column(name = "start_time", nullable = false)
   private LocalDateTime startTime;
@@ -43,6 +50,7 @@ public class CrisisEvent {
 
   @ManyToOne
   @JoinColumn(name = "created_by_user_id", nullable = false)
+  @JsonIdentityReference(alwaysAsId = true)
   private User createdByUser;
 
   @Column(name = "active", nullable = false)
@@ -55,10 +63,11 @@ public class CrisisEvent {
   }
 
   public CrisisEvent(String name, BigDecimal epicenterLatitude, BigDecimal epicenterLongitude,
-      LocalDateTime startTime, User createdByUser) {
+      BigDecimal radius, LocalDateTime startTime, User createdByUser) {
     this.name = name;
     this.epicenterLatitude = epicenterLatitude;
     this.epicenterLongitude = epicenterLongitude;
+    this.radius = radius;
     this.startTime = startTime;
     this.createdByUser = createdByUser;
     this.updatedAt = LocalDateTime.now();
@@ -66,6 +75,6 @@ public class CrisisEvent {
 
   // Enum for severity
   public enum Severity {
-    GREEN, YELLOW, RED
+    green, yellow, red
   }
 }
