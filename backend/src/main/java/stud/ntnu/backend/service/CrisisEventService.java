@@ -83,13 +83,13 @@ public class CrisisEventService {
   @Transactional
   public CrisisEvent createCrisisEvent(CreateCrisisEventDto createCrisisEventDto,
       User currentUser) {
-    // Create a new crisis event
+    // Create a new crisis event with start time from DTO
     CrisisEvent crisisEvent = new CrisisEvent(
         createCrisisEventDto.getName(),
         createCrisisEventDto.getLatitude(),
         createCrisisEventDto.getLongitude(),
         createCrisisEventDto.getRadius(),
-        LocalDateTime.now(),
+        createCrisisEventDto.getStartTime(),
         currentUser
     );
 
@@ -103,6 +103,7 @@ public class CrisisEventService {
 
   /**
    * Updates an existing crisis event.
+   * Note: The start time of a crisis event cannot be updated after creation.
    *
    * @param id                   the ID of the crisis event to update
    * @param updateCrisisEventDto the DTO containing the update information

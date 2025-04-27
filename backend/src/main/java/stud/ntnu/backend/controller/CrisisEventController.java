@@ -40,9 +40,9 @@ public class CrisisEventController {
 
   /**
    * Creates a new crisis event. Only users with ADMIN or SUPERADMIN roles are allowed to create
-   * crisis events.
+   * crisis events. The start time must be provided in the request and cannot be changed after creation.
    *
-   * @param createCrisisEventDto the crisis event information
+   * @param createCrisisEventDto the crisis event information including the required start time
    * @param principal the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
@@ -73,9 +73,10 @@ public class CrisisEventController {
   /**
    * Updates an existing crisis event. Only users with ADMIN or SUPERADMIN roles are allowed to
    * update crisis events. If a field is not provided in the request, it will not be updated.
+   * Note: The start time of a crisis event cannot be updated after creation.
    *
    * @param id                   the ID of the crisis event to update
-   * @param updateCrisisEventDto the crisis event information to update
+   * @param updateCrisisEventDto the crisis event information to update (excluding start time)
    * @param principal            the Principal object representing the current user
    * @return ResponseEntity with the updated crisis event if successful, or an error message if the
    * crisis event is not found or the user is not authorized

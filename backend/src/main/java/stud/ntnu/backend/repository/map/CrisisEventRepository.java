@@ -30,7 +30,7 @@ public interface CrisisEventRepository extends JpaRepository<CrisisEvent, Intege
   // Find active crisis events by severity
   List<CrisisEvent> findByActiveTrueAndSeverity(Severity severity);
 
-  // Update crisis event fields directly using a query
+  // Update crisis event fields directly using a query (excluding start time)
   @Modifying
   @Query("UPDATE CrisisEvent c SET c.name = :name, c.description = :description, " +
       "c.severity = :severity, c.epicenterLatitude = :latitude, " +
