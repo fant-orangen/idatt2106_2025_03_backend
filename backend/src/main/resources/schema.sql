@@ -160,7 +160,7 @@ CREATE TABLE crisis_events (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    severity VARCHAR(10) NOT NULL DEFAULT 'green' CHECK (severity IN ('green','yellow','red')),
+    severity VARCHAR(10) NOT NULL DEFAULT 'GREEN' CHECK (severity IN ('green','yellow','red')),
     epicenter_latitude DECIMAL(10,7) NOT NULL,
     epicenter_longitude DECIMAL(10,7) NOT NULL,
     radius DECIMAL(10,2),

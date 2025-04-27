@@ -1,5 +1,9 @@
 package stud.ntnu.backend.model.user;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -9,6 +13,7 @@ import stud.ntnu.backend.model.household.Household;
 
 @Entity
 @Table(name = "users")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class User {
 
   @Id
@@ -30,6 +35,7 @@ public class User {
 
   @ManyToOne
   @JoinColumn(name = "household_id")
+  @JsonBackReference
   private Household household;
 
   @Column(name = "first_name")
@@ -60,6 +66,7 @@ public class User {
   private LocalDateTime createdAt;
 
   @OneToMany(mappedBy = "createdByUser")
+  @JsonManagedReference
   private List<Group> createdGroups;
 
   // Set createdAt before persist

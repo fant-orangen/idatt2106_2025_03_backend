@@ -1,0 +1,10 @@
+{
+    "latitude": 63.4280,
+    "longitude": 10.3920,
+    "address": "Test Address",
+    "radius": 1.5,
+    "severity": "YELLOW",
+    "description": "Test crisis event",
+    "name": "Test Event",
+    "startTime": "2024-02-20T10:00:00"
+}

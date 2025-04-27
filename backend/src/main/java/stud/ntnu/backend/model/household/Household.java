@@ -1,5 +1,8 @@
 package stud.ntnu.backend.model.household;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,6 +16,7 @@ import stud.ntnu.backend.model.user.User;
 @NoArgsConstructor
 @Entity
 @Table(name = "households")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Household {
 
   // Getters and Setters
@@ -33,6 +37,7 @@ public class Household {
   private LocalDateTime createdAt;
 
   @OneToMany(mappedBy = "household")
+  @JsonManagedReference
   private List<User> users;
 
   // Set createdAt before persist
