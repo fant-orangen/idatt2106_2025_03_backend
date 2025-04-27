@@ -259,7 +259,7 @@ CREATE TABLE notifications (
     preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request')),
     target_type VARCHAR(20) NOT NULL CHECK (target_type IN ('inventory','event','location_request')),
     target_id INT,
-    description TEXT,
+    description TEXT DEFAULT NULL,
     notify_at DATETIME NOT NULL,
     sent_at DATETIME,
     read_at DATETIME,

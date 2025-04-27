@@ -1,5 +1,7 @@
 package stud.ntnu.backend.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.map.CreateCrisisEventDto;
@@ -36,13 +38,14 @@ public class CrisisEventService {
   }
 
   /**
-   * Retrieves all crisis events.
+   * Retrieves all crisis events with pagination.
    *
-   * @return list of all crisis events
+   * @param pageable pagination information
+   * @return page of crisis events
    */
   @Transactional(readOnly = true)
-  public List<CrisisEvent> getAllCrisisEvents() {
-    return crisisEventRepository.findAll();
+  public Page<CrisisEvent> getAllCrisisEvents(Pageable pageable) {
+    return crisisEventRepository.findAll(pageable);
   }
 
 
@@ -117,8 +120,8 @@ public class CrisisEventService {
       for (User user : usersInRadius) {
         Notification notification = notificationService.createNotification(
             user,
-            Notification.PreferenceType.CRISIS_ALERT,
-            Notification.TargetType.EVENT,
+            Notification.PreferenceType.crisis_alert,
+            Notification.TargetType.event,
             savedCrisisEvent.getId(),
             "There is an ongoing crisis." //TODO: improve the description
         );

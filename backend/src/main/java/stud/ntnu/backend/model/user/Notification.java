@@ -31,7 +31,7 @@ public class Notification {
 
   @Column(name = "target_id")
   private Integer targetId;
-  
+
   @Column(name = "description", columnDefinition = "TEXT")
   private String description;
 
@@ -55,25 +55,25 @@ public class Notification {
 
   // Enum for preference type
   public enum PreferenceType {
-    EXPIRATION_REMINDER, CRISIS_ALERT, LOCATION_REQUEST
+    expiration_reminder, crisis_alert, location_request
   }
 
   // Enum for target type
   public enum TargetType {
-    INVENTORY, EVENT, LOCATION_REQUEST
+    inventory, event, location_request
   }
 
   // Constructor with required fields
-  public Notification(User user, PreferenceType preferenceType, TargetType targetType, 
+  public Notification(User user, PreferenceType preferenceType, TargetType targetType,
                      LocalDateTime notifyAt) {
     this.user = user;
     this.preferenceType = preferenceType;
     this.targetType = targetType;
     this.notifyAt = notifyAt;
   }
-  
+
   // Constructor with all fields
-  public Notification(User user, PreferenceType preferenceType, TargetType targetType, 
+  public Notification(User user, PreferenceType preferenceType, TargetType targetType,
                      Integer targetId, String description, LocalDateTime notifyAt) {
     this.user = user;
     this.preferenceType = preferenceType;

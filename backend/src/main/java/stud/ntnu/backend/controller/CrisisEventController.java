@@ -1,8 +1,11 @@
 package stud.ntnu.backend.controller;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import java.security.Principal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -99,5 +102,17 @@ public class CrisisEventController {
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
+
+  /**
+   * Gets all crisis events with pagination.
+   * TODO: Untested!
+   * @param pageable the pagination information
+   * @return ResponseEntity with a page of crisis events
+   */
+  @GetMapping("/all")
+  public ResponseEntity<Page<CrisisEvent>> getAllCrisisEvents(Pageable pageable) {
+    Page<CrisisEvent> crisisEvents = crisisEventService.getAllCrisisEvents(pageable);
+    return ResponseEntity.ok(crisisEvents);
   }
 }
