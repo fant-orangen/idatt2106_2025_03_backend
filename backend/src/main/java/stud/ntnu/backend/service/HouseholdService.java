@@ -8,8 +8,10 @@ import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.model.householdAdmin.HouseholdAdmin;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,6 +30,7 @@ public class HouseholdService {
 
   private final HouseholdRepository householdRepository;
   private final UserRepository userRepository;
+  private final HouseholdAdminRepository householdAdminRepository;
 
   // In-memory storage for invitation tokens (in a real application, this would be stored in a database)
   private final List<HouseholdInvitation> invitations = new ArrayList<>();
@@ -37,10 +40,13 @@ public class HouseholdService {
    *
    * @param householdRepository repository for household operations
    * @param userRepository repository for user operations
+   * @param householdAdminRepository repository for household admin operations
    */
-  public HouseholdService(HouseholdRepository householdRepository, UserRepository userRepository) {
+  public HouseholdService(HouseholdRepository householdRepository, UserRepository userRepository,
+      HouseholdAdminRepository householdAdminRepository) {
     this.householdRepository = householdRepository;
     this.userRepository = userRepository;
+    this.householdAdminRepository = householdAdminRepository;
   }
 
   /**
@@ -116,6 +122,10 @@ public class HouseholdService {
     // Update the user with the new household
     user.setHousehold(household);
     userRepository.save(user);
+
+    // Make the user a household admin
+    HouseholdAdmin admin = new HouseholdAdmin(user, household);
+    householdAdminRepository.save(admin);
 
     return household;
   }
@@ -269,6 +279,31 @@ public class HouseholdService {
         household.getLongitude(),
         members
     );
+  }
+
+  /**
+   * Leaves the current household if the user is not a household admin.
+   *
+   * @param email the email of the user leaving the household
+   * @throws IllegalStateException if the user is a household admin or doesn't have a household
+   */
+  public void leaveHousehold(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    Household household = user.getHousehold();
+    if (household == null) {
+      throw new IllegalStateException("User doesn't have a household");
+    }
+
+    // Check if user is a household admin
+    if (householdAdminRepository.existsByUser(user)) {
+      throw new IllegalStateException("Household admins cannot leave their household");
+    }
+
+    // Remove user from household
+    user.setHousehold(null);
+    userRepository.save(user);
   }
 
   /**

@@ -136,4 +136,24 @@ public class HouseholdController {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
+
+  /**
+   * Leaves the current household if the user is not a household admin.
+   *
+   * @return ResponseEntity with success message if successful, or an error message if the
+   * user is a household admin or doesn't have a household
+   */
+  @PostMapping("/leave")
+  public ResponseEntity<?> leaveHousehold() {
+    try {
+      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+      String email = authentication.getName();
+
+      householdService.leaveHousehold(email);
+      return ResponseEntity.ok("Successfully left the household");
+    } catch (IllegalStateException e) {
+      log.info("Leaving household failed: {}", e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
 }
