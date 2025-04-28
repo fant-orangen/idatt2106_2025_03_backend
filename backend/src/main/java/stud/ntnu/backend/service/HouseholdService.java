@@ -6,9 +6,12 @@ import org.springframework.stereotype.Service;
 import stud.ntnu.backend.dto.household.HouseholdCreateRequestDto;
 import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
+import stud.ntnu.backend.dto.household.HouseholdMemberDto;
+import stud.ntnu.backend.dto.household.EmptyHouseholdMemberDto;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
+import stud.ntnu.backend.repository.household.EmptyHouseholdMemberRepository;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.model.householdAdmin.HouseholdAdmin;
@@ -32,6 +35,7 @@ public class HouseholdService {
   private final HouseholdRepository householdRepository;
   private final UserRepository userRepository;
   private final HouseholdAdminRepository householdAdminRepository;
+  private final EmptyHouseholdMemberRepository emptyHouseholdMemberRepository;
 
   // In-memory storage for invitation tokens (in a real application, this would be stored in a database)
   private final List<HouseholdInvitation> invitations = new ArrayList<>();
@@ -42,12 +46,14 @@ public class HouseholdService {
    * @param householdRepository      repository for household operations
    * @param userRepository           repository for user operations
    * @param householdAdminRepository repository for household admin operations
+   * @param emptyHouseholdMemberRepository repository for empty household member operations
    */
   public HouseholdService(HouseholdRepository householdRepository, UserRepository userRepository,
-      HouseholdAdminRepository householdAdminRepository) {
+      HouseholdAdminRepository householdAdminRepository, EmptyHouseholdMemberRepository emptyHouseholdMemberRepository) {
     this.householdRepository = householdRepository;
     this.userRepository = userRepository;
     this.householdAdminRepository = householdAdminRepository;
+    this.emptyHouseholdMemberRepository = emptyHouseholdMemberRepository;
   }
 
   /**
@@ -272,13 +278,17 @@ public class HouseholdService {
    * @return the household DTO
    */
   private HouseholdDto convertToHouseholdDto(Household household) {
-    List<HouseholdDto.HouseholdMemberDto> members = household.getUsers().stream()
-        .map(user -> new HouseholdDto.HouseholdMemberDto(
-            user.getId(),
-            user.getEmail(),
-            user.getFirstName(),
-            user.getLastName()
-        ))
+    List<HouseholdMemberDto> members = household.getUsers().stream()
+        .map(user -> {
+          boolean isAdmin = householdAdminRepository.existsByUser(user);
+          return new HouseholdMemberDto(
+              user.getId(),
+              user.getEmail(),
+              user.getFirstName(),
+              user.getLastName(),
+              isAdmin
+          );
+        })
         .collect(Collectors.toList());
 
     return new HouseholdDto(
@@ -315,6 +325,63 @@ public class HouseholdService {
     // Remove user from household
     user.setHousehold(null);
     userRepository.save(user);
+  }
+
+  /**
+   * Gets all members of the current user's household.
+   *
+   * @param email the email of the user
+   * @return list of household members
+   * @throws IllegalStateException if the user is not found or doesn't have a household
+   */
+  public List<HouseholdMemberDto> getHouseholdMembers(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    Household household = user.getHousehold();
+    if (household == null) {
+      throw new IllegalStateException("User doesn't have a household");
+    }
+
+    return household.getUsers().stream()
+        .map(member -> {
+          boolean isAdmin = householdAdminRepository.existsByUser(member);
+          return new HouseholdMemberDto(
+              member.getId(),
+              member.getEmail(),
+              member.getFirstName(),
+              member.getLastName(),
+              isAdmin
+          );
+        })
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Gets all empty members of the current user's household.
+   *
+   * @param email the email of the user
+   * @return list of empty household members
+   * @throws IllegalStateException if the user is not found or doesn't have a household
+   */
+  public List<EmptyHouseholdMemberDto> getEmptyHouseholdMembers(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    Household household = user.getHousehold();
+    if (household == null) {
+      throw new IllegalStateException("User doesn't have a household");
+    }
+
+    return emptyHouseholdMemberRepository.findByHousehold(household).stream()
+        .map(member -> new EmptyHouseholdMemberDto(
+            member.getId(),
+            member.getFirstName(),
+            member.getLastName(),
+            member.getType(),
+            member.getDescription()
+        ))
+        .collect(Collectors.toList());
   }
 
   /**
