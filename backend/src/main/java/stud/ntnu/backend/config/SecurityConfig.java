@@ -105,6 +105,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/poi/**").permitAll()
                 // Add role-based authorization for admin endpoints
                 .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
+                .requestMatchers("/api/super-admin").hasAnyRole("SUPERADMIN")
                 // Add role-based authorization for create/update/delete points of interest
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/poi/**").hasAnyRole("ADMIN", "SUPERADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/poi/**").hasAnyRole("ADMIN", "SUPERADMIN")
