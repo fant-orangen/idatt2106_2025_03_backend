@@ -16,6 +16,8 @@ import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.model.householdAdmin.HouseholdAdmin;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,6 +38,7 @@ public class HouseholdService {
   private final UserRepository userRepository;
   private final HouseholdAdminRepository householdAdminRepository;
   private final EmptyHouseholdMemberRepository emptyHouseholdMemberRepository;
+  private static final Logger log = LoggerFactory.getLogger(HouseholdService.class);
 
   // In-memory storage for invitation tokens (in a real application, this would be stored in a database)
   private final List<HouseholdInvitation> invitations = new ArrayList<>();
@@ -343,7 +346,8 @@ public class HouseholdService {
       throw new IllegalStateException("User doesn't have a household");
     }
 
-    return household.getUsers().stream()
+    // Get regular users from the household
+    return userRepository.findByHousehold(household).stream()
         .map(member -> {
           boolean isAdmin = householdAdminRepository.existsByUser(member);
           return new HouseholdMemberDto(
@@ -365,19 +369,25 @@ public class HouseholdService {
    * @throws IllegalStateException if the user is not found or doesn't have a household
    */
   public List<EmptyHouseholdMemberDto> getEmptyHouseholdMembers(String email) {
+    log.info("Fetching empty members for user: {}", email);
+    
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"));
+    log.info("Found user: {}", user.getId());
 
     Household household = user.getHousehold();
     if (household == null) {
       throw new IllegalStateException("User doesn't have a household");
     }
+    log.info("Found household: {}", household.getId());
 
-    return emptyHouseholdMemberRepository.findByHousehold(household).stream()
+    List<EmptyHouseholdMember> members = emptyHouseholdMemberRepository.findByHousehold(household);
+    log.info("Found {} empty members", members.size());
+
+    return members.stream()
         .map(member -> new EmptyHouseholdMemberDto(
             member.getId(),
-            member.getFirstName(),
-            member.getLastName(),
+            member.getName(),
             member.getType(),
             member.getDescription()
         ))

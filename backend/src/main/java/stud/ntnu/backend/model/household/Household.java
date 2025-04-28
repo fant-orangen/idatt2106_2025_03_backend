@@ -47,9 +47,6 @@ public class Household {
   @OneToMany(mappedBy = "household", cascade = CascadeType.ALL)
   private List<User> users = new ArrayList<>();
 
-  @OneToMany(mappedBy = "household", cascade = CascadeType.ALL)
-  private List<EmptyHouseholdMember> emptyMembers = new ArrayList<>();
-
   // Set createdAt before persist
   @PrePersist
   protected void onCreate() {

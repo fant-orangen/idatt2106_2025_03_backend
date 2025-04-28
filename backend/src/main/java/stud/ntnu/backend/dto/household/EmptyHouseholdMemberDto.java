@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
 public class EmptyHouseholdMemberDto {
 
   private Integer id;
-  private String firstName;
-  private String lastName;
+  private String name;
   private String type;
   private String description;
 } 
