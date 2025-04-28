@@ -1,6 +1,9 @@
 package stud.ntnu.backend.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import stud.ntnu.backend.dto.poi.CreatePoiDto;
+import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.map.PoiTypeRepository;
 import stud.ntnu.backend.repository.map.PointOfInterestRepository;
 import stud.ntnu.backend.model.map.PoiType;
@@ -126,5 +129,38 @@ public class PoiService {
    */
   public void deletePoiType(Integer id) {
     poiTypeRepository.deleteById(id);
+  }
+
+  //JavaDoc for createPointOfInterest method
+    /**
+     * Creates a new point of interest.
+     *
+     * @param createPoiDto the DTO containing point of interest information
+     * @param currentUser  the user creating the point of interest
+     * @return the created point of interest
+     */
+  @Transactional
+  public PointOfInterest createPointOfInterest(CreatePoiDto createPoiDto, User currentUser) {
+    // Get the POI type
+    PoiType poiType = getPoiTypeById(createPoiDto.getPoiTypeId())
+            .orElseThrow(() -> new IllegalStateException("POI type not found"));
+
+    // Create a new PointOfInterest entity
+    PointOfInterest poi = new PointOfInterest(
+            poiType,
+            createPoiDto.getName(),
+            createPoiDto.getLatitude(),
+            createPoiDto.getLongitude(),
+            currentUser
+    );
+
+    // Set optional fields if provided
+    poi.setDescription(createPoiDto.getDescription());
+    poi.setAddress(createPoiDto.getAddress());
+    poi.setOpeningHours(createPoiDto.getOpeningHours());
+    poi.setContactInfo(createPoiDto.getContactInfo());
+
+    // Save and return the POI
+    return savePointOfInterest(poi);
   }
 }

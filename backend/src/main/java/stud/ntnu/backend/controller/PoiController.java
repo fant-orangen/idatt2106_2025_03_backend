@@ -1,11 +1,19 @@
 package stud.ntnu.backend.controller;
 
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import stud.ntnu.backend.dto.poi.CreatePoiDto;
 import stud.ntnu.backend.dto.poi.PoiItemDto;
 import stud.ntnu.backend.model.map.PointOfInterest;
+import stud.ntnu.backend.model.map.PoiType;
+import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.PoiService;
+import stud.ntnu.backend.service.UserService;
 import stud.ntnu.backend.util.LocationUtil;
 
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -20,9 +28,11 @@ import java.util.List;
 @RequestMapping("/api/poi")
 public class PoiController {
     private final PoiService poiService;
+    private final UserService userService;
 
-    public PoiController(PoiService poiService) {
+    public PoiController(PoiService poiService, UserService userService) {
         this.poiService = poiService;
+        this.userService = userService;
     }
 
     /**
@@ -101,6 +111,37 @@ public class PoiController {
         PointOfInterest nearestPoi = PoiService.findNearestPoi(latitude, longitude, poiService.getPointsOfInterestByTypeId(id));
         return nearestPoi != null ? PoiItemDto.fromEntity(nearestPoi) : null;
     }
+    //javadoc for createPointOfInterest
+    /**
+     * Creates a new point of interest. Only admin and superadmin can create points of interest.
+     *
+     * @param createPoiDto the DTO containing point of interest information
+     * @param principal    the authenticated user
+     * @return the created point of interest
+     */
+    @PostMapping
+    public ResponseEntity<?> createPointOfInterest(
+            @Valid @RequestBody CreatePoiDto createPoiDto,
+            Principal principal) {
+        try {
+            // Check if the current user is an admin using AdminChecker with Principal
+            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Only administrators can create points of interest");
+            }
 
+            // Get the current authenticated user
+            String email = principal.getName();
+            User currentUser = userService.getUserByEmail(email)
+                    .orElseThrow(() -> new IllegalStateException("User not found"));
+
+            // Delegate the creation logic to the service
+            PointOfInterest savedPoi = poiService.createPointOfInterest(createPoiDto, currentUser);
+
+            // Return the created POI
+            return ResponseEntity.ok(PoiItemDto.fromEntity(savedPoi));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
 }
