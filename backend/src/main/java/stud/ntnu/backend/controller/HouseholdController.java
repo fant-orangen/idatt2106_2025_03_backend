@@ -15,6 +15,7 @@ import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.service.HouseholdService;
 import stud.ntnu.backend.dto.household.HouseholdMemberDto;
 import stud.ntnu.backend.dto.household.EmptyHouseholdMemberDto;
+import stud.ntnu.backend.dto.household.EmptyHouseholdMemberCreateDto;
 
 import java.security.Principal;
 import java.util.List;
@@ -189,6 +190,30 @@ public class HouseholdController {
       return ResponseEntity.ok(members);
     } catch (IllegalStateException e) {
       log.info("Get empty household members failed: {}", e.getMessage());
+      if (e.getMessage().equals("User doesn't have a household")) {
+        return ResponseEntity.notFound().build();
+      }
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Adds an empty household member to the current user's household.
+   *
+   * @param requestDto the empty household member creation request
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity with the created empty household member if successful, or an error message if the
+   * user is not found or doesn't have a household
+   */
+  @PostMapping("/members/empty")
+  public ResponseEntity<?> addEmptyHouseholdMember(
+      @Valid @RequestBody EmptyHouseholdMemberCreateDto requestDto,
+      Principal principal) {
+    try {
+      EmptyHouseholdMemberDto member = householdService.addEmptyHouseholdMember(principal.getName(), requestDto);
+      return ResponseEntity.ok(member);
+    } catch (IllegalStateException e) {
+      log.info("Add empty household member failed: {}", e.getMessage());
       if (e.getMessage().equals("User doesn't have a household")) {
         return ResponseEntity.notFound().build();
       }

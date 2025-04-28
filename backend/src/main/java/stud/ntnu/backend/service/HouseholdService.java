@@ -8,6 +8,7 @@ import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
 import stud.ntnu.backend.dto.household.HouseholdMemberDto;
 import stud.ntnu.backend.dto.household.EmptyHouseholdMemberDto;
+import stud.ntnu.backend.dto.household.EmptyHouseholdMemberCreateDto;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
@@ -393,6 +394,49 @@ public class HouseholdService {
             member.getDescription()
         ))
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Adds an empty household member to the current user's household.
+   *
+   * @param email the email of the user
+   * @param createDto the empty household member creation DTO
+   * @return the created empty household member DTO
+   * @throws IllegalStateException if the user is not found or doesn't have a household
+   */
+  @Transactional
+  public EmptyHouseholdMemberDto addEmptyHouseholdMember(String email, EmptyHouseholdMemberCreateDto createDto) {
+    log.info("Adding empty member for user: {}", email);
+
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+    log.info("Found user: {}", user.getId());
+
+    Household household = user.getHousehold();
+    if (household == null) {
+      throw new IllegalStateException("User doesn't have a household");
+    }
+    log.info("Found household: {}", household.getId());
+
+    // Create the empty household member
+    EmptyHouseholdMember member = new EmptyHouseholdMember(
+        createDto.getName(),
+        createDto.getType(),
+        createDto.getDescription()
+    );
+    member.setHousehold(household);
+
+    // Save the member
+    member = emptyHouseholdMemberRepository.save(member);
+    log.info("Created empty member with ID: {}", member.getId());
+
+    // Return the DTO
+    return new EmptyHouseholdMemberDto(
+        member.getId(),
+        member.getName(),
+        member.getType(),
+        member.getDescription()
+    );
   }
 
   /**
