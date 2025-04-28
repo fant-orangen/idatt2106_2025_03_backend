@@ -103,6 +103,8 @@ public class SecurityConfig {
                     "/poi/**").permitAll()
                 // Add role-based authorization for admin endpoints
                 .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
+                // Add WebSocket security
+                .requestMatchers("/ws/**", "/topic/**", "/app/**").authenticated()
                 // Add other admin-only endpoints here with similar pattern
                 .anyRequest().authenticated());
 
@@ -128,8 +130,10 @@ public class SecurityConfig {
     configuration.setAllowedOrigins(
         Arrays.asList("http://localhost:5173", "http://localhost:8080"));
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+    configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"));
     configuration.setAllowCredentials(true);
+    configuration.setMaxAge(3600L);
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);

@@ -1,5 +1,6 @@
 package stud.ntnu.backend.service;
 
+import org.slf4j.Logger;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ public class NotificationService {
   private final NotificationRepository notificationRepository;
   private final UserRepository userRepository;
   private final SimpMessagingTemplate messagingTemplate;
+  Logger log = org.slf4j.LoggerFactory.getLogger(NotificationService.class);
 
   /**
    * Constructor for dependency injection.
@@ -79,6 +81,7 @@ public class NotificationService {
     // Convert to DTO and send via WebSocket
     NotificationDto notificationDto = NotificationDto.fromEntity(notification);
     String destination = "/topic/notifications/" + notification.getUser().getId();
+    log.info("Sending notification to user: {}", notification.getUser().getId());
     messagingTemplate.convertAndSend(destination, notificationDto);
   }
 
