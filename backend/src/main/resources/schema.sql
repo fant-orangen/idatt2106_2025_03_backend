@@ -9,7 +9,7 @@ CREATE TABLE households (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255),
     address TEXT NOT NULL,
-    population_count INT NOT NULL DEFAULT 1,
+    population_count INT DEFAULT 1,
     latitude DECIMAL(10,7),
     longitude DECIMAL(10,7),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP

@@ -118,8 +118,7 @@ public class HouseholdController {
   /**
    * Gets the authenticated user's household.
    *
-   * @return ResponseEntity with the household if successful, or an error message if the
-   * user is not found or doesn't have a household
+   * @return ResponseEntity with the household if successful, or 404 if the user has no household
    */
   @GetMapping("/me")
   public ResponseEntity<?> getCurrentUserHousehold() {
@@ -131,6 +130,9 @@ public class HouseholdController {
       return ResponseEntity.ok(household);
     } catch (IllegalStateException e) {
       log.info("Get household failed: {}", e.getMessage());
+      if (e.getMessage().equals("User doesn't have a household")) {
+        return ResponseEntity.notFound().build();
+      }
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
