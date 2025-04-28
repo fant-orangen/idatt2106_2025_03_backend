@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.poi.CreatePoiDto;
 import stud.ntnu.backend.dto.poi.PoiItemDto;
+import stud.ntnu.backend.dto.poi.UpdatePoiDto;
 import stud.ntnu.backend.model.map.PointOfInterest;
 import stud.ntnu.backend.model.map.PoiType;
 import stud.ntnu.backend.model.user.User;
@@ -139,6 +140,34 @@ public class PoiController {
 
             // Return the created POI
             return ResponseEntity.ok(PoiItemDto.fromEntity(savedPoi));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    /**
+     * Updates an existing point of interest. Only admin and superadmin can update points of interest.
+     *
+     * @param id           the ID of the point of interest to update
+     * @param updatePoiDto the DTO containing updated point of interest information
+     * @param principal    the authenticated user
+     * @return the updated point of interest
+     */
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updatePointOfInterest(
+            @PathVariable Integer id,
+            @RequestBody UpdatePoiDto updatePoiDto,
+            Principal principal) {
+        try {
+            // Check if the current user is an admin using AdminChecker with Principal
+            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Only administrators can update points of interest");
+            }
+
+            // Delegate to service for updating the point of interest
+            PointOfInterest updatedPoi = poiService.updatePointOfInterest(id, updatePoiDto);
+
+            return ResponseEntity.ok(PoiItemDto.fromEntity(updatedPoi));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
