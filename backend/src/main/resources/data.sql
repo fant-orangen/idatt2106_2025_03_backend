@@ -154,6 +154,14 @@ VALUES (3, 'crisis_alert', TRUE);
 INSERT INTO notification_preferences (user_id, preference_type, enabled)
 VALUES (4, 'location_request', FALSE);
 
+-- NOTIFICATION
+INSERT INTO notifications (user_id, preference_type, target_type, target_id, description, notify_at, sent_at, read_at, created_at)
+VALUES (2, 'crisis_alert', 'event', 101, 'Severe weather alert for your region.', '2025-04-28 14:00:00', NULL, NULL, '2025-04-28 13:45:00');
+INSERT INTO notifications (user_id, preference_type, target_type, target_id, description, notify_at, sent_at, read_at, created_at)
+VALUES (2, 'crisis_alert', 'event', 102, 'danger: alan walker in the streets', '2025-04-29 09:00:00', NULL, NULL, '2025-04-28 13:55:00');
+INSERT INTO notifications (user_id, preference_type, target_type, target_id, description, notify_at, sent_at, read_at, created_at)
+VALUES (3, 'crisis_alert', 'event', 103, 'A big bomb on the way', '2025-04-30 16:30:00', NULL, NULL, '2025-04-28 14:00:00');
+
 -- NEWS ARTICLES
 INSERT INTO news_articles (title, content, published_at, created_by_user_id)
 VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1);
