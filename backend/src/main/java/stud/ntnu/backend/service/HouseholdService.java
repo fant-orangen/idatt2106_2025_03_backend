@@ -13,6 +13,7 @@ import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
 import stud.ntnu.backend.repository.household.EmptyHouseholdMemberRepository;
 import stud.ntnu.backend.model.household.Household;
+import stud.ntnu.backend.model.household.EmptyHouseholdMember;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.model.householdAdmin.HouseholdAdmin;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,13 +47,14 @@ public class HouseholdService {
   /**
    * Constructor for dependency injection.
    *
-   * @param householdRepository      repository for household operations
-   * @param userRepository           repository for user operations
-   * @param householdAdminRepository repository for household admin operations
+   * @param householdRepository            repository for household operations
+   * @param userRepository                 repository for user operations
+   * @param householdAdminRepository       repository for household admin operations
    * @param emptyHouseholdMemberRepository repository for empty household member operations
    */
   public HouseholdService(HouseholdRepository householdRepository, UserRepository userRepository,
-      HouseholdAdminRepository householdAdminRepository, EmptyHouseholdMemberRepository emptyHouseholdMemberRepository) {
+      HouseholdAdminRepository householdAdminRepository,
+      EmptyHouseholdMemberRepository emptyHouseholdMemberRepository) {
     this.householdRepository = householdRepository;
     this.userRepository = userRepository;
     this.householdAdminRepository = householdAdminRepository;
@@ -61,7 +63,6 @@ public class HouseholdService {
 
   /**
    * Retrieves all households.
-   *
    *
    * @return list of all households
    */
@@ -122,7 +123,8 @@ public class HouseholdService {
     }
 
     // Create a new household
-    Household household = new Household(requestDto.getName(), requestDto.getAddress(), requestDto.getPopulationCount());
+    Household household = new Household(requestDto.getName(), requestDto.getAddress(),
+        requestDto.getPopulationCount());
 
     // Set optional coordinates
     household.setLatitude(requestDto.getLatitude());
@@ -346,7 +348,6 @@ public class HouseholdService {
       throw new IllegalStateException("User doesn't have a household");
     }
 
-    // Get regular users from the household
     return userRepository.findByHousehold(household).stream()
         .map(member -> {
           boolean isAdmin = householdAdminRepository.existsByUser(member);
@@ -370,7 +371,7 @@ public class HouseholdService {
    */
   public List<EmptyHouseholdMemberDto> getEmptyHouseholdMembers(String email) {
     log.info("Fetching empty members for user: {}", email);
-    
+
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"));
     log.info("Found user: {}", user.getId());
