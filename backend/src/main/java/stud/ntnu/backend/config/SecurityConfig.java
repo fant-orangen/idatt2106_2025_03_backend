@@ -103,6 +103,8 @@ public class SecurityConfig {
                     "/poi/**").permitAll()
                 // Allow GET requests to POI endpoints
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/poi/**").permitAll()
+                    // Permit access to the crisis-events/all endpoint
+                    .requestMatchers("/api/crisis-events/all").permitAll()
                 // Add role-based authorization for admin endpoints
                 .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
                 // Add role-based authorization for create/update/delete points of interest
