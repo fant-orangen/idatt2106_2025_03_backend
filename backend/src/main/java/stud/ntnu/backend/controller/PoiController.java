@@ -172,5 +172,30 @@ public class PoiController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    /**
+     * Deletes a point of interest by its ID. Only admin and superadmin can delete points of interest.
+     *
+     * @param id        the ID of the point of interest to delete
+     * @param principal the authenticated user
+     * @return a response indicating success or failure
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePointOfInterest(
+            @PathVariable Integer id,
+            Principal principal) {
+        try {
+            // Check if the current user is an admin using AdminChecker with Principal
+            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Only administrators can delete points of interest");
+            }
+
+            // Delegate to service for deleting the point of interest
+            poiService.deletePointOfInterest(id);
+
+            return ResponseEntity.ok("Point of interest deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
 }
