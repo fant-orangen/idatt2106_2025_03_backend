@@ -12,32 +12,26 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "household_admins")
-@IdClass(HouseholdAdminId.class)
 public class HouseholdAdmin {
-    @Id
-    @Column(name = "user_id")
-    private Integer userId;
 
-    @Id
-    @Column(name = "household_id")
-    private Integer householdId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private User user;
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true)
+  private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "household_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private Household household;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "household_id", referencedColumnName = "id")
+  private Household household;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+  @Column(name = "created_at", nullable = false)
+  private LocalDateTime createdAt;
 
-    public HouseholdAdmin(User user, Household household) {
-        this.userId = user.getId();
-        this.householdId = household.getId();
-        this.user = user;
-        this.household = household;
-        this.createdAt = LocalDateTime.now();
-    }
+  public HouseholdAdmin(User user, Household household) {
+    this.user = user;
+    this.household = household;
+    this.createdAt = LocalDateTime.now();
+  }
 } 

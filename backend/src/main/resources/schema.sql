@@ -36,15 +36,6 @@ CREATE TABLE users (
     FOREIGN KEY (household_id) REFERENCES households(id)
 );
 
--- HOUSEHOLD ADMINS
-CREATE TABLE household_admins (
-    user_id INT PRIMARY KEY,
-    household_id INT NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE
-);
-
 -- HOUSEHOLD MEMBERS
 CREATE TABLE household_member (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -277,14 +268,28 @@ CREATE TABLE notifications (
 );
 
 CREATE TABLE crisis_event_changes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    crisis_event_id INT NOT NULL,
-    change_type VARCHAR(30) NOT NULL CHECK (change_type IN ('creation', 'level_change', 'description_update', 'epicenter_moved')),
-    old_value TEXT,
-    new_value TEXT,
-    created_by_user_id INT NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (crisis_event_id) REFERENCES crisis_events(id) ON DELETE CASCADE,
-    FOREIGN KEY (created_by_user_id) REFERENCES users(id)
+                                      id INT AUTO_INCREMENT PRIMARY KEY,
+                                      crisis_event_id INT NOT NULL,
+                                      change_type VARCHAR(30) NOT NULL CHECK (change_type IN ('creation', 'level_change', 'description_update', 'epicenter_moved')),
+                                      old_value TEXT,
+                                      new_value TEXT,
+                                      created_by_user_id INT NOT NULL,
+                                      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                      FOREIGN KEY (crisis_event_id) REFERENCES crisis_events(id) ON DELETE CASCADE,
+                                      FOREIGN KEY (created_by_user_id) REFERENCES users(id)
 );
+
+-- HOUSEHOLD ADMINS
+CREATE TABLE household_admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    household_id INT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (household_id) REFERENCES households(id),
+    UNIQUE (user_id)
+);
+
+
+

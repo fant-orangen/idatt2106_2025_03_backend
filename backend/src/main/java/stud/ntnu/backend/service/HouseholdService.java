@@ -12,6 +12,7 @@ import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.model.householdAdmin.HouseholdAdmin;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -38,8 +39,8 @@ public class HouseholdService {
   /**
    * Constructor for dependency injection.
    *
-   * @param householdRepository repository for household operations
-   * @param userRepository repository for user operations
+   * @param householdRepository      repository for household operations
+   * @param userRepository           repository for user operations
    * @param householdAdminRepository repository for household admin operations
    */
   public HouseholdService(HouseholdRepository householdRepository, UserRepository userRepository,
@@ -51,6 +52,7 @@ public class HouseholdService {
 
   /**
    * Retrieves all households.
+   *
    *
    * @return list of all households
    */
@@ -88,13 +90,14 @@ public class HouseholdService {
   }
 
   /**
-   * Creates a new household for the current authenticated user.
-   * Checks if the user already has a household before creating a new one.
+   * Creates a new household for the current authenticated user. Checks if the user already has a
+   * household before creating a new one.
    *
    * @param requestDto the household creation request
    * @return the created household
    * @throws IllegalStateException if the user already has a household
    */
+  @Transactional
   public Household createHousehold(HouseholdCreateRequestDto requestDto) {
     // Get the current authenticated user
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -116,14 +119,19 @@ public class HouseholdService {
     household.setLatitude(requestDto.getLatitude());
     household.setLongitude(requestDto.getLongitude());
 
-    // Save the household
+    // Save the household first
     household = householdRepository.save(household);
 
     // Update the user with the new household
     user.setHousehold(household);
-    userRepository.save(user);
+    user = userRepository.save(user);
 
-    // Make the user a household admin
+    // Check if user is already an admin
+    if (householdAdminRepository.existsByUser(user)) {
+      throw new IllegalStateException("User is already a household admin");
+    }
+
+    // Create and save the household admin
     HouseholdAdmin admin = new HouseholdAdmin(user, household);
     householdAdminRepository.save(admin);
 
@@ -133,7 +141,7 @@ public class HouseholdService {
   /**
    * Switches a user to a different household.
    *
-   * @param email the email of the user
+   * @param email       the email of the user
    * @param householdId the ID of the household to switch to
    * @return the updated household
    * @throws IllegalStateException if the user or household is not found
@@ -158,7 +166,8 @@ public class HouseholdService {
    * @param inviterEmail the email of the user sending the invitation
    * @param inviteeEmail the email of the user being invited
    * @return the invitation response containing the token
-   * @throws IllegalStateException if the inviter or invitee is not found, or if the inviter doesn't have a household
+   * @throws IllegalStateException if the inviter or invitee is not found, or if the inviter doesn't
+   *                               have a household
    */
   public HouseholdInviteResponseDto inviteToHousehold(String inviterEmail, String inviteeEmail) {
     User inviter = userRepository.findByEmail(inviterEmail)
@@ -179,7 +188,8 @@ public class HouseholdService {
     LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
 
     // Store the invitation
-    HouseholdInvitation invitation = new HouseholdInvitation(token, inviteeEmail, household.getId(), expiresAt);
+    HouseholdInvitation invitation = new HouseholdInvitation(token, inviteeEmail, household.getId(),
+        expiresAt);
     invitations.add(invitation);
 
     // Return the invitation response
@@ -198,7 +208,8 @@ public class HouseholdService {
    * @param email the email of the user joining the household
    * @param token the invitation token
    * @return the joined household
-   * @throws IllegalStateException if the user is not found, the token is invalid or expired, or the household is not found
+   * @throws IllegalStateException if the user is not found, the token is invalid or expired, or the
+   *                               household is not found
    */
   public Household joinHousehold(String email, String token) {
     User user = userRepository.findByEmail(email)
@@ -307,10 +318,10 @@ public class HouseholdService {
   }
 
   /**
-     * Class representing a household invitation.
-     */
-    private record HouseholdInvitation(String token, String inviteeEmail, Integer householdId,
-                                       LocalDateTime expiresAt) {
+   * Class representing a household invitation.
+   */
+  private record HouseholdInvitation(String token, String inviteeEmail, Integer householdId,
+                                     LocalDateTime expiresAt) {
 
   }
 }
