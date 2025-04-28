@@ -99,14 +99,16 @@ public class SecurityConfig {
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth ->
             auth.requestMatchers("/h2-console/**", "/swagger-ui/**", "/swagger-ui.html",
-                    "/v3/api-docs/**", "/actuator/health", "/auth/**", "/api/auth/**",
-                    "/poi/**").permitAll()
+                    "/v3/api-docs/**", "/actuator/health", "/auth/**", "/api/auth/**", "/api/poi/**",
+                    "/poi/**", "/ws/info", "/ws/**").permitAll()
                 // Allow GET requests to POI endpoints
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/poi/**").permitAll()
                     // Permit access to the crisis-events/all endpoint
                     .requestMatchers("/api/crisis-events/all").permitAll()
                 // Add role-based authorization for admin endpoints
                 .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
+                // Add WebSocket security
+                .requestMatchers("/topic/**", "/app/**").authenticated()
                 // Add role-based authorization for create/update/delete points of interest
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/poi/**").hasAnyRole("ADMIN", "SUPERADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/poi/**").hasAnyRole("ADMIN", "SUPERADMIN")
