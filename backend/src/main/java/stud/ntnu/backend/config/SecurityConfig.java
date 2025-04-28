@@ -100,11 +100,11 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth ->
             auth.requestMatchers("/h2-console/**", "/swagger-ui/**", "/swagger-ui.html",
                     "/v3/api-docs/**", "/actuator/health", "/auth/**", "/api/auth/**", "/api/poi/**",
-                    "/poi/**").permitAll()
+                    "/poi/**", "/ws/info", "/ws/**").permitAll()
                 // Add role-based authorization for admin endpoints
                 .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
                 // Add WebSocket security
-                .requestMatchers("/ws/**", "/topic/**", "/app/**").authenticated()
+                .requestMatchers("/topic/**", "/app/**").authenticated()
                 // Add other admin-only endpoints here with similar pattern
                 .anyRequest().authenticated());
 
