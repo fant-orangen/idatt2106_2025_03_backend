@@ -52,12 +52,4 @@ public class SuperAdminService {
         userService.saveUser(user);
     }
 
-    /**
-     * Deletes an admin by their ID.
-     *
-     * @param id the ID of the admin to delete
-     */
-    public void deleteAdmin(Integer id) {
-        userService.deleteUser(id);
-    }
 }
