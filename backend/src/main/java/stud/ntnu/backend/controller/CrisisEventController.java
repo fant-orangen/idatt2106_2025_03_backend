@@ -5,13 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import java.security.Principal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.map.CreateCrisisEventDto;
 import stud.ntnu.backend.dto.map.UpdateCrisisEventDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
@@ -115,4 +110,31 @@ public class CrisisEventController {
     Page<CrisisEvent> crisisEvents = crisisEventService.getAllCrisisEvents(pageable);
     return ResponseEntity.ok(crisisEvents);
   }
+  //javaDoc for deleteCrisisEvent method
+    /**
+     * Deletes a crisis event by its ID. Only users with ADMIN or SUPERADMIN roles are allowed to
+     * delete crisis events.
+     *
+     * @param id        the ID of the crisis event to delete
+     * @param principal the Principal object representing the current user
+     * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
+     */
+    @PutMapping("/deactivate/{id}")
+    public ResponseEntity<?> deleteCrisisEvent(
+            @PathVariable Integer id,
+            Principal principal) {
+        try {
+            // Check if the current user is an admin using AdminChecker with Principal
+            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Only administrators can deactivate crisis events");
+            }
+
+            // Delegate to service for deleting the crisis event
+            crisisEventService.deactivateCrisisEvent(id);
+
+            return ResponseEntity.ok("Crisis event deactivated");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
