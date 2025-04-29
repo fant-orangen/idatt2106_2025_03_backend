@@ -114,8 +114,8 @@ public class EmailService {
     /**
      * Sends a 2FA email to the specified user.
      *
-     * @param user  The User object representing the recipient. Must have a valid email address.
-     * @param token The unique 2FA token string to include in the email.
+     * @param email The email address of the user to send the 2FA code to.
+     * @param code The unique 2FA token string to include in the email.
      */
     public void send2FAEmail(String email, Integer code) {
         if (email == null || code == null) {
