@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,9 +44,8 @@ public class Household {
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
-  @OneToMany(mappedBy = "household")
-  @JsonManagedReference
-  private List<User> users;
+  @OneToMany(mappedBy = "household", cascade = CascadeType.ALL)
+  private List<User> users = new ArrayList<>();
 
   // Set createdAt before persist
   @PrePersist

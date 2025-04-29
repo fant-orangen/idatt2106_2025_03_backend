@@ -9,7 +9,7 @@ CREATE TABLE households (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255),
     address TEXT NOT NULL,
-    population_count INT NOT NULL DEFAULT 1,
+    population_count INT DEFAULT 1,
     latitude DECIMAL(10,7),
     longitude DECIMAL(10,7),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -240,6 +240,17 @@ CREATE TABLE email_tokens (
     used_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- HOUSEHOLD ADMINS
+CREATE TABLE household_admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    household_id INT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (household_id) REFERENCES households(id),
+    UNIQUE (user_id)
 );
 
 -- NOTIFICATION SETTINGS & LOG

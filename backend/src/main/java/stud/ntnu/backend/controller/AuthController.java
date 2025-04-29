@@ -32,7 +32,20 @@ public class AuthController {
         this.authService = authService;
     }
 
-
+  
+    /**
+     * Validates the JWT token from the Authorization header.
+     * Returns 200 OK if the token is valid, 401 Unauthorized otherwise.
+     *
+     * @return ResponseEntity with status 200 OK if token is valid
+     */
+    @GetMapping("/validate")
+    public ResponseEntity<?> validateToken() {
+      // The token validation is handled by Spring Security's JWT filter
+      // If we reach this endpoint, the token is valid
+      return ResponseEntity.ok().build();
+    }
+  
     /**
      * Authenticate a user and generate a JWT token.
      *
@@ -42,11 +55,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
         AuthResponseDto authResponse = authService.login(authRequest);
-
         if (authResponse.getIsUsing2FA()) {
             return ResponseEntity.status(202).body(authResponse);
         }
-
         return ResponseEntity.ok(authResponse);
     }
 

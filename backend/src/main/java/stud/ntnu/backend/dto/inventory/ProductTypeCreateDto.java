@@ -16,17 +16,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductTypeCreateDto {
-    private Integer householdId;
 
-    @NotBlank(message = "Name is required")
-    private String name;
+  private Integer householdId;
 
-    @NotBlank(message = "Unit is required")
-    private String unit;
+  @NotBlank(message = "Name is required")
+  private String name;
 
-    @NotNull(message = "Calories per unit is required")
-    @PositiveOrZero(message = "Calories per unit must be positive or zero")
-    private Double caloriesPerUnit;
+  @NotBlank(message = "Unit is required")
+  private String unit;
 
-    private Boolean isWater = false;
+  @NotNull(message = "Calories per unit is required")
+  @PositiveOrZero(message = "Calories per unit must be positive or zero")
+  private Double caloriesPerUnit;
+
+  private Boolean isWater = false;
 }
