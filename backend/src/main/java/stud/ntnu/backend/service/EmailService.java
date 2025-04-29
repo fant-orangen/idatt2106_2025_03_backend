@@ -112,8 +112,8 @@ public class EmailService {
    * @param user The User object representing the recipient. Must have a valid email address.
    * @param token The unique 2FA token string to include in the email.
    */
-  public void send2FAEmail(User user, String token) {
-    if (user == null || user.getEmail() == null || token == null) {
+  public void send2FAEmail(User user, Integer code) {
+    if (user == null || user.getEmail() == null || code == null) {
       log.error("Cannot send 2FA email. User or token is null or user email is null.");
       return;
     }
@@ -146,7 +146,7 @@ public class EmailService {
           
           Regards,
           The Krisefikser Team
-          """.formatted(userName, token, userName, token);
+          """.formatted(userName, code, userName, code);
 
       message.setText(emailBody);
 

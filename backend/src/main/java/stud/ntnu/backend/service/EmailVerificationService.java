@@ -10,16 +10,21 @@ public class EmailVerificationService {
     @Autowired
     private EmailService emailService;
 
-    public String generateVerificationCode() {
-        return String.format("%06d", new Random().nextInt(999999));
+    public EmailVerificationService(EmailService emailService) {
+        this.emailService = emailService;
+    }
+
+
+    public Integer generateVerificationCode() {
+        return 100000 + new Random().nextInt(900000); // Ensures a 6-digit integer
     }
 
     public void sendVerificationCode(User user) {
-        String code = generateVerificationCode();
+        Integer code = generateVerificationCode();
         emailService.send2FAEmail(user, code);
     }
 
-    public boolean verifyCode(String userEmail, String userEnteredCode, String sentCode) {
+    public boolean verifyCode(Integer userEnteredCode, Integer sentCode) {
         return sentCode.equals(userEnteredCode);
     }
 }
