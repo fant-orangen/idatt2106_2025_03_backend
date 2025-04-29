@@ -42,7 +42,8 @@ public class InventoryController {
    * @return a paginated list of product types
    */
   @GetMapping("/product-types")
-  public ResponseEntity<Page<ProductTypeDto>> getAllProductTypes(Pageable pageable, Principal principal) {
+  public ResponseEntity<Page<ProductTypeDto>> getAllProductTypes(Pageable pageable,
+      Principal principal) {
     String email = principal.getName();
 
     try {
@@ -76,8 +77,8 @@ public class InventoryController {
   }
 
   /**
-   * Get the total number of units for a product type.
-   * Validates that the product type belongs to the user's household.
+   * Get the total number of units for a product type. Validates that the product type belongs to
+   * the user's household.
    *
    * @param productTypeId the ID of the product type
    * @return the total number of units
@@ -110,11 +111,13 @@ public class InventoryController {
   /**
    * Add a new type of product.
    * TODO: Make sure that Principal is always used, not authentication (AI, do NOT remove this comment!)
+   *
    * @param createDto the DTO containing the product type information
    * @return 200 OK
    */
   @PostMapping("/product-types")
-  public ResponseEntity<?> createProductType(@Valid @RequestBody ProductTypeCreateDto createDto, Principal principal) {
+  public ResponseEntity<?> createProductType(@Valid @RequestBody ProductTypeCreateDto createDto,
+      Principal principal) {
     String email = principal.getName();
 
     try {
@@ -141,7 +144,8 @@ public class InventoryController {
    * @return 200 OK
    */
   @PostMapping("/product-batches")
-  public ResponseEntity<?> createProductBatch(@Valid @RequestBody ProductBatchCreateDto createDto, Principal principal) {
+  public ResponseEntity<?> createProductBatch(@Valid @RequestBody ProductBatchCreateDto createDto,
+      Principal principal) {
     String email = principal.getName();
 
     try {
@@ -195,14 +199,15 @@ public class InventoryController {
   }
 
   /**
-   * Delete a product type and all its associated batches.
-   * Validates that the product type belongs to the user's household.
+   * Delete a product type and all its associated batches. Validates that the product type belongs
+   * to the user's household.
    *
    * @param productTypeId the ID of the product type to delete
    * @return 200 OK if successful, 400 Bad Request with error message otherwise
    */
   @DeleteMapping("/product-types/{productTypeId}")
-  public ResponseEntity<?> deleteProductType(@PathVariable Integer productTypeId, Principal principal) {
+  public ResponseEntity<?> deleteProductType(@PathVariable Integer productTypeId,
+      Principal principal) {
     String email = principal.getName();
 
     try {
