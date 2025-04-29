@@ -1,9 +1,12 @@
 package stud.ntnu.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.news.NewsArticleDTO;
+import stud.ntnu.backend.dto.news.NewsArticleResponseDTO;
 import stud.ntnu.backend.model.news.NewsArticle;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.model.map.CrisisEvent;
@@ -12,6 +15,7 @@ import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.repository.map.CrisisEventRepository;
 
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 // IllegalStateException is in java.lang package, no need to import
 
 @Service
@@ -49,5 +53,29 @@ public class NewsService {
     newsArticle.setUpdatedAt(LocalDateTime.now());
 
     return newsArticleRepository.save(newsArticle);
+  }
+
+  /**
+   * Get paginated news articles for a specific crisis event.
+   *
+   * @param crisisEventId the crisis event ID
+   * @param pageable      pagination information
+   * @return a page of news article DTOs
+   * @throws NoSuchElementException if the crisis event doesn't exist
+   */
+  @Transactional(readOnly = true)
+  public Page<NewsArticleResponseDTO> getNewsArticlesByCrisisEvent(Integer crisisEventId,
+      Pageable pageable) {
+    // Check if the crisis event exists
+    if (!crisisEventRepository.existsById(crisisEventId)) {
+      throw new NoSuchElementException("Crisis event not found with id: " + crisisEventId);
+    }
+
+    // Get the news articles
+    Page<NewsArticle> newsArticles = newsArticleRepository.findByCrisisEventId(crisisEventId,
+        pageable);
+
+    // Convert to DTOs
+    return newsArticles.map(NewsArticleResponseDTO::fromEntity);
   }
 }
