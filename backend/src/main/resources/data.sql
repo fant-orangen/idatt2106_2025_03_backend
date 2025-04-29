@@ -9,16 +9,16 @@ INSERT INTO households (name, address, population_count) VALUES ('Johnson Househ
 INSERT INTO households (name, address, population_count) VALUES ('Brown Residence', '789 Pine St, Elsewhere', 2);
 
 -- USERS (password_hash is 'password' for all users)
-INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, email_verified, location_sharing_enabled) 
+INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, email_verified, location_sharing_enabled)
 VALUES ('admin@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', '+4712345678', 2, NULL, 'Admin', 'User', TRUE, FALSE);
 
-INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled) 
+INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled)
 VALUES ('alice@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', '+4723456789', 1, 1, 'Alice', 'L', '123 Main St, Anytown', 63.4305, 10.3951, TRUE, TRUE);
 
-INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled) 
+INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled)
 VALUES ('sarah@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', '+4734567890', 1, NULL, 'Sarah', 'Johnson', '456 Oak Ave, Somewhere', 63.4205, 10.4051, TRUE, TRUE);
 
-INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled) 
+INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled)
 VALUES ('mike@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', '+4745678901', 1, 3, 'Mike', 'Brown', '789 Pine St, Elsewhere', 63.4105, 10.3851, TRUE, FALSE);
 
 -- HOUSEHOLD MEMBERS
@@ -41,30 +41,57 @@ INSERT INTO group_memberships (group_id, household_id, invited_by_user_id) VALUE
 INSERT INTO group_memberships (group_id, household_id, invited_by_user_id) VALUES (2, 3, 1);
 
 -- PRODUCT TYPES
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Food', 'kg', 2000.00, FALSE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Water', 'l', 0.00, TRUE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Medicine', 'stk', 0.00, FALSE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Food', 'kg', 2000.00, FALSE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Water', 'l', 0.00, TRUE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Tools', 'stk', 0.00, FALSE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (3, 'Food', 'kg', 2000.00, FALSE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (3, 'Hygiene', 'stk', 0.00, FALSE);
+-- Smith Family (household_id = 1)
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Canned Beans', 'stk', 120.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Rice', 'kg', 1300.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Bottled Water', 'l', 0.00, TRUE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Painkillers', 'stk', 0.00, FALSE);
+
+-- Johnson Household (household_id = 2)
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Flour', 'kg', 1640.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Pasta', 'kg', 1570.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Purified Water', 'l', 0.00, TRUE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Flashlight', 'stk', 0.00, FALSE);
+
+-- Brown Residence (household_id = 3)
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (3, 'Bread', 'kg', 2650.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (3, 'Canned Soup', 'stk', 200.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (3, 'Toilet Paper', 'stk', 0.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (3, 'Soap', 'stk', 0.00, FALSE);
 
 -- PRODUCT BATCH
-INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1' YEAR, 10);
-INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '2' YEAR, 5);
-INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '6' MONTH, 24);
-INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (3, CURRENT_TIMESTAMP, NULL, 1);
-INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1' YEAR, 2);
-INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (4, CURRENT_TIMESTAMP, NULL, 2);
-INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '2' YEAR, 5);
-INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (5, CURRENT_TIMESTAMP, NULL, 3);
+-- Canned Beans batches
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (1, CURRENT_TIMESTAMP, DATEADD('YEAR', 1, CURRENT_TIMESTAMP), 10);
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (1, CURRENT_TIMESTAMP, DATEADD('YEAR', 2, CURRENT_TIMESTAMP), 5);
+
+-- Rice batch
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (2, CURRENT_TIMESTAMP, DATEADD('YEAR', 1, CURRENT_TIMESTAMP), 3);
+
+-- Bottled Water batches
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (3, CURRENT_TIMESTAMP, DATEADD('MONTH', 6, CURRENT_TIMESTAMP), 24);
+
+-- Painkillers batches
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (4, CURRENT_TIMESTAMP, NULL, 1);
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (4, CURRENT_TIMESTAMP, DATEADD('YEAR', 1, CURRENT_TIMESTAMP), 2);
+
+-- Flour batch
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (5, CURRENT_TIMESTAMP, DATEADD('MONTH', 6, CURRENT_TIMESTAMP), 2);
+
+-- Purified Water batches
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (7, CURRENT_TIMESTAMP, DATEADD('YEAR', 2, CURRENT_TIMESTAMP), 5);
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (7, CURRENT_TIMESTAMP, NULL, 3);
+
+-- Bread batch
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (9, CURRENT_TIMESTAMP, DATEADD('DAY', 7, CURRENT_TIMESTAMP), 2);
+
+-- Canned Soup batch
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (10, CURRENT_TIMESTAMP, DATEADD('MONTH', 18, CURRENT_TIMESTAMP), 6);
 
 -- GROUP INVENTORY CONTRIBUTIONS
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (1, 1, 1, 5);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (1, 2, 2, 1);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (2, 1, 3, 12);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (2, 3, 6, 1);
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (1, 1, 1, 5); -- Neighborhood Watch, Smith Family, Canned Beans
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (1, 2, 5, 1); -- Neighborhood Watch, Johnson Household, Flour
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (2, 1, 3, 12); -- Emergency Response Team, Smith Family, Bottled Water
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (2, 3, 10, 3); -- Emergency Response Team, Brown Residence, Canned Soup
 
 -- POI TYPES
 INSERT INTO poi_types (name) VALUES ('Hospital');
@@ -116,7 +143,7 @@ VALUES (3, 'Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, start_time, created_by_user_id, active)
 VALUES ('Flood Warning', 'Potential flooding in downtown area', 'yellow', 63.4300, 10.3950, CURRENT_TIMESTAMP, 1, TRUE);
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, start_time, created_by_user_id, active)
-VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 63.4250, 10.3900, CURRENT_TIMESTAMP + INTERVAL '1' DAY, 1, TRUE);
+VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 63.4250, 10.3900, DATEADD('DAY', 1, CURRENT_TIMESTAMP), 1, TRUE);
 
 -- SCENARIO THEMES
 INSERT INTO scenario_themes (name, description, created_by_user_id)
@@ -166,7 +193,7 @@ VALUES (3, 'crisis_alert', 'event', 103, 'A big bomb on the way', '2025-04-30 16
 INSERT INTO news_articles (title, content, published_at, created_by_user_id)
 VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1);
 INSERT INTO news_articles (title, content, published_at, created_by_user_id)
-VALUES ('New Emergency Response Guidelines', 'The city has updated its emergency response guidelines. Key changes include...', CURRENT_TIMESTAMP - INTERVAL '2' DAY, 1);
+VALUES ('New Emergency Response Guidelines', 'The city has updated its emergency response guidelines. Key changes include...', DATEADD('DAY', -2, CURRENT_TIMESTAMP), 1);
 
 -- HOUSEHOLD ADMINS
 INSERT INTO household_admins (user_id, household_id) VALUES (2, 1); -- Alice is admin of Smith Family

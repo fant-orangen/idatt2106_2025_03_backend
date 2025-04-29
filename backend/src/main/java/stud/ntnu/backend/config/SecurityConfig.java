@@ -103,16 +103,19 @@ public class SecurityConfig {
                     "/poi/**", "/ws/info", "/ws/**").permitAll()
                 // Allow GET requests to POI endpoints
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/poi/**").permitAll()
-                    // Permit access to the crisis-events/all endpoint
-                    .requestMatchers("/api/crisis-events/all").permitAll()
+                // Permit access to the crisis-events/all endpoint
+                .requestMatchers("/api/crisis-events/all").permitAll()
                 // Add role-based authorization for admin endpoints
                 .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
                 // Add WebSocket security
                 .requestMatchers("/topic/**", "/app/**").authenticated()
                 // Add role-based authorization for create/update/delete points of interest
-                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/poi/**").hasAnyRole("ADMIN", "SUPERADMIN")
-                .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/poi/**").hasAnyRole("ADMIN", "SUPERADMIN")
-                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/poi/**").hasAnyRole("ADMIN", "SUPERADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/poi/**")
+                .hasAnyRole("ADMIN", "SUPERADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/poi/**")
+                .hasAnyRole("ADMIN", "SUPERADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/poi/**")
+                .hasAnyRole("ADMIN", "SUPERADMIN")
                 .anyRequest().authenticated());
 
     // Allow H2 console frame options

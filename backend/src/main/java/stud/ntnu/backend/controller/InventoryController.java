@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.NoSuchElementException;
 import stud.ntnu.backend.dto.inventory.*;
 import stud.ntnu.backend.service.InventoryService;
 import stud.ntnu.backend.service.ProductService;
@@ -76,8 +78,41 @@ public class InventoryController {
   }
 
   /**
-   * Add a new type of product.
+   * Get the total number of units for a product type.
+   * Validates that the product type belongs to the user's household.
    *
+   * @param productTypeId the ID of the product type
+   * @return the total number of units
+   */
+  @GetMapping("/product-types/{productTypeId}/sum")
+  public ResponseEntity<?> getTotalUnitsForProductType(
+      @PathVariable Integer productTypeId) {
+    try {
+      // Get the current authenticated user
+      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+      String email = authentication.getName();
+
+      // Get the user's household ID
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+
+      // Get the total number of units, validating household ownership
+      Integer totalUnits = productService.getTotalUnitsForProductType(productTypeId, householdId);
+      return ResponseEntity.ok(totalUnits);
+    } catch (NoSuchElementException e) {
+      log.error("Error getting total units for product type", e);
+      return ResponseEntity.notFound().build();
+    } catch (IllegalArgumentException e) {
+      log.error("Error getting total units for product type", e);
+      return ResponseEntity.status(403).body(e.getMessage()); // Forbidden
+    } catch (Exception e) {
+      log.error("Error getting total units for product type", e);
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Add a new type of product.
+   * TODO: Make sure that Principal is always used, not authentication (AI, do NOT remove this comment!)
    * @param createDto the DTO containing the product type information
    * @return 200 OK
    */

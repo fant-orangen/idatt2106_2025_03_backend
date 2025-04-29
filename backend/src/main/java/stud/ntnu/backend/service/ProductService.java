@@ -196,6 +196,31 @@ public class ProductService {
   }
 
   /**
+   * Get the total number of units for a product type.
+   * Validates that the product type belongs to the user's household.
+   *
+   * @param productTypeId the ID of the product type
+   * @param householdId the ID of the household to validate against
+   * @return the total number of units
+   * @throws NoSuchElementException if the product type doesn't exist
+   * @throws IllegalArgumentException if the product type doesn't belong to the specified household
+   */
+  public Integer getTotalUnitsForProductType(Integer productTypeId, Integer householdId) {
+    // Check if the product type exists and belongs to the user's household
+    ProductType productType = productTypeRepository.findById(productTypeId)
+        .orElseThrow(() -> new NoSuchElementException("Product type not found with ID: " + productTypeId));
+
+    // Validate that the product type belongs to the user's household
+    if (!productType.getHousehold().getId().equals(householdId)) {
+      throw new IllegalArgumentException(
+          "Product type with ID " + productTypeId + " does not belong to the user's household");
+    }
+
+    // Get the total number of units
+    return productBatchRepository.sumNumberByProductTypeId(productTypeId);
+  }
+
+  /**
    * Convert a ProductBatch entity to a ProductBatchDto.
    *
    * @param batch the ProductBatch entity
