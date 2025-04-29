@@ -1,6 +1,8 @@
 package stud.ntnu.backend.service;
 
 import org.slf4j.Logger;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +15,7 @@ import stud.ntnu.backend.repository.user.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing notifications. Handles creation, retrieval, and sending of notifications.
@@ -97,6 +100,18 @@ public class NotificationService {
   }
 
   /**
+   * Retrieves notifications for a user with pagination.
+   *
+   * @param userId the ID of the user
+   * @param pageable pagination information
+   * @return a page of notifications
+   */
+  @Transactional(readOnly = true)
+  public Page<Notification> getNotificationsForUser(Integer userId, Pageable pageable) {
+    return notificationRepository.findByUserId(userId, pageable);
+  }
+
+  /**
    * Marks a notification as read.
    *
    * @param notificationId the ID of the notification
@@ -155,6 +170,42 @@ public class NotificationService {
     double distance = EARTH_RADIUS * c;
 
     return distance <= radiusDouble;
+  }
+
+  /**
+   * Creates a system notification for all users.
+   *
+   * @param description the description of the notification
+   * @param createdByUser the user who created the notification
+   * @return a list of created notifications
+   */
+  @Transactional
+  public List<Notification> createSystemNotificationForAllUsers(String description, User createdByUser) {
+    List<User> allUsers = userRepository.findAll();
+
+    // Create a notification for each user
+    List<Notification> notifications = allUsers.stream()
+        .map(user -> {
+          // For system notifications, we need to set a target type even though it's not used
+          // We'll use a special constructor that sets the required fields
+          Notification notification = new Notification(user, Notification.PreferenceType.system, LocalDateTime.now());
+          notification.setDescription(description);
+          return notificationRepository.save(notification);
+        })
+        .collect(Collectors.toList());
+
+    return notifications;
+  }
+
+  /**
+   * Sends notifications to all users via WebSocket.
+   *
+   * @param notifications the list of notifications to send
+   */
+  public void sendNotificationsToAllUsers(List<Notification> notifications) {
+    for (Notification notification : notifications) {
+      sendNotification(notification);
+    }
   }
 
   /**

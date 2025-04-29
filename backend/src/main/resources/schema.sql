@@ -267,8 +267,8 @@ CREATE TABLE notification_preferences (
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request')),
-    target_type VARCHAR(20) NOT NULL CHECK (target_type IN ('inventory','event','location_request')),
+    preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request', 'system')),
+    target_type VARCHAR(20) CHECK (target_type IN ('inventory','event','location_request')), -- If the notification is associated with another table, add a target type and target id pointing to the table
     target_id INT,
     description TEXT DEFAULT NULL,
     notify_at DATETIME NOT NULL,

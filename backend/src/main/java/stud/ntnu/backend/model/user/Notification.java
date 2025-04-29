@@ -26,7 +26,7 @@ public class Notification {
   private PreferenceType preferenceType;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "target_type", nullable = false)
+  @Column(name = "target_type", nullable = true) // Changed to nullable for system notifications
   private TargetType targetType;
 
   @Column(name = "target_id")
@@ -55,7 +55,7 @@ public class Notification {
 
   // Enum for preference type
   public enum PreferenceType {
-    expiration_reminder, crisis_alert, location_request
+    expiration_reminder, crisis_alert, location_request, system
   }
 
   // Enum for target type
@@ -69,6 +69,13 @@ public class Notification {
     this.user = user;
     this.preferenceType = preferenceType;
     this.targetType = targetType;
+    this.notifyAt = notifyAt;
+  }
+
+  // Constructor for system notifications (no target type)
+  public Notification(User user, PreferenceType preferenceType, LocalDateTime notifyAt) {
+    this.user = user;
+    this.preferenceType = preferenceType;
     this.notifyAt = notifyAt;
   }
 

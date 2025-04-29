@@ -1,11 +1,16 @@
 package stud.ntnu.backend.controller;
 
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.user.NotificationDto;
+import stud.ntnu.backend.dto.user.SystemNotificationCreateDto;
 import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.NotificationService;
 import stud.ntnu.backend.service.UserService;
 
@@ -33,23 +38,22 @@ public class NotificationController {
   }
 
   /**
-   * Gets all notifications for the current user.
-   * TODO: Untested!
+   * Gets notifications for the current user in a paginated format.
+   *
    * @param principal the Principal object representing the current user
-   * @return ResponseEntity with a list of notifications
+   * @param pageable pagination information
+   * @return ResponseEntity with a page of notifications
    */
   @GetMapping
-  public ResponseEntity<?> getNotifications(Principal principal) {
+  public ResponseEntity<?> getNotifications(Principal principal, Pageable pageable) {
     try {
       User user = userService.getUserByEmail(principal.getName())
           .orElseThrow(() -> new IllegalStateException("User not found"));
 
-      List<Notification> notifications = notificationService.getNotificationsForUser(user.getId());
-      List<NotificationDto> notificationDtos = notifications.stream()
-          .map(NotificationDto::fromEntity)
-          .collect(Collectors.toList());
+      Page<Notification> notificationsPage = notificationService.getNotificationsForUser(user.getId(), pageable);
+      Page<NotificationDto> notificationDtosPage = notificationsPage.map(NotificationDto::fromEntity);
 
-      return ResponseEntity.ok(notificationDtos);
+      return ResponseEntity.ok(notificationDtosPage);
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
@@ -90,5 +94,40 @@ public class NotificationController {
    */
   public void sendNotification(String topic, Object payload) {
     messagingTemplate.convertAndSend(topic, payload);
+  }
+
+  /**
+   * Creates a system notification for all users.
+   * Only users with ADMIN or SUPERADMIN roles can create system notifications.
+   * TODO: Untested!
+   * @param createDto the DTO containing the notification description
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
+   */
+  @PostMapping("/system")
+  public ResponseEntity<?> createSystemNotification(
+      @Valid @RequestBody SystemNotificationCreateDto createDto,
+      Principal principal) {
+    try {
+      // Check if the current user is an admin
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+        return ResponseEntity.status(403).body("Only administrators can create system notifications");
+      }
+
+      // Get the current user
+      User currentUser = userService.getUserByEmail(principal.getName())
+          .orElseThrow(() -> new IllegalStateException("User not found"));
+
+      // Create system notifications for all users
+      List<Notification> notifications = notificationService.createSystemNotificationForAllUsers(
+          createDto.getDescription(), currentUser);
+
+      // Send the notifications via WebSocket
+      notificationService.sendNotificationsToAllUsers(notifications);
+
+      return ResponseEntity.ok().build();
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 }
