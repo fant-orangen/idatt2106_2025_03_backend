@@ -215,11 +215,11 @@ public class User {
         this.emailVerified = emailVerified;
     }
 
-    public Boolean getisUsing2FA() {
+    public Boolean getIsUsing2FA() {
         return isUsing2FA;
     }
 
-    public void setisUsing2FA(Boolean isUsing2FA) {
+    public void setIsUsing2FA(Boolean isUsing2FA) {
         this.isUsing2FA = isUsing2FA;
     }
 
