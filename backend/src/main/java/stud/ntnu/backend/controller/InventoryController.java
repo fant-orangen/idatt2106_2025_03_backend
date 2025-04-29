@@ -6,10 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.NoSuchElementException;
 import stud.ntnu.backend.dto.inventory.*;
 import stud.ntnu.backend.service.InventoryService;
@@ -43,9 +42,8 @@ public class InventoryController {
    * @return a paginated list of product types
    */
   @GetMapping("/product-types")
-  public ResponseEntity<Page<ProductTypeDto>> getAllProductTypes(Pageable pageable) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String email = authentication.getName();
+  public ResponseEntity<Page<ProductTypeDto>> getAllProductTypes(Pageable pageable, Principal principal) {
+    String email = principal.getName();
 
     try {
       // Get the user's household ID
@@ -86,11 +84,10 @@ public class InventoryController {
    */
   @GetMapping("/product-types/{productTypeId}/sum")
   public ResponseEntity<?> getTotalUnitsForProductType(
-      @PathVariable Integer productTypeId) {
+      @PathVariable Integer productTypeId, Principal principal) {
     try {
-      // Get the current authenticated user
-      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-      String email = authentication.getName();
+      // Get the current authenticated user's email
+      String email = principal.getName();
 
       // Get the user's household ID
       Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
@@ -117,9 +114,8 @@ public class InventoryController {
    * @return 200 OK
    */
   @PostMapping("/product-types")
-  public ResponseEntity<?> createProductType(@Valid @RequestBody ProductTypeCreateDto createDto) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String email = authentication.getName();
+  public ResponseEntity<?> createProductType(@Valid @RequestBody ProductTypeCreateDto createDto, Principal principal) {
+    String email = principal.getName();
 
     try {
       // Get the user's household ID
@@ -145,9 +141,8 @@ public class InventoryController {
    * @return 200 OK
    */
   @PostMapping("/product-batches")
-  public ResponseEntity<?> createProductBatch(@Valid @RequestBody ProductBatchCreateDto createDto) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String email = authentication.getName();
+  public ResponseEntity<?> createProductBatch(@Valid @RequestBody ProductBatchCreateDto createDto, Principal principal) {
+    String email = principal.getName();
 
     try {
       // Get the user's household ID
@@ -207,9 +202,8 @@ public class InventoryController {
    * @return 200 OK if successful, 400 Bad Request with error message otherwise
    */
   @DeleteMapping("/product-types/{productTypeId}")
-  public ResponseEntity<?> deleteProductType(@PathVariable Integer productTypeId) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String email = authentication.getName();
+  public ResponseEntity<?> deleteProductType(@PathVariable Integer productTypeId, Principal principal) {
+    String email = principal.getName();
 
     try {
       // Get the user's household ID
