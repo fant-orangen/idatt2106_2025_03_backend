@@ -91,4 +91,14 @@ public class AuthController {
       return ResponseEntity.status(500).body("An unexpected error occurred during email verification.");
     }
   }
+
+  @PostMapping("/verify-2fa")
+  public ResponseEntity<?> verify2FA(@RequestParam String email, @RequestParam String code) {
+    try {
+      AuthResponseDto authResponse = authService.verify2FA(email, code);
+      return ResponseEntity.ok(authResponse);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(null); // Invalid code
+    }
+  }
 }
