@@ -100,7 +100,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth ->
             auth.requestMatchers("/h2-console/**", "/swagger-ui/**", "/swagger-ui.html",
                     "/v3/api-docs/**", "/actuator/health", "/auth/**", "/api/auth/**", "/api/poi/**",
-                    "/poi/**", "/ws/info", "/ws/**").permitAll()
+                    "/poi/**", "/ws/info", "/ws/**", "/api/address/**").permitAll()
                 // Allow GET requests to POI endpoints
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/poi/**").permitAll()
                 // Permit access to the crisis-events/all endpoint
