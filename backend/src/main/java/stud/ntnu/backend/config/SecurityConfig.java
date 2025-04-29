@@ -107,6 +107,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/crisis-events/all").permitAll()
                 // Add role-based authorization for admin endpoints
                 .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
+                .requestMatchers("/api/super-admin").hasAnyRole("SUPERADMIN")
                 // Add WebSocket security
                 .requestMatchers("/topic/**", "/app/**").authenticated()
                 // Add role-based authorization for create/update/delete points of interest
