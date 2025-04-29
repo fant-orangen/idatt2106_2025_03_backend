@@ -134,33 +134,6 @@ public class NotificationService {
   }
 
   /**
-   * Calculates if a point is within a radius of another point.
-   *
-   * @param lat1       latitude of the first point
-   * @param lon1       longitude of the first point
-   * @param lat2       latitude of the second point
-   * @param lon2       longitude of the second point
-   * @param radiusInMeters radius in meters
-   * @return true if the second point is within the radius of the first point
-   */
-  public boolean isWithinRadius(BigDecimal lat1, BigDecimal lon1,
-      BigDecimal lat2, BigDecimal lon2,
-      BigDecimal radiusInMeters) {
-    if (lat1 == null || lon1 == null || lat2 == null || lon2 == null || radiusInMeters == null) {
-      return false;
-    }
-
-    double distance = LocationUtil.calculateDistance(
-        lat1.doubleValue(),
-        lon1.doubleValue(),
-        lat2.doubleValue(),
-        lon2.doubleValue()
-    );
-
-    return distance <= radiusInMeters.doubleValue();
-  }
-
-  /**
    * Creates a system notification for all users.
    *
    * @param description the description of the notification
@@ -195,39 +168,7 @@ public class NotificationService {
       sendNotification(notification);
     }
   }
-
-  /**
-   * Finds all users within a radius of a point.
-   *
-   * @param latitude   latitude of the center point
-   * @param longitude  longitude of the center point
-   * @param radiusInKm radius in kilometers
-   * @return a list of users within the radius
-   */
-  @Transactional(readOnly = true)
-  public List<User> findUsersWithinRadius(BigDecimal latitude, BigDecimal longitude,
-      BigDecimal radiusInKm) {
-    List<User> allUsers = userRepository.findAll();
-
-    return allUsers.stream()
-        .filter(user -> {
-          // Check if user's home coordinates are within radius
-          boolean userInRadius =
-              user.getHomeLatitude() != null && user.getHomeLongitude() != null &&
-                  isWithinRadius(latitude, longitude, user.getHomeLatitude(),
-                      user.getHomeLongitude(), radiusInKm);
-
-          // Check if user's household coordinates are within radius
-          boolean householdInRadius = user.getHousehold() != null &&
-              user.getHousehold().getLatitude() != null &&
-              user.getHousehold().getLongitude() != null &&
-              isWithinRadius(latitude, longitude, user.getHousehold().getLatitude(),
-                  user.getHousehold().getLongitude(), radiusInKm);
-
-          return userInRadius || householdInRadius;
-        })
-        .toList();
-  }
+ 
 
   /**
    * Sends notifications to users within a crisis event's radius.
