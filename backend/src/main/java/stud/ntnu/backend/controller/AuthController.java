@@ -26,7 +26,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    private Logger log = org.slf4j.LoggerFactory.getLogger(AuthController.class);
+    private final Logger log = org.slf4j.LoggerFactory.getLogger(AuthController.class);
 
     public AuthController(AuthService authService) {
         this.authService = authService;

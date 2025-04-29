@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.Random;
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.model.user.TwoFactorCode;
-import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.TwoFactorCodeRepository;
 
 @Service

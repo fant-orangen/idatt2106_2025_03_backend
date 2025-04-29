@@ -36,7 +36,6 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final EmailTokenRepository emailTokenRepository;
-    private final TwoFactorCodeRepository twoFactorCodeRepository;
     private final TwoFactorCodeService twoFactorCodeService;
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
@@ -44,7 +43,6 @@ public class AuthService {
                        UserRepository userRepository, PasswordEncoder passwordEncoder,
                        EmailService emailService,
                        EmailTokenRepository emailTokenRepository,
-                       TwoFactorCodeRepository twoFactorCodeRepository,
                        TwoFactorCodeService twoFactorCodeService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
@@ -52,7 +50,6 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.emailTokenRepository = emailTokenRepository;
-        this.twoFactorCodeRepository = twoFactorCodeRepository;
         this.twoFactorCodeService = twoFactorCodeService;
     }
 
