@@ -4,11 +4,17 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.model.user.TwoFactorCode;
 import stud.ntnu.backend.repository.user.TwoFactorCodeRepository;
+import org.springframework.beans.factory.annotation.Value;
+
+
 
 @Service
 public class TwoFactorCodeService {
+    @Value("${twofactor.code.expiration.minutes}")
+    private int codeExpirationMinutes;
     private final EmailService emailService;
     private final TwoFactorCodeRepository twoFactorCodeRepository;
 
@@ -31,10 +37,12 @@ public class TwoFactorCodeService {
         TwoFactorCode twoFactorCode = new TwoFactorCode();
         twoFactorCode.setEmail(email);
         twoFactorCode.setCode(code);
-        twoFactorCode.setExpiresAt(LocalDateTime.now().plusMinutes(5)); // Code expires in 5 minutes
+
+        twoFactorCode.setExpiresAt(LocalDateTime.now().plusMinutes(codeExpirationMinutes)); // Code expires in 5 minutes
         twoFactorCodeRepository.save(twoFactorCode);
     }
 
+    @Transactional
     public boolean verifyCode(String email, Integer code) {
         Optional<TwoFactorCode> optionalCode = twoFactorCodeRepository.findByEmail(email);
         if (optionalCode.isEmpty()) {
