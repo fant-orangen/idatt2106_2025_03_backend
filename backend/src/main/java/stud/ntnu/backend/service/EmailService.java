@@ -31,7 +31,7 @@ public class EmailService {
    */
   @Autowired
   public EmailService(JavaMailSender mailSender,
-      @Value("${spring.mail.username}") String senderEmail) {
+                      @Value("${spring.mail.username}") String senderEmail) {
     this.mailSender = mailSender;
     this.senderEmail = senderEmail;
   }
@@ -55,7 +55,8 @@ public class EmailService {
       SimpleMailMessage message = new SimpleMailMessage();
       message.setFrom(senderEmail);
       message.setTo(user.getEmail());
-      message.setSubject("Krisefikser.no - Vennligst bekreft e-posten din / Please Verify Your Email");
+      message.setSubject(
+          "Krisefikser.no - Vennligst bekreft e-posten din / Please Verify Your Email");
 
       String verificationUrl = "http://localhost:8080/api/auth/verify?token=" + token;
       String userName = (user.getName() != null ? user.getName() : "Bruker/User");
@@ -63,28 +64,28 @@ public class EmailService {
       // Bilingual Email Body using Text Block and .formatted()
       String emailBody = """
           Hei %s,
-
+          
           Takk for at du registrerte deg hos Krisefikser.no.
           Vennligst klikk på lenken under for å bekrefte e-postadressen din:
-
+          
           %s
-
+          
           Hvis du ikke registrerte deg, vennligst se bort fra denne e-posten.
-
+          
           Med vennlig hilsen,
           Krisefikser-teamet
-
+          
           ----------------------------------------
-
+          
           Hello %s,
-
+          
           Thank you for registering with Krisefikser.no.
           Please click the link below to verify your email address:
-
+          
           %s
-
+          
           If you did not register, please ignore this email.
-
+          
           Regards,
           The Krisefikser Team
           """.formatted(userName, verificationUrl, userName, verificationUrl);
@@ -97,9 +98,67 @@ public class EmailService {
       log.info("Verification email sent successfully to: {}", user.getEmail());
 
     } catch (MailException e) {
-      log.error("Mail sending error for verification email to {}: {}", user.getEmail(), e.getMessage(), e);
+      log.error("Mail sending error for verification email to {}: {}", user.getEmail(),
+          e.getMessage(), e);
     } catch (Exception e) {
-      log.error("Unexpected error sending verification email to {}: {}", user.getEmail(), e.getMessage(), e);
+      log.error("Unexpected error sending verification email to {}: {}", user.getEmail(),
+          e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Sends a 2FA email to the specified user.
+   *
+   * @param user The User object representing the recipient. Must have a valid email address.
+   * @param token The unique 2FA token string to include in the email.
+   */
+  public void send2FAEmail(User user, String token) {
+    if (user == null || user.getEmail() == null || token == null) {
+      log.error("Cannot send 2FA email. User or token is null or user email is null.");
+      return;
+    }
+
+    try {
+      SimpleMailMessage message = new SimpleMailMessage();
+      message.setTo(user.getEmail());
+      message.setFrom(senderEmail);
+      message.setSubject("Krisefikser - 2FA Verification Code / Verifiseringskode");
+
+      String userName = (user.getName() != null ? user.getName() : "Bruker/User");
+
+      String emailBody = """
+          Hei %s,
+          
+          Din 2FA-verifiseringskode er: %s
+          
+          Vennligst skriv inn denne koden for å fullføre innloggingen din.
+          
+          Med vennlig hilsen,
+          Krisefikser-teamet
+          
+          ----------------------------------------
+          
+          Hello %s,
+          
+          Your 2FA verification code is: %s
+          
+          Please enter this code to complete your login.
+          
+          Regards,
+          The Krisefikser Team
+          """.formatted(userName, token, userName, token);
+
+      message.setText(emailBody);
+
+      mailSender.send(message);
+
+      log.info("2FA email sent successfully to: {}", user.getEmail());
+
+    } catch (MailException e) {
+      log.error("Mail sending error for verification email to {}: {}", user.getEmail(),
+          e.getMessage(), e);
+    }catch (Exception e) {
+      log.error("Unexpected error sending 2FA email to {}: {}", user.getEmail(), e.getMessage(), e);
     }
   }
 }
