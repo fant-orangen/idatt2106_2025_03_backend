@@ -1,5 +1,12 @@
 package stud.ntnu.backend.util;
 
+import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.service.UserService;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class LocationUtil {
 
     private LocationUtil() {
@@ -23,5 +30,37 @@ public class LocationUtil {
                         Math.sin(dLon / 2) * Math.sin(dLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return EARTH_RADIUS * c;
+    }
+
+    /**
+     * Finds all users within a specified radius of a crisis event.
+     *
+     * @param userService the user service to get all users
+     * @param latitude the latitude of the crisis event
+     * @param longitude the longitude of the crisis event
+     * @param radiusInKm the radius in kilometers
+     * @return list of users within the radius
+     */
+    public static List<User> findUsersWithinRadius(UserService userService, double latitude, double longitude, double radiusInKm) {
+        List<User> allUsers = userService.getAllUsers();
+        return allUsers.stream()
+                .filter(user -> {
+                    // Check if user's home coordinates are within radius
+                    boolean userInRadius = user.getHomeLatitude() != null && user.getHomeLongitude() != null &&
+                            calculateDistance(latitude, longitude, 
+                                    user.getHomeLatitude().doubleValue(), 
+                                    user.getHomeLongitude().doubleValue()) <= (radiusInKm * 1000); // Convert km to meters
+
+                    // Check if user's household coordinates are within radius
+                    boolean householdInRadius = user.getHousehold() != null &&
+                            user.getHousehold().getLatitude() != null &&
+                            user.getHousehold().getLongitude() != null &&
+                            calculateDistance(latitude, longitude,
+                                    user.getHousehold().getLatitude().doubleValue(),
+                                    user.getHousehold().getLongitude().doubleValue()) <= (radiusInKm * 1000); // Convert km to meters
+
+                    return userInRadius || householdInRadius;
+                })
+                .toList();
     }
 }

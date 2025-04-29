@@ -1,5 +1,7 @@
 package stud.ntnu.backend.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,7 @@ import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.map.CrisisEventRepository;
+import stud.ntnu.backend.util.LocationUtil;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,17 +27,22 @@ public class CrisisEventService {
 
   private final CrisisEventRepository crisisEventRepository;
   private final NotificationService notificationService;
+  private final UserService userService;
+  private final Logger log = LoggerFactory.getLogger(CrisisEventService.class);
 
   /**
    * Constructor for dependency injection.
    *
    * @param crisisEventRepository repository for crisis event operations
    * @param notificationService   service for notification operations
+   * @param userService          service for user operations
    */
   public CrisisEventService(CrisisEventRepository crisisEventRepository,
-      NotificationService notificationService) {
+      NotificationService notificationService,
+      UserService userService) {
     this.crisisEventRepository = crisisEventRepository;
     this.notificationService = notificationService;
+    this.userService = userService;
   }
 
   /**
@@ -108,28 +116,9 @@ public class CrisisEventService {
     // Save the crisis event
     CrisisEvent savedCrisisEvent = crisisEventRepository.save(crisisEvent);
 
-    // Create notifications for users within the radius of the crisis event
-    if (savedCrisisEvent.getRadius() != null) {
-      List<User> usersInRadius = notificationService.findUsersWithinRadius(
-          savedCrisisEvent.getEpicenterLatitude(),
-          savedCrisisEvent.getEpicenterLongitude(),
-          savedCrisisEvent.getRadius()
-      );
-
-      // Create and send notifications to users in radius
-      for (User user : usersInRadius) {
-        Notification notification = notificationService.createNotification(
-            user,
-            Notification.PreferenceType.crisis_alert,
-            Notification.TargetType.event,
-            savedCrisisEvent.getId(),
-            "There is an ongoing crisis." //TODO: improve the description
-        );
-
-        // Send the notification via WebSocket
-        notificationService.sendNotification(notification);
-      }
-    }
+    log.info("Sending notifications to users within the radius of the crisis event");
+    // Send notifications to users within the radius
+    notificationService.sendCrisisEventNotifications(savedCrisisEvent, "There is an ongoing crisis.");
 
     return savedCrisisEvent;
   }
@@ -150,6 +139,10 @@ public class CrisisEventService {
       throw new IllegalStateException("Crisis event not found with ID: " + id);
     }
 
+    // Get the current crisis event
+    CrisisEvent currentCrisisEvent = crisisEventRepository.findById(id)
+        .orElseThrow(() -> new IllegalStateException("Crisis event not found with ID: " + id));
+
     // Option 1: Use the direct repository update method if all fields are provided
     if (updateCrisisEventDto.getName() != null &&
         updateCrisisEventDto.getDescription() != null &&
@@ -169,7 +162,12 @@ public class CrisisEventService {
       );
 
       // Return the updated entity
-      return crisisEventRepository.findById(id).orElseThrow();
+      CrisisEvent updatedCrisisEvent = crisisEventRepository.findById(id).orElseThrow();
+      
+      // Send notifications about the update
+      notificationService.sendCrisisEventUpdateNotifications(updatedCrisisEvent, currentCrisisEvent);
+      
+      return updatedCrisisEvent;
     }
 
     // Option 2: For partial updates, use the traditional approach
@@ -202,6 +200,11 @@ public class CrisisEventService {
     }
 
     // Save directly using the repository
-    return crisisEventRepository.save(crisisEvent);
+    CrisisEvent updatedCrisisEvent = crisisEventRepository.save(crisisEvent);
+    
+    // Send notifications about the update
+    notificationService.sendCrisisEventUpdateNotifications(updatedCrisisEvent, currentCrisisEvent);
+    
+    return updatedCrisisEvent;
   }
 }

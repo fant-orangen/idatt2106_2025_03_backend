@@ -118,7 +118,7 @@ public class NotificationController {
       User currentUser = userService.getUserByEmail(principal.getName())
           .orElseThrow(() -> new IllegalStateException("User not found"));
 
-      // Create system notifications for all users
+      // Create system notifications for all users. TODO: make this more efficient. What if 100 000 users?
       List<Notification> notifications = notificationService.createSystemNotificationForAllUsers(
           createDto.getDescription(), currentUser);
 

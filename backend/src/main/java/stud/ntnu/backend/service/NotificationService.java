@@ -7,10 +7,12 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.user.NotificationDto;
+import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.NotificationRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.util.LocationUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,6 +28,7 @@ public class NotificationService {
   private final NotificationRepository notificationRepository;
   private final UserRepository userRepository;
   private final SimpMessagingTemplate messagingTemplate;
+  private final UserService userService;
   Logger log = org.slf4j.LoggerFactory.getLogger(NotificationService.class);
 
   /**
@@ -34,13 +37,16 @@ public class NotificationService {
    * @param notificationRepository repository for notification operations
    * @param userRepository         repository for user operations
    * @param messagingTemplate      messaging template for WebSocket communication
+   * @param userService           service for user operations
    */
   public NotificationService(NotificationRepository notificationRepository,
       UserRepository userRepository,
-      SimpMessagingTemplate messagingTemplate) {
+      SimpMessagingTemplate messagingTemplate,
+      UserService userService) {
     this.notificationRepository = notificationRepository;
     this.userRepository = userRepository;
     this.messagingTemplate = messagingTemplate;
+    this.userService = userService;
   }
 
   /**
@@ -134,42 +140,24 @@ public class NotificationService {
    * @param lon1       longitude of the first point
    * @param lat2       latitude of the second point
    * @param lon2       longitude of the second point
-   * @param radiusInKm radius in kilometers
+   * @param radiusInMeters radius in meters
    * @return true if the second point is within the radius of the first point
    */
   public boolean isWithinRadius(BigDecimal lat1, BigDecimal lon1,
       BigDecimal lat2, BigDecimal lon2,
-      BigDecimal radiusInKm) {
-    if (lat1 == null || lon1 == null || lat2 == null || lon2 == null || radiusInKm == null) {
+      BigDecimal radiusInMeters) {
+    if (lat1 == null || lon1 == null || lat2 == null || lon2 == null || radiusInMeters == null) {
       return false;
     }
 
-    // Convert to double for calculation
-    double lat1Double = lat1.doubleValue();
-    double lon1Double = lon1.doubleValue();
-    double lat2Double = lat2.doubleValue();
-    double lon2Double = lon2.doubleValue();
-    double radiusDouble = radiusInKm.doubleValue();
+    double distance = LocationUtil.calculateDistance(
+        lat1.doubleValue(),
+        lon1.doubleValue(),
+        lat2.doubleValue(),
+        lon2.doubleValue()
+    );
 
-    // Earth's radius in kilometers
-    final double EARTH_RADIUS = 6371.0;
-
-    // Convert latitude and longitude from degrees to radians
-    double lat1Rad = Math.toRadians(lat1Double);
-    double lon1Rad = Math.toRadians(lon1Double);
-    double lat2Rad = Math.toRadians(lat2Double);
-    double lon2Rad = Math.toRadians(lon2Double);
-
-    // Haversine formula
-    double dLat = lat2Rad - lat1Rad;
-    double dLon = lon2Rad - lon1Rad;
-    double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    double distance = EARTH_RADIUS * c;
-
-    return distance <= radiusDouble;
+    return distance <= radiusInMeters.doubleValue();
   }
 
   /**
@@ -239,5 +227,73 @@ public class NotificationService {
           return userInRadius || householdInRadius;
         })
         .toList();
+  }
+
+  /**
+   * Sends notifications to users within a crisis event's radius.
+   *
+   * @param crisisEvent the crisis event
+   * @param message the notification message
+   */
+  @Transactional
+  public void sendCrisisEventNotifications(CrisisEvent crisisEvent, String message) {
+    if (crisisEvent.getRadius() != null) {
+      List<User> usersInRadius = LocationUtil.findUsersWithinRadius(
+          userService,
+          crisisEvent.getEpicenterLatitude().doubleValue(),
+          crisisEvent.getEpicenterLongitude().doubleValue(),
+          crisisEvent.getRadius().doubleValue()
+      );
+      log.info("Found {} users in radius", usersInRadius.size());
+
+      // Create and send notifications to users in radius
+      for (User user : usersInRadius) {
+        log.info("Creating notification for user: {}", user.getId()); // TODO: remove
+        Notification notification = createNotification(
+            user,
+            Notification.PreferenceType.crisis_alert,
+            Notification.TargetType.event,
+            crisisEvent.getId(),
+            message
+        );
+
+        // Send the notification via WebSocket
+        log.info("Sending notification to user: {}", user.getId());
+        sendNotification(notification);
+      }
+    }
+  }
+
+  /**
+   * Sends notifications about crisis event updates to users within the radius.
+   *
+   * @param updatedCrisisEvent the updated crisis event
+   * @param previousCrisisEvent the previous state of the crisis event
+   */
+  @Transactional
+  public void sendCrisisEventUpdateNotifications(CrisisEvent updatedCrisisEvent, CrisisEvent previousCrisisEvent) {
+    if (updatedCrisisEvent.getRadius() != null) {
+      // Create notification message based on what changed
+      StringBuilder notificationMessage = new StringBuilder("Crisis event has been updated: ");
+      
+      if (!updatedCrisisEvent.getName().equals(previousCrisisEvent.getName())) {
+        notificationMessage.append("Name changed to ").append(updatedCrisisEvent.getName()).append(". ");
+      }
+      if (!updatedCrisisEvent.getDescription().equals(previousCrisisEvent.getDescription())) {
+        notificationMessage.append("Description updated. ");
+      }
+      if (!updatedCrisisEvent.getSeverity().equals(previousCrisisEvent.getSeverity())) {
+        notificationMessage.append("Severity changed to ").append(updatedCrisisEvent.getSeverity()).append(". ");
+      }
+      if (!updatedCrisisEvent.getEpicenterLatitude().equals(previousCrisisEvent.getEpicenterLatitude()) ||
+          !updatedCrisisEvent.getEpicenterLongitude().equals(previousCrisisEvent.getEpicenterLongitude())) {
+        notificationMessage.append("Location updated. ");
+      }
+      if (!updatedCrisisEvent.getRadius().equals(previousCrisisEvent.getRadius())) {
+        notificationMessage.append("Radius changed to ").append(updatedCrisisEvent.getRadius()).append(" meters. ");
+      }
+
+      sendCrisisEventNotifications(updatedCrisisEvent, notificationMessage.toString());
+    }
   }
 }
