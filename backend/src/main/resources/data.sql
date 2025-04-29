@@ -16,7 +16,7 @@ INSERT INTO users (email, password_hash, phone_number, role_id, household_id, fi
 VALUES ('alice@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', '+4723456789', 1, 1, 'Alice', 'L', '123 Main St, Anytown', 63.4305, 10.3951, TRUE, TRUE);
 
 INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled) 
-VALUES ('sarah@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', '+4734567890', 1, 2, 'Sarah', 'Johnson', '456 Oak Ave, Somewhere', 63.4205, 10.4051, TRUE, TRUE);
+VALUES ('sarah@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', '+4734567890', 1, NULL, 'Sarah', 'Johnson', '456 Oak Ave, Somewhere', 63.4205, 10.4051, TRUE, TRUE);
 
 INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled) 
 VALUES ('mike@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', '+4745678901', 3, 3, 'Mike', 'Brown', '789 Pine St, Elsewhere', 63.4105, 10.3851, TRUE, FALSE);
@@ -154,8 +154,20 @@ VALUES (3, 'crisis_alert', TRUE);
 INSERT INTO notification_preferences (user_id, preference_type, enabled)
 VALUES (4, 'location_request', FALSE);
 
+-- NOTIFICATION
+INSERT INTO notifications (user_id, preference_type, target_type, target_id, description, notify_at, sent_at, read_at, created_at)
+VALUES (2, 'crisis_alert', 'event', 101, 'Severe weather alert for your region.', '2025-04-28 14:00:00', NULL, NULL, '2025-04-28 13:45:00');
+INSERT INTO notifications (user_id, preference_type, target_type, target_id, description, notify_at, sent_at, read_at, created_at)
+VALUES (2, 'crisis_alert', 'event', 102, 'danger: alan walker in the streets', '2025-04-29 09:00:00', NULL, NULL, '2025-04-28 13:55:00');
+INSERT INTO notifications (user_id, preference_type, target_type, target_id, description, notify_at, sent_at, read_at, created_at)
+VALUES (3, 'crisis_alert', 'event', 103, 'A big bomb on the way', '2025-04-30 16:30:00', NULL, NULL, '2025-04-28 14:00:00');
+
 -- NEWS ARTICLES
 INSERT INTO news_articles (title, content, published_at, created_by_user_id)
 VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1);
 INSERT INTO news_articles (title, content, published_at, created_by_user_id)
 VALUES ('New Emergency Response Guidelines', 'The city has updated its emergency response guidelines. Key changes include...', CURRENT_TIMESTAMP - INTERVAL '2' DAY, 1);
+
+-- HOUSEHOLD ADMINS
+INSERT INTO household_admins (user_id, household_id) VALUES (2, 1); -- Alice is admin of Smith Family
+INSERT INTO household_admins (user_id, household_id) VALUES (4, 3); -- Mike is admin of Brown Residence

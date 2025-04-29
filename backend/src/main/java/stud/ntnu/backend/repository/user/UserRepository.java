@@ -3,7 +3,9 @@ package stud.ntnu.backend.repository.user;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.model.household.Household;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -28,4 +30,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
    * @return true if a user exists with the email, false otherwise
    */
   boolean existsByEmail(String email);
+
+  List<User> findByHousehold(Household household);
 }
