@@ -65,12 +65,13 @@ public class AuthService {
     // Set the authentication in the security context
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-    // Generate JWT token
-    String jwt = jwtUtil.generateToken(authRequest.getEmail());
-
     // Get user details to include in the response
     User user = userRepository.findByEmail(authRequest.getEmail())
         .orElseThrow(() -> new BadCredentialsException("User not found"));
+
+    // Generate JWT token
+    String jwt = jwtUtil.generateToken(authRequest.getEmail());
+
 
     // Create and return the response
     return new AuthResponseDto(
@@ -78,7 +79,8 @@ public class AuthService {
         user.getId(),
         user.getEmail(),
         user.getRole().getName(),
-        user.getHousehold() != null ? user.getHousehold().getId() : null
+        user.getHousehold() != null ? user.getHousehold().getId() : null,
+        user.getIsUsing2FA()
     );
   }
 

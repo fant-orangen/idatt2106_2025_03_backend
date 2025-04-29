@@ -42,6 +42,11 @@ public class AuthController {
   @PostMapping("/login")
   public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
     AuthResponseDto authResponse = authService.login(authRequest);
+
+    if (authResponse.getIsUsing2FA()) {
+      return ResponseEntity.status(202).body(authResponse);
+    }
+
     return ResponseEntity.ok(authResponse);
   }
 
