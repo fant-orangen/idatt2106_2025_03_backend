@@ -10,7 +10,6 @@ import stud.ntnu.backend.service.NewsService;
 
 import java.security.Principal;
 
-// IllegalStateException is in java.lang package, no need to import
 
 @RestController
 @RequestMapping("/api/news")
@@ -24,6 +23,12 @@ public class NewsController {
     this.newsService = newsService;
   }
 
+  /**
+   * TODO: untested
+   * @param newsArticleDTO - The news article to create
+   * @param principal - The principal object containing the user's ID
+   * @return - The created news article
+   */
   @PostMapping
   public ResponseEntity<?> createNewsArticle(@Validated @RequestBody NewsArticleDTO newsArticleDTO,
       Principal principal) {
