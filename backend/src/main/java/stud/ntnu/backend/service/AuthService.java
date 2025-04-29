@@ -35,6 +35,7 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final EmailService emailService;
   private final EmailTokenRepository emailTokenRepository;
+  private final EmailVerificationService emailVerificationService;
   private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
   public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
@@ -47,6 +48,7 @@ public class AuthService {
     this.passwordEncoder = passwordEncoder;
     this.emailService = emailService;
     this.emailTokenRepository = emailTokenRepository;
+    this.emailVerificationService = new EmailVerificationService(emailService);
   }
 
   /**
@@ -69,6 +71,13 @@ public class AuthService {
     User user = userRepository.findByEmail(authRequest.getEmail())
         .orElseThrow(() -> new BadCredentialsException("User not found"));
 
+    // Check if 2FA is enabled
+    if (user.getIsUsing2FA()) {
+      // Return a response indicating 2FA is required
+      return new AuthResponseDto(null, user.getId(), user.getEmail(), user.getRole().getName(),
+          user.getHousehold() != null ? user.getHousehold().getId() : null, true);
+    }
+
     // Generate JWT token
     String jwt = jwtUtil.generateToken(authRequest.getEmail());
 
@@ -80,7 +89,7 @@ public class AuthService {
         user.getEmail(),
         user.getRole().getName(),
         user.getHousehold() != null ? user.getHousehold().getId() : null,
-        user.getIsUsing2FA()
+        false
     );
   }
 
@@ -178,5 +187,29 @@ public class AuthService {
     emailTokenRepository.save(emailToken);
 
     log.info("Email verified successfully for user: {}", user.getEmail());
+  }
+
+  public AuthResponseDto verify2FA(String email, Integer code) {
+    // Retrieve user
+    User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+    // Verify 2fa code
+    Integer sentCode = 1; // TODO: properly retrieve the sent code in some way, 2fa storage class? idk
+    if (!emailVerificationService.verifyCode(sentCode, code)) {
+      throw new IllegalArgumentException("Invalid 2FA code");
+    }
+
+    // Generate JWT token
+    String jwt = jwtUtil.generateToken(email);
+
+    // Create and return the response
+    return new AuthResponseDto(
+        jwt,
+        user.getId(),
+        user.getEmail(),
+        user.getRole().getName(),
+        user.getHousehold() != null ? user.getHousehold().getId() : null,
+        false
+    );
   }
 }
