@@ -60,7 +60,7 @@ public class User {
     private Boolean emailVerified = false;
 
     @Column(name = "is_using_2fa", nullable = false)
-    private Boolean isUsign2FA = false;
+    private Boolean isUsing2FA = false;
 
     @Column(name = "location_sharing_enabled", nullable = false)
     private Boolean locationSharingEnabled = false;
@@ -215,12 +215,12 @@ public class User {
         this.emailVerified = emailVerified;
     }
 
-    public Boolean getIsUsign2FA() {
-        return isUsign2FA;
+    public Boolean getisUsing2FA() {
+        return isUsing2FA;
     }
 
-    public void setIsUsign2FA(Boolean isUsign2FA) {
-        this.isUsign2FA = isUsign2FA;
+    public void setisUsing2FA(Boolean isUsing2FA) {
+        this.isUsing2FA = isUsing2FA;
     }
 
     public Boolean getLocationSharingEnabled() {
