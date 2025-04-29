@@ -224,9 +224,11 @@ CREATE TABLE news_articles (
     content TEXT NOT NULL,
     published_at DATETIME NOT NULL,
     created_by_user_id INT NOT NULL,
+    crisis_event_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by_user_id) REFERENCES users(id)
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id),
+    FOREIGN KEY (crisis_event_id) REFERENCES crisis_events(id)
 );
 
 -- EMAIL TOKEN MANAGEMENT (verification & password reset)
