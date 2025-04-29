@@ -24,81 +24,95 @@ import stud.ntnu.backend.service.AuthService;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-  private final AuthService authService;
+    private final AuthService authService;
 
-  private Logger log = org.slf4j.LoggerFactory.getLogger(AuthController.class);
+    private Logger log = org.slf4j.LoggerFactory.getLogger(AuthController.class);
 
-  public AuthController(AuthService authService) {
-    this.authService = authService;
-  }
-
-
-  /**
-   * Authenticate a user and generate a JWT token.
-   *
-   * @param authRequest the authentication request containing email and password
-   * @return ResponseEntity containing the JWT token and user information
-   */
-  @PostMapping("/login")
-  public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
-    AuthResponseDto authResponse = authService.login(authRequest);
-
-    if (authResponse.getIsUsing2FA()) {
-      return ResponseEntity.status(202).body(authResponse);
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
-    return ResponseEntity.ok(authResponse);
-  }
 
-  /**
-   * Register a new user with the USER role.
-   *
-   * @param registrationRequest the registration request containing email, password, firstName, lastName,
-   *                           and optional home address and location coordinates
-   * @return ResponseEntity with status 200 OK if successful
-   */
-  @PostMapping("/register")
-  public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDto registrationRequest) {
-    try {
-      authService.register(registrationRequest);
-      return ResponseEntity.ok().build();
-    } catch (IllegalArgumentException e) {
-      log.info("User registration failed: {}", e.getMessage());
-      return ResponseEntity.badRequest().body(e.getMessage());
-    }
-  }
-  /**
-   * Handles the email verification request.
-   * Receives the token sent via the verification link in the email.
-   *
-   * @param token The verification token from the request parameter.
-   * @return ResponseEntity indicating success or failure of the verification.
-   */
-  @GetMapping("/verify")
-  public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
-    try {
-      authService.verifyEmail(token);
-      // On success, return HTTP 200 OK with a success message
-      return ResponseEntity.ok().body("Email successfully verified.");
-    } catch (IllegalArgumentException | IllegalStateException e) {
-      // Catch specific exceptions for invalid/expired/used tokens
-      // Return HTTP 400 Bad Request with the error message from the service
-      return ResponseEntity.badRequest().body(e.getMessage());
-    } catch (Exception e) {
-      // Catch any other unexpected errors during the process
-      // Log the error for debugging
-      // Return HTTP 500 Internal Server Error
-      return ResponseEntity.status(500).body("An unexpected error occurred during email verification.");
-    }
-  }
+    /**
+     * Authenticate a user and generate a JWT token.
+     *
+     * @param authRequest the authentication request containing email and password
+     * @return ResponseEntity containing the JWT token and user information
+     */
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
+        AuthResponseDto authResponse = authService.login(authRequest);
 
-  @PostMapping("/verify-2fa")
-  public ResponseEntity<?> verify2FA(@RequestParam String email, @RequestParam String code) {
-    try {
-      AuthResponseDto authResponse = authService.verify2FA(email, code);
-      return ResponseEntity.ok(authResponse);
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().body(null); // Invalid code
+        if (authResponse.getIsUsing2FA()) {
+            return ResponseEntity.status(202).body(authResponse);
+        }
+
+        return ResponseEntity.ok(authResponse);
     }
-  }
+
+    /**
+     * Register a new user with the USER role.
+     *
+     * @param registrationRequest the registration request containing email, password, firstName, lastName,
+     *                            and optional home address and location coordinates
+     * @return ResponseEntity with status 200 OK if successful
+     */
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDto registrationRequest) {
+        try {
+            authService.register(registrationRequest);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.info("User registration failed: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /**
+     * Handles the email verification request.
+     * Receives the token sent via the verification link in the email.
+     *
+     * @param token The verification token from the request parameter.
+     * @return ResponseEntity indicating success or failure of the verification.
+     */
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
+        try {
+            authService.verifyEmail(token);
+            // On success, return HTTP 200 OK with a success message
+            return ResponseEntity.ok().body("Email successfully verified.");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            // Catch specific exceptions for invalid/expired/used tokens
+            // Return HTTP 400 Bad Request with the error message from the service
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            // Catch any other unexpected errors during the process
+            // Log the error for debugging
+            // Return HTTP 500 Internal Server Error
+            return ResponseEntity.status(500)
+                .body("An unexpected error occurred during email verification.");
+        }
+    }
+
+    @PostMapping("/send-2fa")
+    public ResponseEntity<?> send2FACode(@RequestParam String email) {
+        try {
+            authService.send2FACode(email);
+            return ResponseEntity.status(202).body("2FA code sent successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage()); // Invalid email
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An error occurred while sending the 2FA code.");
+        }
+    }
+
+    @PostMapping("/verify-2fa")
+    public ResponseEntity<?> verify2FA(@RequestParam String email, @RequestParam Integer code) {
+        try {
+            AuthResponseDto authResponse = authService.verify2FA(email, code);
+            return ResponseEntity.ok(authResponse);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null); // Invalid code
+        }
+    }
 }
