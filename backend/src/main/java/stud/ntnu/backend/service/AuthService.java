@@ -17,7 +17,6 @@ import stud.ntnu.backend.model.user.EmailToken;
 import stud.ntnu.backend.model.user.Role;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.EmailTokenRepository;
-import stud.ntnu.backend.repository.user.TwoFactorCodeRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.util.JwtUtil;
 import java.util.Optional;
