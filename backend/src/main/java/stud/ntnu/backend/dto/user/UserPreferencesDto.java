@@ -11,6 +11,8 @@ import lombok.Setter;
 public class UserPreferencesDto {
 
   private Boolean locationSharingEnabled;
+  private Boolean notificationsEnabled;
+  private Boolean twoFactorAuthenticationEnabled;
 
   // Add more preferences as needed, such as notification settings
 
@@ -19,8 +21,11 @@ public class UserPreferencesDto {
   }
 
   // Constructor with all fields
-  public UserPreferencesDto(Boolean locationSharingEnabled) {
+  public UserPreferencesDto(Boolean locationSharingEnabled, Boolean notificationsEnabled,
+      Boolean twoFactorAuthenticationEnabled) {
     this.locationSharingEnabled = locationSharingEnabled;
+    this.notificationsEnabled = notificationsEnabled;
+    this.twoFactorAuthenticationEnabled = twoFactorAuthenticationEnabled;
   }
 
 }
