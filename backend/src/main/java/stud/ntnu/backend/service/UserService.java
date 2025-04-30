@@ -13,6 +13,7 @@ import stud.ntnu.backend.dto.user.UserHistoryDto.ReflectionDto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import stud.ntnu.backend.security.AdminChecker;
 
 /**
  * Service for managing users. Handles retrieval, updating, and deletion of users. Note: User
@@ -126,7 +127,7 @@ public class UserService {
     if (userUpdateDto.getHomeLongitude() != null) {
       user.setHomeLongitude(userUpdateDto.getHomeLongitude());
     }
-    if ("ADMIN".equalsIgnoreCase(user.getRole().getName())) {
+    if (AdminChecker.isUserAdmin(user)) {
       user.setIsUsing2FA(true);
     }
 
@@ -149,7 +150,7 @@ public class UserService {
         .orElseThrow(() -> new IllegalStateException("User not found"));
 
     // Validate that 2FA cannot be disabled for admin users
-    if ("ADMIN".equalsIgnoreCase(user.getRole().getName()) && Boolean.FALSE.equals(preferencesDto.getTwoFactorAuthenticationEnabled())) {
+    if (AdminChecker.isUserAdmin(user) && Boolean.FALSE.equals(preferencesDto.getTwoFactorAuthenticationEnabled())) {
       throw new IllegalArgumentException("2FA cannot be disabled for admin users.");
     }
 

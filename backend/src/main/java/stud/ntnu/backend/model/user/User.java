@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import stud.ntnu.backend.model.group.Group;
 import stud.ntnu.backend.model.household.Household;
+import stud.ntnu.backend.security.AdminChecker;
 
 @Entity
 @Table(name = "users")
@@ -128,6 +129,9 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
+        if (AdminChecker.isUserAdmin(this)) {
+            this.isUsing2FA = true;
+        }
     }
 
     public Household getHousehold() {
