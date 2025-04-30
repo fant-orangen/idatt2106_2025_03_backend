@@ -33,7 +33,12 @@ public class LocationUtil {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return EARTH_RADIUS * c;
     }
-    //using openstreetmap to go from address to coordinates
+    /**
+     * Retrieves the coordinates corresponding to the given address using OpenStreetMap's Nominatim API.
+     *
+     * @param address the address for which to retrieve coordinates
+     * @return a CoordinatesItemDto containing latitude and longitude
+     */
     public static CoordinatesItemDto getCoordinatesByAddress(String address) {
         final String NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
 
@@ -65,6 +70,12 @@ public class LocationUtil {
         }
     }
 
+    /**
+     * Retrieves the address corresponding to the given coordinates using OpenStreetMap's Nominatim API.
+     *
+     * @param coordinates the coordinates for which to retrieve the address
+     * @return a formatted address string
+     */
     public static String getAddressByCords(CoordinatesItemDto coordinates) {
         final String NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse";
 
