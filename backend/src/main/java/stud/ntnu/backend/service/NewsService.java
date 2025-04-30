@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.news.NewsArticleDTO;
 import stud.ntnu.backend.dto.news.NewsArticleResponseDTO;
+import stud.ntnu.backend.dto.news.UpdateNewsArticleDTO;
 import stud.ntnu.backend.model.news.NewsArticle;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.model.map.CrisisEvent;
@@ -116,5 +117,24 @@ public class NewsService {
 
     // Convert to DTOs
     return newsArticles.map(NewsArticleResponseDTO::fromEntity);
+  }
+
+  @Transactional
+  public NewsArticle updateNewsArticle(Long newsArticleId, UpdateNewsArticleDTO updateDto) {
+    NewsArticle newsArticle = newsArticleRepository.findById(newsArticleId)
+        .orElseThrow(() -> new NoSuchElementException("News article not found with id: " + newsArticleId));
+
+    // Update only the fields that are provided
+    if (updateDto.getTitle() != null) {
+      newsArticle.setTitle(updateDto.getTitle());
+    }
+    if (updateDto.getContent() != null) {
+      newsArticle.setContent(updateDto.getContent());
+    }
+
+    // Update the timestamp
+    newsArticle.setUpdatedAt(LocalDateTime.now());
+
+    return newsArticleRepository.save(newsArticle);
   }
 }
