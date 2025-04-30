@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import stud.ntnu.backend.dto.map.CreateScenarioThemeDto;
 import stud.ntnu.backend.dto.map.UpdateScenarioThemeDto;
+import stud.ntnu.backend.dto.map.ScenarioThemeDetailsDto;
 import stud.ntnu.backend.model.map.ScenarioTheme;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
@@ -34,8 +35,9 @@ public class ScenarioThemeController {
 
   /**
    * Creates a new scenario theme. Only users with ADMIN or SUPERADMIN roles are allowed.
-   * 
-   * @param createScenarioThemeDto the scenario theme information (name, description, and optional instructions)
+   *
+   * @param createScenarioThemeDto the scenario theme information (name, description, and optional
+   *                               instructions)
    * @param principal              the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
@@ -60,20 +62,22 @@ public class ScenarioThemeController {
 
   /**
    * Updates an existing scenario theme. Only users with ADMIN or SUPERADMIN roles are allowed.
-   * 
-   * @param updateScenarioThemeDto the scenario theme update information (id, and optionally name, description, instructions)
+   *
+   * @param updateScenarioThemeDto the scenario theme update information (id, and optionally name,
+   *                               description, instructions)
    * @param principal              the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
   @PatchMapping
   public ResponseEntity<?> updateScenarioTheme(
-          @Valid @RequestBody UpdateScenarioThemeDto updateScenarioThemeDto,
-          Principal principal) {
+      @Valid @RequestBody UpdateScenarioThemeDto updateScenarioThemeDto,
+      Principal principal) {
     try {
       if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
         return ResponseEntity.status(403).body("Only administrators can update scenario themes");
       }
-      ScenarioTheme updatedScenarioTheme = scenarioThemeService.updateScenarioTheme(updateScenarioThemeDto);
+      ScenarioTheme updatedScenarioTheme = scenarioThemeService.updateScenarioTheme(
+          updateScenarioThemeDto);
       return ResponseEntity.ok(updatedScenarioTheme);
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
@@ -82,7 +86,7 @@ public class ScenarioThemeController {
 
   /**
    * Gets all scenario themes with pagination.
-   * 
+   *
    * @param pageable the pagination information
    * @return ResponseEntity with a page of scenario themes
    */
@@ -90,5 +94,18 @@ public class ScenarioThemeController {
   public ResponseEntity<Page<ScenarioTheme>> getAllScenarioThemes(Pageable pageable) {
     Page<ScenarioTheme> scenarioThemes = scenarioThemeService.getAllScenarioThemes(pageable);
     return ResponseEntity.ok(scenarioThemes);
+  }
+
+  /**
+   * Gets scenario theme details (name, description, instructions) by id.
+   *
+   * @param id the scenario theme id
+   * @return ResponseEntity with ScenarioThemeDetailsDto or 404 if not found
+   */
+  @GetMapping("/{id}")
+  public ResponseEntity<ScenarioThemeDetailsDto> getScenarioTheme(@PathVariable Integer id) {
+    return scenarioThemeService.getScenarioThemeDetailsById(id)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 }
