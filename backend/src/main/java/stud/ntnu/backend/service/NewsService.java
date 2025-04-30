@@ -85,16 +85,17 @@ public class NewsService {
   }
 
   /**
-   * Get paginated news articles for crisis events that are within a specified distance of the user's location.
-   * This includes both the user's home address and the user's household address.
+   * Get paginated news articles for crisis events that are within a specified distance of the
+   * user's location. This includes both the user's home address and the user's household address.
    *
-   * @param user the user
+   * @param user         the user
    * @param distanceInKm the distance in kilometers
-   * @param pageable pagination information
+   * @param pageable     pagination information
    * @return a page of news article DTOs
    */
   @Transactional(readOnly = true)
-  public Page<NewsArticleResponseDTO> getNewsDigestForUser(User user, double distanceInKm, Pageable pageable) {
+  public Page<NewsArticleResponseDTO> getNewsDigestForUser(User user, double distanceInKm,
+      Pageable pageable) {
     // Get all crisis events
     List<CrisisEvent> allCrisisEvents = crisisEventRepository.findAll();
 

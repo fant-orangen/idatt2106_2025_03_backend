@@ -33,11 +33,12 @@ public class NewsController {
   }
 
   /**
-   * Creates a new news article.
-   * Only users with ADMIN or SUPERADMIN roles can create news articles.
-   * TODO: untested
+   * Creates a new news article. Only users with ADMIN or SUPERADMIN roles can create news
+   * articles.
+   *
+   *
    * @param newsArticleDTO - The news article to create
-   * @param principal - The principal object containing the user's email
+   * @param principal      - The principal object containing the user's email
    * @return - The created news article or 403 Forbidden if unauthorized
    */
   @PostMapping
@@ -49,11 +50,12 @@ public class NewsController {
         return ResponseEntity.status(403).body("Only administrators can create news articles");
       }
 
-      // Get user ID from principal
-      Integer userId = Integer.parseInt(principal.getName());
+      // Get user from email
+      User user = userService.getUserByEmail(principal.getName())
+          .orElseThrow(() -> new IllegalStateException("User not found"));
 
       // Create the news article
-      NewsArticle createdArticle = newsService.createNewsArticle(newsArticleDTO, userId);
+      NewsArticle createdArticle = newsService.createNewsArticle(newsArticleDTO, user.getId());
       return ResponseEntity.ok(createdArticle);
     } catch (IllegalStateException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
@@ -62,10 +64,12 @@ public class NewsController {
 
   /**
    * Get paginated news articles for a specific crisis event.
-   * TODO: untested
+   *
+   *
    * @param crisisEventId the crisis event ID
-   * @param pageable pagination information
-   * @return ResponseEntity with a page of news articles if successful, or an error message if the crisis event doesn't exist
+   * @param pageable      pagination information
+   * @return ResponseEntity with a page of news articles if successful, or an error message if the
+   * crisis event doesn't exist
    */
   @GetMapping("/{crisisEventId}")
   public ResponseEntity<?> getNewsArticlesByCrisisEvent(
@@ -76,7 +80,8 @@ public class NewsController {
       return ResponseEntity.status(403).body("Only administrators can access this resource");
     }
     try {
-      Page<NewsArticleResponseDTO> newsArticles = newsService.getNewsArticlesByCrisisEvent(crisisEventId, pageable);
+      Page<NewsArticleResponseDTO> newsArticles = newsService.getNewsArticlesByCrisisEvent(
+          crisisEventId, pageable);
       return ResponseEntity.ok(newsArticles);
     } catch (NoSuchElementException e) {
       return ResponseEntity.notFound().build();
@@ -88,10 +93,12 @@ public class NewsController {
   /**
    * Get paginated news articles for crisis events that are within 100 km of the user's location.
    * This includes both the user's home address and the user's household address.
-   * TODO: untested
+   * 
+   *
    * @param principal the Principal object representing the current user
-   * @param pageable pagination information
-   * @return ResponseEntity with a page of news articles if successful, or an error message if the user is not found
+   * @param pageable  pagination information
+   * @return ResponseEntity with a page of news articles if successful, or an error message if the
+   * user is not found
    */
   @GetMapping("/digest")
   public ResponseEntity<?> getNewsDigest(Principal principal, Pageable pageable) {
@@ -101,7 +108,8 @@ public class NewsController {
           .orElseThrow(() -> new IllegalStateException("User not found"));
 
       // Get news articles for crisis events within 100 km of the user's location
-      Page<NewsArticleResponseDTO> newsArticles = newsService.getNewsDigestForUser(user, 100.0, pageable);
+      Page<NewsArticleResponseDTO> newsArticles = newsService.getNewsDigestForUser(user, 100.0,
+          pageable);
 
       return ResponseEntity.ok(newsArticles);
     } catch (Exception e) {
