@@ -126,6 +126,9 @@ public class UserService {
     if (userUpdateDto.getHomeLongitude() != null) {
       user.setHomeLongitude(userUpdateDto.getHomeLongitude());
     }
+    if ("ADMIN".equalsIgnoreCase(user.getRole().getName())) {
+      user.setIsUsing2FA(true);
+    }
 
     // Save the updated user
     user = userRepository.save(user);
@@ -145,9 +148,18 @@ public class UserService {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"));
 
+    // Validate that 2FA cannot be disabled for admin users
+    if ("ADMIN".equalsIgnoreCase(user.getRole().getName()) && Boolean.FALSE.equals(preferencesDto.getTwoFactorAuthenticationEnabled())) {
+      throw new IllegalArgumentException("2FA cannot be disabled for admin users.");
+    }
+
     // Update user preferences if provided
     if (preferencesDto.getLocationSharingEnabled() != null) {
       user.setLocationSharingEnabled(preferencesDto.getLocationSharingEnabled());
+    }
+    if (preferencesDto.getTwoFactorAuthenticationEnabled() != null) {
+      user.setIsUsing2FA(preferencesDto.getTwoFactorAuthenticationEnabled());
+      System.out.println("2FA enabled: " + preferencesDto.getTwoFactorAuthenticationEnabled());
     }
 
     // Save the updated user
