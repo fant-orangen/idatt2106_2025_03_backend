@@ -139,12 +139,6 @@ VALUES (2, 'School Playground', 63.4300, 10.3960, 'Elementary School', 3);
 INSERT INTO meeting_places (household_id, name, latitude, longitude, address, created_by_user_id)
 VALUES (3, 'Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
 
--- CRISIS EVENTS
-INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active)
-VALUES ('Flood Warning', 'Potential flooding in downtown area', 'yellow', 63.4300, 10.3950, 2.0, CURRENT_TIMESTAMP, 1, TRUE);
-INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active)
-VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 63.4250, 10.3900, 5.0, DATEADD('DAY', 1, CURRENT_TIMESTAMP), 1, TRUE);
-
 -- SCENARIO THEMES
 INSERT INTO scenario_themes (name, description, created_by_user_id)
 VALUES ('Power Outage', 'Preparing for extended power outages', 1);
@@ -153,41 +147,11 @@ VALUES ('Natural Disaster', 'Earthquake, flood, or storm preparation', 1);
 INSERT INTO scenario_themes (name, description, created_by_user_id)
 VALUES ('Public Health Emergency', 'Pandemic or disease outbreak', 1);
 
--- GAMIFICATION ACTIVITIES
-INSERT INTO gamification_activities (name, category, description, created_by_user_id)
-VALUES ('Complete Inventory', 'Preparation', 'Add at least 10 items to your household inventory', 1);
-INSERT INTO gamification_activities (name, category, description, created_by_user_id)
-VALUES ('Create Meeting Place', 'Planning', 'Define a meeting place for your household', 1);
-INSERT INTO gamification_activities (name, category, description, created_by_user_id)
-VALUES ('Join Group', 'Community', 'Join a community preparedness group', 1);
-
--- USER GAMIFICATION ACTIVITIES
-INSERT INTO user_gamification_activities (user_id, activity_id, status, score, completed_at)
-VALUES (2, 1, 'completed', 100, CURRENT_TIMESTAMP);
-INSERT INTO user_gamification_activities (user_id, activity_id, status)
-VALUES (2, 2, 'pending');
-INSERT INTO user_gamification_activities (user_id, activity_id, status, score, completed_at)
-VALUES (3, 3, 'completed', 50, CURRENT_TIMESTAMP);
-
--- NOTIFICATION PREFERENCES
-INSERT INTO notification_preferences (user_id, preference_type, enabled)
-VALUES (2, 'expiration_reminder', TRUE);
-INSERT INTO notification_preferences (user_id, preference_type, enabled)
-VALUES (2, 'crisis_alert', TRUE);
-INSERT INTO notification_preferences (user_id, preference_type, enabled)
-VALUES (3, 'expiration_reminder', FALSE);
-INSERT INTO notification_preferences (user_id, preference_type, enabled)
-VALUES (3, 'crisis_alert', TRUE);
-INSERT INTO notification_preferences (user_id, preference_type, enabled)
-VALUES (4, 'location_request', FALSE);
-
--- NOTIFICATION
-INSERT INTO notifications (user_id, preference_type, target_type, target_id, description, notify_at, sent_at, read_at, created_at)
-VALUES (2, 'crisis_alert', 'event', 101, 'Severe weather alert for your region.', '2025-04-28 14:00:00', NULL, NULL, '2025-04-28 13:45:00');
-INSERT INTO notifications (user_id, preference_type, target_type, target_id, description, notify_at, sent_at, read_at, created_at)
-VALUES (2, 'crisis_alert', 'event', 102, 'danger: alan walker in the streets', '2025-04-29 09:00:00', NULL, NULL, '2025-04-28 13:55:00');
-INSERT INTO notifications (user_id, preference_type, target_type, target_id, description, notify_at, sent_at, read_at, created_at)
-VALUES (3, 'crisis_alert', 'event', 103, 'A big bomb on the way', '2025-04-30 16:30:00', NULL, NULL, '2025-04-28 14:00:00');
+-- CRISIS EVENTS
+INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
+VALUES ('Flood Warning', 'Potential flooding in downtown area', 'yellow', 63.4300, 10.3950, 2.0, CURRENT_TIMESTAMP, 1, TRUE, 2);
+INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
+VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 63.4250, 10.3900, 5.0, DATEADD('DAY', 1, CURRENT_TIMESTAMP), 1, TRUE, NULL);
 
 -- NEWS ARTICLES
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
