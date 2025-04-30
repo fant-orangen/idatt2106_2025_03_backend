@@ -225,6 +225,7 @@ CREATE TABLE news_articles (
     published_at DATETIME NOT NULL,
     created_by_user_id INT NOT NULL,
     crisis_event_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('draft', 'published', 'archived')),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by_user_id) REFERENCES users(id),

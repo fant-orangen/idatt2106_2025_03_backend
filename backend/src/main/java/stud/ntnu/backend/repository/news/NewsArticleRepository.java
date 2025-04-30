@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.news.NewsArticle;
+import stud.ntnu.backend.model.news.NewsArticle.ArticleStatus;
 
 import java.util.List;
 
@@ -44,4 +45,28 @@ public interface NewsArticleRepository extends JpaRepository<NewsArticle, Long> 
     Page<NewsArticle> findByCrisisEventIdInOrderByPublishedAtDesc(
             @Param("crisisEventIds") List<Integer> crisisEventIds,
             Pageable pageable);
+
+    /**
+     * Find all news articles for crisis events with the specified IDs and status with pagination.
+     *
+     * @param crisisEventIds the list of crisis event IDs
+     * @param status the article status
+     * @param pageable pagination information
+     * @return a page of news articles
+     */
+    @Query("SELECT n FROM NewsArticle n WHERE n.crisisEvent.id IN :crisisEventIds AND n.status = :status ORDER BY n.publishedAt DESC")
+    Page<NewsArticle> findByCrisisEventIdInAndStatusOrderByPublishedAtDesc(
+            @Param("crisisEventIds") List<Integer> crisisEventIds,
+            @Param("status") ArticleStatus status,
+            Pageable pageable);
+
+    /**
+     * Find all news articles for a specific crisis event with a specific status with pagination.
+     *
+     * @param crisisEventId the crisis event ID
+     * @param status the article status
+     * @param pageable pagination information
+     * @return a page of news articles
+     */
+    Page<NewsArticle> findByCrisisEventIdAndStatus(Integer crisisEventId, ArticleStatus status, Pageable pageable);
 }

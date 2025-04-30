@@ -42,6 +42,11 @@ public class NewsArticle {
   @JoinColumn(name = "crisis_event_id", nullable = false)
   private CrisisEvent crisisEvent;
 
+  @NotNull(message = "Status is required")
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private ArticleStatus status;
+
   @NotNull(message = "Created date is required")
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
@@ -49,5 +54,12 @@ public class NewsArticle {
   @NotNull(message = "Updated date is required")
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
+
+  /**
+   * Enum representing the possible statuses of a news article.
+   */
+  public enum ArticleStatus {
+    draft, published, archived
+  }
 
 }

@@ -10,6 +10,7 @@ import stud.ntnu.backend.dto.news.NewsArticleDTO;
 import stud.ntnu.backend.dto.news.NewsArticleResponseDTO;
 import stud.ntnu.backend.dto.news.UpdateNewsArticleDTO;
 import stud.ntnu.backend.model.news.NewsArticle;
+import stud.ntnu.backend.model.news.NewsArticle.ArticleStatus;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.NewsService;
@@ -63,7 +64,7 @@ public class NewsController {
     }
   }
 
-  
+
 
   /**
    * Get paginated news articles for a specific crisis event.
@@ -96,7 +97,7 @@ public class NewsController {
   /**
    * Get paginated news articles for crisis events that are within 100 km of the user's location.
    * This includes both the user's home address and the user's household address.
-   * 
+   *
    *
    * @param principal the Principal object representing the current user
    * @param pageable  pagination information
@@ -122,7 +123,7 @@ public class NewsController {
 
   /**
    * Updates an existing news article. Only users with ADMIN or SUPERADMIN roles can update news
-   * articles. Only title and content can be updated.
+   * articles. Title, content, and status can be updated.
    *
    * @param newsArticleId - The ID of the news article to update
    * @param updateDto - The update data containing new title and/or content

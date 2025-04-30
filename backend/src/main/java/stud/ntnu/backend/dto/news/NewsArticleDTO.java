@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import stud.ntnu.backend.model.news.NewsArticle.ArticleStatus;
 
 @Getter
 @Setter
@@ -18,5 +19,8 @@ public class NewsArticleDTO {
 
   @NotNull(message = "Crisis event ID is required")
   private Integer crisisEventId;
+
+  // Status is optional in the DTO - will default to 'published' if not provided
+  private ArticleStatus status;
 
 }

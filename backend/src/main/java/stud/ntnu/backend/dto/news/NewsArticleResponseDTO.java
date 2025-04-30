@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import stud.ntnu.backend.model.news.NewsArticle;
+import stud.ntnu.backend.model.news.NewsArticle.ArticleStatus;
 
 import java.time.LocalDateTime;
 
@@ -16,35 +17,38 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NewsArticleResponseDTO {
-    private Long id;
-    private String title;
-    private String content;
-    private LocalDateTime publishedAt;
-    private Integer createdById;
-    private String createdByName;
-    private Integer crisisEventId;
-    private String crisisEventName;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
-    /**
-     * Converts a NewsArticle entity to a NewsArticleResponseDTO.
-     *
-     * @param newsArticle the news article entity
-     * @return the news article response DTO
-     */
-    public static NewsArticleResponseDTO fromEntity(NewsArticle newsArticle) {
-        return new NewsArticleResponseDTO(
-                newsArticle.getId(),
-                newsArticle.getTitle(),
-                newsArticle.getContent(),
-                newsArticle.getPublishedAt(),
-                newsArticle.getCreatedBy().getId(),
-                newsArticle.getCreatedBy().getName(),
-                newsArticle.getCrisisEvent().getId(),
-                newsArticle.getCrisisEvent().getName(),
-                newsArticle.getCreatedAt(),
-                newsArticle.getUpdatedAt()
-        );
-    }
+  private Long id;
+  private String title;
+  private String content;
+  private LocalDateTime publishedAt;
+  private Integer createdById;
+  private String createdByName;
+  private Integer crisisEventId;
+  private String crisisEventName;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
+  private ArticleStatus status;
+
+  /**
+   * Converts a NewsArticle entity to a NewsArticleResponseDTO.
+   *
+   * @param newsArticle the news article entity
+   * @return the news article response DTO
+   */
+  public static NewsArticleResponseDTO fromEntity(NewsArticle newsArticle) {
+    return new NewsArticleResponseDTO(
+        newsArticle.getId(),
+        newsArticle.getTitle(),
+        newsArticle.getContent(),
+        newsArticle.getPublishedAt(),
+        newsArticle.getCreatedBy().getId(),
+        newsArticle.getCreatedBy().getName(),
+        newsArticle.getCrisisEvent().getId(),
+        newsArticle.getCrisisEvent().getName(),
+        newsArticle.getCreatedAt(),
+        newsArticle.getUpdatedAt(),
+        newsArticle.getStatus()
+    );
+  }
 }

@@ -190,10 +190,14 @@ INSERT INTO notifications (user_id, preference_type, target_type, target_id, des
 VALUES (3, 'crisis_alert', 'event', 103, 'A big bomb on the way', '2025-04-30 16:30:00', NULL, NULL, '2025-04-28 14:00:00');
 
 -- NEWS ARTICLES
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1);
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id)
-VALUES ('New Emergency Response Guidelines', 'The city has updated its emergency response guidelines. Key changes include...', DATEADD('DAY', -2, CURRENT_TIMESTAMP), 1, 2);
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('New Emergency Response Guidelines', 'The city has updated its emergency response guidelines. Key changes include...', DATEADD('DAY', -2, CURRENT_TIMESTAMP), 1, 2, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Draft Article', 'This is a draft article that is not yet published...', CURRENT_TIMESTAMP, 1, 1, 'draft');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Archived Article', 'This is an old article that has been archived...', DATEADD('DAY', -30, CURRENT_TIMESTAMP), 1, 2, 'archived');
 
 -- HOUSEHOLD ADMINS
 INSERT INTO household_admins (user_id, household_id) VALUES (2, 1); -- Alice is admin of Smith Family

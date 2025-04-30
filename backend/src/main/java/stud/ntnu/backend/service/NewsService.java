@@ -9,6 +9,7 @@ import stud.ntnu.backend.dto.news.NewsArticleDTO;
 import stud.ntnu.backend.dto.news.NewsArticleResponseDTO;
 import stud.ntnu.backend.dto.news.UpdateNewsArticleDTO;
 import stud.ntnu.backend.model.news.NewsArticle;
+import stud.ntnu.backend.model.news.NewsArticle.ArticleStatus;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.repository.news.NewsArticleRepository;
@@ -57,6 +58,13 @@ public class NewsService {
     newsArticle.setCrisisEvent(crisisEvent);
     newsArticle.setCreatedAt(LocalDateTime.now());
     newsArticle.setUpdatedAt(LocalDateTime.now());
+
+    // Set status to 'published' by default if not provided
+    if (newsArticleDTO.getStatus() != null) {
+      newsArticle.setStatus(newsArticleDTO.getStatus());
+    } else {
+      newsArticle.setStatus(ArticleStatus.published);
+    }
 
     return newsArticleRepository.save(newsArticle);
   }
@@ -111,9 +119,9 @@ public class NewsService {
       return Page.empty(pageable);
     }
 
-    // Get news articles for the nearby crisis events
-    Page<NewsArticle> newsArticles = newsArticleRepository.findByCrisisEventIdInOrderByPublishedAtDesc(
-        nearbyCrisisEventIds, pageable);
+    // Get published news articles for the nearby crisis events
+    Page<NewsArticle> newsArticles = newsArticleRepository.findByCrisisEventIdInAndStatusOrderByPublishedAtDesc(
+        nearbyCrisisEventIds, ArticleStatus.published, pageable);
 
     // Convert to DTOs
     return newsArticles.map(NewsArticleResponseDTO::fromEntity);
@@ -130,6 +138,9 @@ public class NewsService {
     }
     if (updateDto.getContent() != null) {
       newsArticle.setContent(updateDto.getContent());
+    }
+    if (updateDto.getStatus() != null) {
+      newsArticle.setStatus(updateDto.getStatus());
     }
 
     // Update the timestamp
