@@ -28,6 +28,7 @@ public class TwoFactorCodeService {
     }
 
     public void sendVerificationCode(String email) {
+        twoFactorCodeRepository.deleteByEmail(email);
         Integer code = generateVerificationCode();
         saveCode(email, code);
         emailService.send2FAEmail(email, code);

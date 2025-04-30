@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import stud.ntnu.backend.dto.auth.AuthRequestDto;
 import stud.ntnu.backend.dto.auth.AuthResponseDto;
 import stud.ntnu.backend.dto.auth.RegisterRequestDto;
+import stud.ntnu.backend.dto.auth.Send2FACodeRequestDto;
 import stud.ntnu.backend.service.AuthService;
+import stud.ntnu.backend.dto.auth.TwoFactorRequestDto;
 
 /**
  * Handles user authentication and account lifecycle actions. Includes user registration, email
@@ -32,7 +34,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-  
+
     /**
      * Validates the JWT token from the Authorization header.
      * Returns 200 OK if the token is valid, 401 Unauthorized otherwise.
@@ -41,11 +43,11 @@ public class AuthController {
      */
     @GetMapping("/validate")
     public ResponseEntity<?> validateToken() {
-      // The token validation is handled by Spring Security's JWT filter
-      // If we reach this endpoint, the token is valid
-      return ResponseEntity.ok().build();
+        // The token validation is handled by Spring Security's JWT filter
+        // If we reach this endpoint, the token is valid
+        return ResponseEntity.ok().build();
     }
-  
+
     /**
      * Authenticate a user and generate a JWT token.
      *
@@ -106,24 +108,26 @@ public class AuthController {
     }
 
     @PostMapping("/send-2fa")
-    public ResponseEntity<?> send2FACode(@RequestParam String email) {
+    public ResponseEntity<?> send2FACode(@RequestBody @Valid Send2FACodeRequestDto request) {
         try {
-            authService.send2FACode(email);
-            return ResponseEntity.status(202).body("2FA code sent successfully.");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage()); // Invalid email
+            authService.send2FACode(request.getEmail());
+            return ResponseEntity.ok("2FA code sent successfully.");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("An error occurred while sending the 2FA code.");
+            log.error("Error sending 2FA code: {}", e.getMessage());
+            return ResponseEntity.status(500).body("Failed to send 2FA code.");
         }
     }
 
     @PostMapping("/verify-2fa")
-    public ResponseEntity<?> verify2FA(@RequestParam String email, @RequestParam Integer code) {
+    public ResponseEntity<?> verify2FA(@RequestBody @Valid TwoFactorRequestDto request) {
         try {
-            AuthResponseDto authResponse = authService.verify2FA(email, code);
-            return ResponseEntity.ok(authResponse);
+            AuthResponseDto response = authService.verify2FA(request.getEmail(), request.getCode());
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null); // Invalid code
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error verifying 2FA code: {}", e.getMessage());
+            return ResponseEntity.status(500).body("Failed to verify 2FA code.");
         }
     }
 }
