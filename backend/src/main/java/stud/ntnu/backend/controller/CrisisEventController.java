@@ -145,13 +145,30 @@ public class CrisisEventController {
   }
 
   /**
+   * Gets a specific crisis event by its ID.
+   *
+   * @param id the ID of the crisis event to retrieve
+   * @return ResponseEntity with the crisis event if found, or 404 Not Found if not found
+   */
+  @GetMapping("/{id}")
+  public ResponseEntity<?> getCrisisEventById(@PathVariable Integer id) {
+    try {
+      return crisisEventService.getCrisisEventById(id)
+          .map(ResponseEntity::ok)
+          .orElse(ResponseEntity.notFound().build());
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
    * Gets all changes for a specific crisis event with pagination.
    *
-   * @param id the ID of the crisis event
-   * @param pageable the pagination information
+   * @param id        the ID of the crisis event
+   * @param pageable  the pagination information
    * @param principal the Principal object representing the current user
-   * @return ResponseEntity with a page of crisis event changes if successful, or an error message if the
-   * crisis event is not found or the user is not authorized
+   * @return ResponseEntity with a page of crisis event changes if successful, or an error message
+   * if the crisis event is not found or the user is not authorized
    */
   @GetMapping("/{id}/changes")
   public ResponseEntity<?> getCrisisEventChanges(

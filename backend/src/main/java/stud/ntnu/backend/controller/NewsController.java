@@ -64,8 +64,6 @@ public class NewsController {
     }
   }
 
-
-
   /**
    * Get paginated news articles for a specific crisis event.
    *
