@@ -69,28 +69,28 @@ public class EmailService {
             // Bilingual Email Body using Text Block and .formatted()
             String emailBody = """
                 Hei %s,
-                
+
                 Takk for at du registrerte deg hos Krisefikser.no.
                 Vennligst klikk på lenken under for å bekrefte e-postadressen din:
-                
+
                 %s
-                
+
                 Hvis du ikke registrerte deg, vennligst se bort fra denne e-posten.
-                
+
                 Med vennlig hilsen,
                 Krisefikser-teamet
-                
+
                 ----------------------------------------
-                
+
                 Hello %s,
-                
+
                 Thank you for registering with Krisefikser.no.
                 Please click the link below to verify your email address:
-                
+
                 %s
-                
+
                 If you did not register, please ignore this email.
-                
+
                 Regards,
                 The Krisefikser Team
                 """.formatted(userName, verificationUrl, userName, verificationUrl);
@@ -103,11 +103,9 @@ public class EmailService {
             log.info("Verification email sent successfully to: {}", user.getEmail());
 
         } catch (MailException e) {
-            log.error("Mail sending error for verification email to {}: {}", user.getEmail(),
-                e.getMessage(), e);
+            log.error("Mail sending error for verification email to {}", user.getEmail());
         } catch (Exception e) {
-            log.error("Unexpected error sending verification email to {}: {}", user.getEmail(),
-                e.getMessage(), e);
+            log.error("Unexpected error sending verification email to {}: {}", user.getEmail(), e.getMessage());
         }
     }
 
@@ -136,22 +134,22 @@ public class EmailService {
 
             String emailBody = """
                 Hei %s,
-                
+
                 Din 2FA-verifiseringskode er: %s
-                
+
                 Vennligst skriv inn denne koden for å fullføre innloggingen din.
-                
+
                 Med vennlig hilsen,
                 Krisefikser-teamet
-                
+
                 ----------------------------------------
-                
+
                 Hello %s,
-                
+
                 Your 2FA verification code is: %s
-                
+
                 Please enter this code to complete your login.
-                
+
                 Regards,
                 The Krisefikser Team
                 """.formatted(userName, code, userName, code);
@@ -163,11 +161,68 @@ public class EmailService {
             log.info("2FA email sent successfully to: {}", user.getEmail());
 
         } catch (MailException e) {
-            log.error("Mail sending error for verification email to {}: {}", user.getEmail(),
-                e.getMessage(), e);
+            log.error("Mail sending error for verification email to {}", user.getEmail());
         } catch (Exception e) {
-            log.error("Unexpected error sending 2FA email to {}: {}", user.getEmail(),
-                e.getMessage(), e);
+            log.error("Unexpected error sending 2FA email to {}: {}", user.getEmail(), e.getMessage());
+        }
+    }
+
+    /**
+     * Sends a password reset email to the specified user.
+     *
+     * @param user The User object representing the recipient. Must have a valid email address.
+     * @param token The unique reset token string to include in the link.
+     */
+    public void sendPasswordResetEmail(User user, String token) {
+        if (user == null || user.getEmail() == null || token == null) {
+            log.error("Cannot send password reset email. User or token is null or user email is null.");
+            return;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(senderEmail);
+            message.setTo(user.getEmail());
+            message.setSubject("Krisefikser.no - Tilbakestill passord / Reset Your Password");
+
+            String userName = (user.getName() != null ? user.getName() : "Bruker/User");
+
+            // Bilingual Email Body using Text Block and .formatted()
+            String emailBody = """
+                Hei %s,
+
+                Vi har mottatt en forespørsel om å tilbakestille passordet ditt.
+                
+                Vennligst benytt denne koden for å sette et nytt passord: %s
+
+                Hvis du ikke ba om å tilbakestille passordet ditt, vennligst se bort fra denne e-posten.
+
+                Med vennlig hilsen,
+                Krisefikser-teamet
+
+                ----------------------------------------
+
+                Hello %s,
+
+                We have received a request to reset your password.
+                
+                Please use this code to set a new password: %s
+
+                If you did not request a password reset, please ignore this email.
+
+                Regards,
+                The Krisefikser Team
+                """.formatted(userName, token, userName, token);
+
+            message.setText(emailBody);
+
+            mailSender.send(message);
+            log.info("Password reset email sent successfully to: {}", user.getEmail());
+
+        } catch (MailException e) {
+            log.error("Mail sending error for password reset email to {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Unexpected error sending password reset email to {}: {}", user.getEmail(), e.getMessage());
         }
     }
 }
