@@ -1,18 +1,23 @@
 package stud.ntnu.backend.service;
 
 import org.slf4j.Logger;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.user.NotificationDto;
+import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.NotificationRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.util.LocationUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing notifications. Handles creation, retrieval, and sending of notifications.
@@ -23,6 +28,7 @@ public class NotificationService {
   private final NotificationRepository notificationRepository;
   private final UserRepository userRepository;
   private final SimpMessagingTemplate messagingTemplate;
+  private final UserService userService;
   Logger log = org.slf4j.LoggerFactory.getLogger(NotificationService.class);
 
   /**
@@ -31,13 +37,16 @@ public class NotificationService {
    * @param notificationRepository repository for notification operations
    * @param userRepository         repository for user operations
    * @param messagingTemplate      messaging template for WebSocket communication
+   * @param userService           service for user operations
    */
   public NotificationService(NotificationRepository notificationRepository,
       UserRepository userRepository,
-      SimpMessagingTemplate messagingTemplate) {
+      SimpMessagingTemplate messagingTemplate,
+      UserService userService) {
     this.notificationRepository = notificationRepository;
     this.userRepository = userRepository;
     this.messagingTemplate = messagingTemplate;
+    this.userService = userService;
   }
 
   /**
@@ -97,6 +106,18 @@ public class NotificationService {
   }
 
   /**
+   * Retrieves notifications for a user with pagination.
+   *
+   * @param userId the ID of the user
+   * @param pageable pagination information
+   * @return a page of notifications
+   */
+  @Transactional(readOnly = true)
+  public Page<Notification> getNotificationsForUser(Integer userId, Pageable pageable) {
+    return notificationRepository.findByUserId(userId, pageable);
+  }
+
+  /**
    * Marks a notification as read.
    *
    * @param notificationId the ID of the notification
@@ -113,80 +134,107 @@ public class NotificationService {
   }
 
   /**
-   * Calculates if a point is within a radius of another point.
+   * Creates a system notification for all users.
    *
-   * @param lat1       latitude of the first point
-   * @param lon1       longitude of the first point
-   * @param lat2       latitude of the second point
-   * @param lon2       longitude of the second point
-   * @param radiusInKm radius in kilometers
-   * @return true if the second point is within the radius of the first point
+   * @param description the description of the notification
+   * @param createdByUser the user who created the notification
+   * @return a list of created notifications
    */
-  public boolean isWithinRadius(BigDecimal lat1, BigDecimal lon1,
-      BigDecimal lat2, BigDecimal lon2,
-      BigDecimal radiusInKm) {
-    if (lat1 == null || lon1 == null || lat2 == null || lon2 == null || radiusInKm == null) {
-      return false;
-    }
+  @Transactional
+  public List<Notification> createSystemNotificationForAllUsers(String description, User createdByUser) {
+    List<User> allUsers = userRepository.findAll();
 
-    // Convert to double for calculation
-    double lat1Double = lat1.doubleValue();
-    double lon1Double = lon1.doubleValue();
-    double lat2Double = lat2.doubleValue();
-    double lon2Double = lon2.doubleValue();
-    double radiusDouble = radiusInKm.doubleValue();
+    // Create a notification for each user
+    List<Notification> notifications = allUsers.stream()
+        .map(user -> {
+          // For system notifications, we need to set a target type even though it's not used
+          // We'll use a special constructor that sets the required fields
+          Notification notification = new Notification(user, Notification.PreferenceType.system, LocalDateTime.now());
+          notification.setDescription(description);
+          return notificationRepository.save(notification);
+        })
+        .collect(Collectors.toList());
 
-    // Earth's radius in kilometers
-    final double EARTH_RADIUS = 6371.0;
-
-    // Convert latitude and longitude from degrees to radians
-    double lat1Rad = Math.toRadians(lat1Double);
-    double lon1Rad = Math.toRadians(lon1Double);
-    double lat2Rad = Math.toRadians(lat2Double);
-    double lon2Rad = Math.toRadians(lon2Double);
-
-    // Haversine formula
-    double dLat = lat2Rad - lat1Rad;
-    double dLon = lon2Rad - lon1Rad;
-    double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    double distance = EARTH_RADIUS * c;
-
-    return distance <= radiusDouble;
+    return notifications;
   }
 
   /**
-   * Finds all users within a radius of a point.
+   * Sends notifications to all users via WebSocket.
    *
-   * @param latitude   latitude of the center point
-   * @param longitude  longitude of the center point
-   * @param radiusInKm radius in kilometers
-   * @return a list of users within the radius
+   * @param notifications the list of notifications to send
    */
-  @Transactional(readOnly = true)
-  public List<User> findUsersWithinRadius(BigDecimal latitude, BigDecimal longitude,
-      BigDecimal radiusInKm) {
-    List<User> allUsers = userRepository.findAll();
+  public void sendNotificationsToAllUsers(List<Notification> notifications) {
+    for (Notification notification : notifications) {
+      sendNotification(notification);
+    }
+  }
+ 
 
-    return allUsers.stream()
-        .filter(user -> {
-          // Check if user's home coordinates are within radius
-          boolean userInRadius =
-              user.getHomeLatitude() != null && user.getHomeLongitude() != null &&
-                  isWithinRadius(latitude, longitude, user.getHomeLatitude(),
-                      user.getHomeLongitude(), radiusInKm);
+  /**
+   * Sends notifications to users within a crisis event's radius.
+   *
+   * @param crisisEvent the crisis event
+   * @param message the notification message
+   */
+  @Transactional
+  public void sendCrisisEventNotifications(CrisisEvent crisisEvent, String message) {
+    if (crisisEvent.getRadius() != null) {
+      List<User> usersInRadius = LocationUtil.findUsersWithinRadius(
+          userService,
+          crisisEvent.getEpicenterLatitude().doubleValue(),
+          crisisEvent.getEpicenterLongitude().doubleValue(),
+          crisisEvent.getRadius().doubleValue()
+      );
+      log.info("Found {} users in radius", usersInRadius.size());
 
-          // Check if user's household coordinates are within radius
-          boolean householdInRadius = user.getHousehold() != null &&
-              user.getHousehold().getLatitude() != null &&
-              user.getHousehold().getLongitude() != null &&
-              isWithinRadius(latitude, longitude, user.getHousehold().getLatitude(),
-                  user.getHousehold().getLongitude(), radiusInKm);
+      // Create and send notifications to users in radius
+      for (User user : usersInRadius) {
+        log.info("Creating notification for user: {}", user.getId()); // TODO: remove
+        Notification notification = createNotification(
+            user,
+            Notification.PreferenceType.crisis_alert,
+            Notification.TargetType.event,
+            crisisEvent.getId(),
+            message
+        );
 
-          return userInRadius || householdInRadius;
-        })
-        .toList();
+        // Send the notification via WebSocket
+        log.info("Sending notification to user: {}", user.getId());
+        sendNotification(notification);
+      }
+    }
+  }
+
+  /**
+   * Sends notifications about crisis event updates to users within the radius.
+   *
+   * @param updatedCrisisEvent the updated crisis event
+   * @param previousCrisisEvent the previous state of the crisis event
+   */
+  @Transactional
+  public void sendCrisisEventUpdateNotifications(CrisisEvent updatedCrisisEvent, CrisisEvent previousCrisisEvent) {
+    if (updatedCrisisEvent.getRadius() != null) {
+      // Create notification message based on what changed
+      StringBuilder notificationMessage = new StringBuilder("Crisis event has been updated: ");
+      
+      if (!updatedCrisisEvent.getName().equals(previousCrisisEvent.getName())) {
+        notificationMessage.append("Name changed to ").append(updatedCrisisEvent.getName()).append(". ");
+      }
+      if (!updatedCrisisEvent.getDescription().equals(previousCrisisEvent.getDescription())) {
+        notificationMessage.append("Description updated. ");
+      }
+      if (!updatedCrisisEvent.getSeverity().equals(previousCrisisEvent.getSeverity())) {
+        notificationMessage.append("Severity changed to ").append(updatedCrisisEvent.getSeverity()).append(". ");
+      }
+      if (!updatedCrisisEvent.getEpicenterLatitude().equals(previousCrisisEvent.getEpicenterLatitude()) ||
+          !updatedCrisisEvent.getEpicenterLongitude().equals(previousCrisisEvent.getEpicenterLongitude())) {
+        notificationMessage.append("Location updated. ");
+      }
+      if (!updatedCrisisEvent.getRadius().equals(previousCrisisEvent.getRadius())) {
+        notificationMessage.append("Radius changed to ").append(updatedCrisisEvent.getRadius()).append(" meters. ");
+      }
+
+      sendCrisisEventNotifications(updatedCrisisEvent, notificationMessage.toString());
+    }
   }
 }

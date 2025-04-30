@@ -35,11 +35,14 @@ public class NotificationDto {
    * @return the notification DTO
    */
   public static NotificationDto fromEntity(Notification notification) {
+    String targetTypeName = notification.getTargetType() != null ?
+        notification.getTargetType().name() : null;
+
     return new NotificationDto(
         notification.getId(),
         notification.getUser().getId(),
         notification.getPreferenceType().name(),
-        notification.getTargetType().name(),
+        targetTypeName,
         notification.getTargetId(),
         notification.getDescription(),
         notification.getNotifyAt(),
