@@ -1,5 +1,14 @@
 package stud.ntnu.backend.util;
 
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+import stud.ntnu.backend.dto.map.CoordinatesItemDto;
+
+import java.math.BigDecimal;
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+
 public class LocationUtil {
 
     private LocationUtil() {
@@ -23,5 +32,83 @@ public class LocationUtil {
                         Math.sin(dLon / 2) * Math.sin(dLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return EARTH_RADIUS * c;
+    }
+    /**
+     * Retrieves the coordinates corresponding to the given address using OpenStreetMap's Nominatim API.
+     *
+     * @param address the address for which to retrieve coordinates
+     * @return a CoordinatesItemDto containing latitude and longitude
+     */
+    public static CoordinatesItemDto getCoordinatesByAddress(String address) {
+        final String NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
+
+        try {
+            // Build the URI with query parameters
+            URI uri = UriComponentsBuilder.fromUriString(NOMINATIM_URL)
+                    .queryParam("q", address)
+                    .queryParam("format", "json")
+                    .queryParam("addressdetails", 1)
+                    .build()
+                    .toUri();
+
+            // Use RestTemplate to make the HTTP GET request
+            RestTemplate restTemplate = new RestTemplate();
+            List<Map<String, Object>> response = restTemplate.getForObject(uri, List.class);
+
+            // Check if a result is returned
+            if (response != null && !response.isEmpty()) {
+                Map<String, Object> firstResult = response.get(0);
+                String lat = (String) firstResult.get("lat");
+                String lon = (String) firstResult.get("lon");
+
+                return new CoordinatesItemDto(lat, lon);
+            } else {
+                throw new IllegalArgumentException("No coordinates found for the given address.");
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error while fetching coordinates: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Retrieves the address corresponding to the given coordinates using OpenStreetMap's Nominatim API.
+     *
+     * @param coordinates the coordinates for which to retrieve the address
+     * @return a formatted address string
+     */
+    public static String getAddressByCords(CoordinatesItemDto coordinates) {
+        final String NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse";
+
+        try {
+            // Build the URI with query parameters
+            URI uri = UriComponentsBuilder.fromUriString(NOMINATIM_URL)
+                    .queryParam("lat", coordinates.getLatitude())
+                    .queryParam("lon", coordinates.getLongitude())
+                    .queryParam("format", "json")
+                    .build()
+                    .toUri();
+
+            // Use RestTemplate to make the HTTP GET request
+            RestTemplate restTemplate = new RestTemplate();
+            Map<String, Object> response = restTemplate.getForObject(uri, Map.class);
+
+            // Check if a result is returned
+            if (response != null) {
+                String displayName = (String) response.get("display_name");
+                if (displayName != null) {
+                    // Split the display_name by commas
+                    String[] parts = displayName.split(",\\s*");
+                    // Reconstruct the desired format
+                    if (parts.length >= 8) {
+                        return String.join(", ", parts[0], parts[1], parts[5], parts[6], parts[7]);
+                    }
+                }
+                throw new IllegalArgumentException("Unexpected address format.");
+            } else {
+                throw new IllegalArgumentException("No address found for the given coordinates.");
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error while fetching address: " + e.getMessage(), e);
+        }
     }
 }
