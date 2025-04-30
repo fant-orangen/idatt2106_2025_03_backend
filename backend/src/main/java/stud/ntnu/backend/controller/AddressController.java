@@ -25,5 +25,16 @@ public class AddressController {
             return ResponseEntity.status(500).body("An error occurred while fetching coordinates.");
         }
     }
+    @GetMapping("/address-by-coordinates")
+    public ResponseEntity<?> getAddressByCoordinates(@RequestParam String latitude, @RequestParam String longitude) {
+        try {
+            String address = LocationUtil.getAddressByCords( new CoordinatesItemDto(latitude, longitude));
+            return ResponseEntity.ok(address);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid coordinates: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An error occurred while fetching address.");
+        }
+    }
 
 }

@@ -64,4 +64,40 @@ public class LocationUtil {
             throw new IllegalArgumentException("Error while fetching coordinates: " + e.getMessage(), e);
         }
     }
+
+    public static String getAddressByCords(CoordinatesItemDto coordinates) {
+        final String NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse";
+
+        try {
+            // Build the URI with query parameters
+            URI uri = UriComponentsBuilder.fromUriString(NOMINATIM_URL)
+                    .queryParam("lat", coordinates.getLatitude())
+                    .queryParam("lon", coordinates.getLongitude())
+                    .queryParam("format", "json")
+                    .build()
+                    .toUri();
+
+            // Use RestTemplate to make the HTTP GET request
+            RestTemplate restTemplate = new RestTemplate();
+            Map<String, Object> response = restTemplate.getForObject(uri, Map.class);
+
+            // Check if a result is returned
+            if (response != null) {
+                String displayName = (String) response.get("display_name");
+                if (displayName != null) {
+                    // Split the display_name by commas
+                    String[] parts = displayName.split(",\\s*");
+                    // Reconstruct the desired format
+                    if (parts.length >= 8) {
+                        return String.join(", ", parts[0], parts[1], parts[5], parts[6], parts[7]);
+                    }
+                }
+                throw new IllegalArgumentException("Unexpected address format.");
+            } else {
+                throw new IllegalArgumentException("No address found for the given coordinates.");
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error while fetching address: " + e.getMessage(), e);
+        }
+    }
 }
