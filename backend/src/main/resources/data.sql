@@ -140,12 +140,12 @@ INSERT INTO meeting_places (household_id, name, latitude, longitude, address, cr
 VALUES (3, 'Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
 
 -- SCENARIO THEMES
-INSERT INTO scenario_themes (name, description, created_by_user_id)
-VALUES ('Power Outage', 'Preparing for extended power outages', 1);
-INSERT INTO scenario_themes (name, description, created_by_user_id)
-VALUES ('Natural Disaster', 'Earthquake, flood, or storm preparation', 1);
-INSERT INTO scenario_themes (name, description, created_by_user_id)
-VALUES ('Public Health Emergency', 'Pandemic or disease outbreak', 1);
+INSERT INTO scenario_themes (name, description, instructions, created_by_user_id)
+VALUES ('Power Outage', 'Preparing for extended power outages', 'Have flashlights, batteries, and non-perishable food ready. Unplug sensitive electronics.', 1);
+INSERT INTO scenario_themes (name, description, instructions, created_by_user_id)
+VALUES ('Natural Disaster', 'Earthquake, flood, or storm preparation', 'Follow evacuation orders. Prepare an emergency kit and know your local shelter locations.', 1);
+INSERT INTO scenario_themes (name, description, instructions, created_by_user_id)
+VALUES ('Public Health Emergency', 'Pandemic or disease outbreak', 'Practice good hygiene, follow public health advice, and stock up on essential medicines.', 1);
 
 -- CRISIS EVENTS
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
