@@ -17,8 +17,6 @@ import stud.ntnu.backend.service.UserService;
 /**
  * Admin controller for managing crisis scenario themes. Supports CRUD operations for themes like
  * strømbrudd or flom, along with corresponding educational and preparedness content.
- * <p>
- * Based on Visjonsdokument 2025 for Krisefikser.no.
  */
 
 @RestController
@@ -36,7 +34,7 @@ public class ScenarioThemeController {
 
   /**
    * Creates a new scenario theme. Only users with ADMIN or SUPERADMIN roles are allowed.
-   * TODO: untested!
+   * 
    * @param createScenarioThemeDto the scenario theme information (name, description, and optional instructions)
    * @param principal              the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
@@ -62,7 +60,7 @@ public class ScenarioThemeController {
 
   /**
    * Updates an existing scenario theme. Only users with ADMIN or SUPERADMIN roles are allowed.
-   * TODO: untested!
+   * 
    * @param updateScenarioThemeDto the scenario theme update information (id, and optionally name, description, instructions)
    * @param principal              the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
@@ -84,7 +82,7 @@ public class ScenarioThemeController {
 
   /**
    * Gets all scenario themes with pagination.
-   *
+   * 
    * @param pageable the pagination information
    * @return ResponseEntity with a page of scenario themes
    */

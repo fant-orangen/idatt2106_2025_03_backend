@@ -164,6 +164,7 @@ CREATE TABLE scenario_themes (
     name VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
     instructions TEXT,
+    status VARCHAR(10) NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
     created_by_user_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
