@@ -191,6 +191,8 @@ public class UserService {
         user.getHomeLatitude(),
         user.getHomeLongitude(),
         user.getLocationSharingEnabled(),
+        false, //TODO: implement notifications settings
+        user.getIsUsing2FA(),
         user.getEmailVerified(),
         user.getHousehold() != null ? user.getHousehold().getId() : null,
         user.getHousehold() != null ? user.getHousehold().getName() : null
