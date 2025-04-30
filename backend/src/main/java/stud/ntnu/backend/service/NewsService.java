@@ -13,9 +13,13 @@ import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.repository.news.NewsArticleRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.repository.map.CrisisEventRepository;
+import stud.ntnu.backend.util.LocationUtil;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 // IllegalStateException is in java.lang package, no need to import
 
 @Service
@@ -43,6 +47,7 @@ public class NewsService {
         .orElseThrow(() -> new IllegalStateException(
             "Crisis event not found with id: " + newsArticleDTO.getCrisisEventId()));
 
+    // TODO: implement logic to send notifications to users within some area / with some conditions
     NewsArticle newsArticle = new NewsArticle();
     newsArticle.setTitle(newsArticleDTO.getTitle());
     newsArticle.setContent(newsArticleDTO.getContent());
@@ -74,6 +79,39 @@ public class NewsService {
     // Get the news articles
     Page<NewsArticle> newsArticles = newsArticleRepository.findByCrisisEventId(crisisEventId,
         pageable);
+
+    // Convert to DTOs
+    return newsArticles.map(NewsArticleResponseDTO::fromEntity);
+  }
+
+  /**
+   * Get paginated news articles for crisis events that are within a specified distance of the user's location.
+   * This includes both the user's home address and the user's household address.
+   *
+   * @param user the user
+   * @param distanceInKm the distance in kilometers
+   * @param pageable pagination information
+   * @return a page of news article DTOs
+   */
+  @Transactional(readOnly = true)
+  public Page<NewsArticleResponseDTO> getNewsDigestForUser(User user, double distanceInKm, Pageable pageable) {
+    // Get all crisis events
+    List<CrisisEvent> allCrisisEvents = crisisEventRepository.findAll();
+
+    // Filter crisis events that are within the specified distance of the user's location
+    List<Integer> nearbyCrisisEventIds = allCrisisEvents.stream()
+        .filter(crisisEvent -> LocationUtil.isCrisisEventNearUser(user, crisisEvent, distanceInKm))
+        .map(CrisisEvent::getId)
+        .collect(Collectors.toList());
+
+    // If no nearby crisis events found, return an empty page
+    if (nearbyCrisisEventIds.isEmpty()) {
+      return Page.empty(pageable);
+    }
+
+    // Get news articles for the nearby crisis events
+    Page<NewsArticle> newsArticles = newsArticleRepository.findByCrisisEventIdInOrderByPublishedAtDesc(
+        nearbyCrisisEventIds, pageable);
 
     // Convert to DTOs
     return newsArticles.map(NewsArticleResponseDTO::fromEntity);

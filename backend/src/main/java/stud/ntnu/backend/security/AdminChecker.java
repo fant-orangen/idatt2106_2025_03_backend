@@ -80,19 +80,7 @@ public class AdminChecker {
     }
     return isAdminRole(user.getRole().getName());
   }
-  
-  /**
-   * Checks if the currently authenticated user has super admin privileges.
-   *
-   * @param userService the user service to retrieve user information
-   * @return true if the user is a super admin, false otherwise
-   * @throws IllegalStateException if the user is not found
-   */
-  public static boolean isCurrentUserSuperAdmin(UserService userService) {
-    Principal principal = (Principal) SecurityContextHolder.getContext().getAuthentication();
-    return isCurrentUserSuperAdmin(principal, userService);
-  }
-  
+
   /**
    * Checks if the user identified by the Principal has super admin privileges.
    *
