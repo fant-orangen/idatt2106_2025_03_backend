@@ -8,6 +8,8 @@ import stud.ntnu.backend.dto.user.UserProfileDto;
 import stud.ntnu.backend.dto.user.UserPreferencesDto;
 import stud.ntnu.backend.dto.user.UserHistoryDto;
 import stud.ntnu.backend.dto.user.UserUpdateDto;
+import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.service.UserService;
 
 /**
@@ -22,9 +24,11 @@ import stud.ntnu.backend.service.UserService;
 public class UserController {
 
   private final UserService userService;
+  private final UserRepository userRepository;
 
-  public UserController(UserService userService) {
+  public UserController(UserService userService, UserRepository userRepository) {
     this.userService = userService;
+    this.userRepository = userRepository;
   }
 
   /**
@@ -63,7 +67,7 @@ public class UserController {
    * @param preferencesDto the preferences to update
    * @return ResponseEntity containing the updated user profile
    */
-  @PatchMapping("/me/preferences")
+  @PatchMapping("/me/preferences/update")
   public ResponseEntity<UserProfileDto> updateUserPreferences(
       @RequestBody UserPreferencesDto preferencesDto) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -71,6 +75,21 @@ public class UserController {
 
     UserProfileDto updatedProfile = userService.updateUserPreferences(email, preferencesDto);
     return ResponseEntity.ok(updatedProfile);
+  }
+
+  @GetMapping("/me/preferences/get")
+  public ResponseEntity<UserPreferencesDto> getUserPreferences() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+
+    User currentUser = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    UserPreferencesDto preferencesDto = new UserPreferencesDto(
+        currentUser.getLocationSharingEnabled(),
+        false, //TODO: fix notificationsEnabled
+        currentUser.getIsUsing2FA()
+    );
+    return ResponseEntity.ok(preferencesDto);
   }
 
   /**
