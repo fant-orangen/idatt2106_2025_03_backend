@@ -187,4 +187,26 @@ public class CrisisEventController {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
+
+  /**
+   * Gets a paginated list of crisis events affecting the current user. A crisis event affects a user if the user's home or household location is within the event's radius.
+   *
+   * @param principal the Principal object representing the current user
+   * @param pageable the pagination information
+   * @return ResponseEntity with a page of crisis events affecting the user
+   */
+  @GetMapping("/current-user")
+  public ResponseEntity<Page<CrisisEvent>> getCrisisEventsAffectingCurrentUser(
+      Principal principal,
+      Pageable pageable) {
+    try {
+      String email = principal.getName();
+      User currentUser = userService.getUserByEmail(email)
+          .orElseThrow(() -> new IllegalStateException("User not found"));
+      Page<CrisisEvent> events = crisisEventService.getCrisisEventsAffectingUser(currentUser, pageable);
+      return ResponseEntity.ok(events);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().build();
+    }
+  }
 }

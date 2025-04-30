@@ -140,10 +140,10 @@ INSERT INTO meeting_places (household_id, name, latitude, longitude, address, cr
 VALUES (3, 'Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
 
 -- CRISIS EVENTS
-INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, start_time, created_by_user_id, active)
-VALUES ('Flood Warning', 'Potential flooding in downtown area', 'yellow', 63.4300, 10.3950, CURRENT_TIMESTAMP, 1, TRUE);
-INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, start_time, created_by_user_id, active)
-VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 63.4250, 10.3900, DATEADD('DAY', 1, CURRENT_TIMESTAMP), 1, TRUE);
+INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active)
+VALUES ('Flood Warning', 'Potential flooding in downtown area', 'yellow', 63.4300, 10.3950, 2.0, CURRENT_TIMESTAMP, 1, TRUE);
+INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active)
+VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 63.4250, 10.3900, 5.0, DATEADD('DAY', 1, CURRENT_TIMESTAMP), 1, TRUE);
 
 -- SCENARIO THEMES
 INSERT INTO scenario_themes (name, description, created_by_user_id)
