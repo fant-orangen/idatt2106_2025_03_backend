@@ -16,7 +16,7 @@ import stud.ntnu.backend.repository.household.EmptyHouseholdMemberRepository;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.household.EmptyHouseholdMember;
 import stud.ntnu.backend.model.user.User;
-import stud.ntnu.backend.model.householdAdmin.HouseholdAdmin;
+import stud.ntnu.backend.model.household.HouseholdAdmin;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

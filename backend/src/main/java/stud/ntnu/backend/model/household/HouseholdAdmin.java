@@ -1,9 +1,8 @@
-package stud.ntnu.backend.model.householdAdmin;
+package stud.ntnu.backend.model.household;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.user.User;
 
 import java.time.LocalDateTime;

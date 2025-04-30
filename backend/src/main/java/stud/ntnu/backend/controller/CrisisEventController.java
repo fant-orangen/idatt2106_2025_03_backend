@@ -8,6 +8,7 @@ import java.security.Principal;
 
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.map.CreateCrisisEventDto;
+import stud.ntnu.backend.dto.map.CrisisEventChangeDto;
 import stud.ntnu.backend.dto.map.UpdateCrisisEventDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.user.User;
@@ -38,10 +39,11 @@ public class CrisisEventController {
 
   /**
    * Creates a new crisis event. Only users with ADMIN or SUPERADMIN roles are allowed to create
-   * crisis events. The start time must be provided in the request and cannot be changed after creation.
+   * crisis events. The start time must be provided in the request and cannot be changed after
+   * creation.
    *
    * @param createCrisisEventDto the crisis event information including the required start time
-   * @param principal the Principal object representing the current user
+   * @param principal            the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
   @PostMapping
@@ -60,7 +62,8 @@ public class CrisisEventController {
           .orElseThrow(() -> new IllegalStateException("User not found"));
 
       // Delegate to service for creating the crisis event
-      CrisisEvent savedCrisisEvent = crisisEventService.createCrisisEvent(createCrisisEventDto, currentUser);
+      CrisisEvent savedCrisisEvent = crisisEventService.createCrisisEvent(createCrisisEventDto,
+          currentUser);
 
       return ResponseEntity.ok(savedCrisisEvent);
     } catch (Exception e) {
@@ -70,8 +73,8 @@ public class CrisisEventController {
 
   /**
    * Updates an existing crisis event. Only users with ADMIN or SUPERADMIN roles are allowed to
-   * update crisis events. If a field is not provided in the request, it will not be updated.
-   * Note: The start time of a crisis event cannot be updated after creation.
+   * update crisis events. If a field is not provided in the request, it will not be updated. Note:
+   * The start time of a crisis event cannot be updated after creation.
    *
    * @param id                   the ID of the crisis event to update
    * @param updateCrisisEventDto the crisis event information to update (excluding start time)
@@ -91,7 +94,8 @@ public class CrisisEventController {
       }
 
       // Delegate to service for updating the crisis event
-      CrisisEvent updatedCrisisEvent = crisisEventService.updateCrisisEvent(id, updateCrisisEventDto);
+      CrisisEvent updatedCrisisEvent = crisisEventService.updateCrisisEvent(id,
+          updateCrisisEventDto);
 
       return ResponseEntity.ok(updatedCrisisEvent);
     } catch (Exception e) {
@@ -102,6 +106,7 @@ public class CrisisEventController {
   /**
    * Gets all crisis events with pagination.
    * TODO: Untested!
+   *
    * @param pageable the pagination information
    * @return ResponseEntity with a page of crisis events
    */
@@ -111,30 +116,58 @@ public class CrisisEventController {
     return ResponseEntity.ok(crisisEvents);
   }
   //javaDoc for deleteCrisisEvent method
-    /**
-     * Deletes a crisis event by its ID. Only users with ADMIN or SUPERADMIN roles are allowed to
-     * delete crisis events.
-     *
-     * @param id        the ID of the crisis event to delete
-     * @param principal the Principal object representing the current user
-     * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
-     */
-    @PutMapping("/deactivate/{id}")
-    public ResponseEntity<?> deleteCrisisEvent(
-            @PathVariable Integer id,
-            Principal principal) {
-        try {
-            // Check if the current user is an admin using AdminChecker with Principal
-            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
-                return ResponseEntity.status(403).body("Only administrators can deactivate crisis events");
-            }
 
-            // Delegate to service for deleting the crisis event
-            crisisEventService.deactivateCrisisEvent(id);
+  /**
+   * Deletes a crisis event by its ID. Only users with ADMIN or SUPERADMIN roles are allowed to
+   * delete crisis events.
+   *
+   * @param id        the ID of the crisis event to delete
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
+   */
+  @PutMapping("/deactivate/{id}")
+  public ResponseEntity<?> deleteCrisisEvent(
+      @PathVariable Integer id,
+      Principal principal) {
+    try {
+      // Check if the current user is an admin using AdminChecker with Principal
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+        return ResponseEntity.status(403).body("Only administrators can deactivate crisis events");
+      }
 
-            return ResponseEntity.ok("Crisis event deactivated");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+      // Delegate to service for deleting the crisis event
+      crisisEventService.deactivateCrisisEvent(id);
+
+      return ResponseEntity.ok("Crisis event deactivated");
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
+
+  /**
+   * Gets all changes for a specific crisis event with pagination.
+   *
+   * @param id the ID of the crisis event
+   * @param pageable the pagination information
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity with a page of crisis event changes if successful, or an error message if the
+   * crisis event is not found or the user is not authorized
+   */
+  @GetMapping("/{id}/changes")
+  public ResponseEntity<?> getCrisisEventChanges(
+      @PathVariable Integer id,
+      Pageable pageable,
+      Principal principal) {
+    try {
+
+      // Get the crisis event changes
+      Page<CrisisEventChangeDto> changes = crisisEventService.getCrisisEventChanges(id, pageable);
+
+      return ResponseEntity.ok(changes);
+    } catch (IllegalStateException e) {
+      return ResponseEntity.notFound().build();
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
 }
