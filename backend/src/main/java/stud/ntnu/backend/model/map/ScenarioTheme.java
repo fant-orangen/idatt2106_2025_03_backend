@@ -36,6 +36,9 @@ public class ScenarioTheme {
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
+  @Column(name = "status", nullable = false)
+  private String status;
+
   // Set createdAt and updatedAt before persist
   @PrePersist
   protected void onCreate() {

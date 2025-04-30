@@ -104,6 +104,9 @@ public class ScenarioThemeService {
     if (dto.getInstructions() != null) {
       scenarioTheme.setInstructions(dto.getInstructions());
     }
+    if (dto.getStatus() != null) {
+      scenarioTheme.setStatus(dto.getStatus());
+    }
     return scenarioThemeRepository.save(scenarioTheme);
   }
 
