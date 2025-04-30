@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import stud.ntnu.backend.dto.auth.AuthRequestDto;
 import stud.ntnu.backend.dto.auth.AuthResponseDto;
 import stud.ntnu.backend.dto.auth.RegisterRequestDto;
+import stud.ntnu.backend.dto.auth.Send2FACodeRequestDto;
 import stud.ntnu.backend.service.AuthService;
+import stud.ntnu.backend.dto.auth.TwoFactorRequestDto;
 
 /**
  * Handles user authentication and account lifecycle actions. Includes user registration, email
@@ -24,78 +26,108 @@ import stud.ntnu.backend.service.AuthService;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-  private final AuthService authService;
+    private final AuthService authService;
 
-  private Logger log = org.slf4j.LoggerFactory.getLogger(AuthController.class);
+    private final Logger log = org.slf4j.LoggerFactory.getLogger(AuthController.class);
 
-  public AuthController(AuthService authService) {
-    this.authService = authService;
-  }
-
-  /**
-   * Validates the JWT token from the Authorization header.
-   * Returns 200 OK if the token is valid, 401 Unauthorized otherwise.
-   *
-   * @return ResponseEntity with status 200 OK if token is valid
-   */
-  @GetMapping("/validate")
-  public ResponseEntity<?> validateToken() {
-    // The token validation is handled by Spring Security's JWT filter
-    // If we reach this endpoint, the token is valid
-    return ResponseEntity.ok().build();
-  }
-
-  /**
-   * Authenticate a user and generate a JWT token.
-   *
-   * @param authRequest the authentication request containing email and password
-   * @return ResponseEntity containing the JWT token and user information
-   */
-  @PostMapping("/login")
-  public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
-    AuthResponseDto authResponse = authService.login(authRequest);
-    return ResponseEntity.ok(authResponse);
-  }
-
-  /**
-   * Register a new user with the USER role.
-   *
-   * @param registrationRequest the registration request containing email, password, firstName, lastName,
-   *                           and optional home address and location coordinates
-   * @return ResponseEntity with status 200 OK if successful
-   */
-  @PostMapping("/register")
-  public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDto registrationRequest) {
-    try {
-      authService.register(registrationRequest);
-      return ResponseEntity.ok().build();
-    } catch (IllegalArgumentException e) {
-      log.info("User registration failed: {}", e.getMessage());
-      return ResponseEntity.badRequest().body(e.getMessage());
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
-  }
-  /**
-   * Handles the email verification request.
-   * Receives the token sent via the verification link in the email.
-   *
-   * @param token The verification token from the request parameter.
-   * @return ResponseEntity indicating success or failure of the verification.
-   */
-  @GetMapping("/verify")
-  public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
-    try {
-      authService.verifyEmail(token);
-      // On success, return HTTP 200 OK with a success message
-      return ResponseEntity.ok().body("Email successfully verified.");
-    } catch (IllegalArgumentException | IllegalStateException e) {
-      // Catch specific exceptions for invalid/expired/used tokens
-      // Return HTTP 400 Bad Request with the error message from the service
-      return ResponseEntity.badRequest().body(e.getMessage());
-    } catch (Exception e) {
-      // Catch any other unexpected errors during the process
-      // Log the error for debugging
-      // Return HTTP 500 Internal Server Error
-      return ResponseEntity.status(500).body("An unexpected error occurred during email verification.");
+
+
+    /**
+     * Validates the JWT token from the Authorization header.
+     * Returns 200 OK if the token is valid, 401 Unauthorized otherwise.
+     *
+     * @return ResponseEntity with status 200 OK if token is valid
+     */
+    @GetMapping("/validate")
+    public ResponseEntity<?> validateToken() {
+        // The token validation is handled by Spring Security's JWT filter
+        // If we reach this endpoint, the token is valid
+        return ResponseEntity.ok().build();
     }
-  }
+
+    /**
+     * Authenticate a user and generate a JWT token.
+     *
+     * @param authRequest the authentication request containing email and password
+     * @return ResponseEntity containing the JWT token and user information
+     */
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
+        AuthResponseDto authResponse = authService.login(authRequest);
+        if (authResponse.getIsUsing2FA()) {
+            return ResponseEntity.status(202).body(authResponse);
+        }
+        return ResponseEntity.ok(authResponse);
+    }
+
+    /**
+     * Register a new user with the USER role.
+     *
+     * @param registrationRequest the registration request containing email, password, firstName, lastName,
+     *                            and optional home address and location coordinates
+     * @return ResponseEntity with status 200 OK if successful
+     */
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDto registrationRequest) {
+        try {
+            authService.register(registrationRequest);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.info("User registration failed: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /**
+     * Handles the email verification request.
+     * Receives the token sent via the verification link in the email.
+     *
+     * @param token The verification token from the request parameter.
+     * @return ResponseEntity indicating success or failure of the verification.
+     */
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
+        try {
+            authService.verifyEmail(token);
+            // On success, return HTTP 200 OK with a success message
+            return ResponseEntity.ok().body("Email successfully verified.");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            // Catch specific exceptions for invalid/expired/used tokens
+            // Return HTTP 400 Bad Request with the error message from the service
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            // Catch any other unexpected errors during the process
+            // Log the error for debugging
+            // Return HTTP 500 Internal Server Error
+            return ResponseEntity.status(500)
+                .body("An unexpected error occurred during email verification.");
+        }
+    }
+
+    @PostMapping("/send-2fa")
+    public ResponseEntity<?> send2FACode(@RequestBody @Valid Send2FACodeRequestDto request) {
+        try {
+            authService.send2FACode(request.getEmail());
+            return ResponseEntity.ok("2FA code sent successfully.");
+        } catch (Exception e) {
+            log.error("Error sending 2FA code: {}", e.getMessage());
+            return ResponseEntity.status(500).body("Failed to send 2FA code.");
+        }
+    }
+
+    @PostMapping("/verify-2fa")
+    public ResponseEntity<?> verify2FA(@RequestBody @Valid TwoFactorRequestDto request) {
+        try {
+            AuthResponseDto response = authService.verify2FA(request.getEmail(), request.getCode());
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error verifying 2FA code: {}", e.getMessage());
+            return ResponseEntity.status(500).body("Failed to verify 2FA code.");
+        }
+    }
 }

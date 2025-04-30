@@ -32,6 +32,7 @@ CREATE TABLE users (
     email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     location_sharing_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_using_2fa BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (role_id) REFERENCES roles(id),
     FOREIGN KEY (household_id) REFERENCES households(id)
 );
@@ -291,5 +292,11 @@ CREATE TABLE crisis_event_changes (
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
 );
 
+CREATE TABLE two_factor_codes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(6) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    expires_at TIMESTAMP NOT NULL
+);
 
 

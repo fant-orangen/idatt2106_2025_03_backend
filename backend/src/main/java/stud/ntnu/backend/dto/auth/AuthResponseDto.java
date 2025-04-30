@@ -11,6 +11,7 @@ public class AuthResponseDto {
   private String email;
   private String role;
   private Integer householdId;
+  private Boolean isUsing2FA;
 
   // Default constructor
   public AuthResponseDto() {
@@ -23,12 +24,13 @@ public class AuthResponseDto {
 
   // Constructor with all fields
   public AuthResponseDto(String token, Integer userId, String email, String role,
-      Integer householdId) {
+      Integer householdId, Boolean isUsing2FA) {
     this.token = token;
     this.userId = userId;
     this.email = email;
     this.role = role;
     this.householdId = householdId;
+    this.isUsing2FA = isUsing2FA;
   }
 
   // Getters and setters
@@ -71,4 +73,12 @@ public class AuthResponseDto {
   public void setHouseholdId(Integer householdId) {
     this.householdId = householdId;
   }
+
+  public Boolean getIsUsing2FA() {
+        return isUsing2FA;
+    }
+
+  public void setIsUsing2FA(Boolean isUsing2FA) {
+        this.isUsing2FA = isUsing2FA;
+    }
 }
