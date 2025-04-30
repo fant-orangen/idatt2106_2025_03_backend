@@ -103,9 +103,9 @@ public class EmailService {
             log.info("Verification email sent successfully to: {}", user.getEmail());
 
         } catch (MailException e) {
-            log.error("Mail sending error for verification email to {}: {}", user.getEmail(), e);
+            log.error("Mail sending error for verification email to {}", user.getEmail());
         } catch (Exception e) {
-            log.error("Unexpected error sending verification email to {}: {}", user.getEmail(), e);
+            log.error("Unexpected error sending verification email to {}: {}", user.getEmail(), e.getMessage());
         }
     }
 
@@ -161,9 +161,9 @@ public class EmailService {
             log.info("2FA email sent successfully to: {}", user.getEmail());
 
         } catch (MailException e) {
-            log.error("Mail sending error for verification email to {}: {}", user.getEmail(), e);
+            log.error("Mail sending error for verification email to {}", user.getEmail());
         } catch (Exception e) {
-            log.error("Unexpected error sending 2FA email to {}: {}", user.getEmail(), e);
+            log.error("Unexpected error sending 2FA email to {}: {}", user.getEmail(), e.getMessage());
         }
     }
 
@@ -220,9 +220,9 @@ public class EmailService {
             log.info("Password reset email sent successfully to: {}", user.getEmail());
 
         } catch (MailException e) {
-            log.error("Mail sending error for password reset email to {}: {}", user.getEmail(), e);
+            log.error("Mail sending error for password reset email to {}", user.getEmail());
         } catch (Exception e) {
-            log.error("Unexpected error sending password reset email to {}: {}", user.getEmail(), e);
+            log.error("Unexpected error sending password reset email to {}: {}", user.getEmail(), e.getMessage());
         }
     }
 }
