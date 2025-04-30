@@ -24,6 +24,8 @@ public class SuperAdminController {
         this.userService = userService;
     }
 
+    String onlySuperAdmin = "Only super-administrators can access this resource";
+
     /**
      * Retrieves all admins.
      *
@@ -35,7 +37,7 @@ public class SuperAdminController {
         try {
             // Check if the current user is an admin using AdminChecker
             if (!AdminChecker.isCurrentUserSuperAdmin(principal, userService)) {
-                return ResponseEntity.status(403).body("Only super-administrators can access this resource");
+                return ResponseEntity.status(403).body(onlySuperAdmin);
             }
 
             // Retrieve and return the list of admins
@@ -46,6 +48,28 @@ public class SuperAdminController {
         }
 
     }
+
+    //gets id by email
+    /**
+     * Retrieves the ID of a user by their email.
+     *
+     * @param email the email of the user
+     * @return the ID of the user or an error message if not found
+     */
+    @GetMapping("/id-by-email/{email}")
+    public ResponseEntity<?> getIdByEmail(Principal principal, @PathVariable String email) {
+        try {
+            if (!AdminChecker.isCurrentUserSuperAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body(onlySuperAdmin);
+            }
+            User user = userService.getUserByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+
+            return ResponseEntity.ok(user.getId());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 
     /**
      * Revokes admin access for a user by their ID.
@@ -58,7 +82,7 @@ public class SuperAdminController {
         try {
             // Check if the current user is a super admin
             if (!AdminChecker.isCurrentUserSuperAdmin(principal, userService)) {
-                return ResponseEntity.status(403).body("Only super-administrators can access this resource");
+                return ResponseEntity.status(403).body(onlySuperAdmin);
             }
 
             // Retrieve the user and check if they have the "ADMIN" role
