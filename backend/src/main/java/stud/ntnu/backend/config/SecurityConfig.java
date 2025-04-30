@@ -105,6 +105,9 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/poi/**").permitAll()
                 // Permit access to the crisis-events/all endpoint
                 .requestMatchers("/api/crisis-events/all").permitAll()
+                // Allow all authenticated users to access GET endpoints for specific crisis events
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/crisis-events/{id}")
+                .authenticated()
                 // Add role-based authorization for admin endpoints
                 .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
                 .requestMatchers("/api/super-admin").hasAnyRole("SUPERADMIN")

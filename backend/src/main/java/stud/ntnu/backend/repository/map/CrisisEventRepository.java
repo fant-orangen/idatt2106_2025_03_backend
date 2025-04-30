@@ -34,7 +34,7 @@ public interface CrisisEventRepository extends JpaRepository<CrisisEvent, Intege
   @Modifying
   @Query("UPDATE CrisisEvent c SET c.name = :name, c.description = :description, " +
       "c.severity = :severity, c.epicenterLatitude = :latitude, " +
-      "c.epicenterLongitude = :longitude, c.radius = :radius WHERE c.id = :id")
+      "c.epicenterLongitude = :longitude, c.radius = :radius, c.updatedAt = CURRENT_TIMESTAMP WHERE c.id = :id")
   void updateCrisisEvent(
       @Param("id") Integer id,
       @Param("name") String name,

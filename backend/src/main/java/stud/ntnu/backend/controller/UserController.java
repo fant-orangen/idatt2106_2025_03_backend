@@ -1,5 +1,6 @@
 package stud.ntnu.backend.controller;
 
+import java.security.Principal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,13 +31,12 @@ public class UserController {
   /**
    * Returns the logged-in user's full profile.
    *
+   * @param principal the Principal representing the current user
    * @return ResponseEntity containing the user's profile information
    */
   @GetMapping("/me")
-  public ResponseEntity<UserProfileDto> getCurrentUser() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String email = authentication.getName();
-
+  public ResponseEntity<UserProfileDto> getCurrentUser(Principal principal) {
+    String email = principal.getName();
     UserProfileDto userProfile = userService.getUserProfile(email);
     return ResponseEntity.ok(userProfile);
   }
