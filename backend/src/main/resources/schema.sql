@@ -281,7 +281,7 @@ CREATE TABLE notifications (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE TABLE crisis_event_changes (
+CREATE TABLE crisis_event_changes ( -- TODO: when a crisis event is updated, a new entry is added to this column
     id INT AUTO_INCREMENT PRIMARY KEY,
     crisis_event_id INT NOT NULL,
     change_type VARCHAR(30) NOT NULL CHECK (change_type IN ('creation', 'level_change', 'description_update', 'epicenter_moved')),

@@ -98,7 +98,6 @@ public class NewsController {
    * Get paginated news articles for crisis events that are within 100 km of the user's location.
    * This includes both the user's home address and the user's household address.
    *
-   *
    * @param principal the Principal object representing the current user
    * @param pageable  pagination information
    * @return ResponseEntity with a page of news articles if successful, or an error message if the
