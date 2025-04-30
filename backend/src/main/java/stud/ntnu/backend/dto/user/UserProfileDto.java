@@ -20,6 +20,8 @@ public class UserProfileDto {
   private BigDecimal homeLatitude;
   private BigDecimal homeLongitude;
   private Boolean locationSharingEnabled;
+  private Boolean notificationsEnabled;
+  private Boolean twoFactorAuthenticationEnabled;
   private Boolean emailVerified;
   private Integer householdId;
   private String householdName;
@@ -31,7 +33,7 @@ public class UserProfileDto {
   // Constructor with all fields
   public UserProfileDto(Integer id, String email, String firstName, String lastName,
       String homeAddress, BigDecimal homeLatitude, BigDecimal homeLongitude,
-      Boolean locationSharingEnabled, Boolean emailVerified,
+      Boolean locationSharingEnabled, Boolean notificationsEnabled, Boolean twoFactorAuthenticationEnabled, Boolean emailVerified,
       Integer householdId, String householdName) {
     this.id = id;
     this.email = email;
@@ -41,6 +43,8 @@ public class UserProfileDto {
     this.homeLatitude = homeLatitude;
     this.homeLongitude = homeLongitude;
     this.locationSharingEnabled = locationSharingEnabled;
+    this.notificationsEnabled = notificationsEnabled;
+    this.twoFactorAuthenticationEnabled = twoFactorAuthenticationEnabled;
     this.emailVerified = emailVerified;
     this.householdId = householdId;
     this.householdName = householdName;
