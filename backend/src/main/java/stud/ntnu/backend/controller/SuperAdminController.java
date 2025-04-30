@@ -101,4 +101,35 @@ public class SuperAdminController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    /**
+     * Adds admin access for a user by their ID.
+     *
+     * @param id the ID of the user to add admin access to
+     * @return a success message or an error message
+     */
+    @PutMapping("/add/{id}")
+    public ResponseEntity<?> addAdminAccess(Principal principal, @PathVariable Integer id) {
+        try {
+            // Check if the current user is a super admin
+            if (!AdminChecker.isCurrentUserSuperAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Only super-administrators can access this resource");
+            }
+
+            // Retrieve the user and check if they have the "USER" role
+            User user = userService.getUserById(id).orElseThrow(() -> new RuntimeException("User not found"));
+            if (!"USER".equals(user.getRole().getName())) {
+                return ResponseEntity.status(400).body("The user does not have a user role to promote to admin");
+            }
+            if ("ADMIN".equals(user.getRole().getName())) {
+                return ResponseEntity.status(400).body("The user already has an admin role");
+            }
+
+            // Add admin access for the user
+            superAdminService.addAdminAccess(id);
+            return ResponseEntity.ok("Admin access granted successfully, user now has admin role");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

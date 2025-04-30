@@ -110,6 +110,7 @@ public class SecurityConfig {
                 .authenticated()
                 // Add role-based authorization for admin endpoints
                 .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
+                .requestMatchers("/api/super-admin", "/api/super-admin/**").hasAnyRole("SUPERADMIN")
                 .requestMatchers("/api/super-admin", "/api/super-admin//id-by-email/{email}").hasAnyRole("SUPERADMIN")
 
                 // Add WebSocket security
