@@ -1,6 +1,8 @@
 package stud.ntnu.backend.controller;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
@@ -78,5 +80,17 @@ public class ScenarioThemeController {
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
+
+  /**
+   * Gets all scenario themes with pagination.
+   *
+   * @param pageable the pagination information
+   * @return ResponseEntity with a page of scenario themes
+   */
+  @GetMapping("/all")
+  public ResponseEntity<Page<ScenarioTheme>> getAllScenarioThemes(Pageable pageable) {
+    Page<ScenarioTheme> scenarioThemes = scenarioThemeService.getAllScenarioThemes(pageable);
+    return ResponseEntity.ok(scenarioThemes);
   }
 }

@@ -21,5 +21,5 @@ public class UpdateCrisisEventDto {
   private Severity severity;
   private BigDecimal latitude;
   private BigDecimal longitude;
-  private BigDecimal radius;
+  private BigDecimal radius; // TODO: add optional scenario theme id
 }

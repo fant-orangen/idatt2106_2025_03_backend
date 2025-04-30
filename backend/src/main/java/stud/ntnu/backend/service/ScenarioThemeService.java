@@ -1,8 +1,13 @@
 package stud.ntnu.backend.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.repository.map.ScenarioThemeRepository;
 import stud.ntnu.backend.model.map.ScenarioTheme;
+import stud.ntnu.backend.dto.map.CreateScenarioThemeDto;
+import stud.ntnu.backend.dto.map.UpdateScenarioThemeDto;
+import stud.ntnu.backend.model.user.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -70,8 +75,7 @@ public class ScenarioThemeService {
    * @param user the user creating the scenario theme
    * @return the saved scenario theme
    */
-  public ScenarioTheme createScenarioTheme(stud.ntnu.backend.dto.map.CreateScenarioThemeDto dto,
-      stud.ntnu.backend.model.user.User user) {
+  public ScenarioTheme createScenarioTheme(CreateScenarioThemeDto dto, User user) {
     ScenarioTheme scenarioTheme = new ScenarioTheme();
     scenarioTheme.setName(dto.getName());
     scenarioTheme.setDescription(dto.getDescription());
@@ -88,7 +92,7 @@ public class ScenarioThemeService {
    * @return the updated scenario theme
    * @throws IllegalStateException if the scenario theme is not found
    */
-  public ScenarioTheme updateScenarioTheme(stud.ntnu.backend.dto.map.UpdateScenarioThemeDto dto) {
+  public ScenarioTheme updateScenarioTheme(UpdateScenarioThemeDto dto) {
     ScenarioTheme scenarioTheme = scenarioThemeRepository.findById(dto.getId())
         .orElseThrow(() -> new IllegalStateException("Scenario theme not found"));
     if (dto.getName() != null) {
@@ -101,5 +105,15 @@ public class ScenarioThemeService {
       scenarioTheme.setInstructions(dto.getInstructions());
     }
     return scenarioThemeRepository.save(scenarioTheme);
+  }
+
+  /**
+   * Returns a paginated list of all scenario themes.
+   *
+   * @param pageable the pagination information
+   * @return a page of scenario themes
+   */
+  public Page<ScenarioTheme> getAllScenarioThemes(Pageable pageable) {
+    return scenarioThemeRepository.findAll(pageable);
   }
 }
