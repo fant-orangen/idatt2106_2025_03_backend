@@ -53,6 +53,7 @@ public class GroupInventoryController {
 
   /**
    * Get all product batches for a given product type that are currently contributed to the given group.
+   * TODO: untested
    * @param request JSON body with groupId and productTypeId
    * @param pageable pagination information
    * @return a paginated list of product batches
@@ -65,5 +66,28 @@ public class GroupInventoryController {
     }
     Page<ProductBatchDto> page = groupInventoryService.getContributedProductBatchesByType(request.getGroupId(), request.getProductTypeId(), pageable);
     return ResponseEntity.ok(page);
+  }
+
+  /**
+   * Remove a contributed product batch from a group by ProductBatch id.
+   * TODO: untested
+   * If the batch is contributed to more than one group, return an error and do not remove it.
+   *
+   * @param productBatchId the id of the product batch
+   * @return 200 OK if removed, 409 Conflict if batch is contributed to more than one group, 404 if not found
+   */
+  @PostMapping("/product-batches")
+  public ResponseEntity<?> removeContributedBatch(@RequestParam Integer productBatchId) {
+    int count = groupInventoryService.countGroupContributionsForBatch(productBatchId);
+    if (count == 0) {
+      return ResponseEntity.notFound().build();
+    } else if (count > 1) {
+      return ResponseEntity.status(409).body("This product batch is being contributed to more than one group.");
+    }
+    boolean removed = groupInventoryService.removeContributedBatch(productBatchId);
+    if (!removed) {
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok().build();
   }
 }

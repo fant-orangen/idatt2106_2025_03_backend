@@ -100,4 +100,37 @@ public class GroupInventoryService {
       .number(batch.getNumber())
       .build());
   }
+
+  /**
+   * Counts the number of group inventory contributions for a given product batch.
+   *
+   * This logic exists because there isn't supposed to be more than one group per product batch.
+   *
+   * @param productBatchId the id of the product batch
+   * @return the number of group inventory contributions for the batch
+   */
+  public int countGroupContributionsForBatch(Integer productBatchId) {
+    return (int) groupInventoryContributionRepository.findAll().stream()
+      .filter(gic -> gic.getProduct() != null && gic.getProduct().getId().equals(productBatchId))
+      .count();
+  }
+
+  /**
+   * Removes a contributed product batch from a group if and only if it is contributed to exactly one group.
+   *
+   * This logic exists because there isn't supposed to be more than one group per product batch.
+   *
+   * @param productBatchId the id of the product batch
+   * @return true if removed, false otherwise
+   */
+  public boolean removeContributedBatch(Integer productBatchId) {
+    List<GroupInventoryContribution> contributions = groupInventoryContributionRepository.findAll().stream()
+      .filter(gic -> gic.getProduct() != null && gic.getProduct().getId().equals(productBatchId))
+      .toList();
+    if (contributions.size() != 1) {
+      return false;
+    }
+    groupInventoryContributionRepository.delete(contributions.get(0));
+    return true;
+  }
 }
