@@ -2,6 +2,7 @@ package stud.ntnu.backend.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.inventory.ProductBatchCreateDto;
@@ -17,8 +18,10 @@ import stud.ntnu.backend.model.inventory.ProductType;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.inventory.ProductBatchRepository;
 import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
+import stud.ntnu.backend.util.SearchUtil;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -30,13 +33,16 @@ public class ProductService {
   private final ProductBatchRepository productBatchRepository;
   private final ProductTypeRepository productTypeRepository;
   private final HouseholdRepository householdRepository;
+  private final SearchUtil searchUtil;
 
   public ProductService(ProductBatchRepository productBatchRepository,
       ProductTypeRepository productTypeRepository,
-      HouseholdRepository householdRepository) {
+      HouseholdRepository householdRepository,
+      SearchUtil searchUtil) {
     this.productBatchRepository = productBatchRepository;
     this.productTypeRepository = productTypeRepository;
     this.householdRepository = householdRepository;
+    this.searchUtil = searchUtil;
   }
 
   /**
@@ -340,5 +346,24 @@ public class ProductService {
         .caloriesPerUnit(productType.getCaloriesPerUnit())
         .category(productType.getCategory())
         .build();
+  }
+
+  /**
+   * Search for product types by name, category, and household.
+   *
+   * @param householdId the ID of the household
+   * @param category the category to filter by
+   * @param search the search string for the name
+   * @param pageable pagination information
+   * @return a page of matching ProductTypeDto
+   */
+  public Page<ProductTypeDto> searchProductTypesByNameAndCategoryAndHousehold(Integer householdId, String category, String search, Pageable pageable) {
+    // Use SearchUtil to search by name, then filter by household and category
+    Page<ProductType> page = searchUtil.searchByDescription(ProductType.class, "name", search, pageable);
+    // Filter by household and category
+    List<ProductType> filteredList = page.getContent().stream()
+      .filter(pt -> pt.getHousehold() != null && pt.getHousehold().getId().equals(householdId) && pt.getCategory().equalsIgnoreCase(category))
+      .toList();
+    return new PageImpl<>(filteredList, pageable, filteredList.size()).map(this::convertToDto);
   }
 }

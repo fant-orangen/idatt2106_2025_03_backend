@@ -314,4 +314,29 @@ public class InventoryController {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
+
+  /**
+   * Search for product types by name, category, and household.
+   * @param search the search string
+   * @param category the category to filter by (food, water, medicine)
+   * @param pageable pagination information
+   * @param principal the authenticated user
+   * @return a page of matching ProductTypeDto
+   */
+  @GetMapping("/product-types/search")
+  public ResponseEntity<Page<ProductTypeDto>> searchProductTypes(
+      @RequestParam String search,
+      @RequestParam String category,
+      Pageable pageable,
+      Principal principal) {
+    try {
+      String email = principal.getName();
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Page<ProductTypeDto> result = productService.searchProductTypesByNameAndCategoryAndHousehold(householdId, category, search, pageable);
+      return ResponseEntity.ok(result);
+    } catch (Exception e) {
+      log.error("Error searching product types", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
 }
