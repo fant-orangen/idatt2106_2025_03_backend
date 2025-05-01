@@ -77,6 +77,7 @@ public class NewsController {
   public ResponseEntity<?> getNewsArticlesByCrisisEvent(
       @PathVariable Integer crisisEventId,
       Pageable pageable, Principal principal) {
+
     try {
       Page<NewsArticleResponseDTO> newsArticles = newsService.getNewsArticlesByCrisisEvent(
           crisisEventId, pageable);

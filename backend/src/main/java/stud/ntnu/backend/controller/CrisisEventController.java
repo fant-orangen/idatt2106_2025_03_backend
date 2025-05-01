@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.map.CreateCrisisEventDto;
 import stud.ntnu.backend.dto.map.CrisisEventChangeDto;
 import stud.ntnu.backend.dto.map.UpdateCrisisEventDto;
+import stud.ntnu.backend.dto.map.CrisisEventPreviewDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
@@ -104,18 +105,16 @@ public class CrisisEventController {
   }
 
   /**
-   * Gets all crisis events with pagination.
-   * TODO: Untested!
+   * Gets a preview of all crisis events with pagination (id, name, severity, startTime only).
    *
    * @param pageable the pagination information
-   * @return ResponseEntity with a page of crisis events
+   * @return ResponseEntity with a page of crisis event previews
    */
   @GetMapping("/all")
-  public ResponseEntity<Page<CrisisEvent>> getAllCrisisEvents(Pageable pageable) {
-    Page<CrisisEvent> crisisEvents = crisisEventService.getAllCrisisEvents(pageable);
-    return ResponseEntity.ok(crisisEvents);
+  public ResponseEntity<Page<CrisisEventPreviewDto>> getAllCrisisEventPreviews(Pageable pageable) {
+    Page<CrisisEventPreviewDto> crisisEventPreviews = crisisEventService.getAllCrisisEventPreviews(pageable);
+    return ResponseEntity.ok(crisisEventPreviews);
   }
-  //javaDoc for deleteCrisisEvent method
 
   /**
    * Deletes a crisis event by its ID. Only users with ADMIN or SUPERADMIN roles are allowed to

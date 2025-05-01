@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import stud.ntnu.backend.dto.auth.AuthRequestDto;
 import stud.ntnu.backend.dto.auth.AuthResponseDto;
+import stud.ntnu.backend.dto.auth.ForgotPasswordRequestDto;
 import stud.ntnu.backend.dto.auth.RegisterRequestDto;
+import stud.ntnu.backend.dto.auth.ResetPasswordRequestDto;
 import stud.ntnu.backend.dto.auth.Send2FACodeRequestDto;
 import stud.ntnu.backend.service.AuthService;
 import stud.ntnu.backend.dto.auth.TwoFactorRequestDto;
@@ -128,6 +130,48 @@ public class AuthController {
         } catch (Exception e) {
             log.error("Error verifying 2FA code: {}", e.getMessage());
             return ResponseEntity.status(500).body("Failed to verify 2FA code.");
+        }
+    }
+
+    /**
+     * Initiates the password reset process for a user.
+     * Sends a password reset email with a token link.
+     *
+     * @param request The forgot password request containing the user's email
+     * @return ResponseEntity with status 200 OK if successful, or an error message
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDto request) {
+        try {
+            authService.forgotPassword(request.getEmail());
+            return ResponseEntity.ok("Password reset email sent successfully.");
+        } catch (IllegalArgumentException e) {
+            // Don't reveal if the email exists or not for security reasons
+            // Just return a generic success message
+            log.info("Forgot password request for non-existent email: {}", request.getEmail());
+            return ResponseEntity.ok("If your email exists in our system, you will receive a password reset link.");
+        } catch (Exception e) {
+            log.error("Error processing forgot password request: {}", e.getMessage());
+            return ResponseEntity.status(500).body("Failed to process forgot password request.");
+        }
+    }
+
+    /**
+     * Resets a user's password using a reset token.
+     *
+     * @param request The reset password request containing the token and new password
+     * @return ResponseEntity with status 200 OK if successful, or an error message
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequestDto request) {
+        try {
+            authService.resetPassword(request.getToken(), request.getNewPassword());
+            return ResponseEntity.ok("Password reset successfully.");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error resetting password: {}", e.getMessage());
+            return ResponseEntity.status(500).body("Failed to reset password.");
         }
     }
 }

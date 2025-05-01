@@ -219,4 +219,79 @@ public class AuthService {
     public void send2FACode(String email) {
         twoFactorCodeService.sendVerificationCode(email);
     }
+
+    /**
+     * Initiates the password reset process for a user.
+     * Generates a reset token, saves it, and sends a password reset email.
+     *
+     * @param email The email address of the user requesting a password reset
+     * @throws IllegalArgumentException if no user is found with the given email
+     */
+    @Transactional
+    public void forgotPassword(String email) {
+        // Find the user by email
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new IllegalArgumentException("No user found with email: " + email));
+
+        // Generate reset token
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
+
+        // Create and save the EmailToken
+        EmailToken resetToken = new EmailToken(
+            user,
+            token,
+            EmailToken.TokenType.RESET,
+            expiresAt
+        );
+        emailTokenRepository.save(resetToken);
+
+        // Send the password reset email
+        emailService.sendPasswordResetEmail(user, token);
+
+        log.info("Password reset initiated for user: {}", email);
+    }
+
+    /**
+     * Resets a user's password using a reset token.
+     *
+     * @param token The reset token
+     * @param newPassword The new password
+     * @throws IllegalArgumentException if the token is invalid or not found
+     * @throws IllegalStateException if the token is expired or already used
+     */
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        // 1. Find the token
+        Optional<EmailToken> tokenOptional = emailTokenRepository.findByToken(token);
+        if (tokenOptional.isEmpty()) {
+            throw new IllegalArgumentException("Invalid reset token");
+        }
+        EmailToken emailToken = tokenOptional.get();
+
+        // 2. Validate the token
+        if (emailToken.getUsedAt() != null) {
+            throw new IllegalStateException("Token has already been used");
+        }
+        if (emailToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Token has expired");
+        }
+        if (emailToken.getType() != EmailToken.TokenType.RESET) {
+            throw new IllegalStateException("Invalid token type");
+        }
+
+        // 3. Update the user's password
+        User user = emailToken.getUser();
+        if (user == null) {
+            throw new IllegalStateException("Token is not associated with a user");
+        }
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // 4. Mark token as used
+        emailToken.setUsedAt(LocalDateTime.now());
+        emailTokenRepository.save(emailToken);
+
+        log.info("Password reset successfully for user: {}", user.getEmail());
+    }
 }

@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.map.CreateCrisisEventDto;
 import stud.ntnu.backend.dto.map.CrisisEventChangeDto;
 import stud.ntnu.backend.dto.map.UpdateCrisisEventDto;
+import stud.ntnu.backend.dto.map.CrisisEventPreviewDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.map.CrisisEventChange;
 import stud.ntnu.backend.model.user.Notification;
@@ -408,5 +409,17 @@ public class CrisisEventService {
     int end = Math.min((start + pageable.getPageSize()), affectingEvents.size());
     List<CrisisEvent> pagedList = (start <= end) ? affectingEvents.subList(start, end) : List.of();
     return new org.springframework.data.domain.PageImpl<>(pagedList, pageable, affectingEvents.size());
+  }
+
+  /**
+   * Retrieves a preview (id, name, severity, startTime) of all crisis events with pagination.
+   *
+   * @param pageable pagination information
+   * @return page of crisis event previews
+   */
+  @Transactional(readOnly = true)
+  public Page<CrisisEventPreviewDto> getAllCrisisEventPreviews(Pageable pageable) {
+    return crisisEventRepository.findAll(pageable)
+        .map(CrisisEventPreviewDto::fromEntity);
   }
 }

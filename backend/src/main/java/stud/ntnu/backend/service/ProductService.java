@@ -7,8 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.inventory.ProductBatchCreateDto;
 import stud.ntnu.backend.dto.inventory.ProductBatchDto;
 import stud.ntnu.backend.dto.inventory.ProductBatchUpdateDto;
-import stud.ntnu.backend.dto.inventory.ProductTypeCreateDto;
+import stud.ntnu.backend.dto.inventory.FoodProductTypeCreateDto;
 import stud.ntnu.backend.dto.inventory.ProductTypeDto;
+import stud.ntnu.backend.dto.inventory.WaterProductTypeCreateDto;
+import stud.ntnu.backend.dto.inventory.MedicineProductTypeCreateDto;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.inventory.ProductBatch;
 import stud.ntnu.backend.model.inventory.ProductType;
@@ -79,13 +81,13 @@ public class ProductService {
   }
 
   /**
-   * Create a new product type.
+   * Create a new food product type.
    *
-   * @param createDto the DTO containing the product type information
+   * @param createDto the DTO containing the food product type information
    * @return the created product type
    */
   @Transactional
-  public ProductTypeDto createProductType(ProductTypeCreateDto createDto) {
+  public ProductTypeDto createProductType(FoodProductTypeCreateDto createDto) {
     Household household = householdRepository.findById(createDto.getHouseholdId())
         .orElseThrow(() -> new NoSuchElementException(
             "Household not found with ID: " + createDto.getHouseholdId()));
@@ -95,7 +97,7 @@ public class ProductService {
         createDto.getName(),
         createDto.getUnit(),
         createDto.getCaloriesPerUnit(),
-        createDto.getIsWater()
+        createDto.getCategory()
     );
 
     ProductType savedProductType = productTypeRepository.save(productType);
@@ -221,6 +223,91 @@ public class ProductService {
   }
 
   /**
+   * Get the total amount of water in litres (all batches of products with category 'water' and unit 'l').
+   * @return the total litres of water
+   */
+  public Integer getTotalLitresOfWater() {
+    return productBatchRepository.sumTotalLitresOfWater();
+  }
+
+  /**
+   * Get the total amount of water in litres for a specific household (all batches of products with category 'water' and unit 'l').
+   * @param householdId the ID of the household
+   * @return the total litres of water
+   */
+  public Integer getTotalLitresOfWaterByHousehold(Integer householdId) {
+    return productBatchRepository.sumTotalLitresOfWaterByHousehold(householdId);
+  }
+
+  /**
+   * Get all water product types for a specific household, paginated.
+   * @param householdId the ID of the household
+   * @param pageable pagination information
+   * @return a page of ProductTypeDto
+   */
+  public Page<ProductTypeDto> getWaterProductTypesByHousehold(Integer householdId, Pageable pageable) {
+    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId, "water", pageable);
+    return productTypes.map(this::convertToDto);
+  }
+
+  /**
+   * Get all medicine product types for a specific household, paginated.
+   * @param householdId the ID of the household
+   * @param pageable pagination information
+   * @return a page of ProductTypeDto
+   */
+  public Page<ProductTypeDto> getMedicineProductTypesByHousehold(Integer householdId, Pageable pageable) {
+    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId, "medicine", pageable);
+    return productTypes.map(this::convertToDto);
+  }
+
+  /**
+   * Create a new water product type.
+   * @param createDto the DTO containing the water product type information
+   * @return the created product type
+   */
+  @Transactional
+  public ProductTypeDto createWaterProductType(WaterProductTypeCreateDto createDto) {
+    Household household = householdRepository.findById(createDto.getHouseholdId())
+        .orElseThrow(() -> new NoSuchElementException(
+            "Household not found with ID: " + createDto.getHouseholdId()));
+
+    ProductType productType = new ProductType(
+        household,
+        createDto.getName(),
+        createDto.getUnit(),
+        null, // caloriesPerUnit is always null for water
+        createDto.getCategory()
+    );
+
+    ProductType savedProductType = productTypeRepository.save(productType);
+    return convertToDto(savedProductType);
+  }
+
+  /**
+   * Create a new medicine product type.
+   * @param createDto the DTO containing the medicine product type information
+   * @return the created product type
+   */
+  @Transactional
+  public ProductTypeDto createMedicineProductType(MedicineProductTypeCreateDto createDto) {
+    Household household = householdRepository.findById(createDto.getHouseholdId())
+        .orElseThrow(() -> new NoSuchElementException(
+            "Household not found with ID: " + createDto.getHouseholdId()));
+
+    ProductType productType = new ProductType(
+        household,
+        createDto.getName(),
+        createDto.getUnit(),
+        null, // caloriesPerUnit is always null for medicine
+        createDto.getCategory()
+    );
+
+    ProductType savedProductType = productTypeRepository.save(productType);
+    return convertToDto(savedProductType);
+  }
+
+  /**
    * Convert a ProductBatch entity to a ProductBatchDto.
    *
    * @param batch the ProductBatch entity
@@ -250,7 +337,7 @@ public class ProductService {
         .name(productType.getName())
         .unit(productType.getUnit())
         .caloriesPerUnit(productType.getCaloriesPerUnit())
-        .isWater(productType.getIsWater())
+        .category(productType.getCategory())
         .build();
   }
 }
