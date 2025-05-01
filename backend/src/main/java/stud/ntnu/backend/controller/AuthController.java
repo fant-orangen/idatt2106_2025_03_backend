@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import stud.ntnu.backend.dto.auth.AuthRequestDto;
 import stud.ntnu.backend.dto.auth.AuthResponseDto;
+import stud.ntnu.backend.dto.auth.ChangeEmailRequestDto;
+import stud.ntnu.backend.dto.auth.ChangePasswordRequestDto;
 import stud.ntnu.backend.dto.auth.RegisterRequestDto;
 import stud.ntnu.backend.dto.auth.Send2FACodeRequestDto;
 import stud.ntnu.backend.service.AuthService;
@@ -128,6 +130,43 @@ public class AuthController {
         } catch (Exception e) {
             log.error("Error verifying 2FA code: {}", e.getMessage());
             return ResponseEntity.status(500).body("Failed to verify 2FA code.");
+        }
+    }
+
+
+    @PostMapping("/change-password")
+        public ResponseEntity<?> changePassword(@RequestBody
+                                                @Valid ChangePasswordRequestDto changePasswordRequest) {
+        try {
+            authService.changePassword(
+                changePasswordRequest.getEmail(),
+                changePasswordRequest.getPassword(),
+                changePasswordRequest.getNewPassword()
+            );
+            return ResponseEntity.ok("Password changed successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error changing password: {}", e.getMessage());
+            return ResponseEntity.status(500).body("Failed to change password.");
+        }
+    }
+
+    @PostMapping("/change-email")
+    public ResponseEntity<?> changeEmail(@RequestBody @Valid
+                                         ChangeEmailRequestDto changeEmailRequest) {
+        try {
+            authService.changeEmail(
+                changeEmailRequest.getEmail(),
+                changeEmailRequest.getNewEmail(),
+                changeEmailRequest.getPassword()
+            );
+            return ResponseEntity.ok("Email changed successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error changing email: {}", e.getMessage());
+            return ResponseEntity.status(500).body("Failed to change email.");
         }
     }
 }
