@@ -216,6 +216,12 @@ public class AuthService {
         );
     }
 
+
+    /**
+     * Sends a 2FA code to the user's email.
+     *
+     * @param email the email of the user.
+     */
     public void send2FACode(String email) {
         twoFactorCodeService.sendVerificationCode(email);
     }
