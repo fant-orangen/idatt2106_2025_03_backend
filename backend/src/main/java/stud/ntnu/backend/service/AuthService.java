@@ -219,4 +219,46 @@ public class AuthService {
     public void send2FACode(String email) {
         twoFactorCodeService.sendVerificationCode(email);
     }
+
+    /**
+     * Changes the password of a user.
+     *
+     * @param email       the email of the user.
+     * @param password the old password.
+     * @param newPassword the new password.
+     */
+    public void changePassword(String email, String password, String newPassword) {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        if (authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(email, password)
+        ).isAuthenticated()) {
+            user.setPasswordHash(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+        } else {
+            throw new BadCredentialsException("Invalid credentials");
+        }
+    }
+
+    /**
+     * Change email of a user.
+     *
+     * @param email    the email of the user.
+     * @param newEmail the new email.
+     * @param password the password of the user.
+     */
+    public void changeEmail(String email, String newEmail, String password) {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        if (authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(email, password)
+        ).isAuthenticated()) {
+            user.setEmail(newEmail);
+            userRepository.save(user);
+        } else {
+            throw new BadCredentialsException("Invalid credentials");
+        }
+    }
 }
