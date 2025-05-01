@@ -40,13 +40,14 @@ public class ProductService {
   }
 
   /**
-   * Get all product types.
+   * Get all food product types for a specific household.
    *
+   * @param householdId the ID of the household
    * @param pageable pagination information
-   * @return a page of product types
+   * @return a page of food product types
    */
-  public Page<ProductTypeDto> getAllProductTypes(Pageable pageable) {
-    Page<ProductType> productTypes = productTypeRepository.findAll(pageable);
+  public Page<ProductTypeDto> getAllFoodProductTypes(Integer householdId, Pageable pageable) {
+    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId, "food", pageable);
     return productTypes.map(this::convertToDto);
   }
 

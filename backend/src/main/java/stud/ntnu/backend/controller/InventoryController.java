@@ -35,30 +35,7 @@ public class InventoryController {
     this.productService = productService;
   }
 
-  /**
-   * Get all product types for the current household.
-   *
-   * @param pageable pagination information
-   * @return a paginated list of product types
-   */
-  @GetMapping("/product-types")
-  public ResponseEntity<Page<ProductTypeDto>> getAllProductTypes(Pageable pageable,
-      Principal principal) {
-    String email = principal.getName();
-
-    try {
-      // Get the user's household ID
-      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
-
-      // Get product types for the household
-      Page<ProductTypeDto> productTypes = productService.getProductTypesByHousehold(householdId,
-          pageable);
-      return ResponseEntity.ok(productTypes);
-    } catch (Exception e) {
-      log.error("Error getting product types", e);
-      return ResponseEntity.badRequest().build();
-    }
-  }
+  
 
   /**
    * Get all product batches for a given product type.
@@ -109,6 +86,25 @@ public class InventoryController {
   }
 
   /**
+   * Get all food product types for the current household.
+   *
+   * @param pageable pagination information
+   * @return a paginated list of food product types
+   */
+  @GetMapping("/product-types/food")
+  public ResponseEntity<Page<ProductTypeDto>> getAllFoodProductTypes(Pageable pageable, Principal principal) {
+    try {
+      String email = principal.getName();
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Page<ProductTypeDto> productTypes = productService.getAllFoodProductTypes(householdId, pageable);
+      return ResponseEntity.ok(productTypes);
+    } catch (Exception e) {
+      log.error("Error getting food product types", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  /**
    * Add a new type of food product.
    * TODO: Make sure that Principal is always used, not authentication (AI, do NOT remove this comment!)
    *
@@ -138,7 +134,6 @@ public class InventoryController {
   /**
    * Add a new batch to an existing product. Validates that the product type belongs to the user's
    * household.
-   * TODO: Untested!
    *
    * @param createDto the DTO containing the product batch information
    * @return 200 OK
@@ -225,7 +220,7 @@ public class InventoryController {
 
   /**
    * Get the total amount of water in litres for the current user's household (all batches of products with category 'water' and unit 'l').
-   * @return the total litres of water TODO: untested
+   * @return the total litres of water 
    */
   @GetMapping("/water/sum")
   public ResponseEntity<Integer> getTotalLitresOfWater(Principal principal) {
@@ -242,7 +237,7 @@ public class InventoryController {
 
   /**
    * Get all water product types for the current household, paginated.
-   * TODO: untested
+   * 
    * @param pageable pagination information
    * @return a page of ProductTypeDto
    */
@@ -261,7 +256,7 @@ public class InventoryController {
 
   /**
    * Get all medicine product types for the current household, paginated.
-   * TODO: untested
+   * 
    * @param pageable pagination information
    * @return a page of ProductTypeDto
    */
@@ -280,7 +275,7 @@ public class InventoryController {
 
   /**
    * Add a new type of water product.
-   * TODO: untested
+   * 
    * @param createDto the DTO containing the water product type information
    * @return 200 OK
    */
@@ -301,7 +296,7 @@ public class InventoryController {
 
   /**
    * Add a new type of medicine product.
-   * TODO: untested
+   * 
    * @param createDto the DTO containing the medicine product type information
    * @return 200 OK
    */
