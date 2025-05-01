@@ -114,7 +114,6 @@ CREATE TABLE group_inventory_contributions (
     household_id INT NOT NULL,
     product_id INT,
     custom_name VARCHAR(255),
-    quantity DECIMAL(10,2) NOT NULL,
     expiration_date DATE,
     contributed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,

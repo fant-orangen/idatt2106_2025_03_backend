@@ -23,4 +23,7 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
 
     @Query("SELECT gm FROM GroupMembership gm WHERE gm.group.id = :groupId AND (gm.leftAt IS NULL OR gm.leftAt > :now)")
     java.util.List<GroupMembership> findAllCurrentByGroupId(@Param("groupId") Integer groupId, @Param("now") java.time.LocalDateTime now);
+
+    @Query("SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId AND gm.group.id = :groupId AND (gm.leftAt IS NULL OR gm.leftAt > :now)")
+    Optional<GroupMembership> findCurrentByHouseholdIdAndGroupId(@Param("householdId") Integer householdId, @Param("groupId") Integer groupId, @Param("now") LocalDateTime now);
 } 

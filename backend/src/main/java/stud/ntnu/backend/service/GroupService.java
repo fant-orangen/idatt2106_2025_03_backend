@@ -141,8 +141,7 @@ public class GroupService {
       return false;
     }
     Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
-    Optional<GroupMembership> membershipOpt = groupMembershipRepository.findCurrentByHouseholdId(householdId, LocalDateTime.now())
-      .filter(m -> m.getGroup().getId().equals(groupId));
+    Optional<GroupMembership> membershipOpt = groupMembershipRepository.findCurrentByHouseholdIdAndGroupId(householdId, groupId, LocalDateTime.now());
     if (membershipOpt.isEmpty()) {
       return false;
     }

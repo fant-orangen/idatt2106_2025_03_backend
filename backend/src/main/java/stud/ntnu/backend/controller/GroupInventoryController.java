@@ -35,7 +35,7 @@ public class GroupInventoryController {
 
   /**
    * Get a paginated list of all product types with batches contributed to the given group and category.
-   * TODO: untested
+   * 
    * @param request JSON body with groupId and category
    * @param pageable pagination information
    * @return a page of ProductTypeDto
@@ -53,7 +53,7 @@ public class GroupInventoryController {
 
   /**
    * Get all product batches for a given product type that are currently contributed to the given group.
-   * TODO: untested
+   * 
    * @param request JSON body with groupId and productTypeId
    * @param pageable pagination information
    * @return a paginated list of product batches
@@ -70,7 +70,7 @@ public class GroupInventoryController {
 
   /**
    * Remove a contributed product batch from a group by ProductBatch id.
-   * TODO: untested
+   * 
    * If the batch is contributed to more than one group, return an error and do not remove it.
    *
    * @param productBatchId the id of the product batch
@@ -90,4 +90,6 @@ public class GroupInventoryController {
     }
     return ResponseEntity.ok().build();
   }
+
+  // TODO: add endpoint for adding a product batch to a group
 }

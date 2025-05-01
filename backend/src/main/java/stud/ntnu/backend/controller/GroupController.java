@@ -20,13 +20,15 @@ import stud.ntnu.backend.dto.household.HouseholdDto;
 import java.util.List;
 import stud.ntnu.backend.dto.inventory.ProductTypeDto;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/groups")
 public class GroupController {
 
   private final GroupService groupService;
-
+  private final Logger logger = LoggerFactory.getLogger(GroupController.class);
   @Autowired
   public GroupController(GroupService groupService) {
     this.groupService = groupService;
@@ -34,7 +36,7 @@ public class GroupController {
 
   /**
    * Get all groups associated with the current user's household at the moment (paginated).
-   * TODO: untested
+   * 
    * @param principal the authenticated user
    * @param pageable pagination information
    * @return a paginated list of group summaries
@@ -51,7 +53,7 @@ public class GroupController {
 
   /**
    * Remove the current user's household from the given group by setting left_at to now.
-   * TODO: untested
+   * 
    * @param groupId the group to leave
    * @param principal the authenticated user
    * @return 200 OK if successful, 404 if not found or not a member
@@ -68,7 +70,7 @@ public class GroupController {
 
   /**
    * Get all households that currently have a membership in the given group.
-   * TODO: untested
+   * 
    * @param groupId the group id
    * @param principal the authenticated user
    * @return a list of HouseholdDto
@@ -77,6 +79,7 @@ public class GroupController {
   public ResponseEntity<List<HouseholdDto>> getCurrentHouseholdsInGroup(@PathVariable("groupId") Integer groupId, Principal principal) {
     String email = principal.getName();
     if (!groupService.isUserMemberOfGroup(groupId, email)) {
+      logger.warn("User [{}] attempted to access households of group [{}] without membership.", email, groupId);
       return ResponseEntity.status(403).body(null);
     }
     List<HouseholdDto> households = groupService.getCurrentHouseholdsInGroup(groupId);
