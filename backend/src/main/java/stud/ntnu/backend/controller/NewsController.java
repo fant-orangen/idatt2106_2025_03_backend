@@ -77,10 +77,6 @@ public class NewsController {
   public ResponseEntity<?> getNewsArticlesByCrisisEvent(
       @PathVariable Integer crisisEventId,
       Pageable pageable, Principal principal) {
-
-    if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
-      return ResponseEntity.status(403).body("Only administrators can access this resource");
-    }
     try {
       Page<NewsArticleResponseDTO> newsArticles = newsService.getNewsArticlesByCrisisEvent(
           crisisEventId, pageable);
