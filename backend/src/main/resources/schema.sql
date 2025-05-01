@@ -92,7 +92,7 @@ CREATE TABLE product_types (
     name VARCHAR(255) NOT NULL,
     unit VARCHAR(10) NOT NULL CHECK (unit IN ('l', 'stk', 'kg', 'gram', 'dl')),
     calories_per_unit DECIMAL(10,2),
-    is_water BOOLEAN NOT NULL DEFAULT FALSE,
+    category VARCHAR(10) NOT NULL CHECK (category IN ('food', 'water', 'medicine')),
     FOREIGN KEY (household_id) REFERENCES households(id),
     UNIQUE (household_id, name)
 );

@@ -29,5 +29,5 @@ public class ProductTypeCreateDto {
   @PositiveOrZero(message = "Calories per unit must be positive or zero")
   private Double caloriesPerUnit;
 
-  private Boolean isWater = false;
+  private String category = "food";
 }

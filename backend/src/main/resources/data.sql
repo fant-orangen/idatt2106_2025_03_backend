@@ -42,22 +42,22 @@ INSERT INTO group_memberships (group_id, household_id, invited_by_user_id) VALUE
 
 -- PRODUCT TYPES
 -- Smith Family (household_id = 1)
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Canned Beans', 'stk', 120.00, FALSE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Rice', 'kg', 1300.00, FALSE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Bottled Water', 'l', 0.00, TRUE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (1, 'Painkillers', 'stk', 0.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Canned Beans', 'stk', 120.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Rice', 'kg', 1300.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Bottled Water', 'l', 0.00, 'water');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Painkillers', 'stk', 0.00, 'medicine');
 
 -- Johnson Household (household_id = 2)
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Flour', 'kg', 1640.00, FALSE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Pasta', 'kg', 1570.00, FALSE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Purified Water', 'l', 0.00, TRUE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (2, 'Flashlight', 'stk', 0.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (2, 'Flour', 'kg', 1640.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (2, 'Pasta', 'kg', 1570.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (2, 'Purified Water', 'l', 0.00, 'water');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (2, 'Flashlight', 'stk', 0.00, 'food');
 
 -- Brown Residence (household_id = 3)
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (3, 'Bread', 'kg', 2650.00, FALSE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (3, 'Canned Soup', 'stk', 200.00, FALSE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (3, 'Toilet Paper', 'stk', 0.00, FALSE);
-INSERT INTO product_types (household_id, name, unit, calories_per_unit, is_water) VALUES (3, 'Soap', 'stk', 0.00, FALSE);
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (3, 'Bread', 'kg', 2650.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (3, 'Canned Soup', 'stk', 200.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (3, 'Toilet Paper', 'stk', 0.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (3, 'Soap', 'stk', 0.00, 'food');
 
 -- PRODUCT BATCH
 -- Canned Beans batches

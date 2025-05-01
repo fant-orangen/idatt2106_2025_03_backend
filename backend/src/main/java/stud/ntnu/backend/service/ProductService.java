@@ -95,7 +95,7 @@ public class ProductService {
         createDto.getName(),
         createDto.getUnit(),
         createDto.getCaloriesPerUnit(),
-        createDto.getIsWater()
+        createDto.getCategory()
     );
 
     ProductType savedProductType = productTypeRepository.save(productType);
@@ -250,7 +250,7 @@ public class ProductService {
         .name(productType.getName())
         .unit(productType.getUnit())
         .caloriesPerUnit(productType.getCaloriesPerUnit())
-        .isWater(productType.getIsWater())
+        .category(productType.getCategory())
         .build();
   }
 }
