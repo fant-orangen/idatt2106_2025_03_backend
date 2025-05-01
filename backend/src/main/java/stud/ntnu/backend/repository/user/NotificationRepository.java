@@ -1,5 +1,7 @@
 package stud.ntnu.backend.repository.user;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.user.Notification;
@@ -12,7 +14,7 @@ import java.util.List;
  */
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
-    
+
     /**
      * Find all notifications for a specific user.
      *
@@ -20,7 +22,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
      * @return a list of notifications
      */
     List<Notification> findByUser(User user);
-    
+
     /**
      * Find all notifications for a specific user ID.
      *
@@ -28,7 +30,16 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
      * @return a list of notifications
      */
     List<Notification> findByUserId(Integer userId);
-    
+
+    /**
+     * Find all notifications for a specific user ID with pagination.
+     *
+     * @param userId the user ID
+     * @param pageable pagination information
+     * @return a page of notifications
+     */
+    Page<Notification> findByUserId(Integer userId, Pageable pageable);
+
     /**
      * Find all unread notifications for a specific user.
      *

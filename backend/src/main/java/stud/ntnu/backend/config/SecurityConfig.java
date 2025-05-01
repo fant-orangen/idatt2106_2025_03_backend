@@ -97,14 +97,21 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth ->
             auth.requestMatchers("/h2-console/**", "/swagger-ui/**", "/swagger-ui.html",
                     "/v3/api-docs/**", "/actuator/health", "/auth/**", "/api/auth/**", "/api/poi/**",
-                    "/poi/**", "/ws/info", "/ws/**").permitAll()
+                    "/poi/**", "/ws/info", "/ws/**", "/api/address/**").permitAll()
                 // Allow GET requests to POI endpoints
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/poi/**").permitAll()
                 // Permit access to the crisis-events/all endpoint
                 .requestMatchers("/api/crisis-events/all").permitAll()
+                // Allow all authenticated users to access GET endpoints for specific crisis events
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/crisis-events/{id}")
+                .authenticated()
+                .requestMatchers("/api/crisis-events/{id}/changes").authenticated()
+                .requestMatchers("/api/news/{crisisEventId}").authenticated()
                 // Add role-based authorization for admin endpoints
                 .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
-                .requestMatchers("/api/super-admin").hasAnyRole("SUPERADMIN")
+                .requestMatchers("/api/super-admin", "/api/super-admin/**").hasAnyRole("SUPERADMIN")
+                .requestMatchers("/api/super-admin", "/api/super-admin//id-by-email/{email}").hasAnyRole("SUPERADMIN")
+
                 // Add WebSocket security
                 .requestMatchers("/topic/**", "/app/**").authenticated()
                 // Add role-based authorization for create/update/delete points of interest
@@ -115,6 +122,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/poi/**")
                 .hasAnyRole("ADMIN", "SUPERADMIN")
                 .anyRequest().authenticated());
+
 
     // Allow H2 console frame options
     http.headers(headers ->

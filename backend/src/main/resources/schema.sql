@@ -90,9 +90,9 @@ CREATE TABLE product_types (
     id INT AUTO_INCREMENT PRIMARY KEY,
     household_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
-    unit VARCHAR(10) NOT NULL CHECK (unit IN ('l', 'stk', 'kg', 'gram', 'dl')),
+    unit VARCHAR(10) NOT NULL CHECK (unit IN ('l', 'stk', 'kg', 'gram', 'dl', 'mg', 'dose', 'mcg')),
     calories_per_unit DECIMAL(10,2),
-    is_water BOOLEAN NOT NULL DEFAULT FALSE,
+    category VARCHAR(10) NOT NULL CHECK (category IN ('food', 'water', 'medicine')),
     FOREIGN KEY (household_id) REFERENCES households(id),
     UNIQUE (household_id, name)
 );
@@ -158,6 +158,19 @@ CREATE TABLE points_of_interest (
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
 );
 
+-- SCENARIO THEMES (admin‐managed crisis scenarios)
+CREATE TABLE scenario_themes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    description TEXT,
+    instructions TEXT,
+    status VARCHAR(10) NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
+    created_by_user_id INT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id)
+);
+
 -- CRISIS EVENTS & EPICENTERS
 CREATE TABLE crisis_events (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -171,18 +184,9 @@ CREATE TABLE crisis_events (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by_user_id INT NOT NULL,
     active BOOLEAN NOT NULL DEFAULT TRUE,
-    FOREIGN KEY (created_by_user_id) REFERENCES users(id)
-);
-
--- SCENARIO THEMES (admin‐managed crisis scenarios)
-CREATE TABLE scenario_themes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
-    description TEXT,
-    created_by_user_id INT NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by_user_id) REFERENCES users(id)
+    scenario_theme_id INT DEFAULT NULL,
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id),
+    FOREIGN KEY (scenario_theme_id) REFERENCES scenario_themes(id)
 );
 
 -- GAMIFICATION ACTIVITIES & USER LOG
@@ -225,9 +229,12 @@ CREATE TABLE news_articles (
     content TEXT NOT NULL,
     published_at DATETIME NOT NULL,
     created_by_user_id INT NOT NULL,
+    crisis_event_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('draft', 'published', 'archived')),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by_user_id) REFERENCES users(id)
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id),
+    FOREIGN KEY (crisis_event_id) REFERENCES crisis_events(id)
 );
 
 -- EMAIL TOKEN MANAGEMENT (verification & password reset)
@@ -268,8 +275,8 @@ CREATE TABLE notification_preferences (
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request')),
-    target_type VARCHAR(20) NOT NULL CHECK (target_type IN ('inventory','event','location_request')),
+    preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request', 'system')),
+    target_type VARCHAR(20) CHECK (target_type IN ('inventory','event','location_request')), -- If the notification is associated with another table, add a target type and target id pointing to the table
     target_id INT,
     description TEXT DEFAULT NULL,
     notify_at DATETIME NOT NULL,
@@ -279,7 +286,7 @@ CREATE TABLE notifications (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE TABLE crisis_event_changes (
+CREATE TABLE crisis_event_changes ( -- TODO: when a crisis event is updated, a new entry is added to this column
     id INT AUTO_INCREMENT PRIMARY KEY,
     crisis_event_id INT NOT NULL,
     change_type VARCHAR(30) NOT NULL CHECK (change_type IN ('creation', 'level_change', 'description_update', 'epicenter_moved')),
