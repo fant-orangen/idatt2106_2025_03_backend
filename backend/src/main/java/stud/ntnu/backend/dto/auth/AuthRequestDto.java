@@ -13,7 +13,6 @@ import lombok.Setter;
 @Getter
 public class AuthRequestDto {
 
-  // Getters and setters
   @NotBlank(message = "Email is required")
   @Email(message = "Email should be valid")
   private String email;
@@ -21,14 +20,17 @@ public class AuthRequestDto {
   @NotBlank(message = "Password is required")
   private String password;
 
+  @NotBlank
+  private String recaptchaToken;
+
   // Default constructor
   public AuthRequestDto() {
   }
 
   // Constructor with parameters
-  public AuthRequestDto(String email, String password) {
+  public AuthRequestDto(String email, String password, String recaptchaToken) {
     this.email = email;
     this.password = password;
+    this.recaptchaToken = recaptchaToken;
   }
-
 }
