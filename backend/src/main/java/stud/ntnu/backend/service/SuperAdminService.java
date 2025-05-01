@@ -34,7 +34,6 @@ public class SuperAdminService {
                 .map(admin -> new UserInfoDto(admin.getEmail(), admin.getId()))
                 .toList();
     }
-    //method for revoiking admin access
     /**
      * Revokes admin access for a user by their ID.
      *
@@ -49,6 +48,24 @@ public class SuperAdminService {
 
         // Set the user's role to "USER"
         user.setRole(userRole);
+        userService.saveUser(user);
+    }
+
+    /**
+     * Grants admin access to a user by their ID. And activates 2FA for the user.
+     *
+     * @param id the ID of the user to grant admin access to
+     */
+    public void addAdminAccess(Integer id) {
+        User user = userService.getUserById(id).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Retrieve the "ADMIN" role from the database
+        Role adminRole = roleRepository.findByName("ADMIN")
+                .orElseThrow(() -> new RuntimeException("Role 'ADMIN' not found"));
+
+        // Set the user's role to "ADMIN" and activate 2FA
+        //TODO: Implement 2FA activation logic
+        user.setRole(adminRole);
         userService.saveUser(user);
     }
 

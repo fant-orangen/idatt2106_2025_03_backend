@@ -61,6 +61,12 @@ public class UserService {
     return userRepository.findByEmail(email);
   }
 
+  public Integer getUserIdByEmail(String email) {
+    return userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("User not found"))
+        .getId();
+  }
+
   /**
    * Saves a user.
    *
