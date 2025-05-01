@@ -30,4 +30,8 @@ public class ProductTypeCreateDto {
   private Double caloriesPerUnit;
 
   private String category = "food";
+
+  public void setHouseholdId(Integer householdId) {
+    this.householdId = householdId;
+  }
 }

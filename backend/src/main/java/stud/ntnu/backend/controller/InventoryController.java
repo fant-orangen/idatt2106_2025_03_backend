@@ -222,4 +222,59 @@ public class InventoryController {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
+
+  /**
+   * Get the total amount of water in litres for the current user's household (all batches of products with category 'water' and unit 'l').
+   * @return the total litres of water TODO: untested
+   */
+  @GetMapping("/water/sum")
+  public ResponseEntity<Integer> getTotalLitresOfWater(Principal principal) {
+    try {
+      String email = principal.getName();
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Integer totalLitres = productService.getTotalLitresOfWaterByHousehold(householdId);
+      return ResponseEntity.ok(totalLitres);
+    } catch (Exception e) {
+      log.error("Error getting total litres of water", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  /**
+   * Get all water product types for the current household, paginated.
+   * TODO: untested
+   * @param pageable pagination information
+   * @return a page of ProductTypeDto
+   */
+  @GetMapping("/product-types/water")
+  public ResponseEntity<Page<ProductTypeDto>> getWaterProductTypes(Pageable pageable, Principal principal) {
+    String email = principal.getName();
+    try {
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Page<ProductTypeDto> productTypes = productService.getWaterProductTypesByHousehold(householdId, pageable);
+      return ResponseEntity.ok(productTypes);
+    } catch (Exception e) {
+      log.error("Error getting water product types", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  /**
+   * Get all medicine product types for the current household, paginated.
+   * TODO: untested
+   * @param pageable pagination information
+   * @return a page of ProductTypeDto
+   */
+  @GetMapping("/product-types/medicine")
+  public ResponseEntity<Page<ProductTypeDto>> getMedicineProductTypes(Pageable pageable, Principal principal) {
+    String email = principal.getName();
+    try {
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Page<ProductTypeDto> productTypes = productService.getMedicineProductTypesByHousehold(householdId, pageable);
+      return ResponseEntity.ok(productTypes);
+    } catch (Exception e) {
+      log.error("Error getting medicine product types", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
 }

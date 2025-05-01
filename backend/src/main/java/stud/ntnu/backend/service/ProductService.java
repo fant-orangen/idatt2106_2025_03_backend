@@ -221,6 +221,45 @@ public class ProductService {
   }
 
   /**
+   * Get the total amount of water in litres (all batches of products with category 'water' and unit 'l').
+   * @return the total litres of water
+   */
+  public Integer getTotalLitresOfWater() {
+    return productBatchRepository.sumTotalLitresOfWater();
+  }
+
+  /**
+   * Get the total amount of water in litres for a specific household (all batches of products with category 'water' and unit 'l').
+   * @param householdId the ID of the household
+   * @return the total litres of water
+   */
+  public Integer getTotalLitresOfWaterByHousehold(Integer householdId) {
+    return productBatchRepository.sumTotalLitresOfWaterByHousehold(householdId);
+  }
+
+  /**
+   * Get all water product types for a specific household, paginated.
+   * @param householdId the ID of the household
+   * @param pageable pagination information
+   * @return a page of ProductTypeDto
+   */
+  public Page<ProductTypeDto> getWaterProductTypesByHousehold(Integer householdId, Pageable pageable) {
+    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId, "water", pageable);
+    return productTypes.map(this::convertToDto);
+  }
+
+  /**
+   * Get all medicine product types for a specific household, paginated.
+   * @param householdId the ID of the household
+   * @param pageable pagination information
+   * @return a page of ProductTypeDto
+   */
+  public Page<ProductTypeDto> getMedicineProductTypesByHousehold(Integer householdId, Pageable pageable) {
+    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId, "medicine", pageable);
+    return productTypes.map(this::convertToDto);
+  }
+
+  /**
    * Convert a ProductBatch entity to a ProductBatchDto.
    *
    * @param batch the ProductBatch entity
