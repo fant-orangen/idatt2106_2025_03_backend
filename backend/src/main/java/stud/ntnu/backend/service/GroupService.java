@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.dto.inventory.ProductTypeDto;
+import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
 
 /**
  * Service for managing groups. Handles creation, retrieval, updating, and deletion of groups.
@@ -31,6 +33,7 @@ public class GroupService {
   private final InventoryService inventoryService;
   private final HouseholdAdminRepository householdAdminRepository;
   private final UserRepository userRepository;
+  private final ProductTypeRepository productTypeRepository;
 
   /**
    * Constructor for dependency injection.
@@ -40,16 +43,19 @@ public class GroupService {
    * @param inventoryService          service for inventory operations
    * @param householdAdminRepository  repository for household admin operations
    * @param userRepository          repository for user operations
+   * @param productTypeRepository     repository for product type operations
    */
   @Autowired
   public GroupService(GroupRepository groupRepository,
       GroupMembershipRepository groupMembershipRepository, InventoryService inventoryService,
-      HouseholdAdminRepository householdAdminRepository, UserRepository userRepository) {
+      HouseholdAdminRepository householdAdminRepository, UserRepository userRepository,
+      ProductTypeRepository productTypeRepository) {
     this.groupRepository = groupRepository;
     this.groupMembershipRepository = groupMembershipRepository;
     this.inventoryService = inventoryService;
     this.householdAdminRepository = householdAdminRepository;
     this.userRepository = userRepository;
+    this.productTypeRepository = productTypeRepository;
   }
 
   /**
@@ -154,5 +160,17 @@ public class GroupService {
       dto.setMembers(null); // or Collections.emptyList() for summary
       return dto;
     }).collect(Collectors.toList());
+  }
+
+  public Page<ProductTypeDto> getContributedProductTypes(Integer groupId, String category, Pageable pageable) {
+    Page<stud.ntnu.backend.model.inventory.ProductType> page = productTypeRepository.findContributedProductTypesByGroupAndCategory(groupId, category, pageable);
+    return page.map(pt -> ProductTypeDto.builder()
+      .id(pt.getId())
+      .householdId(pt.getHousehold() != null ? pt.getHousehold().getId() : null)
+      .name(pt.getName())
+      .unit(pt.getUnit())
+      .caloriesPerUnit(pt.getCaloriesPerUnit())
+      .category(pt.getCategory())
+      .build());
   }
 }

@@ -18,6 +18,8 @@ import stud.ntnu.backend.dto.group.GroupSummaryDto;
 import stud.ntnu.backend.service.GroupService;
 import stud.ntnu.backend.dto.household.HouseholdDto;
 import java.util.List;
+import stud.ntnu.backend.dto.inventory.ProductTypeDto;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/groups")
@@ -75,4 +77,5 @@ public class GroupController {
     List<HouseholdDto> households = groupService.getCurrentHouseholdsInGroup(groupId);
     return ResponseEntity.ok(households);
   }
+
 }

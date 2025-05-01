@@ -104,7 +104,6 @@ CREATE TABLE product_batch (
     date_added DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expiration_time DATETIME,
     number INT NOT NULL,
-    contributed BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (product_type_id) REFERENCES product_types(id) ON DELETE CASCADE
 );
 
