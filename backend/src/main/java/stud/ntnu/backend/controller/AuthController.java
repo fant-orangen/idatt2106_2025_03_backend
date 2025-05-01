@@ -130,6 +130,13 @@ public class AuthController {
         }
     }
 
+    /**
+     * Sends a 2FA code to the user's email.
+     *
+     * This endpoint is used to initiate the 2FA process.
+     * @param request The request containing the user's email
+     * @return ResponseEntity with status 200 OK if successful, or an error message
+     */
     @PostMapping("/send-2fa")
     public ResponseEntity<?> send2FACode(@RequestBody @Valid Send2FACodeRequestDto request) {
         try {
@@ -141,6 +148,14 @@ public class AuthController {
         }
     }
 
+    /**
+     * Verifies the 2FA code sent to the user's email.
+     *
+     * This endpoint is used to complete the 2FA process.
+     *
+     * @param request The request containing the user's email and the 2FA code
+     * @return ResponseEntity with status 200 OK if successful, or an error message
+     */
     @PostMapping("/verify-2fa")
     public ResponseEntity<?> verify2FA(@RequestBody @Valid TwoFactorRequestDto request) {
         try {
