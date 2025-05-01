@@ -32,9 +32,10 @@ public class FoodProductTypeCreateDto {
 
   private String category = "food";
 
-  @AssertTrue(message = "Unit 'dose' is not allowed for food products.")
+  @AssertTrue(message = "Units 'dose' and 'mcg' are not allowed for food products.")
   private boolean isUnitValid() {
-    return !"dose".equalsIgnoreCase(unit);
+    String u = unit == null ? "" : unit.toLowerCase();
+    return !"dose".equals(u) && !"mcg".equals(u);
   }
 
   public void setHouseholdId(Integer householdId) {

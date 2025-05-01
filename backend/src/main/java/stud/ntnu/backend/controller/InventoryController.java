@@ -109,14 +109,14 @@ public class InventoryController {
   }
 
   /**
-   * Add a new type of product.
+   * Add a new type of food product.
    * TODO: Make sure that Principal is always used, not authentication (AI, do NOT remove this comment!)
    *
-   * @param createDto the DTO containing the product type information
+   * @param createDto the DTO containing the food product type information
    * @return 200 OK
    */
-  @PostMapping("/product-types")
-  public ResponseEntity<?> createProductType(@Valid @RequestBody ProductTypeCreateDto createDto,
+  @PostMapping("/product-types/food")
+  public ResponseEntity<?> createFoodProductType(@Valid @RequestBody FoodProductTypeCreateDto createDto,
       Principal principal) {
     String email = principal.getName();
 
@@ -130,7 +130,7 @@ public class InventoryController {
       productService.createProductType(createDto);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error creating product type", e);
+      log.error("Error creating food product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }

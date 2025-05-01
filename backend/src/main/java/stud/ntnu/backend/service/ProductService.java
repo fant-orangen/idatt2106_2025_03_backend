@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.inventory.ProductBatchCreateDto;
 import stud.ntnu.backend.dto.inventory.ProductBatchDto;
 import stud.ntnu.backend.dto.inventory.ProductBatchUpdateDto;
-import stud.ntnu.backend.dto.inventory.ProductTypeCreateDto;
+import stud.ntnu.backend.dto.inventory.FoodProductTypeCreateDto;
 import stud.ntnu.backend.dto.inventory.ProductTypeDto;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.inventory.ProductBatch;
@@ -79,13 +79,13 @@ public class ProductService {
   }
 
   /**
-   * Create a new product type.
+   * Create a new food product type.
    *
-   * @param createDto the DTO containing the product type information
+   * @param createDto the DTO containing the food product type information
    * @return the created product type
    */
   @Transactional
-  public ProductTypeDto createProductType(ProductTypeCreateDto createDto) {
+  public ProductTypeDto createProductType(FoodProductTypeCreateDto createDto) {
     Household household = householdRepository.findById(createDto.getHouseholdId())
         .orElseThrow(() -> new NoSuchElementException(
             "Household not found with ID: " + createDto.getHouseholdId()));

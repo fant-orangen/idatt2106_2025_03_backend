@@ -90,7 +90,7 @@ CREATE TABLE product_types (
     id INT AUTO_INCREMENT PRIMARY KEY,
     household_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
-    unit VARCHAR(10) NOT NULL CHECK (unit IN ('l', 'stk', 'kg', 'gram', 'dl')),
+    unit VARCHAR(10) NOT NULL CHECK (unit IN ('l', 'stk', 'kg', 'gram', 'dl', 'mg', 'dose', 'mcg')),
     calories_per_unit DECIMAL(10,2),
     category VARCHAR(10) NOT NULL CHECK (category IN ('food', 'water', 'medicine')),
     FOREIGN KEY (household_id) REFERENCES households(id),
