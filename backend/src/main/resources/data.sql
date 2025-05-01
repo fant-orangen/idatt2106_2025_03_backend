@@ -146,38 +146,31 @@ INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epic
 VALUES ('Flood Warning', 'Potential flooding in downtown area', 'yellow', 63.4300, 10.3950, 1000.0, CURRENT_TIMESTAMP, 1, TRUE);
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active)
 VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 60.4250, 11.3900, 5000.0, DATEADD('DAY', 1, CURRENT_TIMESTAMP), 1, TRUE);
+INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active)
+VALUES ('lightning storm', 'Potential flooding in downtown area', 'red', 63.4300, 10.3950, 1000.0, TIMESTAMP '2025-05-01 12:00:00', 1, TRUE);
 
 -- CRISIS EVENTS CHANGES
 
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
 VALUES (1, 'creation', NULL, 'Initial creation of crisis event.', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
 VALUES (1, 'level_change', 'Level 2', 'Level 3', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
 VALUES (1, 'description_update', 'Flooding in lower region', 'Flooding spreading to midtown area', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
 VALUES (1, 'creation', NULL, 'Initial creation of crisis event.', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
 VALUES (1, 'level_change', 'Level 2', 'Level 3', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
 VALUES (1, 'description_update', 'Flooding in lower region', 'Flooding spreading to midtown area', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
 VALUES (1, 'creation', NULL, 'Initial creation of crisis event.', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
 VALUES (1, 'level_change', 'Level 2', 'Level 3', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
 VALUES (1, 'description_update', 'Flooding in lower region', 'Flooding spreading to midtown area', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
 VALUES (2, 'epicenter_moved', '40.7128,-74.0060', '40.7306,-73.9352', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
 VALUES (2, 'level_change', 'Level 1', 'Level 2', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
@@ -188,12 +181,6 @@ INSERT INTO scenario_themes (name, description, instructions, status, created_by
 VALUES ('Natural Disaster', 'Earthquake, flood, or storm preparation', 'Follow evacuation orders. Prepare an emergency kit and know your local shelter locations.', 'active', 1);
 INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
 VALUES ('Public Health Emergency', 'Pandemic or disease outbreak', 'Practice good hygiene, follow public health advice, and stock up on essential medicines.', 'active', 1);
-
--- CRISIS EVENTS
-INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
-VALUES ('Flood Warning', 'Potential flooding in downtown area', 'yellow', 63.4300, 10.3950, 2.0, CURRENT_TIMESTAMP, 1, TRUE, 2);
-INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
-VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 63.4250, 10.3900, 5.0, DATEADD('DAY', 1, CURRENT_TIMESTAMP), 1, TRUE, NULL);
 
 -- NEWS ARTICLES
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
