@@ -9,13 +9,21 @@ import lombok.NoArgsConstructor;
 
 /**
  * Data Transfer Object for updating a ProductBatch.
- * Used for reducing the number of units in an existing batch.
+ * <p>
+ * This DTO is used for reducing the number of units in an existing batch.
+ * It contains validation to ensure that the number of units to remove is provided and is positive.
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductBatchUpdateDto {
+
+    /**
+     * The number of units to remove from the batch.
+     * <p>
+     * This field is required and must be a positive integer.
+     */
     @NotNull(message = "Number of units to remove is required")
     @Positive(message = "Number of units to remove must be positive")
     private Integer unitsToRemove;
