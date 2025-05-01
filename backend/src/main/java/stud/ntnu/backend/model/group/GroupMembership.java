@@ -35,6 +35,9 @@ public class GroupMembership {
   @Column(name = "joined_at", nullable = false, updatable = false)
   private LocalDateTime joinedAt;
 
+  @Column(name = "left_at")
+  private LocalDateTime leftAt;
+
   // Set joinedAt before persist
   @PrePersist
   protected void onCreate() {

@@ -35,10 +35,14 @@ INSERT INTO groups (name, created_by_user_id) VALUES ('Neighborhood Watch', 2);
 INSERT INTO groups (name, created_by_user_id) VALUES ('Emergency Response Team', 1);
 
 -- GROUP MEMBERSHIPS
-INSERT INTO group_memberships (group_id, household_id, invited_by_user_id) VALUES (1, 1, 2);
-INSERT INTO group_memberships (group_id, household_id, invited_by_user_id) VALUES (1, 2, 2);
-INSERT INTO group_memberships (group_id, household_id, invited_by_user_id) VALUES (2, 1, 1);
-INSERT INTO group_memberships (group_id, household_id, invited_by_user_id) VALUES (2, 3, 1);
+-- Smith Family (household_id=1) was in Neighborhood Watch, left in the past
+INSERT INTO group_memberships (group_id, household_id, invited_by_user_id, joined_at, left_at) VALUES (1, 1, 2, DATEADD('YEAR', -2, CURRENT_TIMESTAMP), DATEADD('YEAR', -1, CURRENT_TIMESTAMP));
+-- Smith Family (household_id=1) is currently in Emergency Response Team (left_at is NULL)
+INSERT INTO group_memberships (group_id, household_id, invited_by_user_id, joined_at, left_at) VALUES (2, 1, 1, DATEADD('MONTH', -6, CURRENT_TIMESTAMP), NULL);
+-- Johnson Household (household_id=2) is currently in Neighborhood Watch (left_at is in the future)
+INSERT INTO group_memberships (group_id, household_id, invited_by_user_id, joined_at, left_at) VALUES (1, 2, 2, DATEADD('YEAR', -1, CURRENT_TIMESTAMP), DATEADD('YEAR', 1, CURRENT_TIMESTAMP));
+-- Brown Residence (household_id=3) was in Emergency Response Team, left recently
+INSERT INTO group_memberships (group_id, household_id, invited_by_user_id, joined_at, left_at) VALUES (2, 3, 1, DATEADD('MONTH', -8, CURRENT_TIMESTAMP), DATEADD('DAY', -1, CURRENT_TIMESTAMP));
 
 -- PRODUCT TYPES
 -- Smith Family (household_id = 1)

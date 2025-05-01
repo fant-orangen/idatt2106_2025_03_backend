@@ -79,6 +79,7 @@ CREATE TABLE group_memberships (
     household_id INT NOT NULL,
     invited_by_user_id INT,
     joined_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    left_at DATETIME DEFAULT NULL,
     PRIMARY KEY (group_id, household_id),
     FOREIGN KEY (group_id) REFERENCES groups(id),
     FOREIGN KEY (household_id) REFERENCES households(id),
@@ -103,6 +104,7 @@ CREATE TABLE product_batch (
     date_added DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expiration_time DATETIME,
     number INT NOT NULL,
+    contributed BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (product_type_id) REFERENCES product_types(id) ON DELETE CASCADE
 );
 
