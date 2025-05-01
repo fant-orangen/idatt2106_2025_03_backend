@@ -12,8 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.security.Principal;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import stud.ntnu.backend.dto.group.GroupSummaryDto;
 import stud.ntnu.backend.service.GroupService;
+import stud.ntnu.backend.dto.household.HouseholdDto;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/groups")
@@ -27,17 +31,48 @@ public class GroupController {
   }
 
   /**
-   * Get the group associated with the current user's household.
+   * Get all groups associated with the current user's household at the moment (paginated).
+   * TODO: untested
    * @param principal the authenticated user
-   * @return the group summary (id, name, createdAt)
+   * @param pageable pagination information
+   * @return a paginated list of group summaries
    */
   @GetMapping("/current")
-  public ResponseEntity<GroupSummaryDto> getCurrentUserGroup(Principal principal) {
+  public ResponseEntity<Page<GroupSummaryDto>> getCurrentUserGroups(Principal principal, Pageable pageable) {
     String email = principal.getName();
-    GroupSummaryDto group = groupService.getCurrentUserGroup(email);
-    if (group == null) {
+    Page<GroupSummaryDto> groups = groupService.getCurrentUserGroups(email, pageable);
+    if (groups.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
-    return ResponseEntity.ok(group);
+    return ResponseEntity.ok(groups);
+  }
+
+  /**
+   * Remove the current user's household from the given group by setting left_at to now.
+   * TODO: untested
+   * @param groupId the group to leave
+   * @param principal the authenticated user
+   * @return 200 OK if successful, 404 if not found or not a member
+   */
+  @PostMapping("/leave/{groupid}")
+  public ResponseEntity<?> removeHouseholdFromGroup(@PathVariable("groupid") Integer groupId, Principal principal) {
+    String email = principal.getName();
+    boolean removed = groupService.removeHouseholdFromGroup(email, groupId);
+    if (!removed) {
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok().build();
+  }
+
+  /**
+   * Get all households that currently have a membership in the given group.
+   * TODO: untested
+   * @param groupId the group id
+   * @return a list of HouseholdDto
+   */
+  @GetMapping("/{groupId}/households")
+  public ResponseEntity<List<HouseholdDto>> getCurrentHouseholdsInGroup(@PathVariable("groupId") Integer groupId) {
+    List<HouseholdDto> households = groupService.getCurrentHouseholdsInGroup(groupId);
+    return ResponseEntity.ok(households);
   }
 }
