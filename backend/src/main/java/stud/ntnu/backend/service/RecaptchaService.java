@@ -11,6 +11,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
+/**
+ * <h2>RecaptchaService</h2>
+ *
+ * <p>Service for verifying Google reCAPTCHA tokens.</p>
+ */
 @Service
 public class RecaptchaService {
 
@@ -19,6 +24,12 @@ public class RecaptchaService {
 
     private static final String RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
 
+    /**
+     * Verifies the reCAPTCHA token with Google's API.
+     *
+     * @param recaptchaToken The reCAPTCHA token to verify.
+     * @return true if the token is valid and the score is above the threshold, false otherwise.
+     */
     public boolean verifyRecaptcha(String recaptchaToken) {
         RestTemplate restTemplate = new RestTemplate();
 
