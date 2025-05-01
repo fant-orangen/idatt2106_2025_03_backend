@@ -35,30 +35,7 @@ public class InventoryController {
     this.productService = productService;
   }
 
-  /**
-   * Get all product types for the current household.
-   *
-   * @param pageable pagination information
-   * @return a paginated list of product types
-   */
-  @GetMapping("/product-types")
-  public ResponseEntity<Page<ProductTypeDto>> getAllProductTypes(Pageable pageable,
-      Principal principal) {
-    String email = principal.getName();
-
-    try {
-      // Get the user's household ID
-      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
-
-      // Get product types for the household
-      Page<ProductTypeDto> productTypes = productService.getProductTypesByHousehold(householdId,
-          pageable);
-      return ResponseEntity.ok(productTypes);
-    } catch (Exception e) {
-      log.error("Error getting product types", e);
-      return ResponseEntity.badRequest().build();
-    }
-  }
+  
 
   /**
    * Get all product batches for a given product type.
@@ -109,14 +86,33 @@ public class InventoryController {
   }
 
   /**
-   * Add a new type of product.
+   * Get all food product types for the current household.
+   *
+   * @param pageable pagination information
+   * @return a paginated list of food product types
+   */
+  @GetMapping("/product-types/food")
+  public ResponseEntity<Page<ProductTypeDto>> getAllFoodProductTypes(Pageable pageable, Principal principal) {
+    try {
+      String email = principal.getName();
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Page<ProductTypeDto> productTypes = productService.getAllFoodProductTypes(householdId, pageable);
+      return ResponseEntity.ok(productTypes);
+    } catch (Exception e) {
+      log.error("Error getting food product types", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  /**
+   * Add a new type of food product.
    * TODO: Make sure that Principal is always used, not authentication (AI, do NOT remove this comment!)
    *
-   * @param createDto the DTO containing the product type information
+   * @param createDto the DTO containing the food product type information
    * @return 200 OK
    */
-  @PostMapping("/product-types")
-  public ResponseEntity<?> createProductType(@Valid @RequestBody ProductTypeCreateDto createDto,
+  @PostMapping("/product-types/food")
+  public ResponseEntity<?> createFoodProductType(@Valid @RequestBody FoodProductTypeCreateDto createDto,
       Principal principal) {
     String email = principal.getName();
 
@@ -130,7 +126,7 @@ public class InventoryController {
       productService.createProductType(createDto);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error creating product type", e);
+      log.error("Error creating food product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -138,7 +134,6 @@ public class InventoryController {
   /**
    * Add a new batch to an existing product. Validates that the product type belongs to the user's
    * household.
-   * TODO: Untested!
    *
    * @param createDto the DTO containing the product batch information
    * @return 200 OK
@@ -220,6 +215,129 @@ public class InventoryController {
     } catch (Exception e) {
       log.error("Error deleting product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Get the total amount of water in litres for the current user's household (all batches of products with category 'water' and unit 'l').
+   * @return the total litres of water 
+   */
+  @GetMapping("/water/sum")
+  public ResponseEntity<Integer> getTotalLitresOfWater(Principal principal) {
+    try {
+      String email = principal.getName();
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Integer totalLitres = productService.getTotalLitresOfWaterByHousehold(householdId);
+      return ResponseEntity.ok(totalLitres);
+    } catch (Exception e) {
+      log.error("Error getting total litres of water", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  /**
+   * Get all water product types for the current household, paginated.
+   * 
+   * @param pageable pagination information
+   * @return a page of ProductTypeDto
+   */
+  @GetMapping("/product-types/water")
+  public ResponseEntity<Page<ProductTypeDto>> getWaterProductTypes(Pageable pageable, Principal principal) {
+    String email = principal.getName();
+    try {
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Page<ProductTypeDto> productTypes = productService.getWaterProductTypesByHousehold(householdId, pageable);
+      return ResponseEntity.ok(productTypes);
+    } catch (Exception e) {
+      log.error("Error getting water product types", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  /**
+   * Get all medicine product types for the current household, paginated.
+   * 
+   * @param pageable pagination information
+   * @return a page of ProductTypeDto
+   */
+  @GetMapping("/product-types/medicine")
+  public ResponseEntity<Page<ProductTypeDto>> getMedicineProductTypes(Pageable pageable, Principal principal) {
+    String email = principal.getName();
+    try {
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Page<ProductTypeDto> productTypes = productService.getMedicineProductTypesByHousehold(householdId, pageable);
+      return ResponseEntity.ok(productTypes);
+    } catch (Exception e) {
+      log.error("Error getting medicine product types", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  /**
+   * Add a new type of water product.
+   * 
+   * @param createDto the DTO containing the water product type information
+   * @return 200 OK
+   */
+  @PostMapping("/product-types/water")
+  public ResponseEntity<?> createWaterProductType(@Valid @RequestBody WaterProductTypeCreateDto createDto,
+      Principal principal) {
+    String email = principal.getName();
+    try {
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      createDto.setHouseholdId(householdId);
+      productService.createWaterProductType(createDto);
+      return ResponseEntity.ok().build();
+    } catch (Exception e) {
+      log.error("Error creating water product type", e);
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Add a new type of medicine product.
+   * 
+   * @param createDto the DTO containing the medicine product type information
+   * @return 200 OK
+   */
+  @PostMapping("/product-types/medicine")
+  public ResponseEntity<?> createMedicineProductType(@Valid @RequestBody MedicineProductTypeCreateDto createDto,
+      Principal principal) {
+    String email = principal.getName();
+    try {
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      createDto.setHouseholdId(householdId);
+      productService.createMedicineProductType(createDto);
+      return ResponseEntity.ok().build();
+    } catch (Exception e) {
+      log.error("Error creating medicine product type", e);
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Search for product types by name, category, and household.
+   * TODO: untested
+   * @param search the search string
+   * @param category the category to filter by (food, water, medicine)
+   * @param pageable pagination information
+   * @param principal the authenticated user
+   * @return a page of matching ProductTypeDto
+   */
+  @GetMapping("/product-types/search")
+  public ResponseEntity<Page<ProductTypeDto>> searchProductTypes(
+      @RequestParam String search,
+      @RequestParam String category,
+      Pageable pageable,
+      Principal principal) {
+    try {
+      String email = principal.getName();
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Page<ProductTypeDto> result = productService.searchProductTypesByNameAndCategoryAndHousehold(householdId, category, search, pageable);
+      return ResponseEntity.ok(result);
+    } catch (Exception e) {
+      log.error("Error searching product types", e);
+      return ResponseEntity.badRequest().build();
     }
   }
 }

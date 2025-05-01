@@ -32,4 +32,21 @@ public interface ProductBatchRepository extends JpaRepository<ProductBatch, Inte
      */
     @Query("SELECT COALESCE(SUM(pb.number), 0) FROM ProductBatch pb WHERE pb.productType.id = :productTypeId")
     Integer sumNumberByProductTypeId(@Param("productTypeId") Integer productTypeId);
+
+    /**
+     * Sum the total number of litres for all product batches where the product type category is 'water' and the unit is 'l'.
+     *
+     * @return the total number of litres
+     */
+    @Query("SELECT COALESCE(SUM(pb.number), 0) FROM ProductBatch pb WHERE pb.productType.category = 'water' AND pb.productType.unit = 'l'")
+    Integer sumTotalLitresOfWater();
+
+    /**
+     * Sum the total number of litres for all product batches where the product type category is 'water', unit is 'l', and household matches.
+     *
+     * @param householdId the ID of the household
+     * @return the total number of litres
+     */
+    @Query("SELECT COALESCE(SUM(pb.number), 0) FROM ProductBatch pb WHERE pb.productType.category = 'water' AND pb.productType.unit = 'l' AND pb.productType.household.id = :householdId")
+    Integer sumTotalLitresOfWaterByHousehold(@Param("householdId") Integer householdId);
 }

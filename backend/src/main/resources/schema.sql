@@ -90,9 +90,9 @@ CREATE TABLE product_types (
     id INT AUTO_INCREMENT PRIMARY KEY,
     household_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
-    unit VARCHAR(10) NOT NULL CHECK (unit IN ('l', 'stk', 'kg', 'gram', 'dl')),
+    unit VARCHAR(10) NOT NULL CHECK (unit IN ('l', 'stk', 'kg', 'gram', 'dl', 'mg', 'dose', 'mcg')),
     calories_per_unit DECIMAL(10,2),
-    is_water BOOLEAN NOT NULL DEFAULT FALSE,
+    category VARCHAR(10) NOT NULL CHECK (category IN ('food', 'water', 'medicine')),
     FOREIGN KEY (household_id) REFERENCES households(id),
     UNIQUE (household_id, name)
 );
@@ -158,6 +158,19 @@ CREATE TABLE points_of_interest (
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
 );
 
+-- SCENARIO THEMES (admin‐managed crisis scenarios)
+CREATE TABLE scenario_themes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    description TEXT,
+    instructions TEXT,
+    status VARCHAR(10) NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
+    created_by_user_id INT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id)
+);
+
 -- CRISIS EVENTS & EPICENTERS
 CREATE TABLE crisis_events (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -171,18 +184,9 @@ CREATE TABLE crisis_events (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by_user_id INT NOT NULL,
     active BOOLEAN NOT NULL DEFAULT TRUE,
-    FOREIGN KEY (created_by_user_id) REFERENCES users(id)
-);
-
--- SCENARIO THEMES (admin‐managed crisis scenarios)
-CREATE TABLE scenario_themes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
-    description TEXT,
-    created_by_user_id INT NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by_user_id) REFERENCES users(id)
+    scenario_theme_id INT DEFAULT NULL,
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id),
+    FOREIGN KEY (scenario_theme_id) REFERENCES scenario_themes(id)
 );
 
 -- GAMIFICATION ACTIVITIES & USER LOG

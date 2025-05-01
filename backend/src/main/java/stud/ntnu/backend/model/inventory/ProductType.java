@@ -31,17 +31,17 @@ public class ProductType {
   @Column(name = "calories_per_unit")
   private Double caloriesPerUnit;
 
-  @Column(name = "is_water", nullable = false)
-  private Boolean isWater;
+  @Column(name = "category", nullable = false)
+  private String category;
 
   @OneToMany(mappedBy = "productType")
   private List<ProductBatch> productBatches;
 
-  public ProductType(Household household, String name, String unit, Double caloriesPerUnit, Boolean isWater) {
+  public ProductType(Household household, String name, String unit, Double caloriesPerUnit, String category) {
     this.household = household;
     this.name = name;
     this.unit = unit;
     this.caloriesPerUnit = caloriesPerUnit;
-    this.isWater = isWater;
+    this.category = category;
   }
 }
