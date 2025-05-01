@@ -317,6 +317,7 @@ public class InventoryController {
 
   /**
    * Search for product types by name, category, and household.
+   * TODO: untested
    * @param search the search string
    * @param category the category to filter by (food, water, medicine)
    * @param pageable pagination information

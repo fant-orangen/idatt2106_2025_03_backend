@@ -48,6 +48,30 @@ INSERT INTO product_types (household_id, name, unit, calories_per_unit, category
 INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Painkillers', 'mg', 0.00, 'medicine');
 INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Antibiotic', 'dose', 0.00, 'medicine');
 
+-- Additional product types for Smith Family (household_id = 1)
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Oatmeal', 'kg', 370.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Sugar', 'kg', 4000.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Salt', 'kg', 0.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Cooking Oil', 'l', 8840.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Powdered Milk', 'kg', 500.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Canned Tuna', 'stk', 120.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Peanut Butter', 'stk', 588.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Crackers', 'stk', 70.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Dried Fruit', 'kg', 320.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Instant Noodles', 'stk', 350.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Honey', 'kg', 3040.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Tea Bags', 'stk', 2.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Coffee', 'kg', 2.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Cereal Bars', 'stk', 90.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Canned Corn', 'stk', 80.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Canned Tomatoes', 'stk', 30.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Apple Juice', 'l', 46.00, 'food');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Bottled Sparkling Water', 'l', 0.00, 'water');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Electrolyte Solution', 'l', 0.00, 'water');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Antihistamine', 'mg', 0.00, 'medicine');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Cough Syrup', 'dose', 0.00, 'medicine');
+INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (1, 'Bandages', 'stk', 0.00, 'medicine');
+
 -- Johnson Household (household_id = 2)
 INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (2, 'Flour', 'kg', 1640.00, 'food');
 INSERT INTO product_types (household_id, name, unit, calories_per_unit, category) VALUES (2, 'Pasta', 'kg', 1570.00, 'food');
@@ -88,6 +112,52 @@ INSERT INTO product_batch (product_type_id, date_added, expiration_time, number)
 
 -- Canned Soup batch
 INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (10, CURRENT_TIMESTAMP, DATEADD('MONTH', 18, CURRENT_TIMESTAMP), 6);
+
+-- Product batches for new product types (IDs are sequential after previous entries)
+-- Oatmeal (id=14)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (14, CURRENT_TIMESTAMP, DATEADD('YEAR', 1, CURRENT_TIMESTAMP), 2);
+-- Sugar (id=15)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (15, CURRENT_TIMESTAMP, DATEADD('YEAR', 2, CURRENT_TIMESTAMP), 1);
+-- Salt (id=16)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (16, CURRENT_TIMESTAMP, DATEADD('YEAR', 3, CURRENT_TIMESTAMP), 1);
+-- Cooking Oil (id=17)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (17, CURRENT_TIMESTAMP, DATEADD('MONTH', 10, CURRENT_TIMESTAMP), 1);
+-- Powdered Milk (id=18)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (18, CURRENT_TIMESTAMP, DATEADD('MONTH', 6, CURRENT_TIMESTAMP), 1);
+-- Canned Tuna (id=19)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (19, CURRENT_TIMESTAMP, DATEADD('YEAR', 2, CURRENT_TIMESTAMP), 4);
+-- Peanut Butter (id=20)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (20, CURRENT_TIMESTAMP, DATEADD('YEAR', 1, CURRENT_TIMESTAMP), 2);
+-- Crackers (id=21)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (21, CURRENT_TIMESTAMP, DATEADD('MONTH', 8, CURRENT_TIMESTAMP), 3);
+-- Dried Fruit (id=22)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (22, CURRENT_TIMESTAMP, DATEADD('MONTH', 12, CURRENT_TIMESTAMP), 1);
+-- Instant Noodles (id=23)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (23, CURRENT_TIMESTAMP, DATEADD('MONTH', 6, CURRENT_TIMESTAMP), 5);
+-- Honey (id=24)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (24, CURRENT_TIMESTAMP, DATEADD('YEAR', 5, CURRENT_TIMESTAMP), 1);
+-- Tea Bags (id=25)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (25, CURRENT_TIMESTAMP, DATEADD('YEAR', 2, CURRENT_TIMESTAMP), 50);
+-- Coffee (id=26)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (26, CURRENT_TIMESTAMP, DATEADD('YEAR', 2, CURRENT_TIMESTAMP), 1);
+-- Cereal Bars (id=27)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (27, CURRENT_TIMESTAMP, DATEADD('MONTH', 10, CURRENT_TIMESTAMP), 6);
+-- Canned Corn (id=28)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (28, CURRENT_TIMESTAMP, DATEADD('YEAR', 1, CURRENT_TIMESTAMP), 2);
+-- Canned Tomatoes (id=29)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (29, CURRENT_TIMESTAMP, DATEADD('YEAR', 1, CURRENT_TIMESTAMP), 2);
+-- Apple Juice (id=30)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (30, CURRENT_TIMESTAMP, DATEADD('MONTH', 6, CURRENT_TIMESTAMP), 3);
+-- Bottled Sparkling Water (id=31)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (31, CURRENT_TIMESTAMP, DATEADD('YEAR', 1, CURRENT_TIMESTAMP), 6);
+-- Electrolyte Solution (id=32)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (32, CURRENT_TIMESTAMP, DATEADD('MONTH', 8, CURRENT_TIMESTAMP), 2);
+-- Antihistamine (id=33)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (33, CURRENT_TIMESTAMP, DATEADD('YEAR', 2, CURRENT_TIMESTAMP), 1);
+-- Cough Syrup (id=34)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (34, CURRENT_TIMESTAMP, DATEADD('MONTH', 18, CURRENT_TIMESTAMP), 1);
+-- Bandages (id=35)
+INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (35, CURRENT_TIMESTAMP, DATEADD('YEAR', 5, CURRENT_TIMESTAMP), 10);
 
 -- GROUP INVENTORY CONTRIBUTIONS
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (1, 1, 1, 5); -- Neighborhood Watch, Smith Family, Canned Beans
