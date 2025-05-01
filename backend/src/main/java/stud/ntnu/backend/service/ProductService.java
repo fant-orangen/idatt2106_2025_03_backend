@@ -9,6 +9,8 @@ import stud.ntnu.backend.dto.inventory.ProductBatchDto;
 import stud.ntnu.backend.dto.inventory.ProductBatchUpdateDto;
 import stud.ntnu.backend.dto.inventory.FoodProductTypeCreateDto;
 import stud.ntnu.backend.dto.inventory.ProductTypeDto;
+import stud.ntnu.backend.dto.inventory.WaterProductTypeCreateDto;
+import stud.ntnu.backend.dto.inventory.MedicineProductTypeCreateDto;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.inventory.ProductBatch;
 import stud.ntnu.backend.model.inventory.ProductType;
@@ -257,6 +259,52 @@ public class ProductService {
   public Page<ProductTypeDto> getMedicineProductTypesByHousehold(Integer householdId, Pageable pageable) {
     Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId, "medicine", pageable);
     return productTypes.map(this::convertToDto);
+  }
+
+  /**
+   * Create a new water product type.
+   * @param createDto the DTO containing the water product type information
+   * @return the created product type
+   */
+  @Transactional
+  public ProductTypeDto createWaterProductType(WaterProductTypeCreateDto createDto) {
+    Household household = householdRepository.findById(createDto.getHouseholdId())
+        .orElseThrow(() -> new NoSuchElementException(
+            "Household not found with ID: " + createDto.getHouseholdId()));
+
+    ProductType productType = new ProductType(
+        household,
+        createDto.getName(),
+        createDto.getUnit(),
+        null, // caloriesPerUnit is always null for water
+        createDto.getCategory()
+    );
+
+    ProductType savedProductType = productTypeRepository.save(productType);
+    return convertToDto(savedProductType);
+  }
+
+  /**
+   * Create a new medicine product type.
+   * @param createDto the DTO containing the medicine product type information
+   * @return the created product type
+   */
+  @Transactional
+  public ProductTypeDto createMedicineProductType(MedicineProductTypeCreateDto createDto) {
+    Household household = householdRepository.findById(createDto.getHouseholdId())
+        .orElseThrow(() -> new NoSuchElementException(
+            "Household not found with ID: " + createDto.getHouseholdId()));
+
+    ProductType productType = new ProductType(
+        household,
+        createDto.getName(),
+        createDto.getUnit(),
+        null, // caloriesPerUnit is always null for medicine
+        createDto.getCategory()
+    );
+
+    ProductType savedProductType = productTypeRepository.save(productType);
+    return convertToDto(savedProductType);
   }
 
   /**

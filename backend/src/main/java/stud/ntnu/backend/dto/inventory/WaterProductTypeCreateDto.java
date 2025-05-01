@@ -2,21 +2,19 @@ package stud.ntnu.backend.dto.inventory;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Data Transfer Object for creating a new ProductType.
+ * Data Transfer Object for creating a new Water ProductType.
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FoodProductTypeCreateDto {
+public class WaterProductTypeCreateDto {
 
   private Integer householdId;
 
@@ -26,18 +24,14 @@ public class FoodProductTypeCreateDto {
   @NotBlank(message = "Unit is required")
   private String unit;
 
-  @NotNull(message = "Calories per unit is required")
-  @PositiveOrZero(message = "Calories per unit must be positive or zero")
-  private Double caloriesPerUnit;
+  private String category = "water";
 
-  private String category = "food";
-
-  @AssertTrue(message = "Unit 'dose' is not allowed for food products.")
+  @AssertTrue(message = "Only unit 'l' (liter) is allowed for water products.")
   private boolean isUnitValid() {
-    return !"dose".equalsIgnoreCase(unit);
+    return "l".equalsIgnoreCase(unit);
   }
 
   public void setHouseholdId(Integer householdId) {
     this.householdId = householdId;
   }
-}
+} 

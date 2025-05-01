@@ -277,4 +277,46 @@ public class InventoryController {
       return ResponseEntity.badRequest().build();
     }
   }
+
+  /**
+   * Add a new type of water product.
+   * TODO: untested
+   * @param createDto the DTO containing the water product type information
+   * @return 200 OK
+   */
+  @PostMapping("/product-types/water")
+  public ResponseEntity<?> createWaterProductType(@Valid @RequestBody WaterProductTypeCreateDto createDto,
+      Principal principal) {
+    String email = principal.getName();
+    try {
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      createDto.setHouseholdId(householdId);
+      productService.createWaterProductType(createDto);
+      return ResponseEntity.ok().build();
+    } catch (Exception e) {
+      log.error("Error creating water product type", e);
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Add a new type of medicine product.
+   * TODO: untested
+   * @param createDto the DTO containing the medicine product type information
+   * @return 200 OK
+   */
+  @PostMapping("/product-types/medicine")
+  public ResponseEntity<?> createMedicineProductType(@Valid @RequestBody MedicineProductTypeCreateDto createDto,
+      Principal principal) {
+    String email = principal.getName();
+    try {
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      createDto.setHouseholdId(householdId);
+      productService.createMedicineProductType(createDto);
+      return ResponseEntity.ok().build();
+    } catch (Exception e) {
+      log.error("Error creating medicine product type", e);
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
 }
