@@ -2,6 +2,7 @@ package stud.ntnu.backend.controller;
 
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +18,7 @@ import stud.ntnu.backend.dto.auth.ResetPasswordRequestDto;
 import stud.ntnu.backend.dto.auth.Send2FACodeRequestDto;
 import stud.ntnu.backend.service.AuthService;
 import stud.ntnu.backend.dto.auth.TwoFactorRequestDto;
+import stud.ntnu.backend.service.RecaptchaService;
 
 /**
  * Handles user authentication and account lifecycle actions. Includes user registration, email
@@ -30,10 +32,13 @@ public class AuthController {
 
     private final AuthService authService;
 
+    private final RecaptchaService recaptchaService;
+
     private final Logger log = org.slf4j.LoggerFactory.getLogger(AuthController.class);
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, RecaptchaService recaptchaService) {
         this.authService = authService;
+        this.recaptchaService = recaptchaService;
     }
 
 
@@ -58,7 +63,24 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
+        // Verify the reCAPTCHA token
+        System.out.println("Recaptcha token: " + authRequest.getRecaptchaToken());
+        log.info("Login request received: {}", authRequest);
+        if (!recaptchaService.verifyRecaptcha(authRequest.getRecaptchaToken())) {
+            // Return a response with an error message in the AuthResponseDto
+            AuthResponseDto errorResponse = new AuthResponseDto();
+            errorResponse.setToken(null);
+            errorResponse.setEmail(null);
+            errorResponse.setUserId(null);
+            errorResponse.setRole(null);
+            errorResponse.setHouseholdId(null);
+            errorResponse.setIsUsing2FA(false);
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+
+        // Proceed with login if reCAPTCHA is valid
         AuthResponseDto authResponse = authService.login(authRequest);
+
         if (authResponse.getIsUsing2FA()) {
             return ResponseEntity.status(202).body(authResponse);
         }
