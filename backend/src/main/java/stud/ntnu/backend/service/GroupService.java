@@ -168,5 +168,19 @@ public class GroupService {
     }).collect(Collectors.toList());
   }
 
-  
+  public Integer getHouseholdIdByUserEmail(String email) {
+    return inventoryService.getHouseholdIdByUserEmail(email);
+  }
+
+  /**
+   * Checks if the user (by email) is a member of any household in the given group.
+   * @param groupId the group id
+   * @param email the user's email
+   * @return true if the user is a member, false otherwise
+   */
+  public boolean isUserMemberOfGroup(Integer groupId, String email) {
+    Integer userHouseholdId = getHouseholdIdByUserEmail(email);
+    List<HouseholdDto> households = getCurrentHouseholdsInGroup(groupId);
+    return households.stream().anyMatch(h -> h.getId() != null && h.getId().equals(userHouseholdId));
+  }
 }

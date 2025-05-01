@@ -76,8 +76,8 @@ public class GroupInventoryController {
    * @param productBatchId the id of the product batch
    * @return 200 OK if removed, 409 Conflict if batch is contributed to more than one group, 404 if not found
    */
-  @PostMapping("/product-batches")
-  public ResponseEntity<?> removeContributedBatch(@RequestParam Integer productBatchId) {
+  @PatchMapping("/product-batches/{productBatchId}")
+  public ResponseEntity<?> removeContributedBatch(@PathVariable Integer productBatchId) {
     int count = groupInventoryService.countGroupContributionsForBatch(productBatchId);
     if (count == 0) {
       return ResponseEntity.notFound().build();

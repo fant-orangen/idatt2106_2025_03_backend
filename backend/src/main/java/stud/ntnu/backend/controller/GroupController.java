@@ -56,7 +56,7 @@ public class GroupController {
    * @param principal the authenticated user
    * @return 200 OK if successful, 404 if not found or not a member
    */
-  @PostMapping("/leave/{groupid}")
+  @PatchMapping("/leave/{groupid}")
   public ResponseEntity<?> removeHouseholdFromGroup(@PathVariable("groupid") Integer groupId, Principal principal) {
     String email = principal.getName();
     boolean removed = groupService.removeHouseholdFromGroup(email, groupId);
@@ -70,10 +70,15 @@ public class GroupController {
    * Get all households that currently have a membership in the given group.
    * TODO: untested
    * @param groupId the group id
+   * @param principal the authenticated user
    * @return a list of HouseholdDto
    */
   @GetMapping("/{groupId}/households")
-  public ResponseEntity<List<HouseholdDto>> getCurrentHouseholdsInGroup(@PathVariable("groupId") Integer groupId) {
+  public ResponseEntity<List<HouseholdDto>> getCurrentHouseholdsInGroup(@PathVariable("groupId") Integer groupId, Principal principal) {
+    String email = principal.getName();
+    if (!groupService.isUserMemberOfGroup(groupId, email)) {
+      return ResponseEntity.status(403).body(null);
+    }
     List<HouseholdDto> households = groupService.getCurrentHouseholdsInGroup(groupId);
     return ResponseEntity.ok(households);
   }
