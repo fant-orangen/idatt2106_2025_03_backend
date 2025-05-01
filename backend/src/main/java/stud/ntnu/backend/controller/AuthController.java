@@ -21,7 +21,8 @@ import stud.ntnu.backend.service.RecaptchaService;
 
 /**
  * Handles user authentication and account lifecycle actions. Includes user registration, email
- * verification, login (JWT issuance), and password reset flows (forgot/reset).
+ * verification, login (JWT issuance), two-factor authentication (2FA), reCAPTCHA validation,
+ * and password reset flows (forgot/reset).
  * <p>
  * Based on Visjonsdokument 2025 for Krisefikser.no.
  */
