@@ -1,20 +1,27 @@
 package stud.ntnu.backend.controller;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.data.domain.Pageable;
-import stud.ntnu.backend.dto.quiz.CreateQuizDto;
-import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
-import stud.ntnu.backend.service.QuizService;
-import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
-import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
-import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
-import stud.ntnu.backend.dto.quiz.CreateQuizAnswerDto;
-import java.util.List;
-import java.util.Collections;
-
-
 import java.security.Principal;
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import stud.ntnu.backend.dto.quiz.CreateQuizAnswerDto;
+import stud.ntnu.backend.dto.quiz.CreateQuizDto;
+import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
+import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
+import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
+import stud.ntnu.backend.service.QuizService;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import stud.ntnu.backend.service.UserService;
+import stud.ntnu.backend.security.AdminChecker;
 
 /**
  * Admin controller for managing quizzes. Supports creation, archiving, and user attempts.
@@ -24,9 +31,11 @@ import java.security.Principal;
 public class QuizController {
 
     private final QuizService quizService;
+    private final UserService userService;
 
-    public QuizController(QuizService quizService) {
+    public QuizController(QuizService quizService, UserService userService) {
         this.quizService = quizService;
+        this.userService = userService;
     }
 
     /**
@@ -39,6 +48,9 @@ public class QuizController {
     @PostMapping
     public ResponseEntity<?> createQuiz(@RequestBody CreateQuizDto createQuizDto, Principal principal) {
         try {
+            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Forbidden");
+            }
             Long userId = Long.valueOf(principal.getName()); // Adjust if needed
             Long quizId = quizService.createQuiz(createQuizDto, userId);
             return ResponseEntity.ok(Collections.singletonMap("quizId", quizId));
@@ -52,18 +64,21 @@ public class QuizController {
      * Archives a quiz by id.
      * TODO: test
      * @param id the quiz id
+     * @param principal the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
      */
     @PatchMapping("/{id}/archive")
-    public ResponseEntity<?> archiveQuiz(@PathVariable Long id) {
+    public ResponseEntity<?> archiveQuiz(@PathVariable Long id, Principal principal) {
         try {
+            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Forbidden");
+            }
             quizService.archiveQuiz(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
     /**
      * Gets all questions for a quiz by quiz id.
      * TODO: test
@@ -94,11 +109,15 @@ public class QuizController {
      * Saves a quiz question.
      * TODO: test
      * @param dto the CreateQuizQuestionDto containing question data
+     * @param principal the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
      */
     @PostMapping("/questions")
-    public ResponseEntity<?> saveQuizQuestion(@RequestBody CreateQuizQuestionDto dto) {
+    public ResponseEntity<?> saveQuizQuestion(@RequestBody CreateQuizQuestionDto dto, Principal principal) {
         try {
+            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Forbidden");
+            }
             quizService.saveQuizQuestion(dto);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
@@ -110,12 +129,35 @@ public class QuizController {
      * Saves a quiz answer.
      * TODO: test
      * @param dto the CreateQuizAnswerDto containing answer data
+     * @param principal the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
      */
     @PostMapping("/answers")
-    public ResponseEntity<?> saveQuizAnswer(@RequestBody CreateQuizAnswerDto dto) {
+    public ResponseEntity<?> saveQuizAnswer(@RequestBody CreateQuizAnswerDto dto, Principal principal) {
         try {
+            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Forbidden");
+            }
             quizService.saveQuizAnswer(dto);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /**
+     * Deletes a quiz question by its id.
+     * TODO: test
+     * @param questionId the id of the quiz question to delete
+     * @return ResponseEntity with 200 OK or error message
+     */
+    @DeleteMapping("/questions/{question_id}")
+    public ResponseEntity<?> deleteQuizQuestion(@PathVariable("question_id") Long questionId, Principal principal) {
+        try {
+            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Forbidden");
+            }
+            quizService.deleteQuizQuestion(questionId);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

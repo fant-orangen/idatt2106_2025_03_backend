@@ -168,4 +168,11 @@ public class QuizService {
     answer.setIsCorrect(dto.getIsCorrect());
     quizAnswerRepository.save(answer);
   }
+
+  public void deleteQuizQuestion(Long questionId) {
+    if (!quizQuestionRepository.existsById(questionId)) {
+      throw new IllegalArgumentException("Quiz question not found");
+    }
+    quizQuestionRepository.deleteById(questionId);
+  }
 }
