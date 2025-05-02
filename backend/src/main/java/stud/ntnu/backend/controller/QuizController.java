@@ -40,7 +40,7 @@ public class QuizController {
 
     /**
      * Creates a new empty quiz. Only admins should be allowed (add check if needed).
-     * TODO: test
+     * 
      * @param createQuizDto the quiz information (name, description, status)
      * @param principal     the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
@@ -51,8 +51,8 @@ public class QuizController {
             if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
                 return ResponseEntity.status(403).body("Forbidden");
             }
-            Long userId = Long.valueOf(principal.getName()); // Adjust if needed
-            Long quizId = quizService.createQuiz(createQuizDto, userId);
+            Integer userId = userService.getUserIdByEmail(principal.getName());
+            Long quizId = quizService.createQuiz(createQuizDto, userId.longValue());
             return ResponseEntity.ok(Collections.singletonMap("quizId", quizId));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
