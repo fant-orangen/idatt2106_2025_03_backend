@@ -29,7 +29,7 @@ public class UserQuizController {
 
     /**
      * Creates a user quiz attempt for a given quiz.
-     * TODO: test
+     * 
      * @param quizId    the quiz id
      * @param principal the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
@@ -47,7 +47,7 @@ public class UserQuizController {
 
     /**
      * Records a user's answer to a quiz question for a specific attempt.
-     * TODO: test
+     * 
      * @param dto the answer information (userQuizAttemptId, quizId, questionId, answerId)
      * @return ResponseEntity with 200 OK or error message
      */
@@ -63,7 +63,7 @@ public class UserQuizController {
 
     /**
      * Gets all attempts for a quiz by the current user, returning only id and completedAt.
-     * TODO: test
+     * 
      * @param quizId    the quiz id
      * @param principal the Principal object representing the current user
      * @param pageable  the pagination information
@@ -82,7 +82,7 @@ public class UserQuizController {
     /**
      * Gets paginated basic info about quizzes with at least one attempt by the current user.
      * Returns quizId, name, status, and questionCount for each quiz.
-     * TODO: test
+     * 
      * @param principal the Principal object representing the current user
      * @param pageable  the pagination information
      * @return ResponseEntity with a page of QuizBasicInfoDto
@@ -99,7 +99,7 @@ public class UserQuizController {
     
     /**
      * Gets the total number of correct answers for a given quiz attempt.
-     * TODO: test
+     * 
      * @param attemptId the user quiz attempt id
      * @return ResponseEntity with the total number of correct answers (integer)
      */
