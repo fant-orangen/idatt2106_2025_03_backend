@@ -86,4 +86,20 @@ public class QuizController {
         List<QuizAnswerResponseDto> answers = quizService.getAnswersByQuestionId(questionId);
         return ResponseEntity.ok(answers);
     }
+
+    /**
+     * Saves a quiz question.
+     * TODO: test
+     * @param dto the CreateQuizQuestionDto containing question data
+     * @return ResponseEntity with 200 OK or error message
+     */
+    @PostMapping("/questions")
+    public ResponseEntity<?> saveQuizQuestion(@RequestBody CreateQuizQuestionDto dto) {
+        try {
+            quizService.saveQuizQuestion(dto);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

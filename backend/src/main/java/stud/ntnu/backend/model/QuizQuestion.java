@@ -23,6 +23,9 @@ public class QuizQuestion {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "position")
+    private Integer position;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

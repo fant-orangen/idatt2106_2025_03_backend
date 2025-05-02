@@ -11,6 +11,7 @@ import stud.ntnu.backend.dto.quiz.QuizAttemptSummaryDto;
 import stud.ntnu.backend.dto.quiz.QuizBasicInfoDto;
 import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
+import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
 import stud.ntnu.backend.model.Quiz;
 import stud.ntnu.backend.model.UserQuizAttempt;
 import stud.ntnu.backend.model.UserQuizAnswer;
@@ -148,5 +149,13 @@ public class QuizService {
       }
     }
     return correctCount;
+  }
+
+  public void saveQuizQuestion(CreateQuizQuestionDto dto) {
+    QuizQuestion question = new QuizQuestion();
+    question.setQuizId(dto.getQuizId());
+    question.setQuestionBody(dto.getQuestionBody());
+    question.setPosition(dto.getPosition());
+    quizQuestionRepository.save(question);
   }
 }
