@@ -32,15 +32,47 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing quizzes, quiz questions, answers, and user attempts.
+ * Provides business logic for quiz creation, retrieval, update, and deletion.
+ */
 @Service
 public class QuizService {
 
+  /**
+   * Repository for Quiz entities.
+   */
   private final QuizRepository quizRepository;
+
+  /**
+   * Repository for UserQuizAttempt entities.
+   */
   private final UserQuizAttemptRepository userQuizAttemptRepository;
+
+  /**
+   * Repository for UserQuizAnswer entities.
+   */
   private final UserQuizAnswerRepository userQuizAnswerRepository;
+
+  /**
+   * Repository for QuizQuestion entities.
+   */
   private final QuizQuestionRepository quizQuestionRepository;
+
+  /**
+   * Repository for QuizAnswer entities.
+   */
   private final QuizAnswerRepository quizAnswerRepository;
 
+  /**
+   * Constructs a new QuizService with the required repositories.
+   *
+   * @param quizRepository             the quiz repository
+   * @param userQuizAttemptRepository  the user quiz attempt repository
+   * @param userQuizAnswerRepository   the user quiz answer repository
+   * @param quizQuestionRepository     the quiz question repository
+   * @param quizAnswerRepository       the quiz answer repository
+   */
   @Autowired
   public QuizService(QuizRepository quizRepository,
       UserQuizAttemptRepository userQuizAttemptRepository,
@@ -53,6 +85,13 @@ public class QuizService {
     this.quizAnswerRepository = quizAnswerRepository;
   }
 
+  /**
+   * Creates a new quiz and saves it to the repository.
+   *
+   * @param createQuizDto the DTO containing quiz creation data
+   * @param userId        the ID of the user creating the quiz
+   * @return the ID of the created quiz
+   */
   public Long createQuiz(CreateQuizDto createQuizDto, Long userId) {
     Quiz quiz = new Quiz();
     quiz.setName(createQuizDto.getName());
@@ -64,6 +103,12 @@ public class QuizService {
     return quiz.getId();
   }
 
+  /**
+   * Creates a new user quiz attempt and saves it to the repository.
+   *
+   * @param quizId the ID of the quiz being attempted
+   * @param userId the ID of the user attempting the quiz
+   */
   public void createUserQuizAttempt(Long quizId, Integer userId) {
     UserQuizAttempt attempt = new UserQuizAttempt();
     attempt.setUserId(userId);
@@ -72,6 +117,11 @@ public class QuizService {
     userQuizAttemptRepository.save(attempt);
   }
 
+  /**
+   * Creates a new user quiz answer and saves it to the repository.
+   *
+   * @param dto the DTO containing user quiz answer data
+   */
   public void createUserQuizAnswer(CreateUserQuizAnswerDto dto) {
     UserQuizAnswer answer = new UserQuizAnswer();
     answer.setUserQuizAttemptId(dto.getUserQuizAttemptId());
@@ -81,12 +131,27 @@ public class QuizService {
     userQuizAnswerRepository.save(answer);
   }
 
+  /**
+   * Retrieves a paginated list of quiz attempt summaries for a given quiz and user.
+   *
+   * @param quizId   the ID of the quiz
+   * @param userId   the ID of the user
+   * @param pageable the pagination information
+   * @return a page of QuizAttemptSummaryDto objects
+   */
   public Page<QuizAttemptSummaryDto> getQuizAttemptsByQuizId(Long quizId, Integer userId,
       Pageable pageable) {
     return userQuizAttemptRepository.findByUserIdAndQuizId(userId, quizId, pageable)
         .map(a -> new QuizAttemptSummaryDto(a.getId(), a.getCompletedAt()));
   }
 
+  /**
+   * Retrieves basic information for all quizzes that a user has attempted, paginated.
+   *
+   * @param userId   the ID of the user
+   * @param pageable the pagination information
+   * @return a page of QuizBasicInfoDto objects
+   */
   public Page<QuizBasicInfoDto> getBasicInfoForAttemptedQuizzes(Integer userId, Pageable pageable) {
     // Find all quiz IDs for which the user has at least one attempt
     List<UserQuizAttempt> attempts = userQuizAttemptRepository.findByUserId(userId);
@@ -116,6 +181,12 @@ public class QuizService {
     return new PageImpl<>(dtos, pageable, quizIds.size());
   }
 
+  /**
+   * Retrieves all questions for a given quiz.
+   *
+   * @param quizId the ID of the quiz
+   * @return a list of QuizQuestionResponseDto objects
+   */
   public List<QuizQuestionResponseDto> getQuestionsById(Long quizId) {
     List<QuizQuestion> questions = quizQuestionRepository.findAllByQuizId(quizId);
     return questions.stream()
@@ -123,6 +194,12 @@ public class QuizService {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Retrieves all answers for a given quiz question.
+   *
+   * @param questionId the ID of the quiz question
+   * @return a list of QuizAnswerResponseDto objects
+   */
   public List<QuizAnswerResponseDto> getAnswersByQuestionId(Long questionId) {
     List<QuizAnswer> answers = quizAnswerRepository.findAllByQuestionId(questionId);
     return answers.stream()
@@ -131,6 +208,12 @@ public class QuizService {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Calculates the total number of correct answers for a given user quiz attempt.
+   *
+   * @param attemptId the ID of the user quiz attempt
+   * @return the number of correct answers
+   */
   public int getTotalCorrectAnswers(Long attemptId) {
     List<UserQuizAnswer> userAnswers = userQuizAnswerRepository.findAllByUserQuizAttemptId(
         attemptId);
@@ -144,6 +227,11 @@ public class QuizService {
     return correctCount;
   }
 
+  /**
+   * Saves a new quiz question to the repository.
+   *
+   * @param dto the DTO containing quiz question data
+   */
   public void saveQuizQuestion(CreateQuizQuestionDto dto) {
     QuizQuestion question = new QuizQuestion();
     question.setQuizId(dto.getQuizId());
@@ -152,6 +240,11 @@ public class QuizService {
     quizQuestionRepository.save(question);
   }
 
+  /**
+   * Saves a new quiz answer to the repository.
+   *
+   * @param dto the DTO containing quiz answer data
+   */
   public void saveQuizAnswer(CreateQuizAnswerDto dto) {
     QuizAnswer answer = new QuizAnswer();
     answer.setQuizId(dto.getQuizId());
@@ -161,6 +254,12 @@ public class QuizService {
     quizAnswerRepository.save(answer);
   }
 
+  /**
+   * Deletes a quiz question by its ID.
+   *
+   * @param questionId the ID of the quiz question to delete
+   * @throws IllegalArgumentException if the quiz question does not exist
+   */
   public void deleteQuizQuestion(Long questionId) {
     if (!quizQuestionRepository.existsById(questionId)) {
       throw new IllegalArgumentException("Quiz question not found");
@@ -168,11 +267,24 @@ public class QuizService {
     quizQuestionRepository.deleteById(questionId);
   }
 
+  /**
+   * Retrieves a quiz question by its ID.
+   *
+   * @param questionId the ID of the quiz question
+   * @return the QuizQuestion entity
+   * @throws IllegalArgumentException if the quiz question does not exist
+   */
   public QuizQuestion getQuizQuestionById(Long questionId) {
     return quizQuestionRepository.findById(questionId)
         .orElseThrow(() -> new IllegalArgumentException("Quiz question not found"));
   }
 
+  /**
+   * Updates an existing quiz question with new data.
+   *
+   * @param questionId the ID of the quiz question to update
+   * @param dto        the DTO containing updated quiz question data
+   */
   public void updateQuizQuestion(Long questionId, CreateQuizQuestionDto dto) {
     QuizQuestion question = getQuizQuestionById(questionId);
     if (dto.getQuizId() != null) {
@@ -187,6 +299,12 @@ public class QuizService {
     quizQuestionRepository.save(question);
   }
 
+  /**
+   * Updates an existing quiz answer with new data.
+   *
+   * @param answerId the ID of the quiz answer to update
+   * @param dto      the DTO containing updated quiz answer data
+   */
   public void updateQuizAnswer(Long answerId, CreateQuizAnswerDto dto) {
     QuizAnswer answer = quizAnswerRepository.findById(answerId)
         .orElseThrow(() -> new IllegalArgumentException("Quiz answer not found"));
@@ -205,6 +323,12 @@ public class QuizService {
     quizAnswerRepository.save(answer);
   }
 
+  /**
+   * Deletes a quiz answer by its ID.
+   *
+   * @param answerId the ID of the quiz answer to delete
+   * @throws IllegalArgumentException if the quiz answer does not exist
+   */
   public void deleteQuizAnswer(Long answerId) {
     if (!quizAnswerRepository.existsById(answerId)) {
       throw new IllegalArgumentException("Quiz answer not found");
@@ -212,11 +336,24 @@ public class QuizService {
     quizAnswerRepository.deleteById(answerId);
   }
 
+  /**
+   * Retrieves all active quizzes, paginated.
+   *
+   * @param pageable the pagination information
+   * @return a page of QuizPreviewDto objects for active quizzes
+   */
   public Page<QuizPreviewDto> getAllActiveQuizzes(Pageable pageable) {
     return quizRepository.findAllByStatus("active", pageable)
         .map(q -> new QuizPreviewDto(q.getId(), q.getName(), q.getDescription(), q.getCreatedAt()));
   }
 
+  /**
+   * Updates the status of a quiz.
+   *
+   * @param quizId the ID of the quiz to update
+   * @param status the new status to set
+   * @throws IllegalArgumentException if the quiz does not exist
+   */
   public void updateQuizStatus(Long quizId, String status) {
     Quiz quiz = quizRepository.findById(quizId)
         .orElseThrow(() -> new IllegalArgumentException("Quiz not found"));
@@ -224,6 +361,12 @@ public class QuizService {
     quizRepository.save(quiz);
   }
 
+  /**
+   * Retrieves all archived quizzes, paginated.
+   *
+   * @param pageable the pagination information
+   * @return a page of QuizPreviewDto objects for archived quizzes
+   */
   public Page<QuizPreviewDto> getAllArchivedQuizzes(Pageable pageable) {
     return quizRepository.findAllByStatus("archived", pageable)
         .map(q -> new QuizPreviewDto(q.getId(), q.getName(), q.getDescription(), q.getCreatedAt()));
