@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class AddBatchToGroupRequestDto {
-    private Integer batchId;
-    private Integer groupId;
+
+  private Integer batchId;
+  private Integer groupId;
 } 

@@ -10,16 +10,16 @@ import lombok.Setter;
 @Setter
 public class TwoFactorRequestDto {
 
-    private String email;
-    private Integer code;
+  private String email;
+  private Integer code;
 
-    // Default constructor (required for Jackson deserialization)
-    public TwoFactorRequestDto() {
-    }
+  // Default constructor (required for Jackson deserialization)
+  public TwoFactorRequestDto() {
+  }
 
-    // Constructor with parameters (optional, for convenience)
-    public TwoFactorRequestDto(String email, Integer code) {
-        this.email = email;
-        this.code = code;
-    }
+  // Constructor with parameters (optional, for convenience)
+  public TwoFactorRequestDto(String email, Integer code) {
+    this.email = email;
+    this.code = code;
+  }
 }

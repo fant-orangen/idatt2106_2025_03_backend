@@ -8,7 +8,8 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateQuizDto {
-    private String name;
-    private String description;
-    private String status; // Optional, defaults to 'active' if not provided
+
+  private String name;
+  private String description;
+  private String status; // Optional, defaults to 'active' if not provided
 } 

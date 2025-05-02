@@ -10,7 +10,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScenarioThemeDetailsDto {
-    private String name;
-    private String description;
-    private String instructions;
+
+  private String name;
+  private String description;
+  private String instructions;
 } 

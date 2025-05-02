@@ -5,7 +5,8 @@ import java.time.LocalDateTime;
 
 @Data
 public class GroupSummaryDto {
-    private Integer id;
-    private String name;
-    private LocalDateTime createdAt;
+
+  private Integer id;
+  private String name;
+  private LocalDateTime createdAt;
 } 

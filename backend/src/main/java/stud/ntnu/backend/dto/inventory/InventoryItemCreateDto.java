@@ -8,8 +8,8 @@ import lombok.Setter;
 /**
  * DTO for creating a new inventory item.
  * <p>
- * This class is used to transfer data when creating a new item in the inventory.
- * It contains information about the product, custom name, quantity, and expiration date.
+ * This class is used to transfer data when creating a new item in the inventory. It contains
+ * information about the product, custom name, quantity, and expiration date.
  */
 @Setter
 @Getter

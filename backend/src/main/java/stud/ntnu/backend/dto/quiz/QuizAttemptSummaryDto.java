@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuizAttemptSummaryDto {
-    private Long id;
-    private LocalDateTime completedAt;
+
+  private Long id;
+  private LocalDateTime completedAt;
 } 

@@ -1,8 +1,7 @@
 package stud.ntnu.backend.security;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import stud.ntnu.backend.model.user.User;
-import stud.ntnu.backend.service.UserService;
+import stud.ntnu.backend.service.user.UserService;
 
 import java.security.Principal;
 

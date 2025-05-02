@@ -17,6 +17,7 @@ import stud.ntnu.backend.model.map.CrisisEvent.Severity;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateCrisisEventDto {
+
   @NotNull(message = "Latitude is required")
   private BigDecimal latitude;
 
