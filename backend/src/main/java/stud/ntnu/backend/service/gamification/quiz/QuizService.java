@@ -13,7 +13,7 @@ import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizAnswerDto;
-import stud.ntnu.backend.dto.quiz.QuizListItemDto;
+import stud.ntnu.backend.dto.quiz.QuizPreviewDto;
 import stud.ntnu.backend.model.gamification.quiz.Quiz;
 import stud.ntnu.backend.model.gamification.quiz.UserQuizAttempt;
 import stud.ntnu.backend.model.gamification.quiz.UserQuizAnswer;
@@ -212,9 +212,9 @@ public class QuizService {
     quizAnswerRepository.deleteById(answerId);
   }
 
-  public Page<QuizListItemDto> getAllActiveQuizzes(Pageable pageable) {
+  public Page<QuizPreviewDto> getAllActiveQuizzes(Pageable pageable) {
     return quizRepository.findAllByStatus("active", pageable)
-        .map(q -> new QuizListItemDto(q.getId(), q.getName(), q.getDescription(), q.getCreatedAt()));
+        .map(q -> new QuizPreviewDto(q.getId(), q.getName(), q.getDescription(), q.getCreatedAt()));
   }
 
   public void updateQuizStatus(Long quizId, String status) {
@@ -224,8 +224,8 @@ public class QuizService {
     quizRepository.save(quiz);
   }
 
-  public Page<QuizListItemDto> getAllArchivedQuizzes(Pageable pageable) {
+  public Page<QuizPreviewDto> getAllArchivedQuizzes(Pageable pageable) {
     return quizRepository.findAllByStatus("archived", pageable)
-        .map(q -> new QuizListItemDto(q.getId(), q.getName(), q.getDescription(), q.getCreatedAt()));
+        .map(q -> new QuizPreviewDto(q.getId(), q.getName(), q.getDescription(), q.getCreatedAt()));
   }
 }

@@ -20,7 +20,7 @@ import stud.ntnu.backend.dto.quiz.CreateQuizDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
 import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
-import stud.ntnu.backend.dto.quiz.QuizListItemDto;
+import stud.ntnu.backend.dto.quiz.QuizPreviewDto;
 import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.gamification.quiz.QuizService;
 import stud.ntnu.backend.service.user.UserService;
@@ -244,10 +244,10 @@ public class QuizController {
    * Gets all active quizzes in paginated format.
    * 
    * @param pageable the pagination information
-   * @return ResponseEntity with a page of QuizListItemDto (id, name, description, createdAt)
+   * @return ResponseEntity with a page of QuizPreviewDto (id, name, description, createdAt)
    */
-  @GetMapping("/all")
-  public ResponseEntity<Page<QuizListItemDto>> getAllActiveQuizzes(Pageable pageable) {
+  @GetMapping("/all/previews/active")
+  public ResponseEntity<Page<QuizPreviewDto>> getAllActiveQuizzes(Pageable pageable) {
     try {
       return ResponseEntity.ok(quizService.getAllActiveQuizzes(pageable));
     } catch (Exception e) {
@@ -259,12 +259,12 @@ public class QuizController {
    * Gets all archived quizzes in paginated format.
    * 
    * @param pageable the pagination information
-   * @return ResponseEntity with a page of QuizListItemDto (id, name, description, createdAt)
+   * @return ResponseEntity with a page of QuizPreviewDto (id, name, description, createdAt)
    */
-  @GetMapping("/all/archived")
-  public ResponseEntity<Page<QuizListItemDto>> getAllArchivedQuizzes(Pageable pageable) {
+  @GetMapping("/all/previews/archived")
+  public ResponseEntity<Page<QuizPreviewDto>> getAllArchivedQuizzes(Pageable pageable) {
     try {
-      Page<QuizListItemDto> archivedQuizzes = quizService.getAllArchivedQuizzes(pageable);
+      Page<QuizPreviewDto> archivedQuizzes = quizService.getAllArchivedQuizzes(pageable);
       return ResponseEntity.ok(archivedQuizzes);
     } catch (Exception e) {
       return ResponseEntity.badRequest().build();
