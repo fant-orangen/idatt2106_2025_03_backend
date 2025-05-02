@@ -19,6 +19,8 @@ import stud.ntnu.backend.dto.inventory.ContributedProductBatchesRequestDto;
 import stud.ntnu.backend.service.GroupService;
 import stud.ntnu.backend.service.GroupInventoryService;
 import java.util.Objects;
+import java.security.Principal;
+import stud.ntnu.backend.dto.inventory.AddBatchToGroupRequestDto;
 
 @RestController
 @RequestMapping("/api/groups/inventory")
@@ -91,5 +93,28 @@ public class GroupInventoryController {
     return ResponseEntity.ok().build();
   }
 
-  // TODO: add endpoint for adding a product batch to a group
+  /**
+   * Add a product batch to a group. Only allowed if the current user is in a household that is a member of the group.
+   * 
+   * @param request DTO with batchId and groupId
+   * @param principal the authenticated user
+   * @return 200 OK if added, 403 if not authorized
+   */
+  @PostMapping
+  public ResponseEntity<?> addBatchToGroup(@RequestBody AddBatchToGroupRequestDto request, Principal principal) {
+    if (request.getBatchId() == null || request.getGroupId() == null) {
+      return ResponseEntity.notFound().build();
+    }
+    String email = principal.getName();
+    boolean isMember = groupService.isUserMemberOfGroup(request.getGroupId(), email);
+    if (!isMember) {
+      return ResponseEntity.status(403).body("You are not a member of this group.");
+    }
+    boolean added = groupInventoryService.addBatchToGroup(request.getBatchId(), request.getGroupId(), email);
+    if (!added) {
+      return ResponseEntity.status(409).body("Batch could not be added to group.");
+    }
+    return ResponseEntity.ok().build();
+  }
+
 }
