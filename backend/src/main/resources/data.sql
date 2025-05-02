@@ -289,8 +289,8 @@ INSERT INTO household_admins (user_id, household_id) VALUES (4, 3); -- Mike is a
 INSERT INTO quizzes (name, description, created_by_user_id) VALUES ('Emergency Preparedness Basics', 'A quiz to test your knowledge on basic emergency preparedness.', 1);
 
 -- QUIZ QUESTIONS
-INSERT INTO quiz_questions (quiz_id, question_body) VALUES (1, 'What is the recommended amount of water to store per person per day?');
-INSERT INTO quiz_questions (quiz_id, question_body) VALUES (1, 'Which of the following items is NOT recommended for an emergency kit?');
+INSERT INTO quiz_questions (quiz_id, question_body, position) VALUES (1, 'What is the recommended amount of water to store per person per day?', 1);
+INSERT INTO quiz_questions (quiz_id, question_body, position) VALUES (1, 'Which of the following items is NOT recommended for an emergency kit?', 2);
 
 -- QUIZ ANSWERS
 -- For Question 1

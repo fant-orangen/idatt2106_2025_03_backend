@@ -6,6 +6,9 @@ import org.springframework.data.domain.Pageable;
 import stud.ntnu.backend.dto.quiz.CreateQuizDto;
 import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
 import stud.ntnu.backend.service.QuizService;
+import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
+import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
+import java.util.List;
 
 import java.security.Principal;
 
@@ -124,5 +127,31 @@ public class QuizController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    /**
+     * Gets all questions for a quiz by quiz id.
+     * TODO: test
+     * @param quizId the quiz id
+     * @return List of QuizQuestionResponseDto
+     */
+    @GetMapping("/{quiz_id}/questions")
+    public ResponseEntity<List<QuizQuestionResponseDto>> getQuizQuestionsByQuizId(
+            @PathVariable("quiz_id") Long quizId) {
+        List<QuizQuestionResponseDto> questions = quizService.getQuestionsById(quizId);
+        return ResponseEntity.ok(questions);
+    }
+
+    /**
+     * Gets all answers for a quiz question by question id.
+     * TODO: test
+     * @param questionId the quiz question id
+     * @return List of QuizAnswerResponseDto
+     */
+    @GetMapping("/questions/{question_id}/answers")
+    public ResponseEntity<List<QuizAnswerResponseDto>> getAnswersByQuestionId(
+            @PathVariable("question_id") Long questionId) {
+        List<QuizAnswerResponseDto> answers = quizService.getAnswersByQuestionId(questionId);
+        return ResponseEntity.ok(answers);
     }
 }
