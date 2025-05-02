@@ -104,7 +104,7 @@ public class SecurityConfig {
                 // Allow GET requests to POI endpoints
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/poi/**").permitAll()
                 // Permit access to the crisis-events/all endpoint
-                .requestMatchers("/api/crisis-events/all").permitAll()
+                .requestMatchers("/api/crisis-events/all/**").permitAll()
                 // Allow all authenticated users to access GET endpoints for specific crisis events
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/crisis-events/{id}")
                 .authenticated()

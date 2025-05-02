@@ -17,7 +17,11 @@ import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.CrisisEventService;
 import stud.ntnu.backend.service.UserService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Manages crisis events and live updates. Admin functions include creating, editing, and deleting
@@ -32,6 +36,7 @@ public class CrisisEventController {
 
   private final CrisisEventService crisisEventService;
   private final UserService userService;
+  private final Logger log = LoggerFactory.getLogger(CrisisEventController.class);
 
   public CrisisEventController(CrisisEventService crisisEventService, UserService userService) {
     this.crisisEventService = crisisEventService;
@@ -207,5 +212,36 @@ public class CrisisEventController {
     } catch (Exception e) {
       return ResponseEntity.badRequest().build();
     }
+  }
+
+  /**
+   * Gets a paginated list of crisis event previews affecting the current user, sorted by severity (red > yellow > green).
+   *
+   * @param principal the Principal object representing the current user
+   * @param pageable the pagination information
+   * @return ResponseEntity with a page of crisis event previews affecting the user
+   */
+  @GetMapping("/all/current-user")
+  public ResponseEntity<Page<CrisisEventPreviewDto>> getAllCrisisEventPreviewsAffectingUser(
+      Principal principal,
+      Pageable pageable) {
+    try {
+      String email = principal.getName();
+      User currentUser = userService.getUserByEmail(email)
+          .orElseThrow(() -> new IllegalStateException("User not found"));
+      Page<CrisisEventPreviewDto> page = crisisEventService.getCrisisEventPreviewsAffectingUserSortedBySeverity(currentUser, pageable);
+      return ResponseEntity.ok(page);
+    } catch (Exception e) {
+      log.info("Error getting crisis event previews affecting user: {}", e.getMessage());
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  private int severityOrder(CrisisEvent.Severity severity) {
+    return switch (severity) {
+      case red -> 3;
+      case yellow -> 2;
+      case green -> 1;
+    };
   }
 }
