@@ -4,12 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.map.CreateCrisisEventDto;
 import stud.ntnu.backend.dto.map.CrisisEventChangeDto;
 import stud.ntnu.backend.dto.map.UpdateCrisisEventDto;
 import stud.ntnu.backend.dto.map.CrisisEventPreviewDto;
+import stud.ntnu.backend.dto.map.CrisisEventDetailsDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.map.CrisisEventChange;
 import stud.ntnu.backend.model.user.Notification;
@@ -230,31 +232,35 @@ public class CrisisEventService {
     boolean hasChanges = false;
 
     // Update the fields that are provided
-    if (updateCrisisEventDto.getName() != null && !updateCrisisEventDto.getName().equals(currentCrisisEvent.getName())) {
+    if (updateCrisisEventDto.getName() != null && !updateCrisisEventDto.getName()
+        .equals(currentCrisisEvent.getName())) {
       currentCrisisEvent.setName(updateCrisisEventDto.getName());
       hasChanges = true;
     }
     if (updateCrisisEventDto.getDescription() != null &&
         (currentCrisisEvent.getDescription() == null ||
-         !updateCrisisEventDto.getDescription().equals(currentCrisisEvent.getDescription()))) {
+            !updateCrisisEventDto.getDescription().equals(currentCrisisEvent.getDescription()))) {
       currentCrisisEvent.setDescription(updateCrisisEventDto.getDescription());
       hasChanges = true;
     }
-    if (updateCrisisEventDto.getSeverity() != null && !updateCrisisEventDto.getSeverity().equals(currentCrisisEvent.getSeverity())) {
+    if (updateCrisisEventDto.getSeverity() != null && !updateCrisisEventDto.getSeverity()
+        .equals(currentCrisisEvent.getSeverity())) {
       currentCrisisEvent.setSeverity(updateCrisisEventDto.getSeverity());
       hasChanges = true;
     }
-    if (updateCrisisEventDto.getLatitude() != null && !updateCrisisEventDto.getLatitude().equals(currentCrisisEvent.getEpicenterLatitude())) {
+    if (updateCrisisEventDto.getLatitude() != null && !updateCrisisEventDto.getLatitude()
+        .equals(currentCrisisEvent.getEpicenterLatitude())) {
       currentCrisisEvent.setEpicenterLatitude(updateCrisisEventDto.getLatitude());
       hasChanges = true;
     }
-    if (updateCrisisEventDto.getLongitude() != null && !updateCrisisEventDto.getLongitude().equals(currentCrisisEvent.getEpicenterLongitude())) {
+    if (updateCrisisEventDto.getLongitude() != null && !updateCrisisEventDto.getLongitude()
+        .equals(currentCrisisEvent.getEpicenterLongitude())) {
       currentCrisisEvent.setEpicenterLongitude(updateCrisisEventDto.getLongitude());
       hasChanges = true;
     }
     if (updateCrisisEventDto.getRadius() != null &&
         (currentCrisisEvent.getRadius() == null ||
-         !updateCrisisEventDto.getRadius().equals(currentCrisisEvent.getRadius()))) {
+            !updateCrisisEventDto.getRadius().equals(currentCrisisEvent.getRadius()))) {
       currentCrisisEvent.setRadius(updateCrisisEventDto.getRadius());
       hasChanges = true;
     }
@@ -353,7 +359,8 @@ public class CrisisEventService {
           user
       );
       crisisEventChangeRepository.save(change);
-      log.info("Recorded severity change: {} -> {}", oldEvent.getSeverity(), newEvent.getSeverity());
+      log.info("Recorded severity change: {} -> {}", oldEvent.getSeverity(),
+          newEvent.getSeverity());
     }
 
     // Check for epicenter change
@@ -389,9 +396,10 @@ public class CrisisEventService {
   }
 
   /**
-   * Retrieves a paginated list of crisis events affecting the given user. A crisis event affects a user if the user's home or household location is within the event's radius.
+   * Retrieves a paginated list of crisis events affecting the given user. A crisis event affects a
+   * user if the user's home or household location is within the event's radius.
    *
-   * @param user the user to check
+   * @param user     the user to check
    * @param pageable pagination information
    * @return a page of crisis events affecting the user
    */
@@ -401,25 +409,77 @@ public class CrisisEventService {
     List<CrisisEvent> allActiveEvents = crisisEventRepository.findByActiveTrue();
     // Filter events that affect the user
     List<CrisisEvent> affectingEvents = allActiveEvents.stream()
-      .filter(event -> event.getRadius() != null &&
-        LocationUtil.isCrisisEventNearUser(user, event, event.getRadius().doubleValue()))
-      .toList();
+        .filter(event -> event.getRadius() != null &&
+            LocationUtil.isCrisisEventNearUser(user, event, event.getRadius().doubleValue()))
+        .toList();
     // Manual pagination
     int start = (int) pageable.getOffset();
     int end = Math.min((start + pageable.getPageSize()), affectingEvents.size());
     List<CrisisEvent> pagedList = (start <= end) ? affectingEvents.subList(start, end) : List.of();
-    return new org.springframework.data.domain.PageImpl<>(pagedList, pageable, affectingEvents.size());
+    return new PageImpl<>(pagedList, pageable, affectingEvents.size());
   }
 
   /**
-   * Retrieves a preview (id, name, severity, startTime) of all crisis events with pagination.
+   * Retrieves a preview (id, name, severity, startTime) of all active crisis events with
+   * pagination.
    *
    * @param pageable pagination information
    * @return page of crisis event previews
    */
   @Transactional(readOnly = true)
   public Page<CrisisEventPreviewDto> getAllCrisisEventPreviews(Pageable pageable) {
-    return crisisEventRepository.findAll(pageable)
-        .map(CrisisEventPreviewDto::fromEntity);
+    List<CrisisEvent> activeEvents = crisisEventRepository.findByActiveTrue();
+    List<CrisisEventPreviewDto> previews = activeEvents.stream()
+        .map(CrisisEventPreviewDto::fromEntity)
+        .toList();
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), previews.size());
+    List<CrisisEventPreviewDto> pagedList =
+        (start <= end) ? previews.subList(start, end) : List.of();
+    return new PageImpl<>(pagedList, pageable, previews.size());
+  }
+
+  /**
+   * Retrieves a paginated list of crisis event previews affecting the given user, sorted by
+   * severity (red > yellow > green).
+   *
+   * @param user     the user to check
+   * @param pageable pagination information
+   * @return a page of crisis event previews affecting the user
+   */
+  @Transactional(readOnly = true)
+  public Page<CrisisEventPreviewDto> getCrisisEventPreviewsAffectingUserSortedBySeverity(User user,
+      Pageable pageable) {
+    log.info("Getting crisis event previews affecting user: {}", user.getEmail());
+    Page<CrisisEvent> eventsPage = getCrisisEventsAffectingUser(user, pageable);
+    log.info("Affecting events count: {}", eventsPage.getTotalElements());
+    // Map to preview DTOs
+    List<CrisisEventPreviewDto> previews = eventsPage.getContent().stream()
+        .map(CrisisEventPreviewDto::fromEntity)
+        .toList();
+    // Sort by severity: red > yellow > green
+    previews = previews.stream()
+        .sorted((a, b) -> Integer.compare(severityOrder(b.getSeverity()), severityOrder(a.getSeverity())))
+        .toList();
+    return new PageImpl<>(previews, pageable, eventsPage.getTotalElements());
+  }
+
+  private int severityOrder(CrisisEvent.Severity severity) {
+    return switch (severity) {
+      case red -> 3;
+      case yellow -> 2;
+      case green -> 1;
+    };
+  }
+
+  /**
+   * Retrieves a crisis event details DTO by its ID.
+   *
+   * @param id the ID of the crisis event
+   * @return an Optional containing the crisis event details DTO if found
+   */
+  @Transactional(readOnly = true)
+  public Optional<CrisisEventDetailsDto> getCrisisEventDetailsById(Integer id) {
+    return crisisEventRepository.findById(id).map(CrisisEventDetailsDto::fromEntity);
   }
 }

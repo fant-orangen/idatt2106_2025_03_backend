@@ -9,6 +9,7 @@ import stud.ntnu.backend.dto.map.CreateScenarioThemeDto;
 import stud.ntnu.backend.dto.map.UpdateScenarioThemeDto;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.dto.map.ScenarioThemeDetailsDto;
+import stud.ntnu.backend.dto.map.ScenarioThemeNameDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -129,5 +130,15 @@ public class ScenarioThemeService {
   public Optional<ScenarioThemeDetailsDto> getScenarioThemeDetailsById(Integer id) {
     return scenarioThemeRepository.findById(id)
         .map(theme -> new ScenarioThemeDetailsDto(theme.getName(), theme.getDescription(), theme.getInstructions()));
+  }
+
+  /**
+   * Gets scenario theme name by id.
+   * @param id the scenario theme id
+   * @return Optional containing ScenarioThemeNameDto if found
+   */
+  public Optional<ScenarioThemeNameDto> getScenarioThemeNameById(Integer id) {
+    return scenarioThemeRepository.findById(id)
+        .map(theme -> new ScenarioThemeNameDto(theme.getName()));
   }
 }

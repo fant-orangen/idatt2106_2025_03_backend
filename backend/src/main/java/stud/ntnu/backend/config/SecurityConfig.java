@@ -1,6 +1,7 @@
 package stud.ntnu.backend.config;
 
 import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,16 +11,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+// TODO: Improve security access configuration
 
 /**
  * <h2>SecurityConfig</h2>
@@ -104,7 +104,7 @@ public class SecurityConfig {
                 // Allow GET requests to POI endpoints
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/poi/**").permitAll()
                 // Permit access to the crisis-events/all endpoint
-                .requestMatchers("/api/crisis-events/all").permitAll()
+                .requestMatchers("/api/crisis-events/all/**").permitAll()
                 // Allow all authenticated users to access GET endpoints for specific crisis events
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/crisis-events/{id}")
                 .authenticated()
@@ -114,7 +114,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
                 .requestMatchers("/api/super-admin", "/api/super-admin/**").hasAnyRole("SUPERADMIN")
                 .requestMatchers("/api/super-admin", "/api/super-admin//id-by-email/{email}").hasAnyRole("SUPERADMIN")
-
                 // Add WebSocket security
                 .requestMatchers("/topic/**", "/app/**").authenticated()
                 // Add role-based authorization for create/update/delete points of interest
@@ -124,7 +123,8 @@ public class SecurityConfig {
                 .hasAnyRole("ADMIN", "SUPERADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/poi/**")
                 .hasAnyRole("ADMIN", "SUPERADMIN")
-                .anyRequest().authenticated());
+                // Allow all authenticated users to access all GET endpoints for scenario themes
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/scenario-themes/**").authenticated());
 
 
     // Allow H2 console frame options
