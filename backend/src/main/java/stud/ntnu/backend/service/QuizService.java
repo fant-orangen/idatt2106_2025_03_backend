@@ -37,13 +37,12 @@ public class QuizService {
     }
 
     public Quiz createQuiz(CreateQuizDto createQuizDto, Long userId) {
-        Quiz quiz = Quiz.builder()
-                .name(createQuizDto.getName())
-                .description(createQuizDto.getDescription())
-                .status(createQuizDto.getStatus() != null ? createQuizDto.getStatus() : "active")
-                .createdByUserId(userId)
-                .createdAt(LocalDateTime.now())
-                .build();
+        Quiz quiz = new Quiz();
+        quiz.setName(createQuizDto.getName());
+        quiz.setDescription(createQuizDto.getDescription());
+        quiz.setStatus(createQuizDto.getStatus() != null ? createQuizDto.getStatus() : "active");
+        quiz.setCreatedByUserId(userId);
+        quiz.setCreatedAt(LocalDateTime.now());
         return quizRepository.save(quiz);
     }
 
@@ -58,21 +57,19 @@ public class QuizService {
     }
 
     public UserQuizAttempt createUserQuizAttempt(Long quizId, Long userId) {
-        UserQuizAttempt attempt = UserQuizAttempt.builder()
-                .userId(userId)
-                .quizId(quizId)
-                .completedAt(null)
-                .build();
+        UserQuizAttempt attempt = new UserQuizAttempt();
+        attempt.setUserId(userId);
+        attempt.setQuizId(quizId);
+        attempt.setCompletedAt(null);
         return userQuizAttemptRepository.save(attempt);
     }
 
     public UserQuizAnswer createUserQuizAnswer(CreateUserQuizAnswerDto dto) {
-        UserQuizAnswer answer = UserQuizAnswer.builder()
-                .userQuizAttemptId(dto.getUserQuizAttemptId())
-                .quizId(dto.getQuizId())
-                .questionId(dto.getQuestionId())
-                .answerId(dto.getAnswerId())
-                .build();
+        UserQuizAnswer answer = new UserQuizAnswer();
+        answer.setUserQuizAttemptId(dto.getUserQuizAttemptId());
+        answer.setQuizId(dto.getQuizId());
+        answer.setQuestionId(dto.getQuestionId());
+        answer.setAnswerId(dto.getAnswerId());
         return userQuizAnswerRepository.save(answer);
     }
 
