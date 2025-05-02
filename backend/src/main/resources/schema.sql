@@ -194,7 +194,7 @@ CREATE TABLE crisis_events (
 CREATE TABLE gamification_activities (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
-    category VARCHAR(255),
+    --category VARCHAR(255), Category is unnecessary
     description TEXT,
     created_by_user_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -305,6 +305,62 @@ CREATE TABLE two_factor_codes (
     code VARCHAR(6) NOT NULL,
     email VARCHAR(255) NOT NULL,
     expires_at TIMESTAMP NOT NULL
+);
+
+-- QUIZZES
+CREATE TABLE quizzes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_by_user_id INT NOT NULL,
+    status VARCHAR(10) NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id)
+);
+
+-- QUIZ QUESTIONS
+CREATE TABLE quiz_questions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    quiz_id INT NOT NULL,
+    question_body TEXT NOT NULL,
+    position INT DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id)
+);
+
+-- QUIZ ANSWERS
+CREATE TABLE quiz_answers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    quiz_id INT NOT NULL,
+    question_id INT NOT NULL,
+    answer_body TEXT NOT NULL,
+    is_correct BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
+    FOREIGN KEY (question_id) REFERENCES quiz_questions(id) ON DELETE CASCADE
+);
+
+-- USER QUIZ ATTEMPTS
+CREATE TABLE user_quiz_attempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    quiz_id INT NOT NULL,
+    completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id)
+);
+
+-- USER QUIZ ANSWERS
+CREATE TABLE user_quiz_answers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_quiz_attempt_id INT NOT NULL,
+    quiz_id INT NOT NULL,
+    question_id INT NOT NULL,
+    answer_id INT NOT NULL,
+    FOREIGN KEY (user_quiz_attempt_id) REFERENCES user_quiz_attempts(id),
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
+    FOREIGN KEY (question_id) REFERENCES quiz_questions(id) ON DELETE CASCADE,
+    FOREIGN KEY (answer_id) REFERENCES quiz_answers(id) ON DELETE CASCADE
 );
 
 

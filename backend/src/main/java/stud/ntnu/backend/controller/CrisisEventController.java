@@ -1,28 +1,30 @@
 package stud.ntnu.backend.controller;
 
-import jakarta.validation.Valid;
+import java.security.Principal;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import java.security.Principal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import stud.ntnu.backend.dto.map.CreateCrisisEventDto;
 import stud.ntnu.backend.dto.map.CrisisEventChangeDto;
-import stud.ntnu.backend.dto.map.UpdateCrisisEventDto;
 import stud.ntnu.backend.dto.map.CrisisEventPreviewDto;
-import stud.ntnu.backend.dto.map.CrisisEventDetailsDto;
+import stud.ntnu.backend.dto.map.UpdateCrisisEventDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.CrisisEventService;
 import stud.ntnu.backend.service.UserService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * Manages crisis events and live updates. Admin functions include creating, editing, and deleting
@@ -103,6 +105,10 @@ public class CrisisEventController {
       // Delegate to service for updating the crisis event
       CrisisEvent updatedCrisisEvent = crisisEventService.updateCrisisEvent(id,
           updateCrisisEventDto);
+
+      if (updatedCrisisEvent == null) {
+        return ResponseEntity.notFound().build();
+      }
 
       return ResponseEntity.ok(updatedCrisisEvent);
     } catch (Exception e) {

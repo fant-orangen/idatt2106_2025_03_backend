@@ -220,4 +220,6 @@ public class HouseholdController {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
+
+  // TODO: Add endpoint to remove a household member as admin
 }

@@ -18,6 +18,8 @@ import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.map.CrisisEventChangeRepository;
 import stud.ntnu.backend.repository.map.CrisisEventRepository;
+import stud.ntnu.backend.repository.map.ScenarioThemeRepository;
+import stud.ntnu.backend.model.map.ScenarioTheme;
 import stud.ntnu.backend.util.LocationUtil;
 
 import java.time.LocalDateTime;
@@ -35,6 +37,7 @@ public class CrisisEventService {
   private final CrisisEventChangeRepository crisisEventChangeRepository;
   private final NotificationService notificationService;
   private final UserService userService;
+  private final ScenarioThemeRepository scenarioThemeRepository;
   private final Logger log = LoggerFactory.getLogger(CrisisEventService.class);
 
   /**
@@ -43,15 +46,18 @@ public class CrisisEventService {
    * @param crisisEventRepository repository for crisis event operationsd
    * @param notificationService   service for notification operations
    * @param userService           service for user operations
+   * @param scenarioThemeRepository repository for scenario theme operations
    */
   public CrisisEventService(CrisisEventRepository crisisEventRepository,
       CrisisEventChangeRepository crisisEventChangeRepository,
       NotificationService notificationService,
-      UserService userService) {
+      UserService userService,
+      ScenarioThemeRepository scenarioThemeRepository) {
     this.crisisEventRepository = crisisEventRepository;
     this.crisisEventChangeRepository = crisisEventChangeRepository;
     this.notificationService = notificationService;
     this.userService = userService;
+    this.scenarioThemeRepository = scenarioThemeRepository;
   }
 
   /**
@@ -196,14 +202,18 @@ public class CrisisEventService {
         updateCrisisEventDto.getLongitude() != null &&
         updateCrisisEventDto.getRadius() != null) {
 
-      // Update the entity in memory first
       currentCrisisEvent.setName(updateCrisisEventDto.getName());
       currentCrisisEvent.setDescription(updateCrisisEventDto.getDescription());
       currentCrisisEvent.setSeverity(updateCrisisEventDto.getSeverity());
       currentCrisisEvent.setEpicenterLatitude(updateCrisisEventDto.getLatitude());
       currentCrisisEvent.setEpicenterLongitude(updateCrisisEventDto.getLongitude());
       currentCrisisEvent.setRadius(updateCrisisEventDto.getRadius());
-
+      // Update scenario theme if provided
+      if (updateCrisisEventDto.getScenarioThemeId() != null) {
+        ScenarioTheme scenarioTheme = scenarioThemeRepository.findById(updateCrisisEventDto.getScenarioThemeId()).orElse(null);
+        if (scenarioTheme == null) return null;
+        currentCrisisEvent.setScenarioTheme(scenarioTheme);
+      }
       // Then update in the database
       crisisEventRepository.updateCrisisEvent(
           id,
@@ -214,16 +224,9 @@ public class CrisisEventService {
           updateCrisisEventDto.getLongitude(),
           updateCrisisEventDto.getRadius()
       );
-
-      // Explicitly flush to ensure the changes are persisted
       crisisEventRepository.flush();
-
-      // Record the changes using the in-memory objects
       recordChanges(originalState, currentCrisisEvent, currentCrisisEvent.getCreatedByUser());
-
-      // Send notifications about the update
       notificationService.sendCrisisEventUpdateNotifications(currentCrisisEvent, originalState);
-
       return currentCrisisEvent;
     }
 
@@ -261,6 +264,13 @@ public class CrisisEventService {
         (currentCrisisEvent.getRadius() == null ||
             !updateCrisisEventDto.getRadius().equals(currentCrisisEvent.getRadius()))) {
       currentCrisisEvent.setRadius(updateCrisisEventDto.getRadius());
+      hasChanges = true;
+    }
+    // Update scenario theme if provided
+    if (updateCrisisEventDto.getScenarioThemeId() != null) {
+      ScenarioTheme scenarioTheme = scenarioThemeRepository.findById(updateCrisisEventDto.getScenarioThemeId()).orElse(null);
+      if (scenarioTheme == null) return null;
+      currentCrisisEvent.setScenarioTheme(scenarioTheme);
       hasChanges = true;
     }
 

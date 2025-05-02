@@ -1,6 +1,7 @@
 package stud.ntnu.backend.dto.map;
 
 import java.math.BigDecimal;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import stud.ntnu.backend.model.map.CrisisEvent.Severity;
 /**
  * DTO for updating an existing crisis event.
  * All fields are optional - if a field is null, it will not be updated.
+ * If scenarioThemeId is provided, the scenario theme will be updated if the id exists; otherwise, a 404 will be returned.
  */
 @Getter
 @Setter
@@ -22,4 +24,5 @@ public class UpdateCrisisEventDto {
   private BigDecimal latitude;
   private BigDecimal longitude;
   private BigDecimal radius; // TODO: add optional scenario theme id
+  private Integer scenarioThemeId;
 }
