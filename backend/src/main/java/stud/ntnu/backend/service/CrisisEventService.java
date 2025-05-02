@@ -156,8 +156,7 @@ public class CrisisEventService {
 
     log.info("Sending notifications to users within the radius of the crisis event");
     // Send notifications to users within the radius
-    notificationService.sendCrisisEventNotifications(savedCrisisEvent,
-        "There is an ongoing crisis.");
+    notificationService.sendCrisisEventNotifications(savedCrisisEvent);
 
     return savedCrisisEvent;
   }
