@@ -43,9 +43,9 @@ public class CrisisEventService {
   /**
    * Constructor for dependency injection.
    *
-   * @param crisisEventRepository repository for crisis event operationsd
-   * @param notificationService   service for notification operations
-   * @param userService           service for user operations
+   * @param crisisEventRepository   repository for crisis event operationsd
+   * @param notificationService     service for notification operations
+   * @param userService             service for user operations
    * @param scenarioThemeRepository repository for scenario theme operations
    */
   public CrisisEventService(CrisisEventRepository crisisEventRepository,
@@ -210,8 +210,11 @@ public class CrisisEventService {
       currentCrisisEvent.setRadius(updateCrisisEventDto.getRadius());
       // Update scenario theme if provided
       if (updateCrisisEventDto.getScenarioThemeId() != null) {
-        ScenarioTheme scenarioTheme = scenarioThemeRepository.findById(updateCrisisEventDto.getScenarioThemeId()).orElse(null);
-        if (scenarioTheme == null) return null;
+        ScenarioTheme scenarioTheme = scenarioThemeRepository.findById(
+            updateCrisisEventDto.getScenarioThemeId()).orElse(null);
+        if (scenarioTheme == null) {
+          return null;
+        }
         currentCrisisEvent.setScenarioTheme(scenarioTheme);
       }
       // Then update in the database
@@ -268,8 +271,11 @@ public class CrisisEventService {
     }
     // Update scenario theme if provided
     if (updateCrisisEventDto.getScenarioThemeId() != null) {
-      ScenarioTheme scenarioTheme = scenarioThemeRepository.findById(updateCrisisEventDto.getScenarioThemeId()).orElse(null);
-      if (scenarioTheme == null) return null;
+      ScenarioTheme scenarioTheme = scenarioThemeRepository.findById(
+          updateCrisisEventDto.getScenarioThemeId()).orElse(null);
+      if (scenarioTheme == null) {
+        return null;
+      }
       currentCrisisEvent.setScenarioTheme(scenarioTheme);
       hasChanges = true;
     }
@@ -468,7 +474,8 @@ public class CrisisEventService {
         .toList();
     // Sort by severity: red > yellow > green
     previews = previews.stream()
-        .sorted((a, b) -> Integer.compare(severityOrder(b.getSeverity()), severityOrder(a.getSeverity())))
+        .sorted((a, b) -> Integer.compare(severityOrder(b.getSeverity()),
+            severityOrder(a.getSeverity())))
         .toList();
     return new PageImpl<>(previews, pageable, eventsPage.getTotalElements());
   }

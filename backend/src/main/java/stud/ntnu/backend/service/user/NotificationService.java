@@ -82,8 +82,8 @@ public class NotificationService {
   }
 
   /**
-   * Sends a previously created notification via WebSocket to the specific user topic.
-   * It also marks the notification as sent by setting the 'sentAt' timestamp.
+   * Sends a previously created notification via WebSocket to the specific user topic. It also marks
+   * the notification as sent by setting the 'sentAt' timestamp.
    *
    * @param notification The Notification object to send.
    */
@@ -92,7 +92,8 @@ public class NotificationService {
     notificationRepository.save(notification); //
     NotificationDto notificationDto = NotificationDto.fromEntity(notification); //
     String destination = "/topic/notifications/" + notification.getUser().getId(); //
-    log.info("Sending notification to user {}: {}", notification.getUser().getId(), notificationDto.getDescription()); //
+    log.info("Sending notification to user {}: {}", notification.getUser().getId(),
+        notificationDto.getDescription()); //
     messagingTemplate.convertAndSend(destination, notificationDto); //
   }
 
@@ -129,26 +130,29 @@ public class NotificationService {
   @Transactional
   public Notification markAsRead(Integer notificationId) { //
     Notification notification = notificationRepository.findById(notificationId) //
-        .orElseThrow(() -> new IllegalStateException("Notification not found with ID: " + notificationId)); //
+        .orElseThrow(() -> new IllegalStateException(
+            "Notification not found with ID: " + notificationId)); //
     notification.setReadAt(LocalDateTime.now()); //
     return notificationRepository.save(notification); //
   }
 
   /**
-   * Creates a system notification for all users in the database.
-   * System notifications have a preference type of 'system' and no target type/ID.
+   * Creates a system notification for all users in the database. System notifications have a
+   * preference type of 'system' and no target type/ID.
    *
    * @param description   The content of the system notification.
    * @param createdByUser The admin User creating the notification.
    * @return A List of the created Notification entities (one for each user).
    */
   @Transactional
-  public List<Notification> createSystemNotificationForAllUsers(String description, User createdByUser) { //
+  public List<Notification> createSystemNotificationForAllUsers(String description,
+      User createdByUser) { //
     List<User> allUsers = userRepository.findAll(); //
     log.info("Creating system notification '{}' for {} users.", description, allUsers.size()); //
     List<Notification> notifications = allUsers.stream() //
         .map(user -> { //
-          Notification notification = new Notification(user, Notification.PreferenceType.system, LocalDateTime.now()); //
+          Notification notification = new Notification(user, Notification.PreferenceType.system,
+              LocalDateTime.now()); //
           notification.setDescription(description); //
           return notificationRepository.save(notification); //
         })
@@ -158,7 +162,8 @@ public class NotificationService {
   }
 
   /**
-   * Sends a list of notifications (typically system notifications) to their respective users via WebSocket.
+   * Sends a list of notifications (typically system notifications) to their respective users via
+   * WebSocket.
    *
    * @param notifications The list of Notification entities to send.
    */
@@ -170,8 +175,8 @@ public class NotificationService {
   }
 
   /**
-   * Sends notifications to users within a crisis event's radius when the event is CREATED.
-   * The notification message includes details about the event and why the user was notified.
+   * Sends notifications to users within a crisis event's radius when the event is CREATED. The
+   * notification message includes details about the event and why the user was notified.
    *
    * @param crisisEvent the newly created crisis event.
    */
@@ -184,25 +189,28 @@ public class NotificationService {
   }
 
   /**
-   * Sends notifications about crisis event updates to users within the updated radius.
-   * It compares the updated event with its previous state to determine changes and crafts an appropriate message.
-   * Notifications are sent only if significant changes are detected.
+   * Sends notifications about crisis event updates to users within the updated radius. It compares
+   * the updated event with its previous state to determine changes and crafts an appropriate
+   * message. Notifications are sent only if significant changes are detected.
    *
-   * @param updatedCrisisEvent The updated crisis event entity.
+   * @param updatedCrisisEvent  The updated crisis event entity.
    * @param previousCrisisEvent The state of the crisis event before the update.
    */
   @Transactional
-  public void sendCrisisEventUpdateNotifications(CrisisEvent updatedCrisisEvent, CrisisEvent previousCrisisEvent) { //
+  public void sendCrisisEventUpdateNotifications(CrisisEvent updatedCrisisEvent,
+      CrisisEvent previousCrisisEvent) { //
     if (updatedCrisisEvent == null || previousCrisisEvent == null) { //
       log.warn("Cannot send crisis update notifications. Event data missing."); //
       return; //
     }
 
     // Determine message template based on event type (update)
-    String messageTemplate = createUpdateCrisisMessageTemplate(updatedCrisisEvent, previousCrisisEvent); //
+    String messageTemplate = createUpdateCrisisMessageTemplate(updatedCrisisEvent,
+        previousCrisisEvent); //
 
     if (messageTemplate == null) { //
-      log.info("No significant changes detected for event ID {}. No update notifications sent.", updatedCrisisEvent.getId()); //
+      log.info("No significant changes detected for event ID {}. No update notifications sent.",
+          updatedCrisisEvent.getId()); //
       return; // No message means no significant change detected
     }
 
@@ -213,16 +221,21 @@ public class NotificationService {
 
 
   /**
-   * Internal helper method to find relevant users and send notifications with tailored messages based on location proximity.
-   * It checks both the user's registered home location and their household's location against the crisis event's radius.
+   * Internal helper method to find relevant users and send notifications with tailored messages
+   * based on location proximity. It checks both the user's registered home location and their
+   * household's location against the crisis event's radius.
    *
-   * @param crisisEvent The relevant crisis event (new or updated).
-   * @param messageTemplate A template for the notification message, containing the placeholder "{reason}" which will be replaced.
-   * @param isNewEvent Flag indicating if this is for a new event (true) or an update (false).
+   * @param crisisEvent     The relevant crisis event (new or updated).
+   * @param messageTemplate A template for the notification message, containing the placeholder
+   *                        "{reason}" which will be replaced.
+   * @param isNewEvent      Flag indicating if this is for a new event (true) or an update (false).
    */
   @Transactional
-  public void sendCrisisEventNotificationsInternal(CrisisEvent crisisEvent, String messageTemplate, boolean isNewEvent) { //
-    if (crisisEvent == null || crisisEvent.getRadius() == null || crisisEvent.getEpicenterLatitude() == null || crisisEvent.getEpicenterLongitude() == null) { //
+  public void sendCrisisEventNotificationsInternal(CrisisEvent crisisEvent, String messageTemplate,
+      boolean isNewEvent) { //
+    if (crisisEvent == null || crisisEvent.getRadius() == null
+        || crisisEvent.getEpicenterLatitude() == null
+        || crisisEvent.getEpicenterLongitude() == null) { //
       log.warn("Cannot send crisis notifications. Event data incomplete: {}", crisisEvent); //
       return; //
     }
@@ -234,8 +247,8 @@ public class NotificationService {
 
     // Fetch ALL users.
     List<User> allUsers = userService.getAllUsers(); //
-    log.info("Checking {} users against crisis event ID {}", allUsers.size(), crisisEvent.getId()); //
-
+    log.info("Checking {} users against crisis event ID {}", allUsers.size(),
+        crisisEvent.getId()); //
 
     int sentCount = 0; //
     for (User user : allUsers) { //
@@ -251,27 +264,31 @@ public class NotificationService {
         );
         if (distanceToUserHome <= radiusMeters) { //
           userHomeAffected = true; //
-          log.debug("User ID {}'s home location is within radius ({}m <= {}m).", user.getId(), distanceToUserHome, radiusMeters); //
+          log.debug("User ID {}'s home location is within radius ({}m <= {}m).", user.getId(),
+              distanceToUserHome, radiusMeters); //
         }
       }
 
       // 2. Check household location (if available)
       Household household = user.getHousehold(); // Get household directly from user object
-      if (household != null && household.getLatitude() != null && household.getLongitude() != null) { //
+      if (household != null && household.getLatitude() != null
+          && household.getLongitude() != null) { //
         double distanceToHousehold = LocationUtil.calculateDistance( //
             eventLat.doubleValue(), eventLon.doubleValue(), //
             household.getLatitude().doubleValue(), household.getLongitude().doubleValue() //
         );
         if (distanceToHousehold <= radiusMeters) { //
           householdAffected = true; //
-          log.debug("User ID {}'s household location is within radius ({}m <= {}m).", user.getId(), distanceToHousehold, radiusMeters); //
+          log.debug("User ID {}'s household location is within radius ({}m <= {}m).", user.getId(),
+              distanceToHousehold, radiusMeters); //
         }
       }
 
       // 3. Determine the reason text based on checks
       if (userHomeAffected && householdAffected) { //
         // Both user home and household are affected
-        if (user.getHomeLatitude().equals(household.getLatitude()) && user.getHomeLongitude().equals(household.getLongitude())) { //
+        if (user.getHomeLatitude().equals(household.getLatitude()) && user.getHomeLongitude()
+            .equals(household.getLongitude())) { //
           // If home and household location are the same
           notificationReason = "din registrerte hjemme-/husholdningsposisjon"; //
         } else { //
@@ -285,13 +302,13 @@ public class NotificationService {
         notificationReason = "din registrerte hjemmeposisjon"; //
       }
 
-
       // 4. Only proceed if a reason was determined
       if (notificationReason != null) { //
         // Format the final message using the template and reason
         String finalMessage = messageTemplate.replace("{reason}", notificationReason); //
 
-        log.debug("Creating crisis_alert notification for user ID {} with reason: {}", user.getId(), notificationReason); //
+        log.debug("Creating crisis_alert notification for user ID {} with reason: {}", user.getId(),
+            notificationReason); //
         Notification notification = createNotification( //
             user, //
             Notification.PreferenceType.crisis_alert, //
@@ -303,15 +320,17 @@ public class NotificationService {
         sendNotification(notification); // Send the notification via WebSocket
         sentCount++; //
       } else { //
-        log.trace("User ID {} is outside the radius based on stored home/household locations.", user.getId()); //
+        log.trace("User ID {} is outside the radius based on stored home/household locations.",
+            user.getId()); //
       }
     }
-    log.info("Sent {} notifications based on stored locations for event ID {}", sentCount, crisisEvent.getId()); //
+    log.info("Sent {} notifications based on stored locations for event ID {}", sentCount,
+        crisisEvent.getId()); //
   }
 
   /**
-   * Creates the message template for a newly created crisis event notification.
-   * Includes placeholders for the reason the user is notified.
+   * Creates the message template for a newly created crisis event notification. Includes
+   * placeholders for the reason the user is notified.
    *
    * @param crisisEvent The newly created CrisisEvent.
    * @return A formatted string template for the notification message.
@@ -323,31 +342,33 @@ public class NotificationService {
         translateSeverity(crisisEvent.getSeverity()))); //
 
     // Add the reason placeholder
-    message.append(". Du varsles fordi {reason} er innenfor faresonen"); // Ensure placeholder is here
+    message.append(
+        ". Du varsles fordi {reason} er innenfor faresonen"); // Ensure placeholder is here
 
     if (crisisEvent.getDescription() != null && !crisisEvent.getDescription().trim().isEmpty()) { //
-      message.append(". Beskrivelse: ").append(truncateDescription(crisisEvent.getDescription())); //
+      message.append(". Beskrivelse: ")
+          .append(truncateDescription(crisisEvent.getDescription())); //
     }
     String startTimeFormatted = crisisEvent.getStartTime() != null //
         ? crisisEvent.getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) //
         : "ukjent tidspunkt"; //
     message.append(String.format(". Startet %s.", startTimeFormatted)); //
 
-
     return message.toString(); //
   }
 
   /**
-   * Creates the message template for a crisis event update notification.
-   * Summarizes the changes between the previous and updated event states.
-   * Includes placeholders for the reason the user is notified.
-   * Returns null if no significant changes are detected.
+   * Creates the message template for a crisis event update notification. Summarizes the changes
+   * between the previous and updated event states. Includes placeholders for the reason the user is
+   * notified. Returns null if no significant changes are detected.
    *
-   * @param updatedCrisisEvent The updated CrisisEvent entity.
+   * @param updatedCrisisEvent  The updated CrisisEvent entity.
    * @param previousCrisisEvent The CrisisEvent entity representing the state before the update.
-   * @return A formatted string template for the update notification message, or null if no significant changes occurred.
+   * @return A formatted string template for the update notification message, or null if no
+   * significant changes occurred.
    */
-  private String createUpdateCrisisMessageTemplate(CrisisEvent updatedCrisisEvent, CrisisEvent previousCrisisEvent) { //
+  private String createUpdateCrisisMessageTemplate(CrisisEvent updatedCrisisEvent,
+      CrisisEvent previousCrisisEvent) { //
     StringBuilder changes = new StringBuilder(); //
     boolean changed = false; //
     // Check for changes
@@ -355,35 +376,42 @@ public class NotificationService {
       changes.append(String.format("Navn endret til '%s'. ", updatedCrisisEvent.getName())); //
       changed = true; //
     }
-    if (!Objects.equals(updatedCrisisEvent.getDescription(), previousCrisisEvent.getDescription())) { //
+    if (!Objects.equals(updatedCrisisEvent.getDescription(),
+        previousCrisisEvent.getDescription())) { //
       changes.append("Beskrivelse oppdatert. "); //
       changed = true; //
     }
     if (!Objects.equals(updatedCrisisEvent.getSeverity(), previousCrisisEvent.getSeverity())) { //
-      changes.append(String.format("Alvorlighetsgrad endret til %s. ", translateSeverity(updatedCrisisEvent.getSeverity()))); //
+      changes.append(String.format("Alvorlighetsgrad endret til %s. ",
+          translateSeverity(updatedCrisisEvent.getSeverity()))); //
       changed = true; //
     }
-    if (locationChanged(updatedCrisisEvent.getEpicenterLatitude(), previousCrisisEvent.getEpicenterLatitude()) || //
-        locationChanged(updatedCrisisEvent.getEpicenterLongitude(), previousCrisisEvent.getEpicenterLongitude())) { //
+    if (locationChanged(updatedCrisisEvent.getEpicenterLatitude(),
+        previousCrisisEvent.getEpicenterLatitude()) || //
+        locationChanged(updatedCrisisEvent.getEpicenterLongitude(),
+            previousCrisisEvent.getEpicenterLongitude())) { //
       changes.append("Posisjon oppdatert. "); //
       changed = true; //
     }
     if (!Objects.equals(updatedCrisisEvent.getRadius(), previousCrisisEvent.getRadius())) { //
-      changes.append(String.format("Radius endret til %s meter. ", updatedCrisisEvent.getRadius() != null ? updatedCrisisEvent.getRadius().toString() : "ukjent")); // Assuming radius is in meters now
+      changes.append(String.format("Radius endret til %s meter. ",
+          updatedCrisisEvent.getRadius() != null ? updatedCrisisEvent.getRadius().toString()
+              : "ukjent")); // Assuming radius is in meters now
       changed = true; //
     }
     if (!Objects.equals(updatedCrisisEvent.getActive(), previousCrisisEvent.getActive())) { //
-      changes.append(updatedCrisisEvent.getActive() ? "Hendelsen er nå aktiv igjen. " : "Hendelsen er nå markert som inaktiv. "); //
+      changes.append(updatedCrisisEvent.getActive() ? "Hendelsen er nå aktiv igjen. "
+          : "Hendelsen er nå markert som inaktiv. "); //
       changed = true; //
     }
-
 
     if (!changed) { //
       return null; // No significant changes detected
     }
 
     // Construct the template including the reason placeholder
-    return String.format("🔄 Oppdatering for '%s': %s Du varsles fordi {reason} er innenfor det berørte området.", //
+    return String.format(
+        "🔄 Oppdatering for '%s': %s Du varsles fordi {reason} er innenfor det berørte området.", //
         updatedCrisisEvent.getName(), changes.toString().trim()); // Ensure placeholder is here
   }
 
@@ -394,12 +422,18 @@ public class NotificationService {
    * @return A Norwegian string representing the severity ("høy", "middels", "lav", "ukjent").
    */
   private String translateSeverity(CrisisEvent.Severity severity) { //
-    if (severity == null) return "ukjent"; //
+    if (severity == null) {
+      return "ukjent"; //
+    }
     switch (severity) { //
-      case red: return "høy"; //
-      case yellow: return "middels"; //
-      case green: return "lav"; //
-      default: return severity.name(); //
+      case red:
+        return "høy"; //
+      case yellow:
+        return "middels"; //
+      case green:
+        return "lav"; //
+      default:
+        return severity.name(); //
     }
   }
 
@@ -411,7 +445,9 @@ public class NotificationService {
    */
   private String truncateDescription(String description) {
     final int MAX_LENGTH = 100; //
-    if (description == null) return ""; //
+    if (description == null) {
+      return ""; //
+    }
     if (description.length() <= MAX_LENGTH) { //
       return description; //
     }
@@ -419,15 +455,20 @@ public class NotificationService {
   }
 
   /**
-   * Checks if two BigDecimal coordinates have changed significantly, accounting for potential floating-point inaccuracies.
+   * Checks if two BigDecimal coordinates have changed significantly, accounting for potential
+   * floating-point inaccuracies.
    *
    * @param newCoord The new coordinate value.
    * @param oldCoord The old coordinate value.
    * @return true if the coordinates are considered different, false otherwise.
    */
   private boolean locationChanged(BigDecimal newCoord, BigDecimal oldCoord) { //
-    if (newCoord == null && oldCoord == null) return false; //
-    if (newCoord == null || oldCoord == null) return true; //
+    if (newCoord == null && oldCoord == null) {
+      return false; //
+    }
+    if (newCoord == null || oldCoord == null) {
+      return true; //
+    }
     // Use a small tolerance for floating point comparison
     return newCoord.subtract(oldCoord).abs().compareTo(new BigDecimal("0.00001")) > 0; //
   }

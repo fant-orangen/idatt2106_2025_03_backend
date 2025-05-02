@@ -124,16 +124,19 @@ public class ScenarioThemeService {
 
   /**
    * Gets scenario theme details (name, description, instructions) by id.
+   *
    * @param id the scenario theme id
    * @return Optional containing ScenarioThemeDetailsDto if found
    */
   public Optional<ScenarioThemeDetailsDto> getScenarioThemeDetailsById(Integer id) {
     return scenarioThemeRepository.findById(id)
-        .map(theme -> new ScenarioThemeDetailsDto(theme.getName(), theme.getDescription(), theme.getInstructions()));
+        .map(theme -> new ScenarioThemeDetailsDto(theme.getName(), theme.getDescription(),
+            theme.getInstructions()));
   }
 
   /**
    * Gets scenario theme name by id.
+   *
    * @param id the scenario theme id
    * @return Optional containing ScenarioThemeNameDto if found
    */

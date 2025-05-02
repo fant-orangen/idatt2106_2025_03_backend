@@ -29,269 +29,267 @@ import org.slf4j.LoggerFactory;
 @Service
 public class AuthService {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
-    private final EmailTokenRepository emailTokenRepository;
-    private final TwoFactorCodeService twoFactorCodeService;
-    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+  private final AuthenticationManager authenticationManager;
+  private final JwtUtil jwtUtil;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final EmailService emailService;
+  private final EmailTokenRepository emailTokenRepository;
+  private final TwoFactorCodeService twoFactorCodeService;
+  private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
-    public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
-                       UserRepository userRepository, PasswordEncoder passwordEncoder,
-                       EmailService emailService,
-                       EmailTokenRepository emailTokenRepository,
-                       TwoFactorCodeService twoFactorCodeService) {
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.emailService = emailService;
-        this.emailTokenRepository = emailTokenRepository;
-        this.twoFactorCodeService = twoFactorCodeService;
+  public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
+      UserRepository userRepository, PasswordEncoder passwordEncoder,
+      EmailService emailService,
+      EmailTokenRepository emailTokenRepository,
+      TwoFactorCodeService twoFactorCodeService) {
+    this.authenticationManager = authenticationManager;
+    this.jwtUtil = jwtUtil;
+    this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.emailService = emailService;
+    this.emailTokenRepository = emailTokenRepository;
+    this.twoFactorCodeService = twoFactorCodeService;
+  }
+
+  /**
+   * Authenticate a user and generate a JWT token.
+   *
+   * @param authRequest the authentication request containing email and password
+   * @return an AuthResponseDto containing the JWT token and user information
+   * @throws BadCredentialsException if authentication fails
+   */
+  public AuthResponseDto login(AuthRequestDto authRequest) {
+    // Authenticate the user
+    Authentication authentication = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(authRequest.getEmail(),
+            authRequest.getPassword())
+    );
+
+    // Set the authentication in the security context
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    // Get user details to include in the response
+    User user = userRepository.findByEmail(authRequest.getEmail())
+        .orElseThrow(() -> new BadCredentialsException("User not found"));
+
+    // Check if 2FA is enabled
+    if (user.getIsUsing2FA()) {
+      // Return a response indicating 2FA is required
+      return new AuthResponseDto(null, user.getId(), user.getEmail(),
+          user.getRole().getName(),
+          user.getHousehold() != null ? user.getHousehold().getId() : null, true);
     }
 
-    /**
-     * Authenticate a user and generate a JWT token.
-     *
-     * @param authRequest the authentication request containing email and password
-     * @return an AuthResponseDto containing the JWT token and user information
-     * @throws BadCredentialsException if authentication fails
-     */
-    public AuthResponseDto login(AuthRequestDto authRequest) {
-        // Authenticate the user
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(authRequest.getEmail(),
-                authRequest.getPassword())
-        );
+    // Generate JWT token
+    String jwt = jwtUtil.generateToken(authRequest.getEmail());
 
-        // Set the authentication in the security context
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    // Create and return the response
+    return new AuthResponseDto(
+        jwt,
+        user.getId(),
+        user.getEmail(),
+        user.getRole().getName(),
+        user.getHousehold() != null ? user.getHousehold().getId() : null,
+        false
+    );
+  }
 
-        // Get user details to include in the response
-        User user = userRepository.findByEmail(authRequest.getEmail())
-            .orElseThrow(() -> new BadCredentialsException("User not found"));
-
-        // Check if 2FA is enabled
-        if (user.getIsUsing2FA()) {
-            // Return a response indicating 2FA is required
-            return new AuthResponseDto(null, user.getId(), user.getEmail(),
-                user.getRole().getName(),
-                user.getHousehold() != null ? user.getHousehold().getId() : null, true);
-        }
-
-        // Generate JWT token
-        String jwt = jwtUtil.generateToken(authRequest.getEmail());
-
-
-        // Create and return the response
-        return new AuthResponseDto(
-            jwt,
-            user.getId(),
-            user.getEmail(),
-            user.getRole().getName(),
-            user.getHousehold() != null ? user.getHousehold().getId() : null,
-            false
-        );
+  /**
+   * Register a new user with the USER role.
+   *
+   * @param registrationRequest the registration request containing email, password, name, and
+   *                            optional home address and location coordinates
+   * @throws IllegalArgumentException if a user with the given email already exists
+   */
+  @Transactional
+  public void register(RegisterRequestDto registrationRequest) {
+    // Check if user already exists
+    if (userRepository.existsByEmail(registrationRequest.getEmail())) {
+      throw new IllegalArgumentException("User with this email already exists");
     }
 
-    /**
-     * Register a new user with the USER role.
-     *
-     * @param registrationRequest the registration request containing email, password, name, and
-     *                            optional home address and location coordinates
-     * @throws IllegalArgumentException if a user with the given email already exists
-     */
-    @Transactional
-    public void register(RegisterRequestDto registrationRequest) {
-        // Check if user already exists
-        if (userRepository.existsByEmail(registrationRequest.getEmail())) {
-            throw new IllegalArgumentException("User with this email already exists");
-        }
+    // Create a new user with USER role (ID 1)
+    Role userRole = new Role();
+    userRole.setId(1);
 
-        // Create a new user with USER role (ID 1)
-        Role userRole = new Role();
-        userRole.setId(1);
+    // Create the user with hashed password
+    User newUser = new User(
+        registrationRequest.getEmail(),
+        passwordEncoder.encode(registrationRequest.getPassword()),
+        registrationRequest.getPhoneNumber(),
+        userRole
+    );
 
-        // Create the user with hashed password
-        User newUser = new User(
-            registrationRequest.getEmail(),
-            passwordEncoder.encode(registrationRequest.getPassword()),
-            registrationRequest.getPhoneNumber(),
-            userRole
-        );
+    // Set additional fields
+    newUser.setFirstName(registrationRequest.getFirstName());
+    newUser.setLastName(registrationRequest.getLastName());
+    newUser.setHomeAddress(registrationRequest.getHomeAddress());
+    newUser.setHomeLatitude(registrationRequest.getHomeLatitude());
+    newUser.setHomeLongitude(registrationRequest.getHomeLongitude());
 
-        // Set additional fields
-        newUser.setFirstName(registrationRequest.getFirstName());
-        newUser.setLastName(registrationRequest.getLastName());
-        newUser.setHomeAddress(registrationRequest.getHomeAddress());
-        newUser.setHomeLatitude(registrationRequest.getHomeLatitude());
-        newUser.setHomeLongitude(registrationRequest.getHomeLongitude());
+    // Save the user
+    User savedUser = userRepository.save(newUser);
 
-        // Save the user
-        User savedUser = userRepository.save(newUser);
+    // Generate verification token
+    String token = UUID.randomUUID().toString();
+    LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
 
-        // Generate verification token
-        String token = UUID.randomUUID().toString();
-        LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
+    // Create and save the EmailToken
+    EmailToken verificationToken = new EmailToken(
+        savedUser,
+        token,
+        EmailToken.TokenType.VERIFICATION,
+        expiresAt
+    );
+    emailTokenRepository.save(verificationToken);
 
-        // Create and save the EmailToken
-        EmailToken verificationToken = new EmailToken(
-            savedUser,
-            token,
-            EmailToken.TokenType.VERIFICATION,
-            expiresAt
-        );
-        emailTokenRepository.save(verificationToken);
+    // Send the verification email
+    emailService.sendVerificationEmail(savedUser, token);
+  }
 
-        // Send the verification email
-        emailService.sendVerificationEmail(savedUser, token);
+  /**
+   * Verifies a user's email address using the provided token.
+   *
+   * @param token The verification token string.
+   * @throws IllegalArgumentException if the token is invalid or not found.
+   * @throws IllegalStateException    if the token is expired or already used.
+   */
+  @Transactional
+  public void verifyEmail(String token) {
+    // 1. Find the token
+    Optional<EmailToken> tokenOptional = emailTokenRepository.findByToken(token);
+    if (tokenOptional.isEmpty()) {
+      throw new IllegalArgumentException("Invalid verification token");
+    }
+    EmailToken emailToken = tokenOptional.get();
+
+    // 2. Validate the token
+    if (emailToken.getUsedAt() != null) {
+      throw new IllegalStateException("Token has already been used");
+    }
+    if (emailToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+      throw new IllegalStateException("Token has expired");
+    }
+    if (emailToken.getType() != EmailToken.TokenType.VERIFICATION) {
+      throw new IllegalStateException("Invalid token type");
     }
 
-    /**
-     * Verifies a user's email address using the provided token.
-     *
-     * @param token The verification token string.
-     * @throws IllegalArgumentException if the token is invalid or not found.
-     * @throws IllegalStateException    if the token is expired or already used.
-     */
-    @Transactional
-    public void verifyEmail(String token) {
-        // 1. Find the token
-        Optional<EmailToken> tokenOptional = emailTokenRepository.findByToken(token);
-        if (tokenOptional.isEmpty()) {
-            throw new IllegalArgumentException("Invalid verification token");
-        }
-        EmailToken emailToken = tokenOptional.get();
+    // 3. Activate the user
+    User user = emailToken.getUser();
+    if (user == null) {
+      throw new IllegalStateException("Token is not associated with a user");
+    }
+    user.setEmailVerified(true);
+    userRepository.save(user);
 
-        // 2. Validate the token
-        if (emailToken.getUsedAt() != null) {
-            throw new IllegalStateException("Token has already been used");
-        }
-        if (emailToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("Token has expired");
-        }
-        if (emailToken.getType() != EmailToken.TokenType.VERIFICATION) {
-            throw new IllegalStateException("Invalid token type");
-        }
+    // 4. Mark token as used
+    emailToken.setUsedAt(LocalDateTime.now());
+    emailTokenRepository.save(emailToken);
 
+    log.info("Email verified successfully for user: {}", user.getEmail());
+  }
 
-        // 3. Activate the user
-        User user = emailToken.getUser();
-        if (user == null) {
-            throw new IllegalStateException("Token is not associated with a user");
-        }
-        user.setEmailVerified(true);
-        userRepository.save(user);
-
-        // 4. Mark token as used
-        emailToken.setUsedAt(LocalDateTime.now());
-        emailTokenRepository.save(emailToken);
-
-        log.info("Email verified successfully for user: {}", user.getEmail());
+  public AuthResponseDto verify2FA(String email, Integer code) {
+    // Verify 2FA code
+    if (!twoFactorCodeService.verifyCode(email, code)) {
+      throw new IllegalArgumentException("Invalid 2FA code");
     }
 
-    public AuthResponseDto verify2FA(String email, Integer code) {
-        // Verify 2FA code
-        if (!twoFactorCodeService.verifyCode(email, code)) {
-            throw new IllegalArgumentException("Invalid 2FA code");
-        }
+    // Generate JWT token
+    String jwt = jwtUtil.generateToken(email);
 
-        // Generate JWT token
-        String jwt = jwtUtil.generateToken(email);
+    // Retrieve user details
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Retrieve user details
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    // Create and return the response
+    return new AuthResponseDto(
+        jwt,
+        user.getId(),
+        user.getEmail(),
+        user.getRole().getName(),
+        user.getHousehold() != null ? user.getHousehold().getId() : null,
+        false
+    );
+  }
 
-        // Create and return the response
-        return new AuthResponseDto(
-            jwt,
-            user.getId(),
-            user.getEmail(),
-            user.getRole().getName(),
-            user.getHousehold() != null ? user.getHousehold().getId() : null,
-            false
-        );
+  public void send2FACode(String email) {
+    twoFactorCodeService.sendVerificationCode(email);
+  }
+
+  /**
+   * Initiates the password reset process for a user. Generates a reset token, saves it, and sends a
+   * password reset email.
+   *
+   * @param email The email address of the user requesting a password reset
+   * @throws IllegalArgumentException if no user is found with the given email
+   */
+  @Transactional
+  public void forgotPassword(String email) {
+    // Find the user by email
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("No user found with email: " + email));
+
+    // Generate reset token
+    String token = UUID.randomUUID().toString();
+    LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
+
+    // Create and save the EmailToken
+    EmailToken resetToken = new EmailToken(
+        user,
+        token,
+        EmailToken.TokenType.RESET,
+        expiresAt
+    );
+    emailTokenRepository.save(resetToken);
+
+    // Send the password reset email
+    emailService.sendPasswordResetEmail(user, token);
+
+    log.info("Password reset initiated for user: {}", email);
+  }
+
+  /**
+   * Resets a user's password using a reset token.
+   *
+   * @param token       The reset token
+   * @param newPassword The new password
+   * @throws IllegalArgumentException if the token is invalid or not found
+   * @throws IllegalStateException    if the token is expired or already used
+   */
+  @Transactional
+  public void resetPassword(String token, String newPassword) {
+    // 1. Find the token
+    Optional<EmailToken> tokenOptional = emailTokenRepository.findByToken(token);
+    if (tokenOptional.isEmpty()) {
+      throw new IllegalArgumentException("Invalid reset token");
+    }
+    EmailToken emailToken = tokenOptional.get();
+
+    // 2. Validate the token
+    if (emailToken.getUsedAt() != null) {
+      throw new IllegalStateException("Token has already been used");
+    }
+    if (emailToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+      throw new IllegalStateException("Token has expired");
+    }
+    if (emailToken.getType() != EmailToken.TokenType.RESET) {
+      throw new IllegalStateException("Invalid token type");
     }
 
-    public void send2FACode(String email) {
-        twoFactorCodeService.sendVerificationCode(email);
+    // 3. Update the user's password
+    User user = emailToken.getUser();
+    if (user == null) {
+      throw new IllegalStateException("Token is not associated with a user");
     }
+    user.setPasswordHash(passwordEncoder.encode(newPassword));
+    userRepository.save(user);
 
-    /**
-     * Initiates the password reset process for a user.
-     * Generates a reset token, saves it, and sends a password reset email.
-     *
-     * @param email The email address of the user requesting a password reset
-     * @throws IllegalArgumentException if no user is found with the given email
-     */
-    @Transactional
-    public void forgotPassword(String email) {
-        // Find the user by email
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new IllegalArgumentException("No user found with email: " + email));
+    // 4. Mark token as used
+    emailToken.setUsedAt(LocalDateTime.now());
+    emailTokenRepository.save(emailToken);
 
-        // Generate reset token
-        String token = UUID.randomUUID().toString();
-        LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
-
-        // Create and save the EmailToken
-        EmailToken resetToken = new EmailToken(
-            user,
-            token,
-            EmailToken.TokenType.RESET,
-            expiresAt
-        );
-        emailTokenRepository.save(resetToken);
-
-        // Send the password reset email
-        emailService.sendPasswordResetEmail(user, token);
-
-        log.info("Password reset initiated for user: {}", email);
-    }
-
-    /**
-     * Resets a user's password using a reset token.
-     *
-     * @param token The reset token
-     * @param newPassword The new password
-     * @throws IllegalArgumentException if the token is invalid or not found
-     * @throws IllegalStateException if the token is expired or already used
-     */
-    @Transactional
-    public void resetPassword(String token, String newPassword) {
-        // 1. Find the token
-        Optional<EmailToken> tokenOptional = emailTokenRepository.findByToken(token);
-        if (tokenOptional.isEmpty()) {
-            throw new IllegalArgumentException("Invalid reset token");
-        }
-        EmailToken emailToken = tokenOptional.get();
-
-        // 2. Validate the token
-        if (emailToken.getUsedAt() != null) {
-            throw new IllegalStateException("Token has already been used");
-        }
-        if (emailToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("Token has expired");
-        }
-        if (emailToken.getType() != EmailToken.TokenType.RESET) {
-            throw new IllegalStateException("Invalid token type");
-        }
-
-        // 3. Update the user's password
-        User user = emailToken.getUser();
-        if (user == null) {
-            throw new IllegalStateException("Token is not associated with a user");
-        }
-        user.setPasswordHash(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-
-        // 4. Mark token as used
-        emailToken.setUsedAt(LocalDateTime.now());
-        emailTokenRepository.save(emailToken);
-
-        log.info("Password reset successfully for user: {}", user.getEmail());
-    }
+    log.info("Password reset successfully for user: {}", user.getEmail());
+  }
 }

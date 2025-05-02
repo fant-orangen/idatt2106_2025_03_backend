@@ -39,19 +39,21 @@ public class GroupService {
   /**
    * Constructor for dependency injection.
    *
-   * @param groupRepository           repository for group operations
-   * @param groupMembershipRepository repository for group membership operations
-   * @param inventoryService          service for inventory operations
-   * @param householdAdminRepository  repository for household admin operations
-   * @param userRepository          repository for user operations
-   * @param productTypeRepository     repository for product type operations
-   * @param groupInventoryContributionRepository repository for group inventory contribution operations
+   * @param groupRepository                      repository for group operations
+   * @param groupMembershipRepository            repository for group membership operations
+   * @param inventoryService                     service for inventory operations
+   * @param householdAdminRepository             repository for household admin operations
+   * @param userRepository                       repository for user operations
+   * @param productTypeRepository                repository for product type operations
+   * @param groupInventoryContributionRepository repository for group inventory contribution
+   *                                             operations
    */
   @Autowired
   public GroupService(GroupRepository groupRepository,
       GroupMembershipRepository groupMembershipRepository, InventoryService inventoryService,
       HouseholdAdminRepository householdAdminRepository, UserRepository userRepository,
-      ProductTypeRepository productTypeRepository, GroupInventoryContributionRepository groupInventoryContributionRepository) {
+      ProductTypeRepository productTypeRepository,
+      GroupInventoryContributionRepository groupInventoryContributionRepository) {
     this.groupRepository = groupRepository;
     this.groupMembershipRepository = groupMembershipRepository;
     this.inventoryService = inventoryService;
@@ -107,7 +109,8 @@ public class GroupService {
    */
   public GroupSummaryDto getCurrentUserGroup(String email) {
     Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
-    Optional<GroupMembership> membershipOpt = groupMembershipRepository.findCurrentByHouseholdId(householdId, LocalDateTime.now());
+    Optional<GroupMembership> membershipOpt = groupMembershipRepository.findCurrentByHouseholdId(
+        householdId, LocalDateTime.now());
     if (membershipOpt.isEmpty()) {
       return null;
     }
@@ -121,7 +124,8 @@ public class GroupService {
 
   public Page<GroupSummaryDto> getCurrentUserGroups(String email, Pageable pageable) {
     Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
-    Page<GroupMembership> memberships = groupMembershipRepository.findAllCurrentByHouseholdId(householdId, LocalDateTime.now(), pageable);
+    Page<GroupMembership> memberships = groupMembershipRepository.findAllCurrentByHouseholdId(
+        householdId, LocalDateTime.now(), pageable);
     return memberships.map(membership -> {
       Group group = membership.getGroup();
       GroupSummaryDto dto = new GroupSummaryDto();
@@ -138,7 +142,8 @@ public class GroupService {
       return false;
     }
     Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
-    Optional<GroupMembership> membershipOpt = groupMembershipRepository.findCurrentByHouseholdIdAndGroupId(householdId, groupId, LocalDateTime.now());
+    Optional<GroupMembership> membershipOpt = groupMembershipRepository.findCurrentByHouseholdIdAndGroupId(
+        householdId, groupId, LocalDateTime.now());
     if (membershipOpt.isEmpty()) {
       return false;
     }
@@ -149,7 +154,8 @@ public class GroupService {
   }
 
   public List<HouseholdDto> getCurrentHouseholdsInGroup(Integer groupId) {
-    List<GroupMembership> memberships = groupMembershipRepository.findAllCurrentByGroupId(groupId, LocalDateTime.now());
+    List<GroupMembership> memberships = groupMembershipRepository.findAllCurrentByGroupId(groupId,
+        LocalDateTime.now());
     return memberships.stream().map(membership -> {
       Household h = membership.getHousehold();
       HouseholdDto dto = new HouseholdDto();
@@ -170,13 +176,15 @@ public class GroupService {
 
   /**
    * Checks if the user (by email) is a member of any household in the given group.
+   *
    * @param groupId the group id
-   * @param email the user's email
+   * @param email   the user's email
    * @return true if the user is a member, false otherwise
    */
   public boolean isUserMemberOfGroup(Integer groupId, String email) {
     Integer userHouseholdId = getHouseholdIdByUserEmail(email);
     List<HouseholdDto> households = getCurrentHouseholdsInGroup(groupId);
-    return households.stream().anyMatch(h -> h.getId() != null && h.getId().equals(userHouseholdId));
+    return households.stream()
+        .anyMatch(h -> h.getId() != null && h.getId().equals(userHouseholdId));
   }
 }

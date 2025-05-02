@@ -103,7 +103,7 @@ public class UserService {
   /**
    * Updates a user's profile.
    *
-   * @param email the email of the user
+   * @param email         the email of the user
    * @param userUpdateDto the user information to update
    * @return the updated user profile
    * @throws IllegalStateException if the user is not found
@@ -142,7 +142,7 @@ public class UserService {
   /**
    * Updates a user's preferences.
    *
-   * @param email the email of the user
+   * @param email          the email of the user
    * @param preferencesDto the preferences to update
    * @return the updated user profile
    * @throws IllegalStateException if the user is not found

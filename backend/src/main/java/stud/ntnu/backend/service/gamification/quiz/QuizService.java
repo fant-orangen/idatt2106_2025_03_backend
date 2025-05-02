@@ -18,11 +18,11 @@ import stud.ntnu.backend.model.UserQuizAttempt;
 import stud.ntnu.backend.model.UserQuizAnswer;
 import stud.ntnu.backend.model.QuizQuestion;
 import stud.ntnu.backend.model.QuizAnswer;
-import stud.ntnu.backend.repository.QuizRepository;
-import stud.ntnu.backend.repository.UserQuizAttemptRepository;
-import stud.ntnu.backend.repository.UserQuizAnswerRepository;
-import stud.ntnu.backend.repository.QuizQuestionRepository;
-import stud.ntnu.backend.repository.QuizAnswerRepository;
+import stud.ntnu.backend.repository.gamification.quiz.QuizRepository;
+import stud.ntnu.backend.repository.gamification.quiz.UserQuizAttemptRepository;
+import stud.ntnu.backend.repository.gamification.quiz.UserQuizAnswerRepository;
+import stud.ntnu.backend.repository.gamification.quiz.QuizQuestionRepository;
+import stud.ntnu.backend.repository.gamification.quiz.QuizAnswerRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;

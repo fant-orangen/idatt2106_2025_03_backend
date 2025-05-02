@@ -49,11 +49,12 @@ public class ProductService {
    * Get all food product types for a specific household.
    *
    * @param householdId the ID of the household
-   * @param pageable pagination information
+   * @param pageable    pagination information
    * @return a page of food product types
    */
   public Page<ProductTypeDto> getAllFoodProductTypes(Integer householdId, Pageable pageable) {
-    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId, "food", pageable);
+    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId,
+        "food", pageable);
     return productTypes.map(this::convertToDto);
   }
 
@@ -183,8 +184,8 @@ public class ProductService {
    * Delete a product type and all its associated batches.
    *
    * @param productTypeId the ID of the product type to delete
-   * @param householdId the ID of the household to validate against
-   * @throws NoSuchElementException if the product type doesn't exist
+   * @param householdId   the ID of the household to validate against
+   * @throws NoSuchElementException   if the product type doesn't exist
    * @throws IllegalArgumentException if the product type doesn't belong to the specified household
    */
   @Transactional
@@ -205,19 +206,20 @@ public class ProductService {
   }
 
   /**
-   * Get the total number of units for a product type.
-   * Validates that the product type belongs to the user's household.
+   * Get the total number of units for a product type. Validates that the product type belongs to
+   * the user's household.
    *
    * @param productTypeId the ID of the product type
-   * @param householdId the ID of the household to validate against
+   * @param householdId   the ID of the household to validate against
    * @return the total number of units
-   * @throws NoSuchElementException if the product type doesn't exist
+   * @throws NoSuchElementException   if the product type doesn't exist
    * @throws IllegalArgumentException if the product type doesn't belong to the specified household
    */
   public Integer getTotalUnitsForProductType(Integer productTypeId, Integer householdId) {
     // Check if the product type exists and belongs to the user's household
     ProductType productType = productTypeRepository.findById(productTypeId)
-        .orElseThrow(() -> new NoSuchElementException("Product type not found with ID: " + productTypeId));
+        .orElseThrow(
+            () -> new NoSuchElementException("Product type not found with ID: " + productTypeId));
 
     // Validate that the product type belongs to the user's household
     if (!productType.getHousehold().getId().equals(householdId)) {
@@ -230,7 +232,9 @@ public class ProductService {
   }
 
   /**
-   * Get the total amount of water in litres (all batches of products with category 'water' and unit 'l').
+   * Get the total amount of water in litres (all batches of products with category 'water' and unit
+   * 'l').
+   *
    * @return the total litres of water
    */
   public Integer getTotalLitresOfWater() {
@@ -238,7 +242,9 @@ public class ProductService {
   }
 
   /**
-   * Get the total amount of water in litres for a specific household (all batches of products with category 'water' and unit 'l').
+   * Get the total amount of water in litres for a specific household (all batches of products with
+   * category 'water' and unit 'l').
+   *
    * @param householdId the ID of the household
    * @return the total litres of water
    */
@@ -248,28 +254,35 @@ public class ProductService {
 
   /**
    * Get all water product types for a specific household, paginated.
+   *
    * @param householdId the ID of the household
-   * @param pageable pagination information
+   * @param pageable    pagination information
    * @return a page of ProductTypeDto
    */
-  public Page<ProductTypeDto> getWaterProductTypesByHousehold(Integer householdId, Pageable pageable) {
-    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId, "water", pageable);
+  public Page<ProductTypeDto> getWaterProductTypesByHousehold(Integer householdId,
+      Pageable pageable) {
+    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId,
+        "water", pageable);
     return productTypes.map(this::convertToDto);
   }
 
   /**
    * Get all medicine product types for a specific household, paginated.
+   *
    * @param householdId the ID of the household
-   * @param pageable pagination information
+   * @param pageable    pagination information
    * @return a page of ProductTypeDto
    */
-  public Page<ProductTypeDto> getMedicineProductTypesByHousehold(Integer householdId, Pageable pageable) {
-    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId, "medicine", pageable);
+  public Page<ProductTypeDto> getMedicineProductTypesByHousehold(Integer householdId,
+      Pageable pageable) {
+    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId,
+        "medicine", pageable);
     return productTypes.map(this::convertToDto);
   }
 
   /**
    * Create a new water product type.
+   *
    * @param createDto the DTO containing the water product type information
    * @return the created product type
    */
@@ -293,6 +306,7 @@ public class ProductService {
 
   /**
    * Create a new medicine product type.
+   *
    * @param createDto the DTO containing the medicine product type information
    * @return the created product type
    */
@@ -352,18 +366,21 @@ public class ProductService {
    * Search for product types by name, category, and household.
    *
    * @param householdId the ID of the household
-   * @param category the category to filter by
-   * @param search the search string for the name
-   * @param pageable pagination information
+   * @param category    the category to filter by
+   * @param search      the search string for the name
+   * @param pageable    pagination information
    * @return a page of matching ProductTypeDto
    */
-  public Page<ProductTypeDto> searchProductTypesByNameAndCategoryAndHousehold(Integer householdId, String category, String search, Pageable pageable) {
+  public Page<ProductTypeDto> searchProductTypesByNameAndCategoryAndHousehold(Integer householdId,
+      String category, String search, Pageable pageable) {
     // Use SearchUtil to search by name, then filter by household and category
-    Page<ProductType> page = searchUtil.searchByDescription(ProductType.class, "name", search, pageable);
+    Page<ProductType> page = searchUtil.searchByDescription(ProductType.class, "name", search,
+        pageable);
     // Filter by household and category
     List<ProductType> filteredList = page.getContent().stream()
-      .filter(pt -> pt.getHousehold() != null && pt.getHousehold().getId().equals(householdId) && pt.getCategory().equalsIgnoreCase(category))
-      .toList();
+        .filter(pt -> pt.getHousehold() != null && pt.getHousehold().getId().equals(householdId)
+            && pt.getCategory().equalsIgnoreCase(category))
+        .toList();
     return new PageImpl<>(filteredList, pageable, filteredList.size()).map(this::convertToDto);
   }
 }

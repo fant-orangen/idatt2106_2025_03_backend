@@ -129,7 +129,8 @@ public class NewsService {
   @Transactional
   public NewsArticle updateNewsArticle(Long newsArticleId, UpdateNewsArticleDTO updateDto) {
     NewsArticle newsArticle = newsArticleRepository.findById(newsArticleId)
-        .orElseThrow(() -> new NoSuchElementException("News article not found with id: " + newsArticleId));
+        .orElseThrow(
+            () -> new NoSuchElementException("News article not found with id: " + newsArticleId));
 
     // Update only the fields that are provided
     if (updateDto.getTitle() != null) {

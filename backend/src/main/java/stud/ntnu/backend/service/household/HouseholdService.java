@@ -133,15 +133,19 @@ public class HouseholdService {
       try {
         log.info("Attempting to geocode address: {}", requestDto.getAddress());
         // Call the LocationUtil to get coordinates from the address
-        CoordinatesItemDto coordinates = LocationUtil.getCoordinatesByAddress(requestDto.getAddress());
+        CoordinatesItemDto coordinates = LocationUtil.getCoordinatesByAddress(
+            requestDto.getAddress());
 
-        if (coordinates != null && coordinates.getLatitude() != null && coordinates.getLongitude() != null) {
+        if (coordinates != null && coordinates.getLatitude() != null
+            && coordinates.getLongitude() != null) {
           // Set the latitude and longitude on the household object
           household.setLatitude(coordinates.getLatitude());
           household.setLongitude(coordinates.getLongitude());
-          log.info("Successfully geocoded address to Lat: {}, Lon: {}", coordinates.getLatitude(), coordinates.getLongitude());
+          log.info("Successfully geocoded address to Lat: {}, Lon: {}", coordinates.getLatitude(),
+              coordinates.getLongitude());
         } else {
-          log.warn("Geocoding returned null or incomplete coordinates for address: {}", requestDto.getAddress());
+          log.warn("Geocoding returned null or incomplete coordinates for address: {}",
+              requestDto.getAddress());
           // Keep household.latitude and household.longitude as null
         }
       } catch (IllegalArgumentException e) {
@@ -150,7 +154,8 @@ public class HouseholdService {
         // Keep household.latitude and household.longitude as null
       } catch (Exception e) {
         // Catch unexpected errors during geocoding
-        log.error("Unexpected error during geocoding for address '{}': {}", requestDto.getAddress(), e.getMessage(), e);
+        log.error("Unexpected error during geocoding for address '{}': {}", requestDto.getAddress(),
+            e.getMessage(), e);
         // Keep household.latitude and household.longitude as null
       }
     } else {
@@ -429,13 +434,14 @@ public class HouseholdService {
   /**
    * Adds an empty household member to the current user's household.
    *
-   * @param email the email of the user
+   * @param email     the email of the user
    * @param createDto the empty household member creation DTO
    * @return the created empty household member DTO
    * @throws IllegalStateException if the user is not found or doesn't have a household
    */
   @Transactional
-  public EmptyHouseholdMemberDto addEmptyHouseholdMember(String email, EmptyHouseholdMemberCreateDto createDto) {
+  public EmptyHouseholdMemberDto addEmptyHouseholdMember(String email,
+      EmptyHouseholdMemberCreateDto createDto) {
     log.info("Adding empty member for user: {}", email);
 
     User user = userRepository.findByEmail(email)

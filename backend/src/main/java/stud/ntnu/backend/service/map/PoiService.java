@@ -36,6 +36,7 @@ public class PoiService {
     this.pointOfInterestRepository = pointOfInterestRepository;
     this.poiTypeRepository = poiTypeRepository;
   }
+
   //Constants
   String poiNotFound = "POI type not found";
 
@@ -76,12 +77,13 @@ public class PoiService {
   public void deletePointOfInterest(Integer id) {
     pointOfInterestRepository.deleteById(id);
   }
-    /**
-     * Retrieves all points of interest of a specific type.
-     *
-     * @param typeId the ID of the POI type
-     * @return list of points of interest of the specified type
-     */
+
+  /**
+   * Retrieves all points of interest of a specific type.
+   *
+   * @param typeId the ID of the POI type
+   * @return list of points of interest of the specified type
+   */
   public List<PointOfInterest> getPointsOfInterestByTypeId(Integer typeId) {
     return pointOfInterestRepository.findByPoiTypeId(typeId);
   }
@@ -105,14 +107,15 @@ public class PoiService {
     return poiTypeRepository.findById(id);
   }
 
-  public static PointOfInterest findNearestPoi(double latitude, double longitude, List<PointOfInterest> pois) {
+  public static PointOfInterest findNearestPoi(double latitude, double longitude,
+      List<PointOfInterest> pois) {
     return pois.stream()
-            .min((poi1, poi2) -> Double.compare(
-                    calculateDistance(latitude, longitude,
-                            poi1.getLatitude().doubleValue(), poi1.getLongitude().doubleValue()),
-                    calculateDistance(latitude, longitude,
-                            poi2.getLatitude().doubleValue(), poi2.getLongitude().doubleValue())))
-            .orElse(null);
+        .min((poi1, poi2) -> Double.compare(
+            calculateDistance(latitude, longitude,
+                poi1.getLatitude().doubleValue(), poi1.getLongitude().doubleValue()),
+            calculateDistance(latitude, longitude,
+                poi2.getLatitude().doubleValue(), poi2.getLongitude().doubleValue())))
+        .orElse(null);
   }
 
   /**
@@ -135,26 +138,27 @@ public class PoiService {
   }
 
   //JavaDoc for createPointOfInterest method
-    /**
-     * Creates a new point of interest.
-     *
-     * @param createPoiDto the DTO containing point of interest information
-     * @param currentUser  the user creating the point of interest
-     * @return the created point of interest
-     */
+
+  /**
+   * Creates a new point of interest.
+   *
+   * @param createPoiDto the DTO containing point of interest information
+   * @param currentUser  the user creating the point of interest
+   * @return the created point of interest
+   */
   @Transactional
   public PointOfInterest createPointOfInterest(CreatePoiDto createPoiDto, User currentUser) {
     // Get the POI type
     PoiType poiType = getPoiTypeById(createPoiDto.getPoiTypeId())
-            .orElseThrow(() -> new IllegalStateException(poiNotFound));
+        .orElseThrow(() -> new IllegalStateException(poiNotFound));
 
     // Create a new PointOfInterest entity
     PointOfInterest poi = new PointOfInterest(
-            poiType,
-            createPoiDto.getName(),
-            createPoiDto.getLatitude(),
-            createPoiDto.getLongitude(),
-            currentUser
+        poiType,
+        createPoiDto.getName(),
+        createPoiDto.getLatitude(),
+        createPoiDto.getLongitude(),
+        currentUser
     );
 
     // Set optional fields if provided
@@ -168,13 +172,13 @@ public class PoiService {
     return savePointOfInterest(poi);
   }
 
-    /**
-     * Updates an existing point of interest.
-     *
-     * @param id          the ID of the point of interest to update
-     * @param updatePoiDto the DTO containing updated point of interest information
-     * @return the updated point of interest
-     */
+  /**
+   * Updates an existing point of interest.
+   *
+   * @param id           the ID of the point of interest to update
+   * @param updatePoiDto the DTO containing updated point of interest information
+   * @return the updated point of interest
+   */
   @Transactional
   public PointOfInterest updatePointOfInterest(Integer id, UpdatePoiDto updatePoiDto) {
     // First check if the point of interest exists
@@ -184,27 +188,27 @@ public class PoiService {
 
     // Option 1: Use the direct repository update method if all fields are provided
     if (updatePoiDto.getName() != null &&
-            updatePoiDto.getLatitude() != null &&
-            updatePoiDto.getLongitude() != null &&
-            updatePoiDto.getDescription() != null &&
-            updatePoiDto.getOpenFrom() != null &&
-            updatePoiDto.getOpenTo() != null &&
-            updatePoiDto.getContactInfo() != null &&
-            updatePoiDto.getPoiTypeId() != null) {
+        updatePoiDto.getLatitude() != null &&
+        updatePoiDto.getLongitude() != null &&
+        updatePoiDto.getDescription() != null &&
+        updatePoiDto.getOpenFrom() != null &&
+        updatePoiDto.getOpenTo() != null &&
+        updatePoiDto.getContactInfo() != null &&
+        updatePoiDto.getPoiTypeId() != null) {
 
       PoiType poiType = poiTypeRepository.findById(updatePoiDto.getPoiTypeId())
-              .orElseThrow(() -> new IllegalStateException(poiNotFound));
+          .orElseThrow(() -> new IllegalStateException(poiNotFound));
 
       pointOfInterestRepository.updatePointOfInterest(
-              id,
-              updatePoiDto.getName(),
-              updatePoiDto.getLatitude(),
-              updatePoiDto.getLongitude(),
-              updatePoiDto.getDescription(),
-                updatePoiDto.getOpenFrom(),
-                updatePoiDto.getOpenTo(),
-                updatePoiDto.getContactInfo(),
-              poiType
+          id,
+          updatePoiDto.getName(),
+          updatePoiDto.getLatitude(),
+          updatePoiDto.getLongitude(),
+          updatePoiDto.getDescription(),
+          updatePoiDto.getOpenFrom(),
+          updatePoiDto.getOpenTo(),
+          updatePoiDto.getContactInfo(),
+          poiType
       );
 
       // Return the updated entity
@@ -213,7 +217,7 @@ public class PoiService {
 
     // Option 2: For partial updates, use the traditional approach
     PointOfInterest poi = pointOfInterestRepository.findById(id)
-            .orElseThrow(() -> new IllegalStateException("Point of interest not found with ID: " + id));
+        .orElseThrow(() -> new IllegalStateException("Point of interest not found with ID: " + id));
 
     // Update fields if provided
     if (updatePoiDto.getName() != null) {
@@ -239,7 +243,7 @@ public class PoiService {
     }
     if (updatePoiDto.getPoiTypeId() != null) {
       PoiType poiType = poiTypeRepository.findById(updatePoiDto.getPoiTypeId())
-              .orElseThrow(() -> new IllegalStateException(poiNotFound));
+          .orElseThrow(() -> new IllegalStateException(poiNotFound));
       poi.setPoiType(poiType);
     }
 

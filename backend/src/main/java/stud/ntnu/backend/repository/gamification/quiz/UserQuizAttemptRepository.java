@@ -1,4 +1,4 @@
-package stud.ntnu.backend.repository;
+package stud.ntnu.backend.repository.gamification.quiz;
 
 import java.util.List;
 
