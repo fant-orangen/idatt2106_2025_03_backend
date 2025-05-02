@@ -40,6 +40,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
      */
     Page<Notification> findByUserId(Integer userId, Pageable pageable);
 
+    // TODO: Documentation
+    List<Notification> findByUserIdOrderByNotifyAtDesc(Integer userId);
+
+
     /**
      * Find all unread notifications for a specific user.
      *

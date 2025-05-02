@@ -127,9 +127,9 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/scenario-themes/**").authenticated()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/scenario-themes/**").hasAnyRole("ADMIN", "SUPERADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/scenario-themes/**").hasAnyRole("ADMIN", "SUPERADMIN")
-                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/scenario-themes/**").hasAnyRole("ADMIN", "SUPERADMIN"));
-
-
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/quizzes/**").authenticated()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/quizzes/user/attempts/**").authenticated()
+                .requestMatchers("/api/quizzes/admin/**").hasAnyRole("ADMIN", "SUPERADMIN"));
 
 
     // Allow H2 console frame options
@@ -153,7 +153,7 @@ public class SecurityConfig {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(
         Arrays.asList("http://localhost:5173", "http://localhost:8080"));
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
     configuration.setAllowCredentials(true);
 

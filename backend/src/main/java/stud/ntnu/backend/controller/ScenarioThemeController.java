@@ -97,6 +97,8 @@ public class ScenarioThemeController {
     return ResponseEntity.ok(scenarioThemes);
   }
 
+  // TODO: Add endpoint to get only the names and ids of all scenario themes
+
   /**
    * Gets scenario theme details (name, description, instructions) by id.
    *
