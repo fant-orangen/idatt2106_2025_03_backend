@@ -284,3 +284,28 @@ VALUES ('Archived Article', 'This is an old article that has been archived...', 
 -- HOUSEHOLD ADMINS
 INSERT INTO household_admins (user_id, household_id) VALUES (2, 1); -- Alice is admin of Smith Family
 INSERT INTO household_admins (user_id, household_id) VALUES (4, 3); -- Mike is admin of Brown Residence
+
+-- QUIZZES
+INSERT INTO quizzes (name, description, created_by_user_id) VALUES ('Emergency Preparedness Basics', 'A quiz to test your knowledge on basic emergency preparedness.', 1);
+
+-- QUIZ QUESTIONS
+INSERT INTO quiz_questions (quiz_id, question_body) VALUES (1, 'What is the recommended amount of water to store per person per day?');
+INSERT INTO quiz_questions (quiz_id, question_body) VALUES (1, 'Which of the following items is NOT recommended for an emergency kit?');
+
+-- QUIZ ANSWERS
+-- For Question 1
+INSERT INTO quiz_answers (quiz_id, question_id, answer_body, is_correct) VALUES (1, 1, '1 liter', FALSE);
+INSERT INTO quiz_answers (quiz_id, question_id, answer_body, is_correct) VALUES (1, 1, '2 liters', FALSE);
+INSERT INTO quiz_answers (quiz_id, question_id, answer_body, is_correct) VALUES (1, 1, '4 liters', TRUE);
+-- For Question 2
+INSERT INTO quiz_answers (quiz_id, question_id, answer_body, is_correct) VALUES (1, 2, 'Flashlight', FALSE);
+INSERT INTO quiz_answers (quiz_id, question_id, answer_body, is_correct) VALUES (1, 2, 'Canned food', FALSE);
+INSERT INTO quiz_answers (quiz_id, question_id, answer_body, is_correct) VALUES (1, 2, 'Perishable meat', TRUE);
+
+-- USER QUIZ ATTEMPTS
+INSERT INTO user_quiz_attempts (user_id, quiz_id, completed_at) VALUES (2, 1, CURRENT_TIMESTAMP);
+
+-- USER QUIZ ANSWERS (Alice's attempt)
+-- She selects '4 liters' for Q1 and 'Perishable meat' for Q2
+INSERT INTO user_quiz_answers (user_quiz_attempt_id, quiz_id, question_id, answer_id) VALUES (1, 1, 1, 3);
+INSERT INTO user_quiz_answers (user_quiz_attempt_id, quiz_id, question_id, answer_id) VALUES (1, 1, 2, 6);
