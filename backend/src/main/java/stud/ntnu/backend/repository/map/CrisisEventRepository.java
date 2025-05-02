@@ -1,17 +1,18 @@
 package stud.ntnu.backend.repository.map;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.map.CrisisEvent.Severity;
-import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.model.map.ScenarioTheme;
-
-import java.math.BigDecimal;
-import java.util.List;
+import stud.ntnu.backend.model.user.User;
 
 /**
  * Repository interface for CrisisEvent entity operations.

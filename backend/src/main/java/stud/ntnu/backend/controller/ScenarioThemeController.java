@@ -9,6 +9,7 @@ import java.security.Principal;
 import stud.ntnu.backend.dto.map.CreateScenarioThemeDto;
 import stud.ntnu.backend.dto.map.UpdateScenarioThemeDto;
 import stud.ntnu.backend.dto.map.ScenarioThemeDetailsDto;
+import stud.ntnu.backend.dto.map.ScenarioThemeNameDto;
 import stud.ntnu.backend.model.map.ScenarioTheme;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
@@ -105,6 +106,19 @@ public class ScenarioThemeController {
   @GetMapping("/{id}")
   public ResponseEntity<ScenarioThemeDetailsDto> getScenarioTheme(@PathVariable Integer id) {
     return scenarioThemeService.getScenarioThemeDetailsById(id)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  /**
+   * Gets scenario theme name by id.
+   *
+   * @param id the scenario theme id
+   * @return ResponseEntity with ScenarioThemeNameDto or 404 if not found
+   */
+  @GetMapping("/{id}/name")
+  public ResponseEntity<ScenarioThemeNameDto> getScenarioThemeName(@PathVariable Integer id) {
+    return scenarioThemeService.getScenarioThemeNameById(id)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
