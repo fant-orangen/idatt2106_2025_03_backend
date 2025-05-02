@@ -12,5 +12,7 @@ public class QuizPreviewDto {
     private Long id;
     private String name;
     private String description;
+    private String status;
+    private Long questionCount;
     private LocalDateTime createdAt;
 } 

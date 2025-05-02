@@ -8,12 +8,11 @@ import org.springframework.stereotype.Service;
 import stud.ntnu.backend.dto.quiz.CreateQuizDto;
 import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
 import stud.ntnu.backend.dto.quiz.QuizAttemptSummaryDto;
-import stud.ntnu.backend.dto.quiz.QuizBasicInfoDto;
+import stud.ntnu.backend.dto.quiz.QuizPreviewDto;
 import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizAnswerDto;
-import stud.ntnu.backend.dto.quiz.QuizPreviewDto;
 import stud.ntnu.backend.model.gamification.quiz.Quiz;
 import stud.ntnu.backend.model.gamification.quiz.UserQuizAttempt;
 import stud.ntnu.backend.model.gamification.quiz.UserQuizAnswer;
@@ -150,9 +149,9 @@ public class QuizService {
    *
    * @param userId   the ID of the user
    * @param pageable the pagination information
-   * @return a page of QuizBasicInfoDto objects
+   * @return a page of QuizPreviewDto objects
    */
-  public Page<QuizBasicInfoDto> getBasicInfoForAttemptedQuizzes(Integer userId, Pageable pageable) {
+  public Page<QuizPreviewDto> getBasicInfoForAttemptedQuizzes(Integer userId, Pageable pageable) {
     // Find all quiz IDs for which the user has at least one attempt
     List<UserQuizAttempt> attempts = userQuizAttemptRepository.findByUserId(userId);
     Set<Long> quizIds = attempts.stream().map(UserQuizAttempt::getQuizId)
@@ -170,12 +169,14 @@ public class QuizService {
     List<Long> pagedQuizIds = quizIdList.subList(start, end);
     // Fetch quizzes and build DTOs
     List<Quiz> quizzes = quizRepository.findAllById(pagedQuizIds);
-    List<QuizBasicInfoDto> dtos = quizzes.stream()
-        .map(q -> new QuizBasicInfoDto(
+    List<QuizPreviewDto> dtos = quizzes.stream()
+        .map(q -> new QuizPreviewDto(
             q.getId(),
             q.getName(),
+            q.getDescription(),
             q.getStatus(),
-            quizQuestionRepository.countByQuizId(q.getId())
+            quizQuestionRepository.countByQuizId(q.getId()),
+            q.getCreatedAt()
         ))
         .collect(Collectors.toList());
     return new PageImpl<>(dtos, pageable, quizIds.size());
@@ -344,7 +345,14 @@ public class QuizService {
    */
   public Page<QuizPreviewDto> getAllActiveQuizzes(Pageable pageable) {
     return quizRepository.findAllByStatus("active", pageable)
-        .map(q -> new QuizPreviewDto(q.getId(), q.getName(), q.getDescription(), q.getCreatedAt()));
+        .map(q -> new QuizPreviewDto(
+            q.getId(),
+            q.getName(),
+            q.getDescription(),
+            q.getStatus(),
+            quizQuestionRepository.countByQuizId(q.getId()),
+            q.getCreatedAt()
+        ));
   }
 
   /**
@@ -369,6 +377,13 @@ public class QuizService {
    */
   public Page<QuizPreviewDto> getAllArchivedQuizzes(Pageable pageable) {
     return quizRepository.findAllByStatus("archived", pageable)
-        .map(q -> new QuizPreviewDto(q.getId(), q.getName(), q.getDescription(), q.getCreatedAt()));
+        .map(q -> new QuizPreviewDto(
+            q.getId(),
+            q.getName(),
+            q.getDescription(),
+            q.getStatus(),
+            quizQuestionRepository.countByQuizId(q.getId()),
+            q.getCreatedAt()
+        ));
   }
 }

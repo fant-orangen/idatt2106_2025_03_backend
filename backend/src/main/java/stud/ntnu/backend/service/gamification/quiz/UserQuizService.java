@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
 import stud.ntnu.backend.dto.quiz.QuizAttemptSummaryDto;
-import stud.ntnu.backend.dto.quiz.QuizBasicInfoDto;
+import stud.ntnu.backend.dto.quiz.QuizPreviewDto;
 import stud.ntnu.backend.model.gamification.quiz.Quiz;
 import stud.ntnu.backend.model.gamification.quiz.UserQuizAttempt;
 import stud.ntnu.backend.model.gamification.quiz.UserQuizAnswer;
@@ -124,9 +124,9 @@ public class UserQuizService {
    *
    * @param userId   the ID of the user
    * @param pageable the pagination information
-   * @return a page of QuizBasicInfoDto objects containing quiz id, name, status, and question count
+   * @return a page of QuizPreviewDto objects containing quiz id, name, description, status, question count, and createdAt
    */
-  public Page<QuizBasicInfoDto> getBasicInfoForAttemptedQuizzes(Integer userId, Pageable pageable) {
+  public Page<QuizPreviewDto> getBasicInfoForAttemptedQuizzes(Integer userId, Pageable pageable) {
     // Get unique quiz IDs attempted by user
     Set<Long> quizIds = userQuizAttemptRepository.findByUserId(userId).stream()
         .map(UserQuizAttempt::getQuizId)
@@ -142,12 +142,14 @@ public class UserQuizService {
                 Math.min((int)(pageable.getOffset() + pageable.getPageSize()), quizIds.size()));
 
     // Map quizzes to DTOs
-    List<QuizBasicInfoDto> dtos = quizRepository.findAllById(pagedQuizIds).stream()
-        .map(q -> new QuizBasicInfoDto(
+    List<QuizPreviewDto> dtos = quizRepository.findAllById(pagedQuizIds).stream()
+        .map(q -> new QuizPreviewDto(
             q.getId(),
-            q.getName(), 
+            q.getName(),
+            q.getDescription(),
             q.getStatus(),
-            quizQuestionRepository.countByQuizId(q.getId())
+            quizQuestionRepository.countByQuizId(q.getId()),
+            q.getCreatedAt()
         ))
         .collect(Collectors.toList());
 
