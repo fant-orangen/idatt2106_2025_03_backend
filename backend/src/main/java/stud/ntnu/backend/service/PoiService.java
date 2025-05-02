@@ -37,7 +37,7 @@ public class PoiService {
     this.poiTypeRepository = poiTypeRepository;
   }
   //Constants
-  String POI_NOT_FOUND = "POI type not found");
+  String poiNotFound = "POI type not found";
 
   /**
    * Retrieves all points of interest.
@@ -146,7 +146,7 @@ public class PoiService {
   public PointOfInterest createPointOfInterest(CreatePoiDto createPoiDto, User currentUser) {
     // Get the POI type
     PoiType poiType = getPoiTypeById(createPoiDto.getPoiTypeId())
-            .orElseThrow(() -> new IllegalStateException(POI_NOT_FOUND));
+            .orElseThrow(() -> new IllegalStateException(poiNotFound));
 
     // Create a new PointOfInterest entity
     PointOfInterest poi = new PointOfInterest(
@@ -193,7 +193,7 @@ public class PoiService {
             updatePoiDto.getPoiTypeId() != null) {
 
       PoiType poiType = poiTypeRepository.findById(updatePoiDto.getPoiTypeId())
-              .orElseThrow(() -> new IllegalStateException(POI_NOT_FOUND));
+              .orElseThrow(() -> new IllegalStateException(poiNotFound));
 
       pointOfInterestRepository.updatePointOfInterest(
               id,
@@ -239,7 +239,7 @@ public class PoiService {
     }
     if (updatePoiDto.getPoiTypeId() != null) {
       PoiType poiType = poiTypeRepository.findById(updatePoiDto.getPoiTypeId())
-              .orElseThrow(() -> new IllegalStateException(POI_NOT_FOUND));
+              .orElseThrow(() -> new IllegalStateException(poiNotFound));
       poi.setPoiType(poiType);
     }
 
