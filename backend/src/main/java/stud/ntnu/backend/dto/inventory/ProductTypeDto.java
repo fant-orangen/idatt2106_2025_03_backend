@@ -19,5 +19,5 @@ public class ProductTypeDto {
     private String name;
     private String unit;
     private Double caloriesPerUnit;
-    private Boolean isWater;
+    private String category;
 }

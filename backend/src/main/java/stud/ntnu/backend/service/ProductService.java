@@ -2,21 +2,26 @@ package stud.ntnu.backend.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.inventory.ProductBatchCreateDto;
 import stud.ntnu.backend.dto.inventory.ProductBatchDto;
 import stud.ntnu.backend.dto.inventory.ProductBatchUpdateDto;
-import stud.ntnu.backend.dto.inventory.ProductTypeCreateDto;
+import stud.ntnu.backend.dto.inventory.FoodProductTypeCreateDto;
 import stud.ntnu.backend.dto.inventory.ProductTypeDto;
+import stud.ntnu.backend.dto.inventory.WaterProductTypeCreateDto;
+import stud.ntnu.backend.dto.inventory.MedicineProductTypeCreateDto;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.inventory.ProductBatch;
 import stud.ntnu.backend.model.inventory.ProductType;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.inventory.ProductBatchRepository;
 import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
+import stud.ntnu.backend.util.SearchUtil;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -28,23 +33,27 @@ public class ProductService {
   private final ProductBatchRepository productBatchRepository;
   private final ProductTypeRepository productTypeRepository;
   private final HouseholdRepository householdRepository;
+  private final SearchUtil searchUtil;
 
   public ProductService(ProductBatchRepository productBatchRepository,
       ProductTypeRepository productTypeRepository,
-      HouseholdRepository householdRepository) {
+      HouseholdRepository householdRepository,
+      SearchUtil searchUtil) {
     this.productBatchRepository = productBatchRepository;
     this.productTypeRepository = productTypeRepository;
     this.householdRepository = householdRepository;
+    this.searchUtil = searchUtil;
   }
 
   /**
-   * Get all product types.
+   * Get all food product types for a specific household.
    *
+   * @param householdId the ID of the household
    * @param pageable pagination information
-   * @return a page of product types
+   * @return a page of food product types
    */
-  public Page<ProductTypeDto> getAllProductTypes(Pageable pageable) {
-    Page<ProductType> productTypes = productTypeRepository.findAll(pageable);
+  public Page<ProductTypeDto> getAllFoodProductTypes(Integer householdId, Pageable pageable) {
+    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId, "food", pageable);
     return productTypes.map(this::convertToDto);
   }
 
@@ -79,13 +88,13 @@ public class ProductService {
   }
 
   /**
-   * Create a new product type.
+   * Create a new food product type.
    *
-   * @param createDto the DTO containing the product type information
+   * @param createDto the DTO containing the food product type information
    * @return the created product type
    */
   @Transactional
-  public ProductTypeDto createProductType(ProductTypeCreateDto createDto) {
+  public ProductTypeDto createProductType(FoodProductTypeCreateDto createDto) {
     Household household = householdRepository.findById(createDto.getHouseholdId())
         .orElseThrow(() -> new NoSuchElementException(
             "Household not found with ID: " + createDto.getHouseholdId()));
@@ -95,7 +104,7 @@ public class ProductService {
         createDto.getName(),
         createDto.getUnit(),
         createDto.getCaloriesPerUnit(),
-        createDto.getIsWater()
+        createDto.getCategory()
     );
 
     ProductType savedProductType = productTypeRepository.save(productType);
@@ -221,6 +230,91 @@ public class ProductService {
   }
 
   /**
+   * Get the total amount of water in litres (all batches of products with category 'water' and unit 'l').
+   * @return the total litres of water
+   */
+  public Integer getTotalLitresOfWater() {
+    return productBatchRepository.sumTotalLitresOfWater();
+  }
+
+  /**
+   * Get the total amount of water in litres for a specific household (all batches of products with category 'water' and unit 'l').
+   * @param householdId the ID of the household
+   * @return the total litres of water
+   */
+  public Integer getTotalLitresOfWaterByHousehold(Integer householdId) {
+    return productBatchRepository.sumTotalLitresOfWaterByHousehold(householdId);
+  }
+
+  /**
+   * Get all water product types for a specific household, paginated.
+   * @param householdId the ID of the household
+   * @param pageable pagination information
+   * @return a page of ProductTypeDto
+   */
+  public Page<ProductTypeDto> getWaterProductTypesByHousehold(Integer householdId, Pageable pageable) {
+    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId, "water", pageable);
+    return productTypes.map(this::convertToDto);
+  }
+
+  /**
+   * Get all medicine product types for a specific household, paginated.
+   * @param householdId the ID of the household
+   * @param pageable pagination information
+   * @return a page of ProductTypeDto
+   */
+  public Page<ProductTypeDto> getMedicineProductTypesByHousehold(Integer householdId, Pageable pageable) {
+    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(householdId, "medicine", pageable);
+    return productTypes.map(this::convertToDto);
+  }
+
+  /**
+   * Create a new water product type.
+   * @param createDto the DTO containing the water product type information
+   * @return the created product type
+   */
+  @Transactional
+  public ProductTypeDto createWaterProductType(WaterProductTypeCreateDto createDto) {
+    Household household = householdRepository.findById(createDto.getHouseholdId())
+        .orElseThrow(() -> new NoSuchElementException(
+            "Household not found with ID: " + createDto.getHouseholdId()));
+
+    ProductType productType = new ProductType(
+        household,
+        createDto.getName(),
+        createDto.getUnit(),
+        null, // caloriesPerUnit is always null for water
+        createDto.getCategory()
+    );
+
+    ProductType savedProductType = productTypeRepository.save(productType);
+    return convertToDto(savedProductType);
+  }
+
+  /**
+   * Create a new medicine product type.
+   * @param createDto the DTO containing the medicine product type information
+   * @return the created product type
+   */
+  @Transactional
+  public ProductTypeDto createMedicineProductType(MedicineProductTypeCreateDto createDto) {
+    Household household = householdRepository.findById(createDto.getHouseholdId())
+        .orElseThrow(() -> new NoSuchElementException(
+            "Household not found with ID: " + createDto.getHouseholdId()));
+
+    ProductType productType = new ProductType(
+        household,
+        createDto.getName(),
+        createDto.getUnit(),
+        null, // caloriesPerUnit is always null for medicine
+        createDto.getCategory()
+    );
+
+    ProductType savedProductType = productTypeRepository.save(productType);
+    return convertToDto(savedProductType);
+  }
+
+  /**
    * Convert a ProductBatch entity to a ProductBatchDto.
    *
    * @param batch the ProductBatch entity
@@ -250,7 +344,26 @@ public class ProductService {
         .name(productType.getName())
         .unit(productType.getUnit())
         .caloriesPerUnit(productType.getCaloriesPerUnit())
-        .isWater(productType.getIsWater())
+        .category(productType.getCategory())
         .build();
+  }
+
+  /**
+   * Search for product types by name, category, and household.
+   *
+   * @param householdId the ID of the household
+   * @param category the category to filter by
+   * @param search the search string for the name
+   * @param pageable pagination information
+   * @return a page of matching ProductTypeDto
+   */
+  public Page<ProductTypeDto> searchProductTypesByNameAndCategoryAndHousehold(Integer householdId, String category, String search, Pageable pageable) {
+    // Use SearchUtil to search by name, then filter by household and category
+    Page<ProductType> page = searchUtil.searchByDescription(ProductType.class, "name", search, pageable);
+    // Filter by household and category
+    List<ProductType> filteredList = page.getContent().stream()
+      .filter(pt -> pt.getHousehold() != null && pt.getHousehold().getId().equals(householdId) && pt.getCategory().equalsIgnoreCase(category))
+      .toList();
+    return new PageImpl<>(filteredList, pageable, filteredList.size()).map(this::convertToDto);
   }
 }

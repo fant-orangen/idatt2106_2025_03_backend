@@ -108,6 +108,8 @@ public class SecurityConfig {
                 // Allow all authenticated users to access GET endpoints for specific crisis events
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/crisis-events/{id}")
                 .authenticated()
+                .requestMatchers("/api/crisis-events/{id}/changes").authenticated()
+                .requestMatchers("/api/news/{crisisEventId}").authenticated()
                 // Add role-based authorization for admin endpoints
                 .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
                 .requestMatchers("/api/super-admin", "/api/super-admin/**").hasAnyRole("SUPERADMIN")
@@ -123,6 +125,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/poi/**")
                 .hasAnyRole("ADMIN", "SUPERADMIN")
                 .anyRequest().authenticated());
+
 
     // Allow H2 console frame options
     http.headers(headers ->

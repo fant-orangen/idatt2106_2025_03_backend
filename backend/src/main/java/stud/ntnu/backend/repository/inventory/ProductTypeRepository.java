@@ -29,4 +29,14 @@ public interface ProductTypeRepository extends JpaRepository<ProductType, Intege
      * @return a page of product types
      */
     Page<ProductType> findByHouseholdId(Integer householdId, Pageable pageable);
+
+    /**
+     * Find all product types for a specific household and category with pagination.
+     *
+     * @param householdId the ID of the household
+     * @param category the category (e.g., 'water')
+     * @param pageable pagination information
+     * @return a page of product types
+     */
+    Page<ProductType> findByHouseholdIdAndCategory(Integer householdId, String category, Pageable pageable);
 }

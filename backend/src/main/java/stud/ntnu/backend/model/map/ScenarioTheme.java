@@ -2,12 +2,17 @@ package stud.ntnu.backend.model.map;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 import stud.ntnu.backend.model.user.User;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "scenario_themes")
 public class ScenarioTheme {
 
+  // Getters and Setters
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
@@ -18,6 +23,9 @@ public class ScenarioTheme {
   @Column(name = "description", columnDefinition = "TEXT")
   private String description;
 
+  @Column(name = "instructions", columnDefinition = "TEXT")
+  private String instructions;
+
   @ManyToOne
   @JoinColumn(name = "created_by_user_id", nullable = false)
   private User createdByUser;
@@ -27,6 +35,9 @@ public class ScenarioTheme {
 
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
+
+  @Column(name = "status", nullable = false)
+  private String status;
 
   // Set createdAt and updatedAt before persist
   @PrePersist
@@ -50,52 +61,4 @@ public class ScenarioTheme {
     this.createdByUser = createdByUser;
   }
 
-  // Getters and Setters
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public User getCreatedByUser() {
-    return createdByUser;
-  }
-
-  public void setCreatedByUser(User createdByUser) {
-    this.createdByUser = createdByUser;
-  }
-
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(LocalDateTime createdAt) {
-    this.createdAt = createdAt;
-  }
-
-  public LocalDateTime getUpdatedAt() {
-    return updatedAt;
-  }
-
-  public void setUpdatedAt(LocalDateTime updatedAt) {
-    this.updatedAt = updatedAt;
-  }
 }

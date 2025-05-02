@@ -17,10 +17,12 @@ import stud.ntnu.backend.dto.auth.ResetPasswordRequestDto;
 import stud.ntnu.backend.dto.auth.Send2FACodeRequestDto;
 import stud.ntnu.backend.service.AuthService;
 import stud.ntnu.backend.dto.auth.TwoFactorRequestDto;
+import stud.ntnu.backend.service.RecaptchaService;
 
 /**
  * Handles user authentication and account lifecycle actions. Includes user registration, email
- * verification, login (JWT issuance), and password reset flows (forgot/reset).
+ * verification, login (JWT issuance), two-factor authentication (2FA), reCAPTCHA validation,
+ * and password reset flows (forgot/reset).
  * <p>
  * Based on Visjonsdokument 2025 for Krisefikser.no.
  */
@@ -30,10 +32,13 @@ public class AuthController {
 
     private final AuthService authService;
 
+    private final RecaptchaService recaptchaService;
+
     private final Logger log = org.slf4j.LoggerFactory.getLogger(AuthController.class);
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, RecaptchaService recaptchaService) {
         this.authService = authService;
+        this.recaptchaService = recaptchaService;
     }
 
 
@@ -58,7 +63,24 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
+        // Verify the reCAPTCHA token
+        System.out.println("Recaptcha token: " + authRequest.getRecaptchaToken());
+        log.info("Login request received: {}", authRequest);
+        if (!recaptchaService.verifyRecaptcha(authRequest.getRecaptchaToken())) {
+            // Return a response with an error message in the AuthResponseDto
+            AuthResponseDto errorResponse = new AuthResponseDto();
+            errorResponse.setToken(null);
+            errorResponse.setEmail(null);
+            errorResponse.setUserId(null);
+            errorResponse.setRole(null);
+            errorResponse.setHouseholdId(null);
+            errorResponse.setIsUsing2FA(false);
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+
+        // Proceed with login if reCAPTCHA is valid
         AuthResponseDto authResponse = authService.login(authRequest);
+
         if (authResponse.getIsUsing2FA()) {
             return ResponseEntity.status(202).body(authResponse);
         }
@@ -109,6 +131,13 @@ public class AuthController {
         }
     }
 
+    /**
+     * Sends a 2FA code to the user's email.
+     *
+     * This endpoint is used to initiate the 2FA process.
+     * @param request The request containing the user's email
+     * @return ResponseEntity with status 200 OK if successful, or an error message
+     */
     @PostMapping("/send-2fa")
     public ResponseEntity<?> send2FACode(@RequestBody @Valid Send2FACodeRequestDto request) {
         try {
@@ -120,6 +149,14 @@ public class AuthController {
         }
     }
 
+    /**
+     * Verifies the 2FA code sent to the user's email.
+     *
+     * This endpoint is used to complete the 2FA process.
+     *
+     * @param request The request containing the user's email and the 2FA code
+     * @return ResponseEntity with status 200 OK if successful, or an error message
+     */
     @PostMapping("/verify-2fa")
     public ResponseEntity<?> verify2FA(@RequestBody @Valid TwoFactorRequestDto request) {
         try {
