@@ -1,4 +1,4 @@
-package stud.ntnu.backend.service;
+package stud.ntnu.backend.service.household;
 
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.dto.inventory.InventoryItemCreateDto;

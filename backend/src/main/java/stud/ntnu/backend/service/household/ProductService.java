@@ -1,4 +1,4 @@
-package stud.ntnu.backend.service;
+package stud.ntnu.backend.service.household;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

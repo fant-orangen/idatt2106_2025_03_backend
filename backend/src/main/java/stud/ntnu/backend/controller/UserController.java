@@ -9,7 +9,7 @@ import stud.ntnu.backend.dto.user.UserProfileDto;
 import stud.ntnu.backend.dto.user.UserPreferencesDto;
 import stud.ntnu.backend.dto.user.UserHistoryDto;
 import stud.ntnu.backend.dto.user.UserUpdateDto;
-import stud.ntnu.backend.service.UserService;
+import stud.ntnu.backend.service.user.UserService;
 
 /**
  * Manages user profile operations. Includes viewing and updating personal details (name, address,

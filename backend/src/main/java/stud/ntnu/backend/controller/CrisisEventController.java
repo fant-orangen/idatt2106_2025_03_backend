@@ -23,8 +23,8 @@ import stud.ntnu.backend.dto.map.UpdateCrisisEventDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
-import stud.ntnu.backend.service.CrisisEventService;
-import stud.ntnu.backend.service.UserService;
+import stud.ntnu.backend.service.crisis.CrisisEventService;
+import stud.ntnu.backend.service.user.UserService;
 
 /**
  * Manages crisis events and live updates. Admin functions include creating, editing, and deleting

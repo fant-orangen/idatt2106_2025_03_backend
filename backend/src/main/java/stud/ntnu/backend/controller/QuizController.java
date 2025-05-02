@@ -18,9 +18,9 @@ import stud.ntnu.backend.dto.quiz.CreateQuizDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
 import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
-import stud.ntnu.backend.service.QuizService;
+import stud.ntnu.backend.service.gamification.quiz.QuizService;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import stud.ntnu.backend.service.UserService;
+import stud.ntnu.backend.service.user.UserService;
 import stud.ntnu.backend.security.AdminChecker;
 
 /**

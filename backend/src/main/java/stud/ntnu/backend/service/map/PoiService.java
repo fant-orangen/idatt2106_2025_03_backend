@@ -1,4 +1,4 @@
-package stud.ntnu.backend.service;
+package stud.ntnu.backend.service.map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

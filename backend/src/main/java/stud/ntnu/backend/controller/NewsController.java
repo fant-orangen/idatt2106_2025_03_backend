@@ -10,11 +10,10 @@ import stud.ntnu.backend.dto.news.NewsArticleDTO;
 import stud.ntnu.backend.dto.news.NewsArticleResponseDTO;
 import stud.ntnu.backend.dto.news.UpdateNewsArticleDTO;
 import stud.ntnu.backend.model.news.NewsArticle;
-import stud.ntnu.backend.model.news.NewsArticle.ArticleStatus;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
-import stud.ntnu.backend.service.NewsService;
-import stud.ntnu.backend.service.UserService;
+import stud.ntnu.backend.service.crisis.NewsService;
+import stud.ntnu.backend.service.user.UserService;
 
 import java.security.Principal;
 import java.util.NoSuchElementException;

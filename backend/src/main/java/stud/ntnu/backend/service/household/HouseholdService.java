@@ -1,4 +1,4 @@
-package stud.ntnu.backend.service;
+package stud.ntnu.backend.service.household;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

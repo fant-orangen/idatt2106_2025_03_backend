@@ -1,4 +1,4 @@
-package stud.ntnu.backend.service;
+package stud.ntnu.backend.service.crisis;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,15 +14,15 @@ import stud.ntnu.backend.dto.map.CrisisEventPreviewDto;
 import stud.ntnu.backend.dto.map.CrisisEventDetailsDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.map.CrisisEventChange;
-import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.map.CrisisEventChangeRepository;
 import stud.ntnu.backend.repository.map.CrisisEventRepository;
 import stud.ntnu.backend.repository.map.ScenarioThemeRepository;
 import stud.ntnu.backend.model.map.ScenarioTheme;
+import stud.ntnu.backend.service.user.NotificationService;
+import stud.ntnu.backend.service.user.UserService;
 import stud.ntnu.backend.util.LocationUtil;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 

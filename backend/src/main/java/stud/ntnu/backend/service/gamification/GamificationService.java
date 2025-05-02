@@ -1,4 +1,4 @@
-package stud.ntnu.backend.service;
+package stud.ntnu.backend.service.gamification;
 
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.repository.user.GamificationActivityRepository;

@@ -13,8 +13,8 @@ import stud.ntnu.backend.dto.map.ScenarioThemeNameDto;
 import stud.ntnu.backend.model.map.ScenarioTheme;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
-import stud.ntnu.backend.service.ScenarioThemeService;
-import stud.ntnu.backend.service.UserService;
+import stud.ntnu.backend.service.crisis.ScenarioThemeService;
+import stud.ntnu.backend.service.user.UserService;
 
 /**
  * Admin controller for managing crisis scenario themes. Supports CRUD operations for themes like

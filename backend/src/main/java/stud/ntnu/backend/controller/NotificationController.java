@@ -11,12 +11,11 @@ import stud.ntnu.backend.dto.user.SystemNotificationCreateDto;
 import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
-import stud.ntnu.backend.service.NotificationService;
-import stud.ntnu.backend.service.UserService;
+import stud.ntnu.backend.service.user.NotificationService;
+import stud.ntnu.backend.service.user.UserService;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Controller for managing notifications.

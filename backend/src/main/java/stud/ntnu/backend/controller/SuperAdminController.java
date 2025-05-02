@@ -4,10 +4,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.user.UserInfoDto;
 import stud.ntnu.backend.model.user.User;
-import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.security.AdminChecker;
-import stud.ntnu.backend.service.SuperAdminService;
-import stud.ntnu.backend.service.UserService;
+import stud.ntnu.backend.service.admin.SuperAdminService;
+import stud.ntnu.backend.service.user.UserService;
 
 import java.security.Principal;
 import java.util.List;

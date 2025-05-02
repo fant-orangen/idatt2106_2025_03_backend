@@ -1,4 +1,4 @@
-package stud.ntnu.backend.service;
+package stud.ntnu.backend.service.group;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -7,7 +7,7 @@ import stud.ntnu.backend.repository.group.GroupMembershipRepository;
 import stud.ntnu.backend.model.group.Group;
 import stud.ntnu.backend.model.group.GroupMembership;
 import stud.ntnu.backend.dto.group.GroupSummaryDto;
-import stud.ntnu.backend.service.InventoryService;
+import stud.ntnu.backend.service.household.InventoryService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import stud.ntnu.backend.dto.household.HouseholdDto;
@@ -19,11 +19,8 @@ import java.time.LocalDateTime;
 import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.model.user.User;
-import stud.ntnu.backend.dto.inventory.ProductTypeDto;
 import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
-import stud.ntnu.backend.dto.inventory.ProductBatchDto;
 import stud.ntnu.backend.repository.group.GroupInventoryContributionRepository;
-import stud.ntnu.backend.model.inventory.ProductBatch;
 
 /**
  * Service for managing groups. Handles creation, retrieval, updating, and deletion of groups.

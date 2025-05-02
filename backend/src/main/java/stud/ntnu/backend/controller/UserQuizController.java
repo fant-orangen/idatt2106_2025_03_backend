@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
-import stud.ntnu.backend.service.UserQuizService;
-import stud.ntnu.backend.service.UserService;
+import stud.ntnu.backend.service.gamification.quiz.UserQuizService;
+import stud.ntnu.backend.service.user.UserService;
 
 @RestController
 @RequestMapping("/api/quizzes/user")

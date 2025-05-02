@@ -15,9 +15,9 @@ import stud.ntnu.backend.dto.auth.ForgotPasswordRequestDto;
 import stud.ntnu.backend.dto.auth.RegisterRequestDto;
 import stud.ntnu.backend.dto.auth.ResetPasswordRequestDto;
 import stud.ntnu.backend.dto.auth.Send2FACodeRequestDto;
-import stud.ntnu.backend.service.AuthService;
+import stud.ntnu.backend.service.user.AuthService;
 import stud.ntnu.backend.dto.auth.TwoFactorRequestDto;
-import stud.ntnu.backend.service.RecaptchaService;
+import stud.ntnu.backend.service.user.RecaptchaService;
 
 /**
  * Handles user authentication and account lifecycle actions. Includes user registration, email

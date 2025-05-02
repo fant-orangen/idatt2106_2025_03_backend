@@ -10,16 +10,13 @@ package stud.ntnu.backend.controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.security.Principal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import stud.ntnu.backend.dto.group.GroupSummaryDto;
-import stud.ntnu.backend.service.GroupService;
+import stud.ntnu.backend.service.group.GroupService;
 import stud.ntnu.backend.dto.household.HouseholdDto;
 import java.util.List;
-import stud.ntnu.backend.dto.inventory.ProductTypeDto;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package stud.ntnu.backend.service;
+package stud.ntnu.backend.service.user;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;

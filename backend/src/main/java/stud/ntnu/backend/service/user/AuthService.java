@@ -1,4 +1,4 @@
-package stud.ntnu.backend.service;
+package stud.ntnu.backend.service.user;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package stud.ntnu.backend.service;
+package stud.ntnu.backend.service.group;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,8 +17,6 @@ import stud.ntnu.backend.repository.group.GroupRepository;
 import stud.ntnu.backend.repository.inventory.ProductBatchRepository;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.List;
 import java.util.Optional;

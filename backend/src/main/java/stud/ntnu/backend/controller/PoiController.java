@@ -7,11 +7,10 @@ import stud.ntnu.backend.dto.poi.CreatePoiDto;
 import stud.ntnu.backend.dto.poi.PoiItemDto;
 import stud.ntnu.backend.dto.poi.UpdatePoiDto;
 import stud.ntnu.backend.model.map.PointOfInterest;
-import stud.ntnu.backend.model.map.PoiType;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
-import stud.ntnu.backend.service.PoiService;
-import stud.ntnu.backend.service.UserService;
+import stud.ntnu.backend.service.map.PoiService;
+import stud.ntnu.backend.service.user.UserService;
 import stud.ntnu.backend.util.LocationUtil;
 
 import java.security.Principal;

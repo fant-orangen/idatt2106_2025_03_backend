@@ -11,10 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.NoSuchElementException;
 import stud.ntnu.backend.dto.inventory.*;
-import stud.ntnu.backend.service.InventoryService;
-import stud.ntnu.backend.service.ProductService;
-
-import java.util.List;
+import stud.ntnu.backend.service.household.InventoryService;
+import stud.ntnu.backend.service.household.ProductService;
 
 /**
  * Handles inventory management at the household level. Includes listing, adding, editing, or

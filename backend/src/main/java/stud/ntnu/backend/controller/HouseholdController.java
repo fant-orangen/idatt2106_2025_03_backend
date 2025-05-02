@@ -12,7 +12,7 @@ import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
 import stud.ntnu.backend.dto.household.HouseholdJoinRequestDto;
 import stud.ntnu.backend.dto.household.HouseholdSwitchRequestDto;
 import stud.ntnu.backend.model.household.Household;
-import stud.ntnu.backend.service.HouseholdService;
+import stud.ntnu.backend.service.household.HouseholdService;
 import stud.ntnu.backend.dto.household.HouseholdMemberDto;
 import stud.ntnu.backend.dto.household.EmptyHouseholdMemberDto;
 import stud.ntnu.backend.dto.household.EmptyHouseholdMemberCreateDto;
