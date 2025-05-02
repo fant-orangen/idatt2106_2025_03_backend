@@ -45,7 +45,7 @@ public class QuizController {
      * @param principal     the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
      */
-    @PostMapping
+    @PostMapping("/admin")
     public ResponseEntity<?> createQuiz(@RequestBody CreateQuizDto createQuizDto, Principal principal) {
         try {
             if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
@@ -67,7 +67,7 @@ public class QuizController {
      * @param principal the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
      */
-    @PatchMapping("/{id}/archive")
+    @PatchMapping("/admin/{id}/archive")
     public ResponseEntity<?> archiveQuiz(@PathVariable Long id, Principal principal) {
         try {
             if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
@@ -112,7 +112,7 @@ public class QuizController {
      * @param principal the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
      */
-    @PostMapping("/questions")
+    @PostMapping("/admin/questions")
     public ResponseEntity<?> saveQuizQuestion(@RequestBody CreateQuizQuestionDto dto, Principal principal) {
         try {
             if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
@@ -133,7 +133,7 @@ public class QuizController {
      * @param principal the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
      */
-    @PatchMapping("/questions/{question_id}")
+    @PatchMapping("/admin/questions/{question_id}")
     public ResponseEntity<?> updateQuizQuestion(
             @PathVariable("question_id") Long questionId,
             @RequestBody CreateQuizQuestionDto dto,
@@ -157,7 +157,7 @@ public class QuizController {
      * @param principal the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
      */
-    @PatchMapping("/answers/{answer_id}")
+    @PatchMapping("/admin/answers/{answer_id}")
     public ResponseEntity<?> updateQuizAnswer(
             @PathVariable("answer_id") Long answerId,
             @RequestBody CreateQuizAnswerDto dto,
@@ -180,7 +180,7 @@ public class QuizController {
      * @param principal the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
      */
-    @PostMapping("/answers")
+    @PostMapping("/admin/answers")
     public ResponseEntity<?> saveQuizAnswer(@RequestBody CreateQuizAnswerDto dto, Principal principal) {
         try {
             if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
@@ -199,7 +199,7 @@ public class QuizController {
      * @param questionId the id of the quiz question to delete
      * @return ResponseEntity with 200 OK or error message
      */
-    @DeleteMapping("/questions/{question_id}")
+    @DeleteMapping("/admin/questions/{question_id}")
     public ResponseEntity<?> deleteQuizQuestion(@PathVariable("question_id") Long questionId, Principal principal) {
         try {
             if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
