@@ -66,6 +66,7 @@ public class AuthController {
         // Verify the reCAPTCHA token
         System.out.println("Recaptcha token: " + authRequest.getRecaptchaToken());
         log.info("Login request received: {}", authRequest);
+        /**
         if (!recaptchaService.verifyRecaptcha(authRequest.getRecaptchaToken())) {
             // Return a response with an error message in the AuthResponseDto
             AuthResponseDto errorResponse = new AuthResponseDto();
@@ -77,6 +78,7 @@ public class AuthController {
             errorResponse.setIsUsing2FA(false);
             return ResponseEntity.badRequest().body(errorResponse);
         }
+         */
 
         // Proceed with login if reCAPTCHA is valid
         AuthResponseDto authResponse = authService.login(authRequest);

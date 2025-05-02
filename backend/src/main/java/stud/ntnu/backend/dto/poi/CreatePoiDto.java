@@ -33,7 +33,8 @@ public class CreatePoiDto {
     private Integer poiTypeId;
 
     private String description; // Optional
-    private String openingHours; // Optional
+    private String openFrom; // Optional
+    private String openTo; // Optional
     private String contactInfo; // Optional
 
 
