@@ -141,7 +141,8 @@ public class QuizService {
   }
 
   public int getTotalCorrectAnswers(Long attemptId) {
-    List<UserQuizAnswer> userAnswers = userQuizAnswerRepository.findAllByUserQuizAttemptId(attemptId);
+    List<UserQuizAnswer> userAnswers = userQuizAnswerRepository.findAllByUserQuizAttemptId(
+        attemptId);
     int correctCount = 0;
     for (UserQuizAnswer userAnswer : userAnswers) {
       Optional<QuizAnswer> quizAnswerOpt = quizAnswerRepository.findById(userAnswer.getAnswerId());
