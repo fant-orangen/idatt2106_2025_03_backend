@@ -4,6 +4,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.dto.household.HouseholdCreateRequestDto;
+import stud.ntnu.backend.dto.map.CoordinatesItemDto;
 import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
 import stud.ntnu.backend.dto.household.HouseholdMemberDto;
@@ -11,6 +12,7 @@ import stud.ntnu.backend.dto.household.EmptyHouseholdMemberDto;
 import stud.ntnu.backend.dto.household.EmptyHouseholdMemberCreateDto;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.util.LocationUtil;
 import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
 import stud.ntnu.backend.repository.household.EmptyHouseholdMemberRepository;
 import stud.ntnu.backend.model.household.Household;
@@ -127,9 +129,37 @@ public class HouseholdService {
     Household household = new Household(requestDto.getName(), requestDto.getAddress(),
         requestDto.getPopulationCount());
 
-    // Set optional coordinates
-    household.setLatitude(requestDto.getLatitude());
-    household.setLongitude(requestDto.getLongitude());
+    if (requestDto.getAddress() != null && !requestDto.getAddress().trim().isEmpty()) {
+      try {
+        log.info("Attempting to geocode address: {}", requestDto.getAddress());
+        // Call the LocationUtil to get coordinates from the address
+        CoordinatesItemDto coordinates = LocationUtil.getCoordinatesByAddress(requestDto.getAddress());
+
+        if (coordinates != null && coordinates.getLatitude() != null && coordinates.getLongitude() != null) {
+          // Set the latitude and longitude on the household object
+          household.setLatitude(coordinates.getLatitude());
+          household.setLongitude(coordinates.getLongitude());
+          log.info("Successfully geocoded address to Lat: {}, Lon: {}", coordinates.getLatitude(), coordinates.getLongitude());
+        } else {
+          log.warn("Geocoding returned null or incomplete coordinates for address: {}", requestDto.getAddress());
+          // Keep household.latitude and household.longitude as null
+        }
+      } catch (IllegalArgumentException e) {
+        // Log the error if geocoding fails, but allow household creation without coordinates
+        log.error("Could not geocode address '{}': {}", requestDto.getAddress(), e.getMessage());
+        // Keep household.latitude and household.longitude as null
+      } catch (Exception e) {
+        // Catch unexpected errors during geocoding
+        log.error("Unexpected error during geocoding for address '{}': {}", requestDto.getAddress(), e.getMessage(), e);
+        // Keep household.latitude and household.longitude as null
+      }
+    } else {
+      log.info("No address provided, skipping geocoding.");
+      // Set optional coordinates from DTO if they were manually provided (though the goal is to calculate)
+      // This part is less relevant now as we prioritize calculation, but keep it for flexibility
+      household.setLatitude(requestDto.getLatitude());
+      household.setLongitude(requestDto.getLongitude());
+    }
 
     // Save the household first
     household = householdRepository.save(household);
