@@ -1,19 +1,27 @@
 package stud.ntnu.backend.model;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
-// TODO: Add JPA annotations (@Entity, @Table, @Id, etc.) when dependencies are available
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Setter
+@Getter
+@Entity
+@Table(name = "user_quiz_attempts")
 public class UserQuizAttempt {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "user_id", nullable = false)
     private Long userId;
+
+    @Column(name = "quiz_id", nullable = false)
     private Long quizId;
+
+    @Column(name = "completed_at")
     private LocalDateTime completedAt;
+
+    public UserQuizAttempt() {}
 } 

@@ -124,7 +124,9 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/poi/**")
                 .hasAnyRole("ADMIN", "SUPERADMIN")
                 // Allow all authenticated users to access all GET endpoints for scenario themes
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/scenario-themes/**").authenticated());
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/scenario-themes/**").authenticated()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/scenario-themes/**").hasAnyRole("ADMIN", "SUPERADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/scenario-themes/**").hasAnyRole("ADMIN", "SUPERADMIN"));
 
 
     // Allow H2 console frame options

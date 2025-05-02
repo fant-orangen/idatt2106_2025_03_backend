@@ -1,0 +1,15 @@
+package stud.ntnu.backend.dto.quiz;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateUserQuizAnswerDto {
+    private Long userQuizAttemptId;
+    private Long quizId;
+    private Long questionId;
+    private Long answerId;
+} 
