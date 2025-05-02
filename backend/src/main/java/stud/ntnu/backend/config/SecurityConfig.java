@@ -128,7 +128,9 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/scenario-themes/**").hasAnyRole("ADMIN", "SUPERADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/scenario-themes/**").hasAnyRole("ADMIN", "SUPERADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/quizzes/**").authenticated()
-                .requestMatchers("/api/quizzes/admin**").hasAnyRole("ADMIN", "SUPERADMIN"));
+                // Allow authenticated users to POST to /api/quizzes/attempts endpoints
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/quizzes/user/attempts/**").authenticated()
+                .requestMatchers("/api/quizzes/admin/**").hasAnyRole("ADMIN", "SUPERADMIN"));
 
 
     // Allow H2 console frame options

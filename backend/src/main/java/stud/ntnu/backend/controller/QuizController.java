@@ -62,7 +62,7 @@ public class QuizController {
     
     /**
      * Archives a quiz by id.
-     * TODO: test
+     * 
      * @param id the quiz id
      * @param principal the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
@@ -81,7 +81,7 @@ public class QuizController {
     }
     /**
      * Gets all questions for a quiz by quiz id.
-     * TODO: test
+     * 
      * @param quizId the quiz id
      * @return List of QuizQuestionResponseDto
      */
@@ -94,7 +94,7 @@ public class QuizController {
 
     /**
      * Gets all answers for a quiz question by question id.
-     * TODO: test
+     * 
      * @param questionId the quiz question id
      * @return List of QuizAnswerResponseDto
      */
@@ -107,7 +107,7 @@ public class QuizController {
 
     /**
      * Saves a quiz question.
-     * TODO: test
+     * 
      * @param dto the CreateQuizQuestionDto containing question data
      * @param principal the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
@@ -127,7 +127,7 @@ public class QuizController {
 
     /**
      * Partially updates an existing quiz question.
-     * TODO: test
+     * 
      * @param questionId the id of the quiz question to update
      * @param dto the CreateQuizQuestionDto containing updated question data
      * @param principal the Principal object representing the current user
@@ -151,7 +151,7 @@ public class QuizController {
 
     /**
      * Partially updates an existing quiz answer.
-     * TODO: test
+     * 
      * @param answerId the id of the quiz answer to update
      * @param dto the CreateQuizAnswerDto containing updated answer data
      * @param principal the Principal object representing the current user
@@ -175,7 +175,7 @@ public class QuizController {
 
     /**
      * Saves a quiz answer.
-     * TODO: test
+     * 
      * @param dto the CreateQuizAnswerDto containing answer data
      * @param principal the Principal object representing the current user
      * @return ResponseEntity with 200 OK or error message
@@ -195,7 +195,7 @@ public class QuizController {
 
     /**
      * Deletes a quiz question by its id.
-     * TODO: test
+     * 
      * @param questionId the id of the quiz question to delete
      * @return ResponseEntity with 200 OK or error message
      */

@@ -13,15 +13,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
 import stud.ntnu.backend.service.UserQuizService;
+import stud.ntnu.backend.service.UserService;
 
 @RestController
 @RequestMapping("/api/quizzes/user")
 public class UserQuizController {
 
     private final UserQuizService userQuizService;
+    private final UserService userService;
 
-    public UserQuizController(UserQuizService userQuizService) {
+    public UserQuizController(UserQuizService userQuizService, UserService userService) {
         this.userQuizService = userQuizService;
+        this.userService = userService;
     }
 
     /**
@@ -34,7 +37,7 @@ public class UserQuizController {
     @PostMapping("/attempts/{quiz_id}")
     public ResponseEntity<?> createUserQuizAttempt(@PathVariable("quiz_id") Long quizId, Principal principal) {
         try {
-            Long userId = Long.valueOf(principal.getName()); // Adjust if needed
+            Integer userId = userService.getUserIdByEmail(principal.getName());
             userQuizService.createUserQuizAttempt(quizId, userId);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
@@ -69,14 +72,12 @@ public class UserQuizController {
     @GetMapping("/attempts/{quiz_id}")
     public ResponseEntity<?> getQuizAttemptsByQuizId(@PathVariable("quiz_id") Long quizId, Principal principal, Pageable pageable) {
         try {
-            Long userId = Long.valueOf(principal.getName()); // Adjust if needed
+            Integer userId = userService.getUserIdByEmail(principal.getName());
             return ResponseEntity.ok(userQuizService.getQuizAttemptsByQuizId(quizId, userId, pageable));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-
 
     /**
      * Gets paginated basic info about quizzes with at least one attempt by the current user.
@@ -89,7 +90,7 @@ public class UserQuizController {
     @GetMapping("/attempted")
     public ResponseEntity<?> getAttemptedQuizHistory(Principal principal, Pageable pageable) {
         try {
-            Long userId = Long.valueOf(principal.getName()); // Adjust if needed
+            Integer userId = userService.getUserIdByEmail(principal.getName());
             return ResponseEntity.ok(userQuizService.getBasicInfoForAttemptedQuizzes(userId, pageable));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

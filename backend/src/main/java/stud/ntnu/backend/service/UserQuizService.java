@@ -44,7 +44,7 @@ public class UserQuizService {
         this.quizAnswerRepository = quizAnswerRepository;
     }
 
-    public void createUserQuizAttempt(Long quizId, Long userId) {
+    public void createUserQuizAttempt(Long quizId, Integer userId) {
         UserQuizAttempt attempt = new UserQuizAttempt();
         attempt.setUserId(userId);
         attempt.setQuizId(quizId);
@@ -61,12 +61,12 @@ public class UserQuizService {
         userQuizAnswerRepository.save(answer);
     }
 
-    public Page<QuizAttemptSummaryDto> getQuizAttemptsByQuizId(Long quizId, Long userId, Pageable pageable) {
+    public Page<QuizAttemptSummaryDto> getQuizAttemptsByQuizId(Long quizId, Integer userId, Pageable pageable) {
         return userQuizAttemptRepository.findByUserIdAndQuizId(userId, quizId, pageable)
                 .map(a -> new QuizAttemptSummaryDto(a.getId(), a.getCompletedAt()));
     }
 
-    public Page<QuizBasicInfoDto> getBasicInfoForAttemptedQuizzes(Long userId, Pageable pageable) {
+    public Page<QuizBasicInfoDto> getBasicInfoForAttemptedQuizzes(Integer userId, Pageable pageable) {
         List<UserQuizAttempt> attempts = userQuizAttemptRepository.findByUserId(userId);
         Set<Long> quizIds = attempts.stream().map(UserQuizAttempt::getQuizId)
                 .collect(Collectors.toSet());
