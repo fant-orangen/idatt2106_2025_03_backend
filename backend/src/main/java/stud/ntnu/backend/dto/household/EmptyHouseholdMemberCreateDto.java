@@ -15,9 +15,9 @@ public class EmptyHouseholdMemberCreateDto {
 
   @NotBlank(message = "Name is required")
   private String name;
-  
+
   @NotBlank(message = "Type is required")
   private String type;
-  
+
   private String description;
 }

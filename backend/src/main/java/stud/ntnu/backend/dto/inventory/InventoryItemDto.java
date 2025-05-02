@@ -60,13 +60,13 @@ public class InventoryItemDto {
   /**
    * Constructs a new InventoryItemDto with all fields.
    *
-   * @param id               the unique identifier of the inventory item
-   * @param productId        the ID of the product associated with this inventory item
-   * @param productName      the name of the product
-   * @param productTypeName  the name of the product type
-   * @param customName       a custom name for the inventory item
-   * @param quantity         the quantity of the inventory item
-   * @param expirationDate   the expiration date of the inventory item
+   * @param id              the unique identifier of the inventory item
+   * @param productId       the ID of the product associated with this inventory item
+   * @param productName     the name of the product
+   * @param productTypeName the name of the product type
+   * @param customName      a custom name for the inventory item
+   * @param quantity        the quantity of the inventory item
+   * @param expirationDate  the expiration date of the inventory item
    */
   public InventoryItemDto(Integer id, Integer productId, String productName, String productTypeName,
       String customName, BigDecimal quantity, LocalDate expirationDate) {

@@ -8,8 +8,9 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuizBasicInfoDto {
-    private Long quizId;
-    private String name;
-    private String status;
-    private Long questionCount;
+
+  private Long quizId;
+  private String name;
+  private String status;
+  private Long questionCount;
 } 

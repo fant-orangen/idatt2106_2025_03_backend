@@ -16,12 +16,13 @@ import java.math.BigDecimal;
  * All fields are optional - if a field is null, it will not be updated.
  */
 public class UpdatePoiDto {
-    private String name;
-    private BigDecimal latitude;
-    private BigDecimal longitude;
-    private String description;
-    private String openFrom; // Optional
-    private String openTo; // Optional
-    private String contactInfo; // Optional
-    private Integer poiTypeId; // Optional, can be null if not updated
+
+  private String name;
+  private BigDecimal latitude;
+  private BigDecimal longitude;
+  private String description;
+  private String openFrom; // Optional
+  private String openTo; // Optional
+  private String contactInfo; // Optional
+  private Integer poiTypeId; // Optional, can be null if not updated
 }

@@ -10,17 +10,18 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CrisisEventPreviewDto {
-    private Integer id;
-    private String name;
-    private CrisisEvent.Severity severity;
-    private LocalDateTime startTime;
 
-    public static CrisisEventPreviewDto fromEntity(CrisisEvent event) {
-        return new CrisisEventPreviewDto(
-            event.getId(),
-            event.getName(),
-            event.getSeverity(),
-            event.getStartTime()
-        );
-    }
+  private Integer id;
+  private String name;
+  private CrisisEvent.Severity severity;
+  private LocalDateTime startTime;
+
+  public static CrisisEventPreviewDto fromEntity(CrisisEvent event) {
+    return new CrisisEventPreviewDto(
+        event.getId(),
+        event.getName(),
+        event.getSeverity(),
+        event.getStartTime()
+    );
+  }
 } 

@@ -10,5 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScenarioThemeNameDto {
-    private String name;
+
+  private String name;
 } 

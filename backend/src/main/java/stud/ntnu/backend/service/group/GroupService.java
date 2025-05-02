@@ -7,7 +7,7 @@ import stud.ntnu.backend.repository.group.GroupMembershipRepository;
 import stud.ntnu.backend.model.group.Group;
 import stud.ntnu.backend.model.group.GroupMembership;
 import stud.ntnu.backend.dto.group.GroupSummaryDto;
-import stud.ntnu.backend.service.household.InventoryService;
+import stud.ntnu.backend.service.inventory.InventoryService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import stud.ntnu.backend.dto.household.HouseholdDto;

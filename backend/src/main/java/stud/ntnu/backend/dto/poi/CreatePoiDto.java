@@ -9,8 +9,8 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 /**
- * DTO for creating a new point of interest (POI).
- * This class is currently empty, but can be extended in the future.
+ * DTO for creating a new point of interest (POI). This class is currently empty, but can be
+ * extended in the future.
  */
 @Getter
 @Setter
@@ -18,24 +18,25 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 
 public class CreatePoiDto {
-    @NotNull(message = "Name is required")
-    private String name;
 
-    @NotNull(message = "Latitude is required")
-    private BigDecimal latitude;
+  @NotNull(message = "Name is required")
+  private String name;
 
-    @NotNull(message = "Longitude is required")
-    private BigDecimal longitude;
+  @NotNull(message = "Latitude is required")
+  private BigDecimal latitude;
 
-    private String address; // Optional
+  @NotNull(message = "Longitude is required")
+  private BigDecimal longitude;
 
-    @NotNull(message = "POI type is required")
-    private Integer poiTypeId;
+  private String address; // Optional
 
-    private String description; // Optional
-    private String openFrom; // Optional
-    private String openTo; // Optional
-    private String contactInfo; // Optional
+  @NotNull(message = "POI type is required")
+  private Integer poiTypeId;
+
+  private String description; // Optional
+  private String openFrom; // Optional
+  private String openTo; // Optional
+  private String contactInfo; // Optional
 
 
 }

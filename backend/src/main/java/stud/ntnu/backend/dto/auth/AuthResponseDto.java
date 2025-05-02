@@ -75,10 +75,10 @@ public class AuthResponseDto {
   }
 
   public Boolean getIsUsing2FA() {
-        return isUsing2FA;
-    }
+    return isUsing2FA;
+  }
 
   public void setIsUsing2FA(Boolean isUsing2FA) {
-        this.isUsing2FA = isUsing2FA;
-    }
+    this.isUsing2FA = isUsing2FA;
+  }
 }

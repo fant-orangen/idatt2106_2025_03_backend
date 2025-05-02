@@ -8,7 +8,8 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateQuizQuestionDto {
-    private Long quizId;
-    private String questionBody;
-    private Integer position; // nullable
+
+  private Long quizId;
+  private String questionBody;
+  private Integer position; // nullable
 } 

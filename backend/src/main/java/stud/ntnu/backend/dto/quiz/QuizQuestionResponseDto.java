@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuizQuestionResponseDto {
-    private Long id;
-    private String questionBody;
+
+  private Long id;
+  private String questionBody;
 } 

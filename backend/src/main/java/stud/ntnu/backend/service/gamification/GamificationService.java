@@ -3,7 +3,7 @@ package stud.ntnu.backend.service.gamification;
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.repository.user.GamificationActivityRepository;
 import stud.ntnu.backend.repository.user.UserGamificationActivityRepository;
-import stud.ntnu.backend.model.information.GamificationActivity;
+import stud.ntnu.backend.model.gamification.GamificationActivity;
 import stud.ntnu.backend.model.user.UserGamificationActivity;
 
 import java.util.List;

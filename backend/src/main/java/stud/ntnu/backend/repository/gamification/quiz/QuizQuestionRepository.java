@@ -2,7 +2,7 @@ package stud.ntnu.backend.repository.gamification.quiz;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import stud.ntnu.backend.model.QuizQuestion;
+import stud.ntnu.backend.model.gamification.quiz.QuizQuestion;
 
 import java.util.List;
 
