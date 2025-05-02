@@ -175,4 +175,41 @@ public class QuizService {
     }
     quizQuestionRepository.deleteById(questionId);
   }
+
+  public QuizQuestion getQuizQuestionById(Long questionId) {
+    return quizQuestionRepository.findById(questionId)
+        .orElseThrow(() -> new IllegalArgumentException("Quiz question not found"));
+  }
+
+  public void updateQuizQuestion(Long questionId, CreateQuizQuestionDto dto) {
+    QuizQuestion question = getQuizQuestionById(questionId);
+    if (dto.getQuizId() != null) {
+      question.setQuizId(dto.getQuizId());
+    }
+    if (dto.getQuestionBody() != null) {
+      question.setQuestionBody(dto.getQuestionBody());
+    }
+    if (dto.getPosition() != null) {
+      question.setPosition(dto.getPosition());
+    }
+    quizQuestionRepository.save(question);
+  }
+
+  public void updateQuizAnswer(Long answerId, CreateQuizAnswerDto dto) {
+    QuizAnswer answer = quizAnswerRepository.findById(answerId)
+        .orElseThrow(() -> new IllegalArgumentException("Quiz answer not found"));
+    if (dto.getQuizId() != null) {
+      answer.setQuizId(dto.getQuizId());
+    }
+    if (dto.getQuestionId() != null) {
+      answer.setQuestionId(dto.getQuestionId());
+    }
+    if (dto.getAnswerBody() != null) {
+      answer.setAnswerBody(dto.getAnswerBody());
+    }
+    if (dto.getIsCorrect() != null) {
+      answer.setIsCorrect(dto.getIsCorrect());
+    }
+    quizAnswerRepository.save(answer);
+  }
 }

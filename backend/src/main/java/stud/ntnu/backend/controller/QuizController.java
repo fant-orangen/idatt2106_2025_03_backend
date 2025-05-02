@@ -126,6 +126,54 @@ public class QuizController {
     }
 
     /**
+     * Partially updates an existing quiz question.
+     * TODO: test
+     * @param questionId the id of the quiz question to update
+     * @param dto the CreateQuizQuestionDto containing updated question data
+     * @param principal the Principal object representing the current user
+     * @return ResponseEntity with 200 OK or error message
+     */
+    @PatchMapping("/questions/{question_id}")
+    public ResponseEntity<?> updateQuizQuestion(
+            @PathVariable("question_id") Long questionId,
+            @RequestBody CreateQuizQuestionDto dto,
+            Principal principal) {
+        try {
+            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Forbidden");
+            }
+            quizService.updateQuizQuestion(questionId, dto);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /**
+     * Partially updates an existing quiz answer.
+     * TODO: test
+     * @param answerId the id of the quiz answer to update
+     * @param dto the CreateQuizAnswerDto containing updated answer data
+     * @param principal the Principal object representing the current user
+     * @return ResponseEntity with 200 OK or error message
+     */
+    @PatchMapping("/answers/{answer_id}")
+    public ResponseEntity<?> updateQuizAnswer(
+            @PathVariable("answer_id") Long answerId,
+            @RequestBody CreateQuizAnswerDto dto,
+            Principal principal) {
+        try {
+            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Forbidden");
+            }
+            quizService.updateQuizAnswer(answerId, dto);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /**
      * Saves a quiz answer.
      * TODO: test
      * @param dto the CreateQuizAnswerDto containing answer data
