@@ -11,6 +11,7 @@ import stud.ntnu.backend.dto.map.CreateCrisisEventDto;
 import stud.ntnu.backend.dto.map.CrisisEventChangeDto;
 import stud.ntnu.backend.dto.map.UpdateCrisisEventDto;
 import stud.ntnu.backend.dto.map.CrisisEventPreviewDto;
+import stud.ntnu.backend.dto.map.CrisisEventDetailsDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.map.CrisisEventChange;
 import stud.ntnu.backend.model.user.Notification;
@@ -469,5 +470,16 @@ public class CrisisEventService {
       case yellow -> 2;
       case green -> 1;
     };
+  }
+
+  /**
+   * Retrieves a crisis event details DTO by its ID.
+   *
+   * @param id the ID of the crisis event
+   * @return an Optional containing the crisis event details DTO if found
+   */
+  @Transactional(readOnly = true)
+  public Optional<CrisisEventDetailsDto> getCrisisEventDetailsById(Integer id) {
+    return crisisEventRepository.findById(id).map(CrisisEventDetailsDto::fromEntity);
   }
 }

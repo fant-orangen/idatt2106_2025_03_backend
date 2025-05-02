@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.map.CrisisEvent.Severity;
 import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.model.map.ScenarioTheme;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -29,6 +30,12 @@ public interface CrisisEventRepository extends JpaRepository<CrisisEvent, Intege
 
   // Find active crisis events by severity
   List<CrisisEvent> findByActiveTrueAndSeverity(Severity severity);
+
+  // Find crisis events by scenario theme
+  List<CrisisEvent> findByScenarioTheme(ScenarioTheme scenarioTheme);
+
+  // Find active crisis events by scenario theme
+  List<CrisisEvent> findByActiveTrueAndScenarioTheme(ScenarioTheme scenarioTheme);
 
   // Update crisis event fields directly using a query (excluding start time)
   @Modifying

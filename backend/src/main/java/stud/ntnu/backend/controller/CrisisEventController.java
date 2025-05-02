@@ -11,6 +11,7 @@ import stud.ntnu.backend.dto.map.CreateCrisisEventDto;
 import stud.ntnu.backend.dto.map.CrisisEventChangeDto;
 import stud.ntnu.backend.dto.map.UpdateCrisisEventDto;
 import stud.ntnu.backend.dto.map.CrisisEventPreviewDto;
+import stud.ntnu.backend.dto.map.CrisisEventDetailsDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
@@ -169,7 +170,7 @@ public class CrisisEventController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getCrisisEventById(@PathVariable Integer id) {
     try {
-      return crisisEventService.getCrisisEventById(id)
+      return crisisEventService.getCrisisEventDetailsById(id)
           .map(ResponseEntity::ok)
           .orElse(ResponseEntity.notFound().build());
     } catch (Exception e) {

@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.model.map.ScenarioTheme;
 
 @Entity
 @Table(name = "crisis_events")
@@ -55,6 +56,10 @@ public class CrisisEvent {
 
   @Column(name = "active", nullable = false)
   private Boolean active = true;
+
+  @ManyToOne
+  @JoinColumn(name = "scenario_theme_id")
+  private ScenarioTheme scenarioTheme;
 
   // Set updatedAt before update
   @PreUpdate
