@@ -194,7 +194,7 @@ CREATE TABLE crisis_events (
 CREATE TABLE gamification_activities (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
-    category VARCHAR(255),
+    --category VARCHAR(255), Category is unnecessary
     description TEXT,
     created_by_user_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
