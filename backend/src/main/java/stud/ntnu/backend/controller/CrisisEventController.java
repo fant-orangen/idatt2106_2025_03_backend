@@ -115,12 +115,24 @@ public class CrisisEventController {
    * @param pageable the pagination information
    * @return ResponseEntity with a page of crisis event previews
    */
-  @GetMapping("/all")
+  @GetMapping("/all/previews")
   public ResponseEntity<Page<CrisisEventPreviewDto>> getAllCrisisEventPreviews(Pageable pageable) {
     Page<CrisisEventPreviewDto> crisisEventPreviews = crisisEventService.getAllCrisisEventPreviews(pageable);
     return ResponseEntity.ok(crisisEventPreviews);
   }
-
+  
+  /**
+   * Gets a page of all crisis events (full entity, not preview) with pagination.
+   *
+   * @param pageable the pagination information
+   * @return ResponseEntity with a page of crisis events
+   */
+  @GetMapping("/all")
+  public ResponseEntity<Page<CrisisEvent>> getAllCrisisEvents(Pageable pageable) {
+    Page<CrisisEvent> crisisEvents = crisisEventService.getAllCrisisEvents(pageable);
+    return ResponseEntity.ok(crisisEvents);
+  }
+  
   /**
    * Deletes a crisis event by its ID. Only users with ADMIN or SUPERADMIN roles are allowed to
    * delete crisis events.
