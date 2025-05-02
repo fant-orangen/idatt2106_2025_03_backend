@@ -127,28 +127,30 @@ public class UserQuizService {
    * @return a page of QuizBasicInfoDto objects containing quiz id, name, status, and question count
    */
   public Page<QuizBasicInfoDto> getBasicInfoForAttemptedQuizzes(Integer userId, Pageable pageable) {
-    List<UserQuizAttempt> attempts = userQuizAttemptRepository.findByUserId(userId);
-    Set<Long> quizIds = attempts.stream().map(UserQuizAttempt::getQuizId)
+    // Get unique quiz IDs attempted by user
+    Set<Long> quizIds = userQuizAttemptRepository.findByUserId(userId).stream()
+        .map(UserQuizAttempt::getQuizId)
         .collect(Collectors.toSet());
-    if (quizIds.isEmpty()) {
+
+    if (quizIds.isEmpty() || pageable.getOffset() >= quizIds.size()) {
       return Page.empty(pageable);
-    }
-    List<Long> quizIdList = new ArrayList<>(quizIds);
-    int start = (int) pageable.getOffset();
-    int end = Math.min((start + pageable.getPageSize()), quizIdList.size());
-    if (start > end) {
-      return Page.empty(pageable);
-    }
-    List<Long> pagedQuizIds = quizIdList.subList(start, end);
-    List<Quiz> quizzes = quizRepository.findAllById(pagedQuizIds);
-    List<QuizBasicInfoDto> dtos = quizzes.stream()
+    } 
+
+    // Get paginated subset of quiz IDs
+    List<Long> pagedQuizIds = new ArrayList<>(quizIds)
+        .subList((int) pageable.getOffset(), 
+                Math.min((int)(pageable.getOffset() + pageable.getPageSize()), quizIds.size()));
+
+    // Map quizzes to DTOs
+    List<QuizBasicInfoDto> dtos = quizRepository.findAllById(pagedQuizIds).stream()
         .map(q -> new QuizBasicInfoDto(
             q.getId(),
-            q.getName(),
+            q.getName(), 
             q.getStatus(),
             quizQuestionRepository.countByQuizId(q.getId())
         ))
         .collect(Collectors.toList());
+
     return new PageImpl<>(dtos, pageable, quizIds.size());
   }
 

@@ -71,10 +71,9 @@ public class CrisisEventController {
           .orElseThrow(() -> new IllegalStateException("User not found"));
 
       // Delegate to service for creating the crisis event
-      CrisisEvent savedCrisisEvent = crisisEventService.createCrisisEvent(createCrisisEventDto,
-          currentUser);
+      crisisEventService.createCrisisEvent(createCrisisEventDto, currentUser);
 
-      return ResponseEntity.ok(savedCrisisEvent);
+      return ResponseEntity.ok().build();
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
@@ -110,7 +109,7 @@ public class CrisisEventController {
         return ResponseEntity.notFound().build();
       }
 
-      return ResponseEntity.ok(updatedCrisisEvent);
+      return ResponseEntity.ok().build();
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }

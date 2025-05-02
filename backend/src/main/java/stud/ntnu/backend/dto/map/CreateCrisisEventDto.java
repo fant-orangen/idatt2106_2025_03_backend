@@ -38,4 +38,6 @@ public class CreateCrisisEventDto {
 
   @NotNull(message = "Start time is required")
   private LocalDateTime startTime;
+
+  private Integer scenarioThemeId; // Optional scenario theme ID
 }

@@ -141,6 +141,15 @@ public class CrisisEventService {
     crisisEvent.setDescription(createCrisisEventDto.getDescription());
     crisisEvent.setSeverity(createCrisisEventDto.getSeverity());
 
+    // Set scenario theme if provided
+    if (createCrisisEventDto.getScenarioThemeId() != null) {
+        ScenarioTheme scenarioTheme = scenarioThemeRepository.findById(
+            createCrisisEventDto.getScenarioThemeId()).orElse(null);
+        if (scenarioTheme != null) {
+            crisisEvent.setScenarioTheme(scenarioTheme);
+        }
+    }
+
     // Save the crisis event
     CrisisEvent savedCrisisEvent = crisisEventRepository.save(crisisEvent);
 
