@@ -412,14 +412,20 @@ public class CrisisEventService {
   }
 
   /**
-   * Retrieves a preview (id, name, severity, startTime) of all crisis events with pagination.
+   * Retrieves a preview (id, name, severity, startTime) of all active crisis events with pagination.
    *
    * @param pageable pagination information
    * @return page of crisis event previews
    */
   @Transactional(readOnly = true)
   public Page<CrisisEventPreviewDto> getAllCrisisEventPreviews(Pageable pageable) {
-    return crisisEventRepository.findAll(pageable)
-        .map(CrisisEventPreviewDto::fromEntity);
+    List<CrisisEvent> activeEvents = crisisEventRepository.findByActiveTrue();
+    List<CrisisEventPreviewDto> previews = activeEvents.stream()
+        .map(CrisisEventPreviewDto::fromEntity)
+        .toList();
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), previews.size());
+    List<CrisisEventPreviewDto> pagedList = (start <= end) ? previews.subList(start, end) : List.of();
+    return new org.springframework.data.domain.PageImpl<>(pagedList, pageable, previews.size());
   }
 }
