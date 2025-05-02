@@ -21,7 +21,8 @@ public class PoiItemDto {
   private BigDecimal latitude;
   private BigDecimal longitude;
   private String address;
-  private String openingHours;
+  private String openFrom;
+  private String openTo;
   private String contactInfo;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
@@ -38,7 +39,8 @@ public class PoiItemDto {
     dto.setLatitude(poi.getLatitude());
     dto.setLongitude(poi.getLongitude());
     dto.setAddress(poi.getAddress());
-    dto.setOpeningHours(poi.getOpeningHours());
+    dto.setOpenFrom(poi.getOpenFrom());
+    dto.setOpenTo(poi.getOpenTo());
     dto.setContactInfo(poi.getContactInfo());
     dto.setCreatedAt(poi.getCreatedAt());
     dto.setUpdatedAt(poi.getUpdatedAt());

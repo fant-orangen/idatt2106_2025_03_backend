@@ -5,6 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.user.TwoFactorCode;
 
+/**
+ * <h2>TwoFactorCodeRepository</h2>
+ *
+ * <p>Repository interface for managing two-factor authentication codes.</p>
+ */
 @Repository
 public interface TwoFactorCodeRepository extends JpaRepository<TwoFactorCode, Integer> {
     Optional<TwoFactorCode> findByEmail(String email);

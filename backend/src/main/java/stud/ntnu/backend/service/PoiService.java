@@ -36,6 +36,8 @@ public class PoiService {
     this.pointOfInterestRepository = pointOfInterestRepository;
     this.poiTypeRepository = poiTypeRepository;
   }
+  //Constants
+  String poiNotFound = "POI type not found";
 
   /**
    * Retrieves all points of interest.
@@ -144,7 +146,7 @@ public class PoiService {
   public PointOfInterest createPointOfInterest(CreatePoiDto createPoiDto, User currentUser) {
     // Get the POI type
     PoiType poiType = getPoiTypeById(createPoiDto.getPoiTypeId())
-            .orElseThrow(() -> new IllegalStateException("POI type not found"));
+            .orElseThrow(() -> new IllegalStateException(poiNotFound));
 
     // Create a new PointOfInterest entity
     PointOfInterest poi = new PointOfInterest(
@@ -158,7 +160,8 @@ public class PoiService {
     // Set optional fields if provided
     poi.setDescription(createPoiDto.getDescription());
     poi.setAddress(createPoiDto.getAddress());
-    poi.setOpeningHours(createPoiDto.getOpeningHours());
+    poi.setOpenFrom(createPoiDto.getOpenFrom());
+    poi.setOpenTo(createPoiDto.getOpenTo());
     poi.setContactInfo(createPoiDto.getContactInfo());
 
     // Save and return the POI
@@ -184,12 +187,13 @@ public class PoiService {
             updatePoiDto.getLatitude() != null &&
             updatePoiDto.getLongitude() != null &&
             updatePoiDto.getDescription() != null &&
-            updatePoiDto.getOpeningHours() != null &&
+            updatePoiDto.getOpenFrom() != null &&
+            updatePoiDto.getOpenTo() != null &&
             updatePoiDto.getContactInfo() != null &&
             updatePoiDto.getPoiTypeId() != null) {
 
       PoiType poiType = poiTypeRepository.findById(updatePoiDto.getPoiTypeId())
-              .orElseThrow(() -> new IllegalStateException("POI type not found"));
+              .orElseThrow(() -> new IllegalStateException(poiNotFound));
 
       pointOfInterestRepository.updatePointOfInterest(
               id,
@@ -197,8 +201,9 @@ public class PoiService {
               updatePoiDto.getLatitude(),
               updatePoiDto.getLongitude(),
               updatePoiDto.getDescription(),
-              updatePoiDto.getOpeningHours(),
-              updatePoiDto.getContactInfo(),
+                updatePoiDto.getOpenFrom(),
+                updatePoiDto.getOpenTo(),
+                updatePoiDto.getContactInfo(),
               poiType
       );
 
@@ -223,15 +228,18 @@ public class PoiService {
     if (updatePoiDto.getDescription() != null) {
       poi.setDescription(updatePoiDto.getDescription());
     }
-    if (updatePoiDto.getOpeningHours() != null) {
-      poi.setOpeningHours(updatePoiDto.getOpeningHours());
+    if (updatePoiDto.getOpenFrom() != null) {
+      poi.setOpenFrom(updatePoiDto.getOpenFrom());
+    }
+    if (updatePoiDto.getOpenTo() != null) {
+      poi.setOpenTo(updatePoiDto.getOpenTo());
     }
     if (updatePoiDto.getContactInfo() != null) {
       poi.setContactInfo(updatePoiDto.getContactInfo());
     }
     if (updatePoiDto.getPoiTypeId() != null) {
       PoiType poiType = poiTypeRepository.findById(updatePoiDto.getPoiTypeId())
-              .orElseThrow(() -> new IllegalStateException("POI type not found"));
+              .orElseThrow(() -> new IllegalStateException(poiNotFound));
       poi.setPoiType(poiType);
     }
 
