@@ -336,8 +336,8 @@ CREATE TABLE quiz_answers (
     answer_body TEXT NOT NULL,
     is_correct BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (quiz_id) REFERENCES quizzes(id),
-    FOREIGN KEY (question_id) REFERENCES quiz_questions(id)
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
+    FOREIGN KEY (question_id) REFERENCES quiz_questions(id) ON DELETE CASCADE
 );
 
 -- USER QUIZ ATTEMPTS
@@ -358,9 +358,9 @@ CREATE TABLE user_quiz_answers (
     question_id INT NOT NULL,
     answer_id INT NOT NULL,
     FOREIGN KEY (user_quiz_attempt_id) REFERENCES user_quiz_attempts(id),
-    FOREIGN KEY (quiz_id) REFERENCES quizzes(id),
-    FOREIGN KEY (question_id) REFERENCES quiz_questions(id),
-    FOREIGN KEY (answer_id) REFERENCES quiz_answers(id)
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
+    FOREIGN KEY (question_id) REFERENCES quiz_questions(id) ON DELETE CASCADE,
+    FOREIGN KEY (answer_id) REFERENCES quiz_answers(id) ON DELETE CASCADE
 );
 
 

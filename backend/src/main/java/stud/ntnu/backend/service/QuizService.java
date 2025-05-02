@@ -23,7 +23,10 @@ import stud.ntnu.backend.repository.QuizQuestionRepository;
 import stud.ntnu.backend.repository.QuizAnswerRepository;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,7 +50,7 @@ public class QuizService {
     this.quizAnswerRepository = quizAnswerRepository;
   }
 
-  public void createQuiz(CreateQuizDto createQuizDto, Long userId) {
+  public Long createQuiz(CreateQuizDto createQuizDto, Long userId) {
     Quiz quiz = new Quiz();
     quiz.setName(createQuizDto.getName());
     quiz.setDescription(createQuizDto.getDescription());
@@ -55,6 +58,7 @@ public class QuizService {
     quiz.setCreatedByUserId(userId);
     quiz.setCreatedAt(LocalDateTime.now());
     quizRepository.save(quiz);
+    return quiz.getId();
   }
 
   public void archiveQuiz(Long quizId) {
