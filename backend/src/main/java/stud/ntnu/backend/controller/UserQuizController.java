@@ -1,20 +1,27 @@
 package stud.ntnu.backend.controller;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.data.domain.Pageable;
-import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
-import stud.ntnu.backend.service.QuizService;
 import java.security.Principal;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
+import stud.ntnu.backend.service.UserQuizService;
 
 @RestController
 @RequestMapping("/api/quizzes/user")
 public class UserQuizController {
 
-    private final QuizService quizService;
+    private final UserQuizService userQuizService;
 
-    public UserQuizController(QuizService quizService) {
-        this.quizService = quizService;
+    public UserQuizController(UserQuizService userQuizService) {
+        this.userQuizService = userQuizService;
     }
 
     /**
@@ -28,7 +35,7 @@ public class UserQuizController {
     public ResponseEntity<?> createUserQuizAttempt(@PathVariable("quiz_id") Long quizId, Principal principal) {
         try {
             Long userId = Long.valueOf(principal.getName()); // Adjust if needed
-            quizService.createUserQuizAttempt(quizId, userId);
+            userQuizService.createUserQuizAttempt(quizId, userId);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -44,7 +51,7 @@ public class UserQuizController {
     @PostMapping("/attempts/answer")
     public ResponseEntity<?> createUserQuizAnswer(@RequestBody CreateUserQuizAnswerDto dto) {
         try {
-            quizService.createUserQuizAnswer(dto);
+            userQuizService.createUserQuizAnswer(dto);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -63,7 +70,7 @@ public class UserQuizController {
     public ResponseEntity<?> getQuizAttemptsByQuizId(@PathVariable("quiz_id") Long quizId, Principal principal, Pageable pageable) {
         try {
             Long userId = Long.valueOf(principal.getName()); // Adjust if needed
-            return ResponseEntity.ok(quizService.getQuizAttemptsByQuizId(quizId, userId, pageable));
+            return ResponseEntity.ok(userQuizService.getQuizAttemptsByQuizId(quizId, userId, pageable));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -83,7 +90,7 @@ public class UserQuizController {
     public ResponseEntity<?> getAttemptedQuizHistory(Principal principal, Pageable pageable) {
         try {
             Long userId = Long.valueOf(principal.getName()); // Adjust if needed
-            return ResponseEntity.ok(quizService.getBasicInfoForAttemptedQuizzes(userId, pageable));
+            return ResponseEntity.ok(userQuizService.getBasicInfoForAttemptedQuizzes(userId, pageable));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -98,7 +105,7 @@ public class UserQuizController {
     @GetMapping("/attempts/{attempt_id}/correct-count")
     public ResponseEntity<?> getTotalCorrectAnswersForAttempt(@PathVariable("attempt_id") Long attemptId) {
         try {
-            int correctCount = quizService.getTotalCorrectAnswers(attemptId);
+            int correctCount = userQuizService.getTotalCorrectAnswers(attemptId);
             return ResponseEntity.ok(correctCount);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

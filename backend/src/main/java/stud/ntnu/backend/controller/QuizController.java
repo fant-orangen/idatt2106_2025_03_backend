@@ -8,8 +8,11 @@ import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
 import stud.ntnu.backend.service.QuizService;
 import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
+import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
+import stud.ntnu.backend.dto.quiz.CreateQuizAnswerDto;
 import java.util.List;
 import java.util.Collections;
+
 
 import java.security.Principal;
 
@@ -97,6 +100,22 @@ public class QuizController {
     public ResponseEntity<?> saveQuizQuestion(@RequestBody CreateQuizQuestionDto dto) {
         try {
             quizService.saveQuizQuestion(dto);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /**
+     * Saves a quiz answer.
+     * TODO: test
+     * @param dto the CreateQuizAnswerDto containing answer data
+     * @return ResponseEntity with 200 OK or error message
+     */
+    @PostMapping("/answers")
+    public ResponseEntity<?> saveQuizAnswer(@RequestBody CreateQuizAnswerDto dto) {
+        try {
+            quizService.saveQuizAnswer(dto);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

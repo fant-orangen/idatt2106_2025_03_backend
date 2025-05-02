@@ -12,6 +12,7 @@ import stud.ntnu.backend.dto.quiz.QuizBasicInfoDto;
 import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
+import stud.ntnu.backend.dto.quiz.CreateQuizAnswerDto;
 import stud.ntnu.backend.model.Quiz;
 import stud.ntnu.backend.model.UserQuizAttempt;
 import stud.ntnu.backend.model.UserQuizAnswer;
@@ -157,5 +158,14 @@ public class QuizService {
     question.setQuestionBody(dto.getQuestionBody());
     question.setPosition(dto.getPosition());
     quizQuestionRepository.save(question);
+  }
+
+  public void saveQuizAnswer(CreateQuizAnswerDto dto) {
+    QuizAnswer answer = new QuizAnswer();
+    answer.setQuizId(dto.getQuizId());
+    answer.setQuestionId(dto.getQuestionId());
+    answer.setAnswerBody(dto.getAnswerBody());
+    answer.setIsCorrect(dto.getIsCorrect());
+    quizAnswerRepository.save(answer);
   }
 }
