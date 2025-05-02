@@ -313,6 +313,7 @@ CREATE TABLE quizzes (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     created_by_user_id INT NOT NULL,
+    status VARCHAR(10) NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
 );
