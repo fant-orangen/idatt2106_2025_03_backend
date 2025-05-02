@@ -45,7 +45,6 @@ public class QuizController {
     }
 
     
-
     /**
      * Archives a quiz by id.
      * TODO: test

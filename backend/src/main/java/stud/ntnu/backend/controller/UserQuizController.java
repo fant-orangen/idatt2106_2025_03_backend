@@ -69,6 +69,8 @@ public class UserQuizController {
         }
     }
 
+
+
     /**
      * Gets paginated basic info about quizzes with at least one attempt by the current user.
      * Returns quizId, name, status, and questionCount for each quiz.
@@ -82,6 +84,22 @@ public class UserQuizController {
         try {
             Long userId = Long.valueOf(principal.getName()); // Adjust if needed
             return ResponseEntity.ok(quizService.getBasicInfoForAttemptedQuizzes(userId, pageable));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
+    /**
+     * Gets the total number of correct answers for a given quiz attempt.
+     * TODO: test
+     * @param attemptId the user quiz attempt id
+     * @return ResponseEntity with the total number of correct answers (integer)
+     */
+    @GetMapping("/attempts/{attempt_id}/correct-count")
+    public ResponseEntity<?> getTotalCorrectAnswersForAttempt(@PathVariable("attempt_id") Long attemptId) {
+        try {
+            int correctCount = quizService.getTotalCorrectAnswers(attemptId);
+            return ResponseEntity.ok(correctCount);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

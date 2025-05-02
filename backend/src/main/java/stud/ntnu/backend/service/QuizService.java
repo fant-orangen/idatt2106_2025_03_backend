@@ -137,4 +137,16 @@ public class QuizService {
             a.getAnswerBody()))
         .collect(Collectors.toList());
   }
+
+  public int getTotalCorrectAnswers(Long attemptId) {
+    List<UserQuizAnswer> userAnswers = userQuizAnswerRepository.findAllByUserQuizAttemptId(attemptId);
+    int correctCount = 0;
+    for (UserQuizAnswer userAnswer : userAnswers) {
+      Optional<QuizAnswer> quizAnswerOpt = quizAnswerRepository.findById(userAnswer.getAnswerId());
+      if (quizAnswerOpt.isPresent() && Boolean.TRUE.equals(quizAnswerOpt.get().getIsCorrect())) {
+        correctCount++;
+      }
+    }
+    return correctCount;
+  }
 }
