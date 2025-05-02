@@ -160,10 +160,10 @@ INSERT INTO product_batch (product_type_id, date_added, expiration_time, number)
 INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (35, CURRENT_TIMESTAMP, DATEADD('YEAR', 5, CURRENT_TIMESTAMP), 10);
 
 -- GROUP INVENTORY CONTRIBUTIONS
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (1, 1, 1, 5); -- Neighborhood Watch, Smith Family, Canned Beans
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (1, 2, 5, 1); -- Neighborhood Watch, Johnson Household, Flour
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (2, 1, 3, 12); -- Emergency Response Team, Smith Family, Bottled Water
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id, quantity) VALUES (2, 3, 10, 3); -- Emergency Response Team, Brown Residence, Canned Soup
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 1); -- Neighborhood Watch, Smith Family, Canned Beans
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 2, 5); -- Neighborhood Watch, Johnson Household, Flour
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (2, 1, 3); -- Emergency Response Team, Smith Family, Bottled Water
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (2, 3, 10); -- Emergency Response Team, Brown Residence, Canned Soup
 
 -- POI TYPES
 INSERT INTO poi_types (name) VALUES ('Hospital');
@@ -211,6 +211,14 @@ VALUES (2, 'School Playground', 63.4300, 10.3960, 'Elementary School', 3);
 INSERT INTO meeting_places (household_id, name, latitude, longitude, address, created_by_user_id)
 VALUES (3, 'Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
 
+-- SCENARIO THEMES
+INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
+VALUES ('Power Outage', 'Preparing for extended power outages', 'Have flashlights, batteries, and non-perishable food ready. Unplug sensitive electronics.', 'active', 1);
+INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
+VALUES ('Natural Disaster', 'Earthquake, flood, or storm preparation', 'Follow evacuation orders. Prepare an emergency kit and know your local shelter locations.', 'active', 1);
+INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
+VALUES ('Public Health Emergency', 'Pandemic or disease outbreak', 'Practice good hygiene, follow public health advice, and stock up on essential medicines.', 'active', 1);
+
 -- CRISIS EVENTS
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active)
 VALUES ('Flood Warning', 'Potential flooding in downtown area', 'yellow', 63.4300, 10.3950, 1000.0, CURRENT_TIMESTAMP, 1, TRUE);
@@ -218,6 +226,9 @@ INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epic
 VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 60.4250, 11.3900, 5000.0, DATEADD('DAY', 1, CURRENT_TIMESTAMP), 1, TRUE);
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active)
 VALUES ('lightning storm', 'Potential flooding in downtown area', 'red', 63.4300, 10.3950, 1000.0, TIMESTAMP '2025-05-01 12:00:00', 1, TRUE);
+-- Inactive crisis event
+INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
+VALUES ('Past Earthquake', 'Earthquake event that has ended', 'red', 63.4200, 10.4000, 20, DATEADD('DAY', -10, CURRENT_TIMESTAMP), 1, FALSE, 2);
 
 -- CRISIS EVENTS CHANGES
 
@@ -243,14 +254,6 @@ INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_v
 VALUES (2, 'epicenter_moved', '40.7128,-74.0060', '40.7306,-73.9352', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
 VALUES (2, 'level_change', 'Level 1', 'Level 2', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- SCENARIO THEMES
-INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
-VALUES ('Power Outage', 'Preparing for extended power outages', 'Have flashlights, batteries, and non-perishable food ready. Unplug sensitive electronics.', 'active', 1);
-INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
-VALUES ('Natural Disaster', 'Earthquake, flood, or storm preparation', 'Follow evacuation orders. Prepare an emergency kit and know your local shelter locations.', 'active', 1);
-INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
-VALUES ('Public Health Emergency', 'Pandemic or disease outbreak', 'Practice good hygiene, follow public health advice, and stock up on essential medicines.', 'active', 1);
 
 -- NEWS ARTICLES
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)

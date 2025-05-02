@@ -38,8 +38,11 @@ public class PointOfInterest {
   @Column(name = "address", columnDefinition = "TEXT")
   private String address;
 
-  @Column(name = "opening_hours", columnDefinition = "TEXT")
-  private String openingHours;
+  @Column(name = "open_from", columnDefinition = "TEXT")
+  private String openFrom;
+
+    @Column(name = "open_to", columnDefinition = "TEXT")
+    private String openTo;
 
   @Column(name = "contact_info", columnDefinition = "TEXT")
   private String contactInfo;

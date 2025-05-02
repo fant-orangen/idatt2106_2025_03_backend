@@ -1,7 +1,6 @@
 package stud.ntnu.backend.model.group;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -9,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.inventory.Product;
+import stud.ntnu.backend.model.inventory.ProductBatch;
 
 @Entity
 @Table(name = "group_inventory_contributions")
@@ -31,13 +31,10 @@ public class GroupInventoryContribution {
 
   @ManyToOne
   @JoinColumn(name = "product_id")
-  private Product product;
+  private ProductBatch product;
 
   @Column(name = "custom_name")
   private String customName;
-
-  @Column(name = "quantity", nullable = false, precision = 10, scale = 2)
-  private BigDecimal quantity;
 
   @Column(name = "expiration_date")
   private LocalDate expirationDate;
@@ -51,19 +48,15 @@ public class GroupInventoryContribution {
     contributedAt = LocalDateTime.now();
   }
 
-  public GroupInventoryContribution(Group group, Household household, Product product,
-      BigDecimal quantity) {
+  public GroupInventoryContribution(Group group, Household household, ProductBatch product) {
     this.group = group;
     this.household = household;
     this.product = product;
-    this.quantity = quantity;
   }
 
-  public GroupInventoryContribution(Group group, Household household, String customName,
-      BigDecimal quantity) {
+  public GroupInventoryContribution(Group group, Household household, String customName) {
     this.group = group;
     this.household = household;
     this.customName = customName;
-    this.quantity = quantity;
   }
 }

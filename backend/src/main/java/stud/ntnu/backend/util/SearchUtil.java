@@ -21,7 +21,6 @@ import java.util.Set;
  * Utility class for performing generic search operations across different entities. This
  * implementation assumes that entity class and column names are provided by developers, not by end
  * users, so the validation is primarily to catch developer errors.
- * TODO: this class is as of yet completely untested
  */
 @Component
 public class SearchUtil {

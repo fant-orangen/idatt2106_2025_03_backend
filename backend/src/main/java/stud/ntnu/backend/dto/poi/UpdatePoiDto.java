@@ -20,7 +20,8 @@ public class UpdatePoiDto {
     private BigDecimal latitude;
     private BigDecimal longitude;
     private String description;
-    private String openingHours; // Optional
+    private String openFrom; // Optional
+    private String openTo; // Optional
     private String contactInfo; // Optional
     private Integer poiTypeId; // Optional, can be null if not updated
 }

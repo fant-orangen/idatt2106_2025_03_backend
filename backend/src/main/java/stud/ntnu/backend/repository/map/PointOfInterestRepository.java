@@ -26,7 +26,7 @@ public interface PointOfInterestRepository extends JpaRepository<PointOfInterest
     @Modifying
     @Query("UPDATE PointOfInterest p SET p.name = :name, p.latitude = :latitude, " +
             "p.longitude = :longitude, p.description = :description, " +
-            "p.openingHours = :openingHours, p.contactInfo = :contactInfo, " +
+            "p.openFrom = :openingFrom, p.openTo = :openTo, p.contactInfo = :contactInfo, " +
             "p.poiType = :poiType WHERE p.id = :id")
     void updatePointOfInterest(
             @Param("id") Integer id,
@@ -34,7 +34,8 @@ public interface PointOfInterestRepository extends JpaRepository<PointOfInterest
             @Param("latitude") BigDecimal latitude,
             @Param("longitude") BigDecimal longitude,
             @Param("description") String description,
-            @Param("openingHours") String openingHours,
+            @Param("openFrom") String openFrom,
+            @Param("openTo") String openTo,
             @Param("contactInfo") String contactInfo,
             @Param("poiType") PoiType poiType
     );
