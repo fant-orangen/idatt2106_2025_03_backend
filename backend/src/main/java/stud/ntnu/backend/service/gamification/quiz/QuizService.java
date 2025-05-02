@@ -13,6 +13,7 @@ import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizAnswerDto;
+import stud.ntnu.backend.dto.quiz.QuizListItemDto;
 import stud.ntnu.backend.model.gamification.quiz.Quiz;
 import stud.ntnu.backend.model.gamification.quiz.UserQuizAttempt;
 import stud.ntnu.backend.model.gamification.quiz.UserQuizAnswer;
@@ -61,16 +62,6 @@ public class QuizService {
     quiz.setCreatedAt(LocalDateTime.now());
     quizRepository.save(quiz);
     return quiz.getId();
-  }
-
-  public void archiveQuiz(Long quizId) {
-    Optional<Quiz> quizOpt = quizRepository.findById(quizId);
-    if (quizOpt.isEmpty()) {
-      throw new IllegalArgumentException("Quiz not found");
-    }
-    Quiz quiz = quizOpt.get();
-    quiz.setStatus("archived");
-    quizRepository.save(quiz);
   }
 
   public void createUserQuizAttempt(Long quizId, Integer userId) {
@@ -212,5 +203,29 @@ public class QuizService {
       answer.setIsCorrect(dto.getIsCorrect());
     }
     quizAnswerRepository.save(answer);
+  }
+
+  public void deleteQuizAnswer(Long answerId) {
+    if (!quizAnswerRepository.existsById(answerId)) {
+      throw new IllegalArgumentException("Quiz answer not found");
+    }
+    quizAnswerRepository.deleteById(answerId);
+  }
+
+  public Page<QuizListItemDto> getAllActiveQuizzes(Pageable pageable) {
+    return quizRepository.findAllByStatus("active", pageable)
+        .map(q -> new QuizListItemDto(q.getId(), q.getName(), q.getDescription(), q.getCreatedAt()));
+  }
+
+  public void updateQuizStatus(Long quizId, String status) {
+    Quiz quiz = quizRepository.findById(quizId)
+        .orElseThrow(() -> new IllegalArgumentException("Quiz not found"));
+    quiz.setStatus(status);
+    quizRepository.save(quiz);
+  }
+
+  public Page<QuizListItemDto> getAllArchivedQuizzes(Pageable pageable) {
+    return quizRepository.findAllByStatus("archived", pageable)
+        .map(q -> new QuizListItemDto(q.getId(), q.getName(), q.getDescription(), q.getCreatedAt()));
   }
 }

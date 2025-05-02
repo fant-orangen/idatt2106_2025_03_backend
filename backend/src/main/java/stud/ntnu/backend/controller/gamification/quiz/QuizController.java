@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,16 +13,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import stud.ntnu.backend.dto.quiz.CreateQuizAnswerDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
 import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
-import stud.ntnu.backend.service.gamification.quiz.QuizService;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import stud.ntnu.backend.service.user.UserService;
+import stud.ntnu.backend.dto.quiz.QuizListItemDto;
 import stud.ntnu.backend.security.AdminChecker;
+import stud.ntnu.backend.service.gamification.quiz.QuizService;
+import stud.ntnu.backend.service.user.UserService;
 
 /**
  * Admin controller for managing quizzes. Supports creation, archiving, and user attempts.
@@ -74,7 +76,7 @@ public class QuizController {
       if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
         return ResponseEntity.status(403).body("Forbidden");
       }
-      quizService.archiveQuiz(id);
+      quizService.updateQuizStatus(id, "archived");
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
@@ -214,6 +216,58 @@ public class QuizController {
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  } 
+
+  /**
+   * Deletes a quiz answer by its id.
+   * 
+   * @param answerId the id of the quiz answer to delete
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity with 200 OK or error message
+   */
+  @DeleteMapping("/admin/answers/{answer_id}")
+  public ResponseEntity<?> deleteQuizAnswer(@PathVariable("answer_id") Long answerId,
+      Principal principal) {
+    try {
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+        return ResponseEntity.status(403).body("Forbidden");
+      }
+      quizService.deleteQuizAnswer(answerId);
+      return ResponseEntity.ok().build();
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Gets all active quizzes in paginated format.
+   * 
+   * @param pageable the pagination information
+   * @return ResponseEntity with a page of QuizListItemDto (id, name, description, createdAt)
+   */
+  @GetMapping("/all")
+  public ResponseEntity<Page<QuizListItemDto>> getAllActiveQuizzes(Pageable pageable) {
+    try {
+      return ResponseEntity.ok(quizService.getAllActiveQuizzes(pageable));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  /**
+   * Gets all archived quizzes in paginated format.
+   * 
+   * @param pageable the pagination information
+   * @return ResponseEntity with a page of QuizListItemDto (id, name, description, createdAt)
+   */
+  @GetMapping("/all/archived")
+  public ResponseEntity<Page<QuizListItemDto>> getAllArchivedQuizzes(Pageable pageable) {
+    try {
+      Page<QuizListItemDto> archivedQuizzes = quizService.getAllArchivedQuizzes(pageable);
+      return ResponseEntity.ok(archivedQuizzes);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().build();
     }
   }
 }
