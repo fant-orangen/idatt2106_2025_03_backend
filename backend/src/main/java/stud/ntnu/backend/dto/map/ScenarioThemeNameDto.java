@@ -11,5 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ScenarioThemeNameDto {
 
+  private Integer id;
   private String name;
 } 
