@@ -173,7 +173,7 @@ public class CrisisEventController {
    * @param id the ID of the crisis event to retrieve
    * @return ResponseEntity with the crisis event if found, or 404 Not Found if not found
    */
-  @GetMapping("/user/crisis-events/{id}")
+  @GetMapping("/public/crisis-events/{id}")
   public ResponseEntity<?> getCrisisEventById(@PathVariable Integer id) {
     try {
       return crisisEventService.getCrisisEventDetailsById(id)
@@ -193,7 +193,7 @@ public class CrisisEventController {
    * @return ResponseEntity with a page of crisis event changes if successful, or an error message
    * if the crisis event is not found or the user is not authorized
    */
-  @GetMapping(path = "/admin/crisis-events/{id}/changes")
+  @GetMapping(path = "/public/crisis-events/{id}/changes")
   public ResponseEntity<?> getCrisisEventChanges(
       @PathVariable Integer id,
       Pageable pageable,

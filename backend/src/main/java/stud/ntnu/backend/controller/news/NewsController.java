@@ -69,7 +69,7 @@ public class NewsController {
    * @return ResponseEntity with a page of news articles if successful, or an error message if the
    * crisis event doesn't exist
    */
-  @GetMapping("/user/news/{crisisEventId}")
+  @GetMapping("/public/news/{crisisEventId}")
   public ResponseEntity<?> getNewsArticlesByCrisisEvent(
       @PathVariable Integer crisisEventId,
       Pageable pageable, Principal principal) {
