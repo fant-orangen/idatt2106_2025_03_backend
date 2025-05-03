@@ -1,5 +1,6 @@
 package stud.ntnu.backend.service.user;
 
+import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.UserRepository;
@@ -181,50 +183,50 @@ public class EmailService {
     }
 
     try {
-      SimpleMailMessage message = new SimpleMailMessage();
-      message.setFrom(senderEmail);
-      message.setTo(user.getEmail());
-      message.setSubject("Krisefikser.no - Tilbakestill passord / Reset Your Password");
+      MimeMessage mimeMessage = mailSender.createMimeMessage();
+      MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+
+      helper.setFrom(senderEmail);
+      helper.setTo(user.getEmail());
+      helper.setSubject("Krisefikser.no - Tilbakestill passord / Reset Your Password");
 
       String userName = (user.getName() != null ? user.getName() : "Bruker/User");
 
-      // Bilingual Email Body using Text Block and .formatted()
+      // Construct the reset password URL
+      String resetPasswordUrl = "http://localhost:5173/reset-password/" + token;
+
+      // Bilingual HTML Email Body
       String emailBody = """
-          Hei %s,
-          
-          Vi har mottatt en forespørsel om å tilbakestille passordet ditt.
-          
-          Vennligst benytt denne koden for å sette et nytt passord: %s
-          
-          Hvis du ikke ba om å tilbakestille passordet ditt, vennligst se bort fra denne e-posten.
-          
-          Med vennlig hilsen,
-          Krisefikser-teamet
-          
-          ----------------------------------------
-          
-          Hello %s,
-          
-          We have received a request to reset your password.
-          
-          Please use this code to set a new password: %s
-          
-          If you did not request a password reset, please ignore this email.
-          
-          Regards,
-          The Krisefikser Team
-          """.formatted(userName, token, userName, token);
+            <html>
+            <body>
+                <p>Hei %s,</p>
+                <p>Vi har mottatt en forespørsel om å tilbakestille passordet ditt.</p>
+                <p>Benytt denne koden og lenken for å tilbakestille passordet ditt:</p>
+                <p><strong>Kode:</strong> %s</p>
+                <p><strong>Lenke:</strong> <a href="%s">%s</a></p>
+                <p>Hvis du ikke ba om å tilbakestille passordet ditt, vennligst se bort fra denne e-posten.</p>
+                <p>Med vennlig hilsen,<br>Krisefikser-teamet</p>
+                <hr>
+                <p>Hello %s,</p>
+                <p>We have received a request to reset your password.</p>
+                <p>Please use the code and link below to set a new password:</p>
+                <p><strong>Code:</strong> %s</p>
+                <p><strong>Link:</strong> <a href="%s">%s</a></p>
+                <p>If you did not request a password reset, please ignore this email.</p>
+                <p>Regards,<br>The Krisefikser Team</p>
+            </body>
+            </html>
+            """.formatted(userName, token, resetPasswordUrl, resetPasswordUrl, userName, token, resetPasswordUrl, resetPasswordUrl);
 
-      message.setText(emailBody);
+      helper.setText(emailBody, true); // Set 'true' to indicate HTML content
 
-      mailSender.send(message);
+      mailSender.send(mimeMessage);
       log.info("Password reset email sent successfully to: {}", user.getEmail());
 
     } catch (MailException e) {
       log.error("Mail sending error for password reset email to {}", user.getEmail());
     } catch (Exception e) {
-      log.error("Unexpected error sending password reset email to {}: {}", user.getEmail(),
-          e.getMessage());
+      log.error("Unexpected error sending password reset email to {}: {}", user.getEmail(), e.getMessage());
     }
   }
 }
