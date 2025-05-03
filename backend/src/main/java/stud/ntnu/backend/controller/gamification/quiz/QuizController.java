@@ -29,7 +29,7 @@ import stud.ntnu.backend.service.user.UserService;
  * Admin controller for managing quizzes. Supports creation, archiving, and user attempts.
  */
 @RestController
-@RequestMapping("/api/quizzes")
+@RequestMapping("/api")
 public class QuizController {
 
   private final QuizService quizService;
@@ -40,6 +40,8 @@ public class QuizController {
     this.userService = userService;
   }
 
+  // -------------------- ADMIN ENDPOINTS --------------------
+
   /**
    * Creates a new empty quiz. Only admins should be allowed (add check if needed).
    *
@@ -47,7 +49,7 @@ public class QuizController {
    * @param principal     the Principal object representing the current user
    * @return ResponseEntity with 200 OK or error message
    */
-  @PostMapping("/admin")
+  @PostMapping("/admin/quizzes")
   public ResponseEntity<?> createQuiz(@RequestBody CreateQuizDto createQuizDto,
       Principal principal) {
     try {
@@ -62,7 +64,6 @@ public class QuizController {
     }
   }
 
-
   /**
    * Archives a quiz by id.
    *
@@ -70,7 +71,7 @@ public class QuizController {
    * @param principal the Principal object representing the current user
    * @return ResponseEntity with 200 OK or error message
    */
-  @PatchMapping("/admin/{id}/archive")
+  @PatchMapping("/admin/quizzes/{id}/archive")
   public ResponseEntity<?> archiveQuiz(@PathVariable Long id, Principal principal) {
     try {
       if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
@@ -84,39 +85,13 @@ public class QuizController {
   }
 
   /**
-   * Gets all questions for a quiz by quiz id.
-   *
-   * @param quizId the quiz id
-   * @return List of QuizQuestionResponseDto
-   */
-  @GetMapping("/{quiz_id}/questions")
-  public ResponseEntity<List<QuizQuestionResponseDto>> getQuizQuestionsByQuizId(
-      @PathVariable("quiz_id") Long quizId) {
-    List<QuizQuestionResponseDto> questions = quizService.getQuestionsById(quizId);
-    return ResponseEntity.ok(questions);
-  }
-
-  /**
-   * Gets all answers for a quiz question by question id.
-   *
-   * @param questionId the quiz question id
-   * @return List of QuizAnswerResponseDto
-   */
-  @GetMapping("/questions/{question_id}/answers")
-  public ResponseEntity<List<QuizAnswerResponseDto>> getAnswersByQuestionId(
-      @PathVariable("question_id") Long questionId) {
-    List<QuizAnswerResponseDto> answers = quizService.getAnswersByQuestionId(questionId);
-    return ResponseEntity.ok(answers);
-  }
-
-  /**
    * Saves a quiz question.
    *
    * @param dto       the CreateQuizQuestionDto containing question data
    * @param principal the Principal object representing the current user
    * @return ResponseEntity with 200 OK or error message
    */
-  @PostMapping("/admin/questions")
+  @PostMapping("/admin/quizzes/questions")
   public ResponseEntity<?> saveQuizQuestion(@RequestBody CreateQuizQuestionDto dto,
       Principal principal) {
     try {
@@ -138,7 +113,7 @@ public class QuizController {
    * @param principal  the Principal object representing the current user
    * @return ResponseEntity with 200 OK or error message
    */
-  @PatchMapping("/admin/questions/{question_id}")
+  @PatchMapping("/admin/quizzes/questions/{question_id}")
   public ResponseEntity<?> updateQuizQuestion(
       @PathVariable("question_id") Long questionId,
       @RequestBody CreateQuizQuestionDto dto,
@@ -162,7 +137,7 @@ public class QuizController {
    * @param principal the Principal object representing the current user
    * @return ResponseEntity with 200 OK or error message
    */
-  @PatchMapping("/admin/answers/{answer_id}")
+  @PatchMapping("/admin/quizzes/answers/{answer_id}")
   public ResponseEntity<?> updateQuizAnswer(
       @PathVariable("answer_id") Long answerId,
       @RequestBody CreateQuizAnswerDto dto,
@@ -185,7 +160,7 @@ public class QuizController {
    * @param principal the Principal object representing the current user
    * @return ResponseEntity with 200 OK or error message
    */
-  @PostMapping("/admin/answers")
+  @PostMapping("/admin/quizzes/answers")
   public ResponseEntity<?> saveQuizAnswer(@RequestBody CreateQuizAnswerDto dto,
       Principal principal) {
     try {
@@ -205,7 +180,7 @@ public class QuizController {
    * @param questionId the id of the quiz question to delete
    * @return ResponseEntity with 200 OK or error message
    */
-  @DeleteMapping("/admin/questions/{question_id}")
+  @DeleteMapping("/admin/quizzes/questions/{question_id}")
   public ResponseEntity<?> deleteQuizQuestion(@PathVariable("question_id") Long questionId,
       Principal principal) {
     try {
@@ -226,7 +201,7 @@ public class QuizController {
    * @param principal the Principal object representing the current user
    * @return ResponseEntity with 200 OK or error message
    */
-  @DeleteMapping("/admin/answers/{answer_id}")
+  @DeleteMapping("/admin/quizzes/answers/{answer_id}")
   public ResponseEntity<?> deleteQuizAnswer(@PathVariable("answer_id") Long answerId,
       Principal principal) {
     try {
@@ -240,13 +215,41 @@ public class QuizController {
     }
   }
 
+  // -------------------- USER ENDPOINTS --------------------
+
+  /**
+   * Gets all questions for a quiz by quiz id.
+   *
+   * @param quizId the quiz id
+   * @return List of QuizQuestionResponseDto
+   */
+  @GetMapping("/user/quizzes/{quiz_id}/questions")
+  public ResponseEntity<List<QuizQuestionResponseDto>> getQuizQuestionsByQuizId(
+      @PathVariable("quiz_id") Long quizId) {
+    List<QuizQuestionResponseDto> questions = quizService.getQuestionsById(quizId);
+    return ResponseEntity.ok(questions);
+  }
+
+  /**
+   * Gets all answers for a quiz question by question id.
+   *
+   * @param questionId the quiz question id
+   * @return List of QuizAnswerResponseDto
+   */
+  @GetMapping("/user/quizzes/questions/{question_id}/answers")
+  public ResponseEntity<List<QuizAnswerResponseDto>> getAnswersByQuestionId(
+      @PathVariable("question_id") Long questionId) {
+    List<QuizAnswerResponseDto> answers = quizService.getAnswersByQuestionId(questionId);
+    return ResponseEntity.ok(answers);
+  }
+
   /**
    * Gets all active quizzes in paginated format.
    * 
    * @param pageable the pagination information
    * @return ResponseEntity with a page of QuizPreviewDto (id, name, description, createdAt)
    */
-  @GetMapping("/all/previews/active")
+  @GetMapping("/user/quizzes/all/previews/active")
   public ResponseEntity<Page<QuizPreviewDto>> getAllActiveQuizzes(Pageable pageable) {
     try {
       return ResponseEntity.ok(quizService.getAllActiveQuizzes(pageable));
@@ -261,7 +264,7 @@ public class QuizController {
    * @param pageable the pagination information
    * @return ResponseEntity with a page of QuizPreviewDto (id, name, description, createdAt)
    */
-  @GetMapping("/all/previews/archived")
+  @GetMapping("/user/quizzes/all/previews/archived")
   public ResponseEntity<Page<QuizPreviewDto>> getAllArchivedQuizzes(Pageable pageable) {
     try {
       Page<QuizPreviewDto> archivedQuizzes = quizService.getAllArchivedQuizzes(pageable);

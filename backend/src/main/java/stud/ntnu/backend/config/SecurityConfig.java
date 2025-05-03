@@ -98,39 +98,28 @@ public class SecurityConfig {
         .sessionManagement(session ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth ->
-            auth.requestMatchers("/h2-console/**", "/swagger-ui/**", "/swagger-ui.html",
-                    "/v3/api-docs/**", "/actuator/health", "/auth/**", "/api/auth/**", "/api/poi/**",
-                    "/poi/**", "/ws/info", "/ws/**", "/api/address/**").permitAll()
-                // Allow GET requests to POI endpoints
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/poi/**").permitAll()
-                // Permit access to the crisis-events/all endpoint
-                .requestMatchers("/api/crisis-events/all/**").permitAll()
-                // Allow all authenticated users to access GET endpoints for specific crisis events
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/crisis-events/{id}")
-                .authenticated()
-                .requestMatchers("/api/crisis-events/{id}/changes").authenticated()
-                .requestMatchers("/api/news/{crisisEventId}").authenticated()
-                // Add role-based authorization for admin endpoints
-                .requestMatchers("/api/crisis-events/**").hasAnyRole("ADMIN", "SUPERADMIN")
-                .requestMatchers("/api/super-admin", "/api/super-admin/**").hasAnyRole("SUPERADMIN")
-                .requestMatchers("/api/super-admin", "/api/super-admin//id-by-email/{email}").hasAnyRole("SUPERADMIN")
-                // Add WebSocket security
-                .requestMatchers("/topic/**", "/app/**").authenticated()
-                // Add role-based authorization for create/update/delete points of interest
-                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/poi/**")
-                .hasAnyRole("ADMIN", "SUPERADMIN")
-                .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/poi/**")
-                .hasAnyRole("ADMIN", "SUPERADMIN")
-                .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/poi/**")
-                .hasAnyRole("ADMIN", "SUPERADMIN")
-                // Allow all authenticated users to access all GET endpoints for scenario themes
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/scenario-themes/**").authenticated()
-                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/scenario-themes/**").hasAnyRole("ADMIN", "SUPERADMIN")
-                .requestMatchers(org.springframework.http.HttpMethod.PATCH, "/api/scenario-themes/**").hasAnyRole("ADMIN", "SUPERADMIN")
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/quizzes/**").authenticated()
-                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/quizzes/user/attempts/**").authenticated()
-                .requestMatchers("/api/quizzes/admin/**").hasAnyRole("ADMIN", "SUPERADMIN"));
+            auth
+                // Public endpoints
+                .requestMatchers(
+                    "/h2-console/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**",
+                    "/actuator/health",
+                    "/auth/**",
+                    "/api/auth/**",
+                    "/api/public/**"
+                ).permitAll()
 
+                // Authenticated user endpoints
+                .requestMatchers("/api/user/**").authenticated()
+
+                // Admin endpoints
+                .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPERADMIN")
+
+                // Super admin endpoints
+                .requestMatchers("/api/super-admin/**").hasRole("SUPERADMIN")
+        );
 
     // Allow H2 console frame options
     http.headers(headers ->

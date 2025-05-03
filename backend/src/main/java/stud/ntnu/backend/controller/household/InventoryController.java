@@ -21,7 +21,7 @@ import stud.ntnu.backend.service.inventory.ProductService;
  * Based on Visjonsdokument 2025 for Krisefikser.no.
  */
 @RestController
-@RequestMapping("/api/inventory")
+@RequestMapping("/api/user/inventory")
 public class InventoryController {
 
   private final InventoryService inventoryService;
