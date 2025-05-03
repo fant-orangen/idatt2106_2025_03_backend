@@ -59,12 +59,12 @@ public class MeetingPlaceController {
 
     /**
      * Archives a meeting place. Only accessible by admins.
-     * TODO: test with postman
+     * 
      * @param id the ID of the meeting place to archive
      * @param principal the authenticated user
      * @return the archived meeting place
      */
-    @PutMapping("/admin/meeting-places/{id}/archive")
+    @PatchMapping("/admin/meeting-places/{id}/archive")
     public ResponseEntity<?> archiveMeetingPlace(
             @PathVariable Integer id,
             Principal principal) {
@@ -82,12 +82,12 @@ public class MeetingPlaceController {
 
     /**
      * Activates a meeting place. Only accessible by admins.
-     * TODO: test with postman
+     * 
      * @param id the ID of the meeting place to activate
      * @param principal the authenticated user
      * @return the activated meeting place
      */
-    @PutMapping("/admin/meeting-places/{id}/activate")
+    @PatchMapping("/admin/meeting-places/{id}/activate")
     public ResponseEntity<?> activateMeetingPlace(
             @PathVariable Integer id,
             Principal principal) {
@@ -105,7 +105,7 @@ public class MeetingPlaceController {
 
     /**
      * Gets all active meeting places within 10km of the specified location.
-     * TODO: test with postman
+     * 
      * @param latitude the latitude of the location
      * @param longitude the longitude of the location
      * @return list of nearby meeting places
