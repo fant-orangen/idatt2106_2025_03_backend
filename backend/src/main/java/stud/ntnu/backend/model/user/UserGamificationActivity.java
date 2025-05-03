@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import stud.ntnu.backend.model.information.GamificationActivity;
+import stud.ntnu.backend.model.gamification.GamificationActivity;
 
 @Entity
 @Table(name = "user_gamification_activities")

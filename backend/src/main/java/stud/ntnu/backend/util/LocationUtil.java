@@ -5,13 +5,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 import stud.ntnu.backend.dto.map.CoordinatesItemDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.user.User;
-import stud.ntnu.backend.service.UserService;
+import stud.ntnu.backend.service.user.UserService;
 
-import java.math.BigDecimal;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class LocationUtil {
 

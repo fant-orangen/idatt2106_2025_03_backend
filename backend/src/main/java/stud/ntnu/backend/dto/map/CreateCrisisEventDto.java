@@ -17,6 +17,7 @@ import stud.ntnu.backend.model.map.CrisisEvent.Severity;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateCrisisEventDto {
+
   @NotNull(message = "Latitude is required")
   private BigDecimal latitude;
 
@@ -37,4 +38,6 @@ public class CreateCrisisEventDto {
 
   @NotNull(message = "Start time is required")
   private LocalDateTime startTime;
+
+  private Integer scenarioThemeId; // Optional scenario theme ID
 }

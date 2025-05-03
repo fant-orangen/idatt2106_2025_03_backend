@@ -37,16 +37,14 @@ public class ScenarioTheme {
   private LocalDateTime updatedAt;
 
   @Column(name = "status", nullable = false)
-  private String status;
+  private String status = "active";
 
-  // Set createdAt and updatedAt before persist
   @PrePersist
   protected void onCreate() {
     createdAt = LocalDateTime.now();
     updatedAt = LocalDateTime.now();
   }
 
-  // Set updatedAt before update
   @PreUpdate
   protected void onUpdate() {
     updatedAt = LocalDateTime.now();

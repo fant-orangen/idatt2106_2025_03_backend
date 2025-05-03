@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 /**
  * Data Transfer Object for creating a new food ProductType.
  * <p>
- * This DTO is used when adding a new food product type to the inventory.
- * It contains validation to ensure that only valid units are allowed for food products,
- * and that all required fields are present and valid.
+ * This DTO is used when adding a new food product type to the inventory. It contains validation to
+ * ensure that only valid units are allowed for food products, and that all required fields are
+ * present and valid.
  */
 @Data
 @Builder
@@ -23,36 +23,34 @@ import lombok.NoArgsConstructor;
 public class FoodProductTypeCreateDto {
 
   /**
-   * The ID of the household to which this product type belongs.
-   * This is set by the backend based on the authenticated user.
+   * The ID of the household to which this product type belongs. This is set by the backend based on
+   * the authenticated user.
    */
   private Integer householdId;
 
   /**
-   * The name of the food product type.
-   * This field is required and must not be blank.
+   * The name of the food product type. This field is required and must not be blank.
    */
   @NotBlank(message = "Name is required")
   private String name;
 
   /**
-   * The unit of measurement for the food product type (e.g., "kg", "l", "stk").
-   * This field is required and must not be blank.
+   * The unit of measurement for the food product type (e.g., "kg", "l", "stk"). This field is
+   * required and must not be blank.
    */
   @NotBlank(message = "Unit is required")
   private String unit;
 
   /**
-   * The number of calories per unit for the food product type.
-   * This field is required and must be zero or positive.
+   * The number of calories per unit for the food product type. This field is required and must be
+   * zero or positive.
    */
   @NotNull(message = "Calories per unit is required")
   @PositiveOrZero(message = "Calories per unit must be positive or zero")
   private Double caloriesPerUnit;
 
   /**
-   * The category of the product type.
-   * This is always set to "food" for food product types.
+   * The category of the product type. This is always set to "food" for food product types.
    */
   private String category = "food";
 
@@ -68,8 +66,8 @@ public class FoodProductTypeCreateDto {
   }
 
   /**
-   * Sets the household ID for this DTO.
-   * This is typically set by the backend based on the authenticated user.
+   * Sets the household ID for this DTO. This is typically set by the backend based on the
+   * authenticated user.
    *
    * @param householdId the household ID to set
    */

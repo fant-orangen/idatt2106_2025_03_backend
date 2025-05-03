@@ -8,9 +8,9 @@ import lombok.Setter;
 /**
  * DTO for returning the preparedness status of a household.
  * <p>
- * This class encapsulates information about a household's inventory status,
- * including the household's identity, population, survival days, and details
- * about the types and counts of products in the inventory.
+ * This class encapsulates information about a household's inventory status, including the
+ * household's identity, population, survival days, and details about the types and counts of
+ * products in the inventory.
  * </p>
  */
 @Setter
@@ -38,13 +38,14 @@ public class InventoryStatusDto {
   private Integer survivalDays;
 
   /**
-   * A map containing the count of each product type in the household's inventory.
-   * The key is the product type name, and the value is the count.
+   * A map containing the count of each product type in the household's inventory. The key is the
+   * product type name, and the value is the count.
    */
   private Map<String, Integer> productTypeCounts;
 
   /**
-   * A list of product type status objects, each representing the status of a specific product type.
+   * A list of product type status objects, each representing the status of a specific product
+   * type.
    */
   private List<ProductTypeStatusDto> productTypeStatus;
 
@@ -57,12 +58,12 @@ public class InventoryStatusDto {
   /**
    * Constructor with all fields.
    *
-   * @param householdId        the unique identifier of the household
-   * @param householdName      the name of the household
-   * @param populationCount    the number of people in the household
-   * @param survivalDays       the number of days the household can survive
-   * @param productTypeCounts  a map of product type names to their counts
-   * @param productTypeStatus  a list of product type status DTOs
+   * @param householdId       the unique identifier of the household
+   * @param householdName     the name of the household
+   * @param populationCount   the number of people in the household
+   * @param survivalDays      the number of days the household can survive
+   * @param productTypeCounts a map of product type names to their counts
+   * @param productTypeStatus a list of product type status DTOs
    */
   public InventoryStatusDto(Integer householdId, String householdName, Integer populationCount,
       Integer survivalDays, Map<String, Integer> productTypeCounts,
@@ -78,8 +79,8 @@ public class InventoryStatusDto {
   /**
    * DTO for the status of a product type.
    * <p>
-   * This class provides details about a specific product type in the inventory,
-   * including its name, current count, recommended count, and whether the amount is sufficient.
+   * This class provides details about a specific product type in the inventory, including its name,
+   * current count, recommended count, and whether the amount is sufficient.
    * </p>
    */
   public static class ProductTypeStatusDto {
@@ -113,10 +114,10 @@ public class InventoryStatusDto {
     /**
      * Constructor with all fields.
      *
-     * @param productTypeName   the name of the product type
-     * @param count             the current count of the product type
-     * @param recommendedCount  the recommended count for the product type
-     * @param sufficient        whether the current count is sufficient
+     * @param productTypeName  the name of the product type
+     * @param count            the current count of the product type
+     * @param recommendedCount the recommended count for the product type
+     * @param sufficient       whether the current count is sufficient
      */
     public ProductTypeStatusDto(String productTypeName, Integer count, Integer recommendedCount,
         Boolean sufficient) {

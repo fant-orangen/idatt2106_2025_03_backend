@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 public class Send2FACodeRequestDto {
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Email should be valid")
-    private String email;
+  @NotBlank(message = "Email is required")
+  @Email(message = "Email should be valid")
+  private String email;
 }

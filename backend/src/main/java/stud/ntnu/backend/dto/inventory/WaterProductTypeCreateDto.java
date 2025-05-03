@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 /**
  * Data Transfer Object for creating a new Water ProductType.
  * <p>
- * This DTO is used when adding a new water product type to the inventory.
- * It contains validation to ensure that only valid units are allowed for water products,
- * and that all required fields are present and valid.
+ * This DTO is used when adding a new water product type to the inventory. It contains validation to
+ * ensure that only valid units are allowed for water products, and that all required fields are
+ * present and valid.
  */
 @Data
 @Builder
@@ -21,28 +21,26 @@ import lombok.NoArgsConstructor;
 public class WaterProductTypeCreateDto {
 
   /**
-   * The ID of the household to which this product type belongs.
-   * This is set by the backend based on the authenticated user.
+   * The ID of the household to which this product type belongs. This is set by the backend based on
+   * the authenticated user.
    */
   private Integer householdId;
 
   /**
-   * The name of the water product type.
-   * This field is required and must not be blank.
+   * The name of the water product type. This field is required and must not be blank.
    */
   @NotBlank(message = "Name is required")
   private String name;
 
   /**
-   * The unit of measurement for the water product type (must be "l").
-   * This field is required and must not be blank.
+   * The unit of measurement for the water product type (must be "l"). This field is required and
+   * must not be blank.
    */
   @NotBlank(message = "Unit is required")
   private String unit;
 
   /**
-   * The category of the product type.
-   * This is always set to "water" for water product types.
+   * The category of the product type. This is always set to "water" for water product types.
    */
   private String category = "water";
 
@@ -57,8 +55,8 @@ public class WaterProductTypeCreateDto {
   }
 
   /**
-   * Sets the household ID for this DTO.
-   * This is typically set by the backend based on the authenticated user.
+   * Sets the household ID for this DTO. This is typically set by the backend based on the
+   * authenticated user.
    *
    * @param householdId the household ID to set
    */

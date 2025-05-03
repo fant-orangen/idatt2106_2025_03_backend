@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class ContributedProductBatchesRequestDto {
-    private Integer groupId;
-    private Integer productTypeId;
+
+  private Integer groupId;
+  private Integer productTypeId;
 } 

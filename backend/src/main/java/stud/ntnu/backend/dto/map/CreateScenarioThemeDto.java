@@ -14,8 +14,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateScenarioThemeDto {
-    @NotNull(message = "Name is required")
-    private String name;
-    private String description;
-    private String instructions;
+
+  @NotNull(message = "Name is required")
+  private String name;
+  private String description;
+  private String instructions;
 } 

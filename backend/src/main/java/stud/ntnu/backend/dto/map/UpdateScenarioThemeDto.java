@@ -14,10 +14,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateScenarioThemeDto {
-    @NotNull(message = "ID is required")
-    private Integer id;
-    private String name;
-    private String description;
-    private String instructions;
-    private String status;
+
+  @NotNull(message = "ID is required")
+  private Integer id;
+  private String name;
+  private String description;
+  private String instructions;
+  private String status;
 } 
