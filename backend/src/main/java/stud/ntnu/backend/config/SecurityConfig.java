@@ -108,11 +108,13 @@ public class SecurityConfig {
                     "/actuator/health",
                     "/auth/**",
                     "/api/auth/**",
-                    "/api/public/**"
+                    "/api/public/**",
+                    "/ws/**"
                 ).permitAll()
 
                 // Authenticated user endpoints
                 .requestMatchers("/api/user/**").authenticated()
+                .requestMatchers("/topic/**", "/app/**").authenticated()
 
                 // Admin endpoints
                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPERADMIN")

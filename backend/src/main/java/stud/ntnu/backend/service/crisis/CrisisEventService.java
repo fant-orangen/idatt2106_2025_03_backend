@@ -127,6 +127,7 @@ public class CrisisEventService {
   @Transactional
   public CrisisEvent createCrisisEvent(CreateCrisisEventDto createCrisisEventDto,
       User currentUser) {
+    log.info("Starting creation of new crisis event by user: {}", currentUser.getId());
     // Create a new crisis event with start time from DTO
     CrisisEvent crisisEvent = new CrisisEvent(
         createCrisisEventDto.getName(),
@@ -152,6 +153,7 @@ public class CrisisEventService {
 
     // Save the crisis event
     CrisisEvent savedCrisisEvent = crisisEventRepository.save(crisisEvent);
+    log.info("Crisis event saved with ID: {}", savedCrisisEvent.getId());
 
     // Record the creation change
     CrisisEventChange change = new CrisisEventChange(
@@ -163,9 +165,10 @@ public class CrisisEventService {
     );
     crisisEventChangeRepository.save(change);
 
-    log.info("Sending notifications to users within the radius of the crisis event");
+    log.info("About to send notifications to users within the radius of the crisis event (ID: {})", savedCrisisEvent.getId());
     // Send notifications to users within the radius
     notificationService.sendCrisisEventNotifications(savedCrisisEvent);
+    log.info("Notification sending triggered for crisis event ID: {}", savedCrisisEvent.getId());
 
     return savedCrisisEvent;
   }
@@ -238,7 +241,9 @@ public class CrisisEventService {
       );
       crisisEventRepository.flush();
       recordChanges(originalState, currentCrisisEvent, currentCrisisEvent.getCreatedByUser());
+      log.info("About to send update notifications for crisis event ID: {}", currentCrisisEvent.getId());
       notificationService.sendCrisisEventUpdateNotifications(currentCrisisEvent, originalState);
+      log.info("Update notification sending triggered for crisis event ID: {}", currentCrisisEvent.getId());
       return currentCrisisEvent;
     }
 
@@ -300,12 +305,15 @@ public class CrisisEventService {
       // Record the changes
       recordChanges(originalState, updatedCrisisEvent, updatedCrisisEvent.getCreatedByUser());
 
+      log.info("About to send update notifications for crisis event ID: {}", updatedCrisisEvent.getId());
       // Send notifications about the update
       notificationService.sendCrisisEventUpdateNotifications(updatedCrisisEvent, originalState);
+      log.info("Update notification sending triggered for crisis event ID: {}", updatedCrisisEvent.getId());
 
       return updatedCrisisEvent;
     } else {
       // No changes, return the original entity
+      log.info("No changes detected for crisis event ID: {}. No update notifications sent.", currentCrisisEvent.getId());
       return currentCrisisEvent;
     }
   }
