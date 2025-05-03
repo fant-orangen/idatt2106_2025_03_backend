@@ -104,19 +104,21 @@ public class MeetingPlaceController {
     }
 
     /**
-     * Gets all active meeting places within 10km of the specified location.
+     * Gets all active meeting places within the specified distance (defaults to 10km) of the location.
      * 
      * @param latitude the latitude of the location
      * @param longitude the longitude of the location
+     * @param distance the distance in meters (optional, defaults to 10000)
      * @return list of nearby meeting places
      */
     @GetMapping("/public/meeting-places/nearby")
     public ResponseEntity<List<MeetingPlaceDto>> getNearbyMeetingPlaces(
             @RequestParam BigDecimal latitude,
-            @RequestParam BigDecimal longitude) {
+            @RequestParam BigDecimal longitude,
+            @RequestParam(required = false, defaultValue = "10.0") double distanceKm) {
         try {
             List<MeetingPlace> nearbyPlaces = meetingPlaceService.getNearbyMeetingPlaces(
-                    latitude, longitude, 10.0); // 10km radius
+                    latitude, longitude, distanceKm);
             List<MeetingPlaceDto> dtos = nearbyPlaces.stream()
                     .map(MeetingPlaceDto::fromEntity)
                     .toList();
@@ -126,6 +128,5 @@ public class MeetingPlaceController {
         }
     }
 
-    // TODO: calculate route to meeting place
     // TODO: get all meeting places based on viewport
 }

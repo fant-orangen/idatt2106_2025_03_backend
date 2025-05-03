@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
+import java.util.List;
 import stud.ntnu.backend.dto.map.CreateScenarioThemeDto;
 import stud.ntnu.backend.dto.map.UpdateScenarioThemeDto;
 import stud.ntnu.backend.dto.map.ScenarioThemeDetailsDto;
@@ -97,7 +98,18 @@ public class ScenarioThemeController {
     return ResponseEntity.ok(scenarioThemes);
   }
 
-  // TODO: Add endpoint to get only the names and ids of all scenario themes
+  
+  /**
+   * Gets a list of all scenario themes with just their names and IDs.
+   * This is a lightweight endpoint for UI components that only need basic theme information.
+   *
+   * @return ResponseEntity with a list of ScenarioThemeNameDto objects
+   */
+  @GetMapping("/user/scenario-themes/previews/all")
+  public ResponseEntity<List<ScenarioThemeNameDto>> getAllScenarioThemePreviews() {
+    List<ScenarioThemeNameDto> previews = scenarioThemeService.getAllScenarioThemePreviews();
+    return ResponseEntity.ok(previews);
+  }
 
   /**
    * Gets scenario theme details (name, description, instructions) by id.
