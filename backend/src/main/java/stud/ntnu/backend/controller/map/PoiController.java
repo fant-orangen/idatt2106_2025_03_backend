@@ -66,7 +66,7 @@ public class PoiController {
    * @param id the id of the poi
    * @return the poi with the given id as a PoiItemDto
    */
-  @GetMapping("/user/poi/{id}")
+  @GetMapping("/public/poi/{id}")
   public PoiItemDto getPointOfInterestById(@PathVariable int id) {
     return poiService.getPointOfInterestById(id)
         .map(PoiItemDto::fromEntity)
@@ -84,7 +84,7 @@ public class PoiController {
    * @return a list of points of interest within the specified distance
    */
   //To test with postman http://localhost:8080/api/user/poi/type/nearby?latitude=63.4308&longitude=10.3943&distance=1000
-  @GetMapping("/user/poi/type/nearby")
+  @GetMapping("/public/poi/type/nearby")
   public List<PoiItemDto> getPointsOfInterestByTypeIdAndDistance(
       @RequestParam(required = false) Integer id,
       @RequestParam double latitude,
@@ -107,7 +107,7 @@ public class PoiController {
    * @param longitude the longitude of the location
    * @return the nearest point of interest of the specified type
    */
-  @GetMapping("/user/poi/type/nearest/{id}")
+  @GetMapping("/public/poi/type/nearest/{id}")
   public PoiItemDto getNearestPointOfInterestByType(
       @PathVariable int id,
       @RequestParam double latitude,
