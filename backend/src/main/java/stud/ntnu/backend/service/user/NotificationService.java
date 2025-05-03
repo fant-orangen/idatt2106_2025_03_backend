@@ -243,7 +243,7 @@ public class NotificationService {
     BigDecimal eventLat = crisisEvent.getEpicenterLatitude(); //
     BigDecimal eventLon = crisisEvent.getEpicenterLongitude(); //
     // Use radius directly in meters for calculations.
-    double radiusMeters = crisisEvent.getRadius().doubleValue(); //
+    double radiusMeters = crisisEvent.getRadius().doubleValue() * 1000; // MUST BE IN METERS
 
     // Fetch ALL users.
     List<User> allUsers = userService.getAllUsers(); //
