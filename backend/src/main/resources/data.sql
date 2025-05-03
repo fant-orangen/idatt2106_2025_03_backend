@@ -204,12 +204,12 @@ VALUES (8, 'Jonsvatnet Water Treatment Plant', 'Primary water source and treatme
 
 
 -- MEETING PLACES
-INSERT INTO meeting_places (household_id, name, latitude, longitude, address, created_by_user_id)
-VALUES (1, 'Park Entrance', 63.4290, 10.3940, 'City Park Main Entrance', 2);
-INSERT INTO meeting_places (household_id, name, latitude, longitude, address, created_by_user_id)
-VALUES (2, 'School Playground', 63.4300, 10.3960, 'Elementary School', 3);
-INSERT INTO meeting_places (household_id, name, latitude, longitude, address, created_by_user_id)
-VALUES (3, 'Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
+INSERT INTO meeting_places (name, latitude, longitude, address, created_by_user_id)
+VALUES ('Park Entrance', 63.4290, 10.3940, 'City Park Main Entrance', 2);
+INSERT INTO meeting_places (name, latitude, longitude, address, created_by_user_id)
+VALUES ('School Playground', 63.4300, 10.3960, 'Elementary School', 3);
+INSERT INTO meeting_places (name, latitude, longitude, address, created_by_user_id)
+VALUES ('Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
 
 -- SCENARIO THEMES
 INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
