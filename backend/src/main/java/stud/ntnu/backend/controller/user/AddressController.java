@@ -1,6 +1,5 @@
 package stud.ntnu.backend.controller.user;
 
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,23 +8,22 @@ import org.springframework.web.bind.annotation.RestController;
 import stud.ntnu.backend.dto.map.CoordinatesItemDto;
 import stud.ntnu.backend.util.LocationUtil;
 
-
 /**
  * Controller for handling address-related requests. Provides endpoints to get coordinates by
  * address and vice versa.
  */
 @RestController
-@RequestMapping("/api/address")
+@RequestMapping("/api")
 public class AddressController {
-
 
   /**
    * Retrieves coordinates based on the provided address.
+   * User endpoint: /api/user/coordinates-by-address
    *
    * @param address the address to get coordinates for
    * @return ResponseEntity containing the coordinates or an error message
    */
-  @GetMapping("/coordinates-by-address")
+  @GetMapping("/user/coordinates-by-address")
   public ResponseEntity<?> getCoordinatesByAddress(@RequestParam String address) {
     try {
       CoordinatesItemDto coordinates = LocationUtil.getCoordinatesByAddress(address);
@@ -39,12 +37,13 @@ public class AddressController {
 
   /**
    * Retrieves the address based on the provided coordinates.
+   * User endpoint: /api/user/address-by-coordinates
    *
    * @param latitude  the latitude of the coordinates
    * @param longitude the longitude of the coordinates
    * @return ResponseEntity containing the address or an error message
    */
-  @GetMapping("/address-by-coordinates")
+  @GetMapping("/user/address-by-coordinates")
   public ResponseEntity<?> getAddressByCoordinates(@RequestParam String latitude,
       @RequestParam String longitude) {
     try {

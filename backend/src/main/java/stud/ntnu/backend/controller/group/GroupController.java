@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RestController
-@RequestMapping("/api/groups")
+@RequestMapping("/api")
 public class GroupController {
 
   private final GroupService groupService;
@@ -39,7 +39,7 @@ public class GroupController {
    * @param pageable  pagination information
    * @return a paginated list of group summaries
    */
-  @GetMapping("/current")
+  @GetMapping("/user/groups/current")
   public ResponseEntity<Page<GroupSummaryDto>> getCurrentUserGroups(Principal principal,
       Pageable pageable) {
     String email = principal.getName();
@@ -52,12 +52,13 @@ public class GroupController {
 
   /**
    * Remove the current user's household from the given group by setting left_at to now.
+   * This endpoint requires admin authentication and is under /api/admin/groups.
    *
    * @param groupId   the group to leave
    * @param principal the authenticated user
    * @return 200 OK if successful, 404 if not found or not a member
    */
-  @PatchMapping("/leave/{groupid}")
+  @PatchMapping(path = "/user/groups/leave/{groupid}")
   public ResponseEntity<?> removeHouseholdFromGroup(@PathVariable("groupid") Integer groupId,
       Principal principal) {
     String email = principal.getName();
@@ -70,12 +71,13 @@ public class GroupController {
 
   /**
    * Get all households that currently have a membership in the given group.
+   * This endpoint requires admin authentication and is under /api/admin/groups.
    *
    * @param groupId   the group id
    * @param principal the authenticated user
    * @return a list of HouseholdDto
    */
-  @GetMapping("/{groupId}/households")
+  @GetMapping(path = "/user/groups/{groupId}/households")
   public ResponseEntity<List<HouseholdDto>> getCurrentHouseholdsInGroup(
       @PathVariable("groupId") Integer groupId, Principal principal) {
     String email = principal.getName();

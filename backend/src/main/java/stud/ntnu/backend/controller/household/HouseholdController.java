@@ -26,7 +26,7 @@ import java.util.List;
  * on Visjonsdokument 2025 for Krisefikser.no.
  */
 @RestController
-@RequestMapping("/api/households")
+@RequestMapping("/api/user/households")
 public class HouseholdController {
 
   private final HouseholdService householdService;

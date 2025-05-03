@@ -23,7 +23,7 @@ import java.security.Principal;
 import stud.ntnu.backend.dto.inventory.AddBatchToGroupRequestDto;
 
 @RestController
-@RequestMapping("/api/groups/inventory")
+@RequestMapping("/api")
 public class GroupInventoryController {
 
   private final GroupService groupService;
@@ -44,7 +44,7 @@ public class GroupInventoryController {
    * @param pageable pagination information
    * @return a page of ProductTypeDto
    */
-  @GetMapping("/product-types")
+  @GetMapping("/user/groups/inventory/product-types")
   public ResponseEntity<Page<ProductTypeDto>> getContributedProductTypes(
       @RequestBody ContributedProductTypesRequestDto request, Pageable pageable) {
     if (Objects.isNull(request.getGroupId()) || Objects.isNull(request.getCategory())) {
@@ -64,7 +64,7 @@ public class GroupInventoryController {
    * @param pageable pagination information
    * @return a paginated list of product batches
    */
-  @GetMapping("/product-types/batches")
+  @GetMapping("/user/groups/inventory/product-types/batches")
   public ResponseEntity<Page<ProductBatchDto>> getContributedProductBatchesByType(
       @RequestBody ContributedProductBatchesRequestDto request, Pageable pageable) {
     if (Objects.isNull(request.getGroupId()) || Objects.isNull(request.getProductTypeId())) {
@@ -84,7 +84,7 @@ public class GroupInventoryController {
    * @return 200 OK if removed, 409 Conflict if batch is contributed to more than one group, 404 if
    * not found
    */
-  @PatchMapping("/product-batches/{productBatchId}")
+  @PatchMapping("/user/groups/inventory/product-batches/{productBatchId}")
   public ResponseEntity<?> removeContributedBatch(@PathVariable Integer productBatchId) {
     int count = groupInventoryService.countGroupContributionsForBatch(productBatchId);
     if (count == 0) {
@@ -108,7 +108,7 @@ public class GroupInventoryController {
    * @param principal the authenticated user
    * @return 200 OK if added, 403 if not authorized
    */
-  @PostMapping
+  @PostMapping("/user/groups/inventory")
   public ResponseEntity<?> addBatchToGroup(@RequestBody AddBatchToGroupRequestDto request,
       Principal principal) {
     if (request.getBatchId() == null || request.getGroupId() == null) {

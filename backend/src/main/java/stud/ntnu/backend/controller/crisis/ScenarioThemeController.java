@@ -22,7 +22,7 @@ import stud.ntnu.backend.service.user.UserService;
  */
 
 @RestController
-@RequestMapping("/api/scenario-themes")
+@RequestMapping("/api")
 public class ScenarioThemeController {
 
   private final ScenarioThemeService scenarioThemeService;
@@ -42,7 +42,7 @@ public class ScenarioThemeController {
    * @param principal              the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
-  @PostMapping
+  @PostMapping(path = "/admin/scenario-themes")
   public ResponseEntity<?> createScenarioTheme(
       @Valid @RequestBody CreateScenarioThemeDto createScenarioThemeDto,
       Principal principal) {
@@ -69,7 +69,7 @@ public class ScenarioThemeController {
    * @param principal              the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
-  @PatchMapping
+  @PatchMapping(path = "/admin/scenario-themes")
   public ResponseEntity<?> updateScenarioTheme(
       @Valid @RequestBody UpdateScenarioThemeDto updateScenarioThemeDto,
       Principal principal) {
@@ -91,7 +91,7 @@ public class ScenarioThemeController {
    * @param pageable the pagination information
    * @return ResponseEntity with a page of scenario themes
    */
-  @GetMapping("/all")
+  @GetMapping("/user/scenario-themes/all")
   public ResponseEntity<Page<ScenarioTheme>> getAllScenarioThemes(Pageable pageable) {
     Page<ScenarioTheme> scenarioThemes = scenarioThemeService.getAllScenarioThemes(pageable);
     return ResponseEntity.ok(scenarioThemes);
@@ -105,7 +105,7 @@ public class ScenarioThemeController {
    * @param id the scenario theme id
    * @return ResponseEntity with ScenarioThemeDetailsDto or 404 if not found
    */
-  @GetMapping("/{id}")
+  @GetMapping("/user/scenario-themes/{id}")
   public ResponseEntity<ScenarioThemeDetailsDto> getScenarioTheme(@PathVariable Integer id) {
     return scenarioThemeService.getScenarioThemeDetailsById(id)
         .map(ResponseEntity::ok)
@@ -118,7 +118,7 @@ public class ScenarioThemeController {
    * @param id the scenario theme id
    * @return ResponseEntity with ScenarioThemeNameDto or 404 if not found
    */
-  @GetMapping("/{id}/name")
+  @GetMapping("/user/scenario-themes/{id}/name")
   public ResponseEntity<ScenarioThemeNameDto> getScenarioThemeName(@PathVariable Integer id) {
     return scenarioThemeService.getScenarioThemeNameById(id)
         .map(ResponseEntity::ok)

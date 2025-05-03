@@ -16,7 +16,7 @@ import stud.ntnu.backend.service.gamification.quiz.UserQuizService;
 import stud.ntnu.backend.service.user.UserService;
 
 @RestController
-@RequestMapping("/api/quizzes/user")
+@RequestMapping("/api/user/quizzes")
 public class UserQuizController {
 
   private final UserQuizService userQuizService;
@@ -83,11 +83,11 @@ public class UserQuizController {
 
   /**
    * Gets paginated basic info about quizzes with at least one attempt by the current user. Returns
-   * quizId, name, status, and questionCount for each quiz.
+   * id, name, description, status, questionCount, and createdAt for each quiz.
    *
    * @param principal the Principal object representing the current user
    * @param pageable  the pagination information
-   * @return ResponseEntity with a page of QuizBasicInfoDto
+   * @return ResponseEntity with a page of QuizPreviewDto
    */
   @GetMapping("/attempted")
   public ResponseEntity<?> getAttemptedQuizHistory(Principal principal, Pageable pageable) {

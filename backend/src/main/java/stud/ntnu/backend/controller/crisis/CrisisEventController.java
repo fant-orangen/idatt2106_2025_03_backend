@@ -34,7 +34,7 @@ import stud.ntnu.backend.service.user.UserService;
  * Based on Visjonsdokument 2025 for Krisefikser.no.
  */
 @RestController
-@RequestMapping("/api/crisis-events")
+@RequestMapping("/api")
 public class CrisisEventController {
 
   private final CrisisEventService crisisEventService;
@@ -55,7 +55,7 @@ public class CrisisEventController {
    * @param principal            the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
-  @PostMapping
+  @PostMapping(path = "/admin/crisis-events")
   public ResponseEntity<?> createCrisisEvent(
       @Valid @RequestBody CreateCrisisEventDto createCrisisEventDto,
       Principal principal) {
@@ -71,10 +71,9 @@ public class CrisisEventController {
           .orElseThrow(() -> new IllegalStateException("User not found"));
 
       // Delegate to service for creating the crisis event
-      CrisisEvent savedCrisisEvent = crisisEventService.createCrisisEvent(createCrisisEventDto,
-          currentUser);
+      crisisEventService.createCrisisEvent(createCrisisEventDto, currentUser);
 
-      return ResponseEntity.ok(savedCrisisEvent);
+      return ResponseEntity.ok().build();
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
@@ -91,7 +90,7 @@ public class CrisisEventController {
    * @return ResponseEntity with the updated crisis event if successful, or an error message if the
    * crisis event is not found or the user is not authorized
    */
-  @PutMapping("/{id}")
+  @PutMapping(path = "/admin/crisis-events/{id}")
   public ResponseEntity<?> updateCrisisEvent(
       @PathVariable Integer id,
       @RequestBody UpdateCrisisEventDto updateCrisisEventDto,
@@ -110,7 +109,7 @@ public class CrisisEventController {
         return ResponseEntity.notFound().build();
       }
 
-      return ResponseEntity.ok(updatedCrisisEvent);
+      return ResponseEntity.ok().build();
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
@@ -122,7 +121,7 @@ public class CrisisEventController {
    * @param pageable the pagination information
    * @return ResponseEntity with a page of crisis event previews
    */
-  @GetMapping("/all/previews")
+  @GetMapping("/public/crisis-events/all/previews")
   public ResponseEntity<Page<CrisisEventPreviewDto>> getAllCrisisEventPreviews(Pageable pageable) {
     Page<CrisisEventPreviewDto> crisisEventPreviews = crisisEventService.getAllCrisisEventPreviews(
         pageable);
@@ -135,7 +134,7 @@ public class CrisisEventController {
    * @param pageable the pagination information
    * @return ResponseEntity with a page of crisis events
    */
-  @GetMapping("/all")
+  @GetMapping("/public/crisis-events/all")
   public ResponseEntity<Page<CrisisEvent>> getAllCrisisEvents(Pageable pageable) {
     Page<CrisisEvent> crisisEvents = crisisEventService.getAllCrisisEvents(pageable);
     return ResponseEntity.ok(crisisEvents);
@@ -149,7 +148,7 @@ public class CrisisEventController {
    * @param principal the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
-  @PutMapping("/deactivate/{id}")
+  @PutMapping(path = "/admin/crisis-events/deactivate/{id}")
   public ResponseEntity<?> deleteCrisisEvent(
       @PathVariable Integer id,
       Principal principal) {
@@ -174,7 +173,7 @@ public class CrisisEventController {
    * @param id the ID of the crisis event to retrieve
    * @return ResponseEntity with the crisis event if found, or 404 Not Found if not found
    */
-  @GetMapping("/{id}")
+  @GetMapping("/user/crisis-events/{id}")
   public ResponseEntity<?> getCrisisEventById(@PathVariable Integer id) {
     try {
       return crisisEventService.getCrisisEventDetailsById(id)
@@ -194,7 +193,7 @@ public class CrisisEventController {
    * @return ResponseEntity with a page of crisis event changes if successful, or an error message
    * if the crisis event is not found or the user is not authorized
    */
-  @GetMapping("/{id}/changes")
+  @GetMapping(path = "/admin/crisis-events/{id}/changes")
   public ResponseEntity<?> getCrisisEventChanges(
       @PathVariable Integer id,
       Pageable pageable,
@@ -220,7 +219,7 @@ public class CrisisEventController {
    * @param pageable  the pagination information
    * @return ResponseEntity with a page of crisis events affecting the user
    */
-  @GetMapping("/current-user")
+  @GetMapping("/user/crisis-events/current-user")
   public ResponseEntity<Page<CrisisEvent>> getCrisisEventsAffectingCurrentUser(
       Principal principal,
       Pageable pageable) {
@@ -244,7 +243,7 @@ public class CrisisEventController {
    * @param pageable  the pagination information
    * @return ResponseEntity with a page of crisis event previews affecting the user
    */
-  @GetMapping("/all/current-user")
+  @GetMapping("/user/crisis-events/all/current-user")
   public ResponseEntity<Page<CrisisEventPreviewDto>> getAllCrisisEventPreviewsAffectingUser(
       Principal principal,
       Pageable pageable) {

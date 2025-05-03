@@ -19,7 +19,7 @@ import stud.ntnu.backend.service.user.UserService;
  * Based on Visjonsdokument 2025 for Krisefikser.no.
  */
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 public class UserController {
 
   private final UserService userService;
