@@ -197,26 +197,30 @@ public class EmailService {
 
       // Bilingual HTML Email Body
       String emailBody = """
-            <html>
-            <body>
-                <p>Hei %s,</p>
-                <p>Vi har mottatt en forespørsel om å tilbakestille passordet ditt.</p>
-                <p>Benytt denne koden og lenken for å tilbakestille passordet ditt:</p>
-                <p><strong>Kode:</strong> %s</p>
-                <p><strong>Lenke:</strong> <a href="%s">%s</a></p>
-                <p>Hvis du ikke ba om å tilbakestille passordet ditt, vennligst se bort fra denne e-posten.</p>
-                <p>Med vennlig hilsen,<br>Krisefikser-teamet</p>
-                <hr>
-                <p>Hello %s,</p>
-                <p>We have received a request to reset your password.</p>
-                <p>Please use the code and link below to set a new password:</p>
-                <p><strong>Code:</strong> %s</p>
-                <p><strong>Link:</strong> <a href="%s">%s</a></p>
-                <p>If you did not request a password reset, please ignore this email.</p>
-                <p>Regards,<br>The Krisefikser Team</p>
-            </body>
-            </html>
-            """.formatted(userName, token, resetPasswordUrl, resetPasswordUrl, userName, token, resetPasswordUrl, resetPasswordUrl);
+    <html>
+    <body>
+        <p>Hei %s,</p>
+        <p>Vi har mottatt en forespørsel om å tilbakestille passordet ditt.</p>
+        <p>Benytt denne koden og lenken for å tilbakestille passordet ditt:</p>
+        <p><strong>Kode:</strong> %s</p
+        <p>Vi anbefaler å kopiere koden</p>
+        <p>Koden er gyldig i 10 minutter.</p>
+        <p><strong>Lenke:</strong> <a href="%s" title="Tilbakestill passord">Klikk her for å tilbakestille passordet ditt</a></p>
+        <p>Hvis du ikke ba om å tilbakestille passordet ditt, vennligst se bort fra denne e-posten.</p>
+        <p>Med vennlig hilsen,<br>Krisefikser-teamet</p>
+        <hr>
+        <p>Hello %s,</p>
+        <p>We have received a request to reset your password.</p>
+        <p>Please use the code and link below to set a new password:</p>
+        <p><strong>Code:</strong> %s</p>
+        <p>We recommend copying the code</p>
+        <p>The code is valid for 10 minutes.</p>
+        <p><strong>Link:</strong> <a href="%s" title="Reset your password">Click here to reset your password</a></p>
+        <p>If you did not request a password reset, please ignore this email.</p>
+        <p>Regards,<br>The Krisefikser Team</p>
+    </body>
+    </html>
+    """.formatted(userName, token, resetPasswordUrl, userName, token, resetPasswordUrl);
 
       helper.setText(emailBody, true); // Set 'true' to indicate HTML content
 
