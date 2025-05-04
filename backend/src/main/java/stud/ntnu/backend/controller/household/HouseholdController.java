@@ -12,13 +12,17 @@ import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
 import stud.ntnu.backend.dto.household.HouseholdJoinRequestDto;
 import stud.ntnu.backend.dto.household.HouseholdSwitchRequestDto;
 import stud.ntnu.backend.model.household.Household;
+import stud.ntnu.backend.model.household.Invitation;
 import stud.ntnu.backend.service.household.HouseholdService;
+import stud.ntnu.backend.service.user.InvitationService;
 import stud.ntnu.backend.dto.household.HouseholdMemberDto;
 import stud.ntnu.backend.dto.household.EmptyHouseholdMemberDto;
 import stud.ntnu.backend.dto.household.EmptyHouseholdMemberCreateDto;
+import stud.ntnu.backend.repository.user.UserRepository;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Handles household-level operations. Allows users to create or join households, modify population
@@ -30,10 +34,14 @@ import java.util.List;
 public class HouseholdController {
 
   private final HouseholdService householdService;
+  private final InvitationService invitationService;
+  private final UserRepository userRepository;
   private final Logger log = LoggerFactory.getLogger(HouseholdController.class);
 
-  public HouseholdController(HouseholdService householdService) {
+  public HouseholdController(HouseholdService householdService, InvitationService invitationService, UserRepository userRepository) {
     this.householdService = householdService;
+    this.invitationService = invitationService;
+    this.userRepository = userRepository;
   }
 
   /**
@@ -228,5 +236,136 @@ public class HouseholdController {
     }
   }
 
-  // TODO: Add endpoint to remove a household member as admin
+  /**
+   * Removes an empty household member from the current user's household.
+   *
+   * @param memberId  the ID of the empty household member to remove
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity with success message if successful, or an error message if the user is not
+   * found, doesn't have a household, or the member doesn't belong to the user's household
+   */
+  @DeleteMapping("/members/empty/{memberId}")
+  public ResponseEntity<?> removeEmptyHouseholdMember(
+      @PathVariable Integer memberId,
+      Principal principal) {
+    try {
+      householdService.removeEmptyHouseholdMember(principal.getName(), memberId);
+      return ResponseEntity.ok("Successfully removed empty household member");
+    } catch (IllegalStateException e) {
+      log.info("Remove empty household member failed: {}", e.getMessage());
+      if (e.getMessage().equals("User doesn't have a household")) {
+        return ResponseEntity.notFound().build();
+      }
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Gets all pending invitations for the current user's household.
+   *
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity with the list of pending invitations if successful, or 404 if the user has
+   * no household
+   */
+  @GetMapping("/pending-invitations")
+  public ResponseEntity<?> getPendingInvitations(Principal principal) {
+    try {
+      // Get the user's household ID
+      HouseholdDto household = householdService.getCurrentUserHousehold(principal.getName());
+      List<Invitation> invitations = householdService.getPendingInvitationsForHousehold(household.getId());
+      return ResponseEntity.ok(invitations);
+    } catch (IllegalStateException e) {
+      log.info("Get pending invitations failed: {}", e.getMessage());
+      if (e.getMessage().equals("User doesn't have a household")) {
+        return ResponseEntity.notFound().build();
+      }
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Promotes a user to household admin.
+   *
+   * @param email     the email of the user to promote
+   * @param principal the Principal object representing the current user (admin)
+   * @return ResponseEntity with success message if successful, or an error message if the admin or
+   * user is not found, if the admin is not an admin, or if the user is not in the same household
+   */
+  @PostMapping("/promote-admin/{email}")
+  public ResponseEntity<?> promoteToAdmin(
+      @PathVariable String email,
+      Principal principal) {
+    try {
+      householdService.promoteToAdmin(principal.getName(), email);
+      return ResponseEntity.ok("Successfully promoted user to admin");
+    } catch (IllegalStateException e) {
+      log.info("Promote to admin failed: {}", e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Removes a member from the household. Only household admins can remove members.
+   *
+   * @param memberId  the ID of the member to remove
+   * @param principal the Principal object representing the current user (admin)
+   * @return ResponseEntity with success message if successful, or an error message if the admin or
+   * member is not found, if the admin is not an admin, if the member is not in the same household,
+   * or if the member is the last admin
+   */
+  @DeleteMapping("/members/{memberId}")
+  public ResponseEntity<?> removeMemberFromHousehold(
+      @PathVariable Integer memberId,
+      Principal principal) {
+    try {
+      householdService.removeMemberFromHousehold(principal.getName(), memberId);
+      return ResponseEntity.ok("Successfully removed member from household");
+    } catch (IllegalStateException e) {
+      log.info("Remove member from household failed: {}", e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Checks if the current user is an admin of their household.
+   *
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity with a JSON object containing isAdmin field
+   */
+  @GetMapping("/is-admin")
+  public ResponseEntity<?> isCurrentUserHouseholdAdmin(Principal principal) {
+    try {
+      // Find the user by email
+      String email = principal.getName();
+      stud.ntnu.backend.model.user.User user = userRepository.findByEmail(email)
+          .orElseThrow(() -> new IllegalStateException("User not found"));
+
+      // Check if the user is a household admin
+      boolean isAdmin = householdService.isUserHouseholdAdmin(user);
+
+      // Return the result as a JSON object
+      return ResponseEntity.ok(Map.of("isAdmin", isAdmin));
+    } catch (Exception e) {
+      log.error("Error checking admin status: {}", e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Deletes the current user's household. Only household admins can delete households.
+   *
+   * @param principal the Principal object representing the current user (admin)
+   * @return ResponseEntity with success message if successful, or an error message if the user is not
+   * found, doesn't have a household, or is not an admin
+   */
+  @DeleteMapping
+  public ResponseEntity<?> deleteHousehold(Principal principal) {
+    try {
+      householdService.deleteCurrentHousehold(principal.getName());
+      return ResponseEntity.ok("Successfully deleted household");
+    } catch (IllegalStateException e) {
+      log.info("Delete household failed: {}", e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
 }
