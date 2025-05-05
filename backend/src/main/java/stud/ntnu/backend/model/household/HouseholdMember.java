@@ -29,7 +29,7 @@ public class HouseholdMember {
     @Column(nullable = false)
     private String type;
 
-    @Column(nullable = false)
+    @Column(name = "kcal_requirement", nullable = false)
     private Integer kcalRequirement = 2000;
 
     @Column(name = "created_at", nullable = false)

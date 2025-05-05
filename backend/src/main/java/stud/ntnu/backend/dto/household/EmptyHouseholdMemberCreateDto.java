@@ -20,4 +20,6 @@ public class EmptyHouseholdMemberCreateDto {
   private String type;
 
   private String description;
+  
+  private Integer kcal_requirement = 2000; // Default value matches schema.sql
 }

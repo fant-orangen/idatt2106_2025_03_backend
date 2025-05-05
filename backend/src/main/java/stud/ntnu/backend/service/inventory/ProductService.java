@@ -227,6 +227,8 @@ public class ProductService {
 
     // Delete the product type - associated product batches will be deleted automatically via ON DELETE CASCADE
     productTypeRepository.deleteById(productTypeId);
+
+    eventPublisher.publishEvent(new InventoryChangeEvent(householdId, "DELETE"));
   }
 
   /**
