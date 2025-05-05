@@ -456,4 +456,50 @@ public class ProductService {
 
     return userCalories + memberCalories;
   }
+
+  /**
+   * Calculate the number of days of water remaining in the household based on
+   * the recommended daily water consumption per person.
+   *
+   * @param householdId the ID of the household
+   * @return the number of days of water remaining
+   */
+  public Double getWaterDaysRemaining(Integer householdId) {
+    // Get total water in the household
+    Integer totalLitres = getTotalLitresOfWaterByHousehold(householdId);
+    
+    // Get the daily water requirement for the household
+    Integer dailyRequirement = getHouseholdWaterRequirement(householdId);
+    
+    // Avoid division by zero
+    if (dailyRequirement == 0) {
+      return 0.0;
+    }
+    
+    // Calculate days remaining
+    return totalLitres.doubleValue() / dailyRequirement.doubleValue();
+  }
+
+  /**
+   * Calculate the number of days of food remaining in the household based on
+   * the recommended daily food consumption per person.
+   *
+   * @param householdId the ID of the household
+   * @return the number of days of food remaining
+   */
+  public Double getFoodDaysRemaining(Integer householdId) {
+    // Get total calories available in the household
+    Integer totalCalories = getTotalCaloriesByHousehold(householdId);
+    
+    // Get the daily calorie requirement for the household
+    Integer dailyRequirement = getHouseholdCalorieRequirement(householdId);
+    
+    // Avoid division by zero
+    if (dailyRequirement == 0) {
+      return 0.0;
+    }
+    
+    // Calculate days remaining
+    return totalCalories.doubleValue() / dailyRequirement.doubleValue();
+  }
 }

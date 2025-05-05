@@ -237,6 +237,50 @@ public class InventoryController {
     }
   }
 
+  // TODO: add endpoint to get the number of days left of water in the household
+
+  /**
+   * Get the number of days of water remaining in the household based on the recommended daily
+   * water consumption per person.
+   *
+   * @param principal the Principal representing the current user
+   * @return the number of days of water remaining
+   */
+  @GetMapping("/water/days-remaining")
+  public ResponseEntity<Double> getWaterDaysRemaining(Principal principal) {
+    try {
+      String email = principal.getName();
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Double daysRemaining = productService.getWaterDaysRemaining(householdId);
+      return ResponseEntity.ok(daysRemaining);
+    } catch (Exception e) {
+      log.error("Error getting days of water remaining", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  /**
+   * Get the number of days of food remaining in the household based on the recommended daily
+   * food consumption per person.
+   *
+   * @param principal the Principal representing the current user
+   * @return the number of days of food remaining
+   */
+  @GetMapping("/food/days-remaining")
+  public ResponseEntity<Double> getFoodDaysRemaining(Principal principal) {
+    try {
+      String email = principal.getName();
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Double daysRemaining = productService.getFoodDaysRemaining(householdId);
+      return ResponseEntity.ok(daysRemaining);
+    } catch (Exception e) {
+      log.error("Error getting days of food remaining", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  // TODO: add endpoint to get the number of days left of food in the household
+
   /**
    * Get all water product types for the current household, paginated.
    *
