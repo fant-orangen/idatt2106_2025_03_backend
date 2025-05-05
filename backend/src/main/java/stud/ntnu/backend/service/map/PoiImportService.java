@@ -134,6 +134,7 @@ public class PoiImportService {
     );
   }
 
+  // TODO: Also import opening hours if possible
   /**
    * Imports grocery stores from the Overpass API and saves them as POIs in the database.
    * POIs with shop type "supermarket", "grocery", or "convenience" are imported.

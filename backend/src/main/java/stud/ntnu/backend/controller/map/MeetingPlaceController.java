@@ -170,6 +170,22 @@ public class MeetingPlaceController {
         }
     }
 
-
+    /**
+     * Gets a meeting place by its ID.
+     *
+     * @param id the ID of the meeting place
+     * @return the meeting place if found, or 404 if not found
+     */
+    @GetMapping("/public/meeting-places/{id}")
+    public ResponseEntity<MeetingPlaceDto> getMeetingPlaceById(@PathVariable Integer id) {
+        try {
+            return meetingPlaceService.getMeetingPlaceById(id)
+                .map(MeetingPlaceDto::fromEntity)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
 }
