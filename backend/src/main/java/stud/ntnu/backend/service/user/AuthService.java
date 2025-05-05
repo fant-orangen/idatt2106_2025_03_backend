@@ -233,7 +233,7 @@ public class AuthService {
 
     // Generate reset token
     String token = UUID.randomUUID().toString();
-    LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
+    LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(10);
 
     // Create and save the EmailToken
     EmailToken resetToken = new EmailToken(
