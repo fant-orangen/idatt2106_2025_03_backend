@@ -1,8 +1,11 @@
 package stud.ntnu.backend.service.map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.poi.CreatePoiDto;
+import stud.ntnu.backend.dto.poi.PoiPreviewDto;
 import stud.ntnu.backend.dto.poi.UpdatePoiDto;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.map.PoiTypeRepository;
@@ -49,6 +52,24 @@ public class PoiService {
     return pointOfInterestRepository.findAll();
   }
 
+    /**
+     * Retrieves a preview of all points of interest with pagination.
+     *
+     * @param pageable the pagination information
+     * @return a paginated list of points of interest previews
+     */
+  @Transactional(readOnly = true)
+  public Page<PoiPreviewDto> getPoiPreviews(Pageable pageable) {
+    // Fetch paginated POIs
+    Page<PointOfInterest> poiPage = pointOfInterestRepository.findAll(pageable);
+
+    // Map entities to PoiPreviewDto
+    return poiPage.map(poi -> new PoiPreviewDto(
+            poi.getId(),
+            poi.getName(),
+            poi.getPoiType().getName()
+    ));
+  }
   /**
    * Retrieves a point of interest by its ID.
    *
