@@ -28,6 +28,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+// IMPORTANT! This class has been deprecated and only exists in case of errors 
+
 /**
  * Service for managing product types and batches.
  */

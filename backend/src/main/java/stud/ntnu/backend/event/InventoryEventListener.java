@@ -6,11 +6,11 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import stud.ntnu.backend.model.user.Notification;
- import stud.ntnu.backend.model.user.NotificationPreference;
+import stud.ntnu.backend.model.user.NotificationPreference;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.repository.user.NotificationPreferenceRepository;
-import stud.ntnu.backend.service.inventory.ProductService;
+import stud.ntnu.backend.service.inventory.InventoryService;
 import stud.ntnu.backend.service.user.NotificationService;
 
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class InventoryEventListener {
 
-  private final ProductService productService;
+  private final InventoryService inventoryService;
   private final NotificationService notificationService;
   private final UserRepository userRepository;
   private final NotificationPreferenceRepository notificationPreferenceRepository;
@@ -35,13 +35,13 @@ public class InventoryEventListener {
     log.debug("Processing inventory change for household: {}", event.getHouseholdId());
 
     // Get household requirements
-    int requiredWaterPerDay = productService.getHouseholdWaterRequirement(event.getHouseholdId());
-    int requiredCaloriesPerDay = productService.getHouseholdCalorieRequirement(
+    int requiredWaterPerDay = inventoryService.getHouseholdWaterRequirement(event.getHouseholdId());
+    int requiredCaloriesPerDay = inventoryService.getHouseholdCalorieRequirement(
         event.getHouseholdId());
 
     // Get current inventory levels
-    int totalWater = productService.getTotalLitresOfWaterByHousehold(event.getHouseholdId());
-    int totalCalories = productService.getTotalCaloriesByHousehold(event.getHouseholdId());
+    int totalWater = inventoryService.getTotalLitresOfWaterByHousehold(event.getHouseholdId());
+    int totalCalories = inventoryService.getTotalCaloriesByHousehold(event.getHouseholdId());
 
     // Calculate days of supply left
     double waterDaysLeft = (double) totalWater / requiredWaterPerDay;
