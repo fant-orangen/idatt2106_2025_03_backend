@@ -2,6 +2,8 @@ package stud.ntnu.backend.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,9 +15,11 @@ import stud.ntnu.backend.repository.user.NotificationPreferenceRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.service.user.NotificationService;
 
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -28,14 +32,16 @@ import java.util.Optional;
 public class ExpirationNotificationScheduler {
 
     // Set this to true to enable test mode with notifications every 15 seconds
-    private static final boolean TEST_MODE = true;
+    private static final boolean TEST_MODE = true; // TODO: set to false when ready
 
     private final ProductBatchRepository productBatchRepository;
     private final UserRepository userRepository;
     private final NotificationPreferenceRepository notificationPreferenceRepository;
     private final NotificationService notificationService;
+    private final MessageSource messageSource;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final Locale LOCALE = new Locale("nb", "NO"); // Norwegian locale
 
     /**
      * Scheduled task that runs daily at 1 AM to check for expiring and expired products.
@@ -49,7 +55,7 @@ public class ExpirationNotificationScheduler {
             return;
         }
         
-        log.info("Running daily expiration check");
+        log.info(getMessage("log.scheduler.daily"));
         performExpirationCheck();
     }
     
@@ -64,7 +70,7 @@ public class ExpirationNotificationScheduler {
             return;
         }
         
-        log.info("Running test mode expiration check (15-second interval)");
+        log.info(getMessage("log.scheduler.test"));
         performExpirationCheck();
     }
     
@@ -86,11 +92,11 @@ public class ExpirationNotificationScheduler {
             List<ProductBatch> expiredBatches = productBatchRepository.findExpiredBatches(now);
             processExpiringBatches(expiredBatches, true);
             
-            log.info("Expiration check completed - processed {} expiring and {} expired batches", 
-                    expiringBatches.size(), expiredBatches.size());
+            log.info(getMessage("log.scheduler.completed", 
+                    expiringBatches.size(), expiredBatches.size()));
             
         } catch (Exception e) {
-            log.error("Error during expiration check", e);
+            log.error(getMessage("log.error.check"), e);
         }
     }
     
@@ -113,20 +119,21 @@ public class ExpirationNotificationScheduler {
                 }
                 
                 // Create the notification message
-                String productName = batch.getProductType().getName();
-                int quantity = batch.getNumber();
-                String unit = batch.getProductType().getUnit();
-                String date = batch.getExpirationTime().format(DATE_FORMATTER);
-                
                 String message;
-                if (isExpired) {
-                    message = String.format(
-                        "⚠️ Produktet '%s' (%d %s) har utløpt (%s).",
-                        productName, quantity, unit, date);
+                
+                if (batches.size() == 1) {
+                    // Single product notification
+                    String productName = batch.getProductType().getName();
+                    int quantity = batch.getNumber();
+                    String unit = batch.getProductType().getUnit();
+                    String date = batch.getExpirationTime().format(DATE_FORMATTER);
+                    
+                    String messageKey = isExpired ? "notification.expired.single" : "notification.expiring.single";
+                    message = getMessage(messageKey, productName, quantity, unit, date);
                 } else {
-                    message = String.format(
-                        "⚠️ Produktet '%s' (%d %s) utløper om mindre enn 7 dager (%s).",
-                        productName, quantity, unit, date);
+                    // Multiple products notification
+                    String messageKey = isExpired ? "notification.expired.multiple" : "notification.expiring.multiple";
+                    message = getMessage(messageKey, batches.size());
                 }
                 
                 // Send notification to each user in the household
@@ -139,11 +146,22 @@ public class ExpirationNotificationScheduler {
                         message);
                     
                     notificationService.sendNotification(notification);
-                    log.debug("Sent expiration notification to user {}: {}", user.getId(), message);
+                    log.debug(getMessage("log.notification.sent", user.getId(), message));
                 }
             } catch (Exception e) {
-                log.error("Error processing batch {}", batch.getId(), e);
+                log.error(getMessage("log.error.batch", batch.getId()), e);
             }
         }
+    }
+    
+    /**
+     * Helper method to retrieve messages from the message source
+     * 
+     * @param code The message code
+     * @param args Any arguments to be formatted into the message
+     * @return The formatted message string
+     */
+    private String getMessage(String code, Object... args) {
+        return messageSource.getMessage(code, args, LOCALE);
     }
 }
