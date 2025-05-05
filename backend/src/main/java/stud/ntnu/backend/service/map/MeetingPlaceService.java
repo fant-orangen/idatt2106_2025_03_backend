@@ -7,6 +7,7 @@ import stud.ntnu.backend.model.map.MeetingPlace;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.map.MeetingPlaceRepository;
 import stud.ntnu.backend.util.LocationUtil;
+import stud.ntnu.backend.dto.map.CoordinatesItemDto;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -72,17 +73,26 @@ public class MeetingPlaceService {
   public MeetingPlace createMeetingPlace(CreateMeetingPlaceDto createDto, User currentUser) {
     // If address is provided but not coordinates, convert address to coordinates
     if (createDto.getAddress() != null && (createDto.getLatitude() == null || createDto.getLongitude() == null)) {
-      // TODO: Implement address to coordinates conversion using a geocoding service
-      throw new UnsupportedOperationException("Address to coordinates conversion not yet implemented");
+      CoordinatesItemDto coordinates = LocationUtil.getCoordinatesByAddress(createDto.getAddress());
+      // Create meeting place with converted coordinates
+      MeetingPlace meetingPlace = new MeetingPlace(
+        createDto.getName(),
+        coordinates.getLatitude(),
+        coordinates.getLongitude(),
+        currentUser
+      );
+      meetingPlace.setAddress(createDto.getAddress());
+      return meetingPlaceRepository.save(meetingPlace);
     }
 
+    // If coordinates are provided directly
     MeetingPlace meetingPlace = new MeetingPlace(
       createDto.getName(),
       createDto.getLatitude(),
       createDto.getLongitude(),
       currentUser
     );
-    meetingPlace.setAddress(createDto.getAddress()); // TODO: Does this work if the address is null?
+    meetingPlace.setAddress(createDto.getAddress());
 
     return meetingPlaceRepository.save(meetingPlace);
   }
