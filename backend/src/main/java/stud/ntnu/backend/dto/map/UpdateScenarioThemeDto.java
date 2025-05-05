@@ -19,6 +19,8 @@ public class UpdateScenarioThemeDto {
   private Integer id;
   private String name;
   private String description;
-  private String instructions;
+  private String before;
+  private String under;
+  private String after;
   private String status;
-} 
+}
