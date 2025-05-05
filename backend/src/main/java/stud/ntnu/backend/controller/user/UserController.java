@@ -9,6 +9,7 @@ import stud.ntnu.backend.dto.user.UserProfileDto;
 import stud.ntnu.backend.dto.user.UserPreferencesDto;
 import stud.ntnu.backend.dto.user.UserHistoryDto;
 import stud.ntnu.backend.dto.user.UserUpdateDto;
+import stud.ntnu.backend.dto.user.UserBasicInfoDto;
 import stud.ntnu.backend.service.user.UserService;
 
 /**
@@ -85,5 +86,21 @@ public class UserController {
 
     UserHistoryDto userHistory = userService.getUserHistory(email);
     return ResponseEntity.ok(userHistory);
+  }
+
+  /**
+   * Returns a user's basic information by their ID.
+   *
+   * @param id the ID of the user to retrieve
+   * @return ResponseEntity containing the user's basic information or an error message
+   */
+  @GetMapping("/{id}/basic-info")
+  public ResponseEntity<?> getUserBasicInfo(@PathVariable Integer id) {
+    try {
+      UserBasicInfoDto userBasicInfo = userService.getUserBasicInfo(id);
+      return ResponseEntity.ok(userBasicInfo);
+    } catch (IllegalStateException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 }
