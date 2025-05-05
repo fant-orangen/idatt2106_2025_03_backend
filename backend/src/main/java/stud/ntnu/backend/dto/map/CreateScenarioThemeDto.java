@@ -18,5 +18,7 @@ public class CreateScenarioThemeDto {
   @NotNull(message = "Name is required")
   private String name;
   private String description;
-  private String instructions;
-} 
+  private String before;
+  private String under;
+  private String after;
+}
