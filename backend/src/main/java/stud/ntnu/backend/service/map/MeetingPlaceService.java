@@ -1,5 +1,7 @@
 package stud.ntnu.backend.service.map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.map.CreateMeetingPlaceDto;
@@ -124,5 +126,17 @@ public class MeetingPlaceService {
         place.getLongitude().doubleValue()
       ) <= maxDistanceKm * 1000) // Convert km to meters
       .toList();
+  }
+
+  /**
+   * Retrieves a paginated list of all meeting places.
+   *
+   * @param page the page number (0-based)
+   * @param size the size of each page
+   * @return paginated list of meeting places
+   */
+  public Page<MeetingPlace> getAllMeetingPlacesPaginated(int page, int size) {
+    PageRequest pageRequest = PageRequest.of(page, size);
+    return meetingPlaceRepository.findAll(pageRequest);
   }
 }

@@ -453,7 +453,7 @@ public class CrisisEventService {
 
   /**
    * Retrieves a preview (id, name, severity, startTime) of all active crisis events with
-   * pagination.
+   * pagination, sorted by severity (red > yellow > green).
    *
    * @param pageable pagination information
    * @return page of crisis event previews
@@ -463,12 +463,22 @@ public class CrisisEventService {
     List<CrisisEvent> activeEvents = crisisEventRepository.findByActiveTrue();
     List<CrisisEventPreviewDto> previews = activeEvents.stream()
         .map(CrisisEventPreviewDto::fromEntity)
+        .sorted((a, b) -> Integer.compare(severityOrder(b.getSeverity()),
+            severityOrder(a.getSeverity())))
         .toList();
     int start = (int) pageable.getOffset();
     int end = Math.min((start + pageable.getPageSize()), previews.size());
     List<CrisisEventPreviewDto> pagedList =
         (start <= end) ? previews.subList(start, end) : List.of();
     return new PageImpl<>(pagedList, pageable, previews.size());
+  }
+
+  private int severityOrder(CrisisEvent.Severity severity) {
+    return switch (severity) {
+      case red -> 3;
+      case yellow -> 2;
+      case green -> 1;
+    };
   }
 
   /**
@@ -495,14 +505,6 @@ public class CrisisEventService {
             severityOrder(a.getSeverity())))
         .toList();
     return new PageImpl<>(previews, pageable, eventsPage.getTotalElements());
-  }
-
-  private int severityOrder(CrisisEvent.Severity severity) {
-    return switch (severity) {
-      case red -> 3;
-      case yellow -> 2;
-      case green -> 1;
-    };
   }
 
   /**

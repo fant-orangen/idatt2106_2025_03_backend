@@ -1,6 +1,7 @@
 package stud.ntnu.backend.controller.map;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.map.CreateMeetingPlaceDto;
@@ -123,6 +124,26 @@ public class MeetingPlaceController {
             List<MeetingPlaceDto> dtos = nearbyPlaces.stream()
                     .map(MeetingPlaceDto::fromEntity)
                     .toList();
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Gets a paginated list of all meeting places.
+     *
+     * @param page the page number (0-based, defaults to 0)
+     * @param size the size of each page (defaults to 10)
+     * @return paginated list of meeting places
+     */
+    @GetMapping("/public/meeting-places")
+    public ResponseEntity<Page<MeetingPlaceDto>> getAllMeetingPlaces(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Page<MeetingPlace> meetingPlaces = meetingPlaceService.getAllMeetingPlacesPaginated(page, size);
+            Page<MeetingPlaceDto> dtos = meetingPlaces.map(MeetingPlaceDto::fromEntity);
             return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
