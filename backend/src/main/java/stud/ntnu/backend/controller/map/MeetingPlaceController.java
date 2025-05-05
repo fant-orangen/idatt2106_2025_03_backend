@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.map.CreateMeetingPlaceDto;
 import stud.ntnu.backend.dto.map.MeetingPlaceDto;
+import stud.ntnu.backend.dto.map.MeetingPlacePreviewDto;
 import stud.ntnu.backend.model.map.MeetingPlace;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
@@ -137,7 +138,7 @@ public class MeetingPlaceController {
      * @param size the size of each page (defaults to 10)
      * @return paginated list of meeting places
      */
-    @GetMapping("/public/meeting-places")
+    @GetMapping("/public/meeting-places/all")
     public ResponseEntity<Page<MeetingPlaceDto>> getAllMeetingPlaces(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -149,6 +150,26 @@ public class MeetingPlaceController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    /**
+     * Gets a paginated list of all meeting place previews.
+     *
+     * @param page the page number (0-based, defaults to 0)
+     * @param size the size of each page (defaults to 10)
+     * @return paginated list of meeting place previews
+     */
+    @GetMapping("/public/meeting-places/all/previews")
+    public ResponseEntity<Page<MeetingPlacePreviewDto>> getAllMeetingPlacePreviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Page<MeetingPlacePreviewDto> previews = meetingPlaceService.getAllMeetingPlacePreviewsPaginated(page, size);
+            return ResponseEntity.ok(previews);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 
     // TODO: Add endpoint for getting all meeting places
 

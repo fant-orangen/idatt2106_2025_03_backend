@@ -10,6 +10,7 @@ import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.map.MeetingPlaceRepository;
 import stud.ntnu.backend.util.LocationUtil;
 import stud.ntnu.backend.dto.map.CoordinatesItemDto;
+import stud.ntnu.backend.dto.map.MeetingPlacePreviewDto;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -138,5 +139,17 @@ public class MeetingPlaceService {
   public Page<MeetingPlace> getAllMeetingPlacesPaginated(int page, int size) {
     PageRequest pageRequest = PageRequest.of(page, size);
     return meetingPlaceRepository.findAll(pageRequest);
+  }
+
+  /**
+   * Retrieves a paginated list of meeting place previews (only id and name).
+   *
+   * @param page the page number (0-based)
+   * @param size the size of each page
+   * @return paginated list of meeting place previews
+   */
+  public Page<MeetingPlacePreviewDto> getAllMeetingPlacePreviewsPaginated(int page, int size) {
+    PageRequest pageRequest = PageRequest.of(page, size);
+    return meetingPlaceRepository.findAll(pageRequest).map(MeetingPlacePreviewDto::fromEntity);
   }
 }
