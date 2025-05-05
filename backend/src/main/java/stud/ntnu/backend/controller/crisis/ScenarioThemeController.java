@@ -92,7 +92,7 @@ public class ScenarioThemeController {
    * @param pageable the pagination information
    * @return ResponseEntity with a page of scenario themes
    */
-  @GetMapping("/user/scenario-themes/all")
+  @GetMapping("/public/scenario-themes/all")
   public ResponseEntity<Page<ScenarioTheme>> getAllScenarioThemes(Pageable pageable) {
     Page<ScenarioTheme> scenarioThemes = scenarioThemeService.getAllScenarioThemes(pageable);
     return ResponseEntity.ok(scenarioThemes);
@@ -105,7 +105,7 @@ public class ScenarioThemeController {
    *
    * @return ResponseEntity with a list of ScenarioThemeNameDto objects
    */
-  @GetMapping("/user/scenario-themes/previews/all")
+  @GetMapping("/public/scenario-themes/previews/all")
   public ResponseEntity<List<ScenarioThemeNameDto>> getAllScenarioThemePreviews() {
     List<ScenarioThemeNameDto> previews = scenarioThemeService.getAllScenarioThemePreviews();
     return ResponseEntity.ok(previews);
@@ -117,7 +117,7 @@ public class ScenarioThemeController {
    * @param id the scenario theme id
    * @return ResponseEntity with ScenarioThemeDetailsDto or 404 if not found
    */
-  @GetMapping("/user/scenario-themes/{id}")
+  @GetMapping("/public/scenario-themes/{id}")
   public ResponseEntity<ScenarioThemeDetailsDto> getScenarioTheme(@PathVariable Integer id) {
     return scenarioThemeService.getScenarioThemeDetailsById(id)
         .map(ResponseEntity::ok)
@@ -130,7 +130,7 @@ public class ScenarioThemeController {
    * @param id the scenario theme id
    * @return ResponseEntity with ScenarioThemeNameDto or 404 if not found
    */
-  @GetMapping("/user/scenario-themes/{id}/name")
+  @GetMapping("/public/scenario-themes/{id}/name")
   public ResponseEntity<ScenarioThemeNameDto> getScenarioThemeName(@PathVariable Integer id) {
     return scenarioThemeService.getScenarioThemeNameById(id)
         .map(ResponseEntity::ok)

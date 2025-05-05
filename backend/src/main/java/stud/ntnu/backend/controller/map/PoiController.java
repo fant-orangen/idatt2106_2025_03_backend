@@ -66,7 +66,7 @@ public class PoiController {
    * @param id the id of the poi
    * @return the poi with the given id as a PoiItemDto
    */
-  @GetMapping("/user/poi/{id}")
+  @GetMapping("/public/poi/{id}")
   public PoiItemDto getPointOfInterestById(@PathVariable int id) {
     return poiService.getPointOfInterestById(id)
         .map(PoiItemDto::fromEntity)

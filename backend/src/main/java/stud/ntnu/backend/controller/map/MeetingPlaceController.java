@@ -31,6 +31,7 @@ public class MeetingPlaceController {
         this.userService = userService;
     }
 
+    // TODO: this endpoint does not work yet because address -> coordinates is not implemented
     /**
      * Creates a new meeting place. Only accessible by admins.
      * TODO: test with postman
@@ -128,5 +129,4 @@ public class MeetingPlaceController {
         }
     }
 
-    // TODO: get all meeting places based on viewport
 }
