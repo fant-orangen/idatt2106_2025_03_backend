@@ -648,4 +648,76 @@ public class InventoryService {
     // Calculate days remaining
     return totalCalories.doubleValue() / dailyRequirement.doubleValue();
   }
+
+  /**
+   * Get all expiring product types for a specific household, filtered by category and expiration time.
+   *
+   * @param householdId the ID of the household
+   * @param category the category to filter by (food, water, medicine)
+   * @param expirationTimeInDays the number of days within which products should expire
+   * @param pageable pagination information
+   * @return a page of product types that have batches expiring within the specified time
+   */
+  public Page<ProductTypeDto> getExpiringProductTypes(
+      Integer householdId,
+      String category,
+      Integer expirationTimeInDays,
+      Pageable pageable) {
+    
+    // Calculate the expiration cutoff date
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime cutoffDate = now.plusDays(expirationTimeInDays);
+
+    // Get product types with expiring batches
+    Page<ProductType> productTypes = productTypeRepository.findByHouseholdIdAndCategory(
+        householdId, category, pageable);
+
+    // Filter product types to only include those with batches expiring within the time period
+    List<ProductType> filteredTypes = productTypes.getContent().stream()
+        .filter(type -> {
+            List<ProductBatch> batches = productBatchRepository.findByProductTypeId(type.getId());
+            return batches.stream()
+                .anyMatch(batch -> {
+                    LocalDateTime expirationTime = batch.getExpirationTime();
+                    return expirationTime != null && 
+                           expirationTime.isAfter(now) && 
+                           expirationTime.isBefore(cutoffDate);
+                });
+        })
+        .toList();
+
+    // Create a new page with the filtered results
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), filteredTypes.size());
+    
+    return new PageImpl<>(
+        filteredTypes.subList(start, end),
+        pageable,
+        filteredTypes.size()
+    ).map(this::convertToDto);
+  }
+
+  /**
+   * Get all expiring product batches for a given product type.
+   *
+   * @param productTypeId the ID of the product type
+   * @param pageable pagination information
+   * @return a page of expiring product batches
+   */
+  public Page<ProductBatchDto> getExpiringProductBatchesByProductType(
+      Integer productTypeId,
+      Pageable pageable) {
+    
+    if (!productTypeRepository.existsById(productTypeId)) {
+      throw new NoSuchElementException("Product type not found with ID: " + productTypeId);
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime cutoffDate = now.plusDays(7); // Default to 7 days for expiring products
+
+    Page<ProductBatch> productBatches = productBatchRepository.findByProductTypeIdAndExpirationTimeBetween(
+        productTypeId, now, cutoffDate, pageable);
+        
+    return productBatches.map(this::convertToDto);
+  }
 }

@@ -1,6 +1,7 @@
 package stud.ntnu.backend.controller.household;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -42,6 +43,23 @@ public class InventoryController {
       @PathVariable Integer productTypeId,
       Pageable pageable) {
     Page<ProductBatchDto> productBatches = inventoryService.getProductBatchesByProductType(
+        productTypeId, pageable);
+    return ResponseEntity.ok(productBatches);
+  }
+
+  // TODO: test this endpoint
+  /**
+   * Get all expiring product batches for a given product type.
+   *
+   * @param productTypeId the ID of the product type
+   * @param pageable      pagination information
+   * @return a paginated list of expiring product batches
+   */
+  @GetMapping("/product-types/{productTypeId}/batches/expiring")
+  public ResponseEntity<Page<ProductBatchDto>> getExpiringProductBatchesByProductType(
+      @PathVariable Integer productTypeId,
+      Pageable pageable) {
+    Page<ProductBatchDto> productBatches = inventoryService.getExpiringProductBatchesByProductType(
         productTypeId, pageable);
     return ResponseEntity.ok(productBatches);
   }
@@ -318,6 +336,33 @@ public class InventoryController {
       return ResponseEntity.badRequest().build();
     }
   }
+  // TODO: test this endpoint
+  /**
+   * Get all expiring product types for the current household, filtered by category and expiration time.
+   * 
+   * @param category            the category to filter by (food, water, medicine)
+   * @param expirationTimeInDays the expiration time in days
+   * @param pageable            pagination information
+   * @param principal           the authenticated user
+   * @return a page of ProductTypeDto
+   */
+  @GetMapping("/product-types/expiring")
+  public ResponseEntity<Page<ProductTypeDto>> getExpiringProductTypes(
+      @RequestParam @Valid String category,
+      @RequestParam @Valid @Positive Integer expirationTimeInDays,
+      Pageable pageable,
+      Principal principal) {
+    String email = principal.getName();
+    try {
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Page<ProductTypeDto> productTypes = inventoryService.getExpiringProductTypes(
+          householdId, category, expirationTimeInDays, pageable);
+      return ResponseEntity.ok(productTypes);
+    } catch (Exception e) {
+      log.error("Error getting expiring product types", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
 
   /**
    * Add a new type of water product.
@@ -390,4 +435,6 @@ public class InventoryController {
       return ResponseEntity.badRequest().build();
     }
   }
+
+
 }
