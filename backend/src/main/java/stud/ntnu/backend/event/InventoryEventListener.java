@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.NotificationPreference;
 import stud.ntnu.backend.model.user.User;
@@ -26,6 +28,7 @@ public class InventoryEventListener {
   private final NotificationService notificationService;
   private final UserRepository userRepository;
   private final NotificationPreferenceRepository notificationPreferenceRepository;
+  private final MessageSource messageSource;
 
   private static final int DAYS_WARNING_THRESHOLD = 7;
 
@@ -52,9 +55,14 @@ public class InventoryEventListener {
 
     // Check water threshold
     if (waterDaysLeft < DAYS_WARNING_THRESHOLD) {
-      String waterMessage = String.format(
-          "⚠️ Lav vannbeholdning: Du har kun %.1f dager igjen med vann basert på nåværende forbruk (%d liter tilgjengelig, %d liter per dag nødvendig).",
-          waterDaysLeft, totalWater, requiredWaterPerDay
+      String waterMessage = messageSource.getMessage(
+          "notification.low.water",
+          new Object[]{
+              String.format("%.1f", waterDaysLeft),
+              totalWater,
+              requiredWaterPerDay
+          },
+          LocaleContextHolder.getLocale()
       );
 
       for (User user : householdUsers) {
@@ -77,9 +85,14 @@ public class InventoryEventListener {
 
     // Check calorie threshold
     if (calorieDaysLeft < DAYS_WARNING_THRESHOLD) {
-      String foodMessage = String.format(
-          "⚠️ Lav matbeholdning: Du har kun %.1f dager igjen med mat basert på nåværende forbruk (%d kcal tilgjengelig, %d kcal per dag nødvendig).",
-          calorieDaysLeft, totalCalories, requiredCaloriesPerDay
+      String foodMessage = messageSource.getMessage(
+          "notification.low.food",
+          new Object[]{
+              String.format("%.1f", calorieDaysLeft),
+              totalCalories,
+              requiredCaloriesPerDay
+          },
+          LocaleContextHolder.getLocale()
       );
 
       for (User user : householdUsers) {
