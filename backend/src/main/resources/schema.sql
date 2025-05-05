@@ -67,6 +67,7 @@ CREATE TABLE invitations (
     token VARCHAR(255) NOT NULL UNIQUE,
     expires_at DATETIME NOT NULL,
     accepted_at DATETIME,
+    declined_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (inviter_user_id) REFERENCES users(id),
     FOREIGN KEY (household_id) REFERENCES households(id),
@@ -124,14 +125,13 @@ CREATE TABLE group_inventory_contributions (
 -- MEETING PLACES (user/household–defined POIs)
 CREATE TABLE meeting_places (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    household_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
     latitude DECIMAL(10,7) NOT NULL,
     longitude DECIMAL(10,7) NOT NULL,
     address TEXT,
+    status VARCHAR(10) NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
     created_by_user_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (household_id) REFERENCES households(id),
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
 );
 
@@ -277,7 +277,7 @@ CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request', 'system')),
-    target_type VARCHAR(20) CHECK (target_type IN ('inventory','event','location_request')), -- If the notification is associated with another table, add a target type and target id pointing to the table
+    target_type VARCHAR(20) CHECK (target_type IN ('inventory','event','location_request','invitation')), -- If the notification is associated with another table, add a target type and target id pointing to the table
     target_id INT,
     description TEXT DEFAULT NULL,
     notify_at DATETIME NOT NULL,

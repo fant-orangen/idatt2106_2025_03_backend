@@ -1,9 +1,14 @@
 package stud.ntnu.backend.service.map;
 
 import org.springframework.stereotype.Service;
-import stud.ntnu.backend.repository.map.MeetingPlaceRepository;
+import org.springframework.transaction.annotation.Transactional;
+import stud.ntnu.backend.dto.map.CreateMeetingPlaceDto;
 import stud.ntnu.backend.model.map.MeetingPlace;
+import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.repository.map.MeetingPlaceRepository;
+import stud.ntnu.backend.util.LocationUtil;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,5 +66,53 @@ public class MeetingPlaceService {
    */
   public void deleteMeetingPlace(Integer id) {
     meetingPlaceRepository.deleteById(id);
+  }
+
+  @Transactional
+  public MeetingPlace createMeetingPlace(CreateMeetingPlaceDto createDto, User currentUser) {
+    // If address is provided but not coordinates, convert address to coordinates
+    if (createDto.getAddress() != null && (createDto.getLatitude() == null || createDto.getLongitude() == null)) {
+      // TODO: Implement address to coordinates conversion using a geocoding service
+      throw new UnsupportedOperationException("Address to coordinates conversion not yet implemented");
+    }
+
+    MeetingPlace meetingPlace = new MeetingPlace(
+      createDto.getName(),
+      createDto.getLatitude(),
+      createDto.getLongitude(),
+      currentUser
+    );
+    meetingPlace.setAddress(createDto.getAddress()); // TODO: Does this work if the address is null?
+
+    return meetingPlaceRepository.save(meetingPlace);
+  }
+
+  @Transactional
+  public MeetingPlace archiveMeetingPlace(Integer id) {
+    MeetingPlace meetingPlace = meetingPlaceRepository.findById(id)
+      .orElseThrow(() -> new IllegalStateException("Meeting place not found"));
+    meetingPlace.setStatus("archived");
+    return meetingPlaceRepository.save(meetingPlace);
+  }
+
+  @Transactional
+  public MeetingPlace activateMeetingPlace(Integer id) {
+    MeetingPlace meetingPlace = meetingPlaceRepository.findById(id)
+      .orElseThrow(() -> new IllegalStateException("Meeting place not found"));
+    meetingPlace.setStatus("active");
+    return meetingPlaceRepository.save(meetingPlace);
+  }
+
+  public List<MeetingPlace> getNearbyMeetingPlaces(BigDecimal latitude, BigDecimal longitude, double maxDistanceKm) {
+    List<MeetingPlace> allMeetingPlaces = meetingPlaceRepository.findByStatus("active");
+    
+    return allMeetingPlaces.stream()
+      .filter(place -> LocationUtil.calculateDistance(
+        latitude.doubleValue(),
+        longitude.doubleValue(),
+        place.getLatitude().doubleValue(),
+        place.getLongitude().doubleValue()
+      ) <= maxDistanceKm * 1000) // Convert km to meters
+      .toList();
   }
 }
