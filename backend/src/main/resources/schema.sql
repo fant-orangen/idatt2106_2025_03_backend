@@ -33,6 +33,7 @@ CREATE TABLE users (
     location_sharing_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_using_2fa BOOLEAN NOT NULL DEFAULT FALSE,
+    kcal_requirement INT NOT NULL DEFAULT 2000,
     FOREIGN KEY (role_id) REFERENCES roles(id),
     FOREIGN KEY (household_id) REFERENCES households(id)
 );
@@ -45,6 +46,7 @@ CREATE TABLE household_member (
     description TEXT,
     type VARCHAR(10) NOT NULL CHECK (type IN ('child', 'adult', 'pet')),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    kcal_requirement INT NOT NULL DEFAULT 2000,
     FOREIGN KEY (household_id) REFERENCES households(id)
 );
 
@@ -276,7 +278,7 @@ CREATE TABLE notification_preferences (
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request', 'system')),
+    preference_type VARCHAR(25) NOT NULL CHECK (preference_type IN ('expiration_reminder', 'remaining_supply_alert', 'crisis_alert','location_request', 'system')),
     target_type VARCHAR(20) CHECK (target_type IN ('inventory','event','location_request','invitation')), -- If the notification is associated with another table, add a target type and target id pointing to the table
     target_id INT,
     description TEXT DEFAULT NULL,

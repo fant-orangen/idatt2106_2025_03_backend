@@ -49,4 +49,10 @@ public interface ProductBatchRepository extends JpaRepository<ProductBatch, Inte
      */
     @Query("SELECT COALESCE(SUM(pb.number), 0) FROM ProductBatch pb WHERE pb.productType.category = 'water' AND pb.productType.unit = 'l' AND pb.productType.household.id = :householdId")
     Integer sumTotalLitresOfWaterByHousehold(@Param("householdId") Integer householdId);
+
+    @Query("SELECT COALESCE(SUM(pb.number * pt.caloriesPerUnit), 0) FROM ProductBatch pb " +
+           "JOIN pb.productType pt " +
+           "WHERE pt.household.id = :householdId " +
+           "AND pt.category = 'food'")
+    Integer sumTotalCaloriesByHousehold(@Param("householdId") Integer householdId);
 }
