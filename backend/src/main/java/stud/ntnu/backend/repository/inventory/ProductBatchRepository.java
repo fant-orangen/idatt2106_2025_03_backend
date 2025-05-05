@@ -81,4 +81,23 @@ public interface ProductBatchRepository extends JpaRepository<ProductBatch, Inte
     @Query("SELECT pb FROM ProductBatch pb JOIN FETCH pb.productType pt JOIN FETCH pt.household " +
            "WHERE pb.expirationTime < :referenceDate")
     List<ProductBatch> findExpiredBatches(@Param("referenceDate") LocalDateTime referenceDate);
+
+    /**
+     * Find expiring product batches for a specific product type.
+     *
+     * @param productTypeId the ID of the product type
+     * @param fromDate the start date/time
+     * @param toDate the end date/time
+     * @param pageable pagination information
+     * @return a page of product batches
+     */
+    @Query("SELECT pb FROM ProductBatch pb " +
+           "WHERE pb.productType.id = :productTypeId " +
+           "AND pb.expirationTime > :fromDate " +
+           "AND pb.expirationTime < :toDate")
+    Page<ProductBatch> findByProductTypeIdAndExpirationTimeBetween(
+        @Param("productTypeId") Integer productTypeId,
+        @Param("fromDate") LocalDateTime fromDate,
+        @Param("toDate") LocalDateTime toDate,
+        Pageable pageable);
 }

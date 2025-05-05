@@ -675,7 +675,7 @@ public class InventoryService {
     // Filter product types to only include those with batches expiring within the time period
     List<ProductType> filteredTypes = productTypes.getContent().stream()
         .filter(type -> {
-            List<ProductBatch> batches = productBatchRepository.findByProductTypeId(type.getId());
+            List<ProductBatch> batches = productBatchRepository.findByProductTypeId(type.getId(), Pageable.unpaged()).getContent();
             return batches.stream()
                 .anyMatch(batch -> {
                     LocalDateTime expirationTime = batch.getExpirationTime();
