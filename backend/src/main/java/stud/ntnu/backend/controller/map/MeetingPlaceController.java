@@ -171,6 +171,5 @@ public class MeetingPlaceController {
     }
 
 
-    // TODO: Add endpoint for getting all meeting places
 
 }
