@@ -142,6 +142,18 @@ public class ScenarioThemeService {
    */
   public Optional<ScenarioThemeNameDto> getScenarioThemeNameById(Integer id) {
     return scenarioThemeRepository.findById(id)
-        .map(theme -> new ScenarioThemeNameDto(theme.getName()));
+        .map(theme -> new ScenarioThemeNameDto(theme.getId(), theme.getName()));
+  }
+
+  /**
+   * Gets a list of all scenario themes with just their IDs and names.
+   * This is a lightweight endpoint for UI components that only need basic theme information.
+   *
+   * @return List of ScenarioThemeNameDto containing only IDs and names
+   */
+  public List<ScenarioThemeNameDto> getAllScenarioThemePreviews() {
+    return scenarioThemeRepository.findAll().stream()
+        .map(theme -> new ScenarioThemeNameDto(theme.getId(), theme.getName()))
+        .toList();
   }
 }

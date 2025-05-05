@@ -124,14 +124,13 @@ CREATE TABLE group_inventory_contributions (
 -- MEETING PLACES (user/household–defined POIs)
 CREATE TABLE meeting_places (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    household_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
     latitude DECIMAL(10,7) NOT NULL,
     longitude DECIMAL(10,7) NOT NULL,
     address TEXT,
+    status VARCHAR(10) NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
     created_by_user_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (household_id) REFERENCES households(id),
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
 );
 

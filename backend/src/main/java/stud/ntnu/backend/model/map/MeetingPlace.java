@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.user.User;
 
 @Entity
@@ -20,10 +19,6 @@ public class MeetingPlace {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
-  @ManyToOne
-  @JoinColumn(name = "household_id", nullable = false)
-  private Household household;
-
   @Column(name = "name", nullable = false)
   private String name;
 
@@ -35,6 +30,9 @@ public class MeetingPlace {
 
   @Column(name = "address", columnDefinition = "TEXT")
   private String address;
+
+  @Column(name = "status", nullable = false)
+  private String status = "active";
 
   @ManyToOne
   @JoinColumn(name = "created_by_user_id", nullable = false)
@@ -49,9 +47,7 @@ public class MeetingPlace {
     createdAt = LocalDateTime.now();
   }
 
-  public MeetingPlace(Household household, String name, BigDecimal latitude, BigDecimal longitude,
-      User createdByUser) {
-    this.household = household;
+  public MeetingPlace(String name, BigDecimal latitude, BigDecimal longitude, User createdByUser) {
     this.name = name;
     this.latitude = latitude;
     this.longitude = longitude;
