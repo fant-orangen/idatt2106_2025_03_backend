@@ -8,6 +8,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.inventory.ProductBatch;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 /**
  * Repository interface for ProductBatch entity operations.
  */
@@ -55,4 +58,27 @@ public interface ProductBatchRepository extends JpaRepository<ProductBatch, Inte
            "WHERE pt.household.id = :householdId " +
            "AND pt.category = 'food'")
     Integer sumTotalCaloriesByHousehold(@Param("householdId") Integer householdId);
+    
+    /**
+     * Find product batches that are about to expire (between now and future date).
+     * Includes all product type and household information for efficient processing.
+     *
+     * @param fromDate the start date/time (now)
+     * @param toDate the end date/time (future)
+     * @return a list of product batches
+     */
+    @Query("SELECT pb FROM ProductBatch pb JOIN FETCH pb.productType pt JOIN FETCH pt.household " +
+           "WHERE pb.expirationTime > :fromDate AND pb.expirationTime < :toDate")
+    List<ProductBatch> findExpiringBatches(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate);
+    
+    /**
+     * Find product batches that have already expired (before now).
+     * Includes all product type and household information for efficient processing.
+     *
+     * @param referenceDate the reference date/time (now)
+     * @return a list of product batches
+     */
+    @Query("SELECT pb FROM ProductBatch pb JOIN FETCH pb.productType pt JOIN FETCH pt.household " +
+           "WHERE pb.expirationTime < :referenceDate")
+    List<ProductBatch> findExpiredBatches(@Param("referenceDate") LocalDateTime referenceDate);
 }
