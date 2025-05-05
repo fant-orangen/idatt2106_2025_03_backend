@@ -41,7 +41,7 @@ public class ExpirationNotificationScheduler {
     private final MessageSource messageSource;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    private static final Locale LOCALE = new Locale("nb", "NO"); // Norwegian locale
+    private static final Locale LOCALE = Locale.forLanguageTag("nb-NO"); // Norwegian locale
 
     /**
      * Scheduled task that runs daily at 1 AM to check for expiring and expired products.
