@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.auth.AuthRequestDto;
 import stud.ntnu.backend.dto.auth.AuthResponseDto;
+import stud.ntnu.backend.dto.auth.ChangePasswordDto;
 import stud.ntnu.backend.dto.auth.RegisterRequestDto;
 import stud.ntnu.backend.model.user.EmailToken;
 import stud.ntnu.backend.model.user.Role;
@@ -291,5 +292,32 @@ public class AuthService {
     emailTokenRepository.save(emailToken);
 
     log.info("Password reset successfully for user: {}", user.getEmail());
+  }
+    /**
+     * Changes the password for the currently authenticated user.
+     *
+     * @param changePasswordDto DTO containing the old and new passwords
+     * @throws IllegalArgumentException if the old password does not match
+     */
+  @Transactional
+  public void changePassword(ChangePasswordDto changePasswordDto) {
+    // Get the currently authenticated user
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
+
+    // Find the user by email
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("No user found with email: " + email));
+
+    // Check if the old password matches
+    if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), user.getPasswordHash())) {
+      throw new IllegalArgumentException("Failed to authenticate user");
+    }
+
+    // Update the user's password
+    user.setPasswordHash(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+    userRepository.save(user);
+
+    log.info("Password changed successfully for user: {}", email);
   }
 }
