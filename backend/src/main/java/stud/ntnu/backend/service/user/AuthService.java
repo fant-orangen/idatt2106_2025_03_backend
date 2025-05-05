@@ -23,6 +23,7 @@ import stud.ntnu.backend.util.JwtUtil;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import stud.ntnu.backend.validation.PasswordValidator;
 
 /**
  * Service for handling authentication-related operations.
@@ -299,25 +300,24 @@ public class AuthService {
      * @param changePasswordDto DTO containing the old and new passwords
      * @throws IllegalArgumentException if the old password does not match
      */
-  @Transactional
-  public void changePassword(ChangePasswordDto changePasswordDto) {
-    // Get the currently authenticated user
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String email = authentication.getName();
+    @Transactional
+    public void changePassword(ChangePasswordDto changePasswordDto) {
+      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+      String email = authentication.getName();
 
-    // Find the user by email
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new IllegalArgumentException("No user found with email: " + email));
+      User user = userRepository.findByEmail(email)
+              .orElseThrow(() -> new IllegalArgumentException("No user found with email: " + email));
 
-    // Check if the old password matches
-    if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), user.getPasswordHash())) {
-      throw new IllegalArgumentException("Failed to authenticate user");
+      if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), user.getPasswordHash())) {
+        throw new IllegalArgumentException("Failed to authenticate user");
+      }
+
+      PasswordValidator.validate(changePasswordDto.getOldPassword(), changePasswordDto.getNewPassword(),
+              changePasswordDto.getConfirmNewPassword());
+
+      user.setPasswordHash(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+      userRepository.save(user);
+
+      log.info("Password changed successfully for user: {}", email);
     }
-
-    // Update the user's password
-    user.setPasswordHash(passwordEncoder.encode(changePasswordDto.getNewPassword()));
-    userRepository.save(user);
-
-    log.info("Password changed successfully for user: {}", email);
-  }
 }
