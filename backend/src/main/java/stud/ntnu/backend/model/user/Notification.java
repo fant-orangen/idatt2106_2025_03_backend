@@ -60,7 +60,7 @@ public class Notification {
 
   // Enum for target type
   public enum TargetType {
-    inventory, event, location_request
+    inventory, event, location_request, invitation
   }
 
   // Constructor with required fields

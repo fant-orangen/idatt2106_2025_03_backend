@@ -43,8 +43,16 @@ public class Invitation {
   @Column(name = "accepted_at")
   private LocalDateTime acceptedAt;
 
+  @Column(name = "declined_at")
+  private LocalDateTime declinedAt;
+
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
+
+  // Enum for invitation status
+  public enum Status {
+    PENDING, ACCEPTED, DECLINED, EXPIRED
+  }
 
   // Set createdAt before persist
   @PrePersist
@@ -57,5 +65,60 @@ public class Invitation {
     this.inviteeEmail = inviteeEmail;
     this.token = token;
     this.expiresAt = expiresAt;
+  }
+
+  /**
+   * Constructor for household invitations.
+   */
+  public Invitation(User inviterUser, String inviteeEmail, Household household, String token, LocalDateTime expiresAt) {
+    this.inviterUser = inviterUser;
+    this.inviteeEmail = inviteeEmail;
+    this.household = household;
+    this.token = token;
+    this.expiresAt = expiresAt;
+  }
+
+  /**
+   * Get the current status of the invitation.
+   *
+   * @return the status of the invitation
+   */
+  public Status getStatus() {
+    if (acceptedAt != null) {
+      return Status.ACCEPTED;
+    } else if (declinedAt != null) {
+      return Status.DECLINED;
+    } else if (expiresAt.isBefore(LocalDateTime.now())) {
+      return Status.EXPIRED;
+    } else {
+      return Status.PENDING;
+    }
+  }
+
+  /**
+   * Check if the invitation is pending (not accepted, declined, or expired).
+   *
+   * @return true if the invitation is pending, false otherwise
+   */
+  public boolean isPending() {
+    return getStatus() == Status.PENDING;
+  }
+
+  /**
+   * Accept the invitation.
+   */
+  public void accept() {
+    if (isPending()) {
+      this.acceptedAt = LocalDateTime.now();
+    }
+  }
+
+  /**
+   * Decline the invitation.
+   */
+  public void decline() {
+    if (isPending()) {
+      this.declinedAt = LocalDateTime.now();
+    }
   }
 }
