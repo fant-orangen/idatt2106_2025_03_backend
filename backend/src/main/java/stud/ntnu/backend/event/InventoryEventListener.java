@@ -6,13 +6,16 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import stud.ntnu.backend.model.user.Notification;
+ import stud.ntnu.backend.model.user.NotificationPreference;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.repository.user.NotificationPreferenceRepository;
 import stud.ntnu.backend.service.inventory.ProductService;
 import stud.ntnu.backend.service.user.NotificationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -22,6 +25,7 @@ public class InventoryEventListener {
   private final ProductService productService;
   private final NotificationService notificationService;
   private final UserRepository userRepository;
+  private final NotificationPreferenceRepository notificationPreferenceRepository;
 
   private static final int DAYS_WARNING_THRESHOLD = 7;
 
@@ -54,14 +58,20 @@ public class InventoryEventListener {
       );
 
       for (User user : householdUsers) {
-        Notification notification = notificationService.createNotification(
-            user,
-            Notification.PreferenceType.remaining_supply_alert,
-            Notification.TargetType.inventory,
-            null,
-            waterMessage
-        );
-        notificationService.sendNotification(notification);
+        // Check if user has enabled notifications for remaining supply alerts
+        Optional<NotificationPreference> preference = notificationPreferenceRepository
+            .findByUserAndPreferenceType(user, Notification.PreferenceType.remaining_supply_alert);
+        
+        if (preference.isEmpty() || preference.get().getEnabled()) {
+          Notification notification = notificationService.createNotification(
+              user,
+              Notification.PreferenceType.remaining_supply_alert,
+              Notification.TargetType.inventory,
+              null,
+              waterMessage
+          );
+          notificationService.sendNotification(notification);
+        }
       }
     }
 
@@ -73,14 +83,20 @@ public class InventoryEventListener {
       );
 
       for (User user : householdUsers) {
-        Notification notification = notificationService.createNotification(
-            user,
-            Notification.PreferenceType.remaining_supply_alert,
-            Notification.TargetType.inventory,
-            null,
-            foodMessage
-        );
-        notificationService.sendNotification(notification);
+        // Check if user has enabled notifications for remaining supply alerts
+        Optional<NotificationPreference> preference = notificationPreferenceRepository
+            .findByUserAndPreferenceType(user, Notification.PreferenceType.remaining_supply_alert);
+        
+        if (preference.isEmpty() || preference.get().getEnabled()) {
+          Notification notification = notificationService.createNotification(
+              user,
+              Notification.PreferenceType.remaining_supply_alert,
+              Notification.TargetType.inventory,
+              null,
+              foodMessage
+          );
+          notificationService.sendNotification(notification);
+        }
       }
     }
   }

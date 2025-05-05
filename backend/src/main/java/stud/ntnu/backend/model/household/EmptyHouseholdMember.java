@@ -46,8 +46,8 @@ public class EmptyHouseholdMember {
     this.createdAt = java.time.LocalDateTime.now();
   }
 
-  public EmptyHouseholdMember(String name, String type, String description, Integer kcal_requirement) {
+  public EmptyHouseholdMember(String name, String type, String description, Integer kcalRequirement) {
     this(name, type, description);
-    this.kcal_requirement = kcal_requirement != null ? kcal_requirement : 2000;
+    this.kcalRequirement = kcalRequirement != null ? kcalRequirement : 2000;
   }
 } 
