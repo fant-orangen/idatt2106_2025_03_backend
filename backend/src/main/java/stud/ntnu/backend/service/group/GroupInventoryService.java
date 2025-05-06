@@ -19,6 +19,8 @@ import stud.ntnu.backend.repository.inventory.ProductBatchRepository;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.util.SearchUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +40,7 @@ public class GroupInventoryService {
   private final HouseholdRepository householdRepository;
   private final UserRepository userRepository;
   private final SearchUtil searchUtil;
+  private final Logger logger = LoggerFactory.getLogger(GroupInventoryService.class);
 
   /**
    * Constructor for dependency injection.
@@ -274,5 +277,38 @@ public class GroupInventoryService {
         pt.getCaloriesPerUnit(),
         pt.getCategory()
     ));
+  }
+
+  /**
+   * Checks if a product batch is contributed to any group by the user's household.
+   * 
+   * @param productBatchId the ID of the product batch to check
+   * @param email the email of the user making the request
+   * @return true if the batch exists, belongs to the user's household, and is contributed to at least one group
+   * @throws IllegalArgumentException if the user is not found
+   */
+  public boolean isContributedToGroup(Integer productBatchId, String email) {
+    // Check if batch exists
+    ProductBatch batch = productBatchRepository.findById(productBatchId).orElse(null);
+    if (batch == null) {
+      return false;
+    } 
+    // Check if the batch is contributed to a group associated with the user's household
+    // Get user's household
+    var user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    
+    var household = user.getHousehold();
+    if (household == null) {
+        return false;
+    }
+
+    // Check if batch belongs to user's household
+    if (!batch.getProductType().getHousehold().getId().equals(household.getId())) {
+        return false;
+    }
+
+    // Check if batch is contributed to any group
+    return groupInventoryContributionRepository.existsByProductBatchId(productBatchId);
   }
 }

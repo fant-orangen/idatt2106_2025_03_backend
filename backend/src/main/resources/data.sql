@@ -163,32 +163,12 @@ INSERT INTO product_batch (product_type_id, date_added, expiration_time, number)
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 1); --  Canned Beans
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 7); -- Antibiotics
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (2, 1, 3); -- Rice
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (2, 3, 10); -- Cooking oil
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (2, 1, 10); -- Cooking oil
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 2);
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 4);
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 5);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 6);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 8);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 9);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 11);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 12);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 13);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 14);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 15);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 16);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 17);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 18);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 19);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 20);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 21);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 22);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 23);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 24);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 25);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 26);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 27);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 28);
-INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 29);
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 2, 29);
+
 
 
 

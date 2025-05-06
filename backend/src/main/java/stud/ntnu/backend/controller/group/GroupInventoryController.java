@@ -160,4 +160,24 @@ public class GroupInventoryController {
     return ResponseEntity.ok(page);
   }
 
+  /**
+   * Check if a product batch is contributed to a group by the current user's household.
+   *
+   * @param productBatchId the id of the product batch
+   * @param principal the authenticated user
+   * @return true if the product batch is contributed to a group, false otherwise
+   */
+  @GetMapping("user/groups/inventory/{productBatchId}/contributed")
+  public ResponseEntity<Boolean> isContributedToGroup(@PathVariable Integer productBatchId, Principal principal) {
+    if (Objects.isNull(productBatchId)) {
+      return ResponseEntity.badRequest().build();
+    }
+    String email = principal.getName();
+    try {
+      boolean isContributed = groupInventoryService.isContributedToGroup(productBatchId, email);
+      return ResponseEntity.ok(isContributed);
+    } catch (Exception e) {
+      return ResponseEntity.status(400).body(false); // TODO: Change this status code?
+    }
+  }
 }

@@ -40,4 +40,8 @@ public interface GroupInventoryContributionRepository extends JpaRepository<Grou
         @Param("householdId") Integer householdId,
         @Param("searchTerm") String searchTerm,
         Pageable pageable);
+
+    @Query("SELECT CASE WHEN COUNT(gic) > 0 THEN true ELSE false END FROM GroupInventoryContribution gic " +
+           "WHERE gic.product.id = :productBatchId")
+    boolean existsByProductBatchId(@Param("productBatchId") Integer productBatchId);
 }
