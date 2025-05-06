@@ -43,6 +43,12 @@ public interface ProductTypeRepository extends JpaRepository<ProductType, Intege
      */
     Page<ProductType> findByHouseholdIdAndCategory(Integer householdId, String category, Pageable pageable);
 
-    @Query("SELECT DISTINCT pt FROM ProductType pt JOIN ProductBatch pb ON pb.productType = pt JOIN GroupInventoryContribution gic ON gic.product = pb WHERE gic.group.id = :groupId AND pt.category = :category")
-    Page<ProductType> findContributedProductTypesByGroupAndCategory(@Param("groupId") Integer groupId, @Param("category") String category, Pageable pageable);
+
+    @Query("SELECT DISTINCT pt FROM ProductType pt " +
+           "JOIN ProductBatch pb ON pb.productType = pt " +
+           "JOIN GroupInventoryContribution gic ON gic.product = pb " +
+           "WHERE gic.group.id = :groupId")
+    Page<ProductType> findContributedProductTypesByGroup(
+        @Param("groupId") Integer groupId,
+        Pageable pageable);
 }

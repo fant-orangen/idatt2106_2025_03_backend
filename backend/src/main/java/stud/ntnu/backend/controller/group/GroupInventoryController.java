@@ -37,25 +37,21 @@ public class GroupInventoryController {
   }
 
   /**
-   * Get a paginated list of all product types with batches contributed to the given group and
-   * category.
+   * Get a paginated list of all product types with batches contributed to the given group.
    *
    * @param groupId The ID of the group
-   * @param category The category to filter by
    * @param pageable pagination information
    * @return a page of ProductTypeDto
    */
   @GetMapping("/user/groups/inventory/product-types")
   public ResponseEntity<Page<ProductTypeDto>> getContributedProductTypes(
       @RequestParam Integer groupId,
-      @RequestParam String category,
       Pageable pageable) {
-    if (Objects.isNull(groupId) || Objects.isNull(category)) {
+    if (Objects.isNull(groupId)) {
       return ResponseEntity.badRequest().build();
     }
     Page<ProductTypeDto> page = groupInventoryService.getContributedProductTypes(
         groupId,
-        category,
         pageable);
     return ResponseEntity.ok(page);
   }
@@ -132,6 +128,33 @@ public class GroupInventoryController {
       return ResponseEntity.status(409).body("Batch could not be added to group.");
     }
     return ResponseEntity.ok().build();
+  }
+
+  /**
+   * Search for product types that have at least one batch contributed to the specified group by the current user's household.
+   *
+   * @param groupId The ID of the group to search within
+   * @param search The search term to filter product types by name
+   * @param pageable pagination information
+   * @param principal the authenticated user
+   * @return a page of ProductTypeDto matching the search criteria
+   */
+  @GetMapping("/user/groups/inventory/product-types/search")
+  public ResponseEntity<Page<ProductTypeDto>> searchContributedProductTypes(
+      @RequestParam Integer groupId,
+      @RequestParam String search,
+      Pageable pageable,
+      Principal principal) {
+    if (Objects.isNull(groupId) || Objects.isNull(search)) {
+      return ResponseEntity.badRequest().build();
+    }
+    String email = principal.getName();
+    Page<ProductTypeDto> page = groupInventoryService.searchContributedProductTypes(
+        groupId,
+        search,
+        email,
+        pageable);
+    return ResponseEntity.ok(page);
   }
 
 }

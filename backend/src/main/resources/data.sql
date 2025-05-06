@@ -161,6 +161,7 @@ INSERT INTO product_batch (product_type_id, date_added, expiration_time, number)
 
 -- GROUP INVENTORY CONTRIBUTIONS
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 1); -- Neighborhood Watch, Smith Family, Canned Beans
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 7); -- Neighborhood Watch, Smith Family, Canned Beans
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 2, 5); -- Neighborhood Watch, Johnson Household, Flour
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (2, 1, 3); -- Emergency Response Team, Smith Family, Bottled Water
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (2, 3, 10); -- Emergency Response Team, Brown Residence, Canned Soup
