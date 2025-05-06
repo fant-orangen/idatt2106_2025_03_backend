@@ -230,6 +230,7 @@ public class AuthService {
     );
   }
 
+
   public void send2FACode(String email) {
     twoFactorCodeService.sendVerificationCode(email);
   }

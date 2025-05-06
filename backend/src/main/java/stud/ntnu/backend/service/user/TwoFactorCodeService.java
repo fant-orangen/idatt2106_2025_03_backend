@@ -51,6 +51,7 @@ public class TwoFactorCodeService {
    *
    * @param email The email address to send the verification code to.
    */
+  @Transactional
   public void sendVerificationCode(String email) {
     twoFactorCodeRepository.deleteByEmail(email);
     Integer code = generateVerificationCode();
