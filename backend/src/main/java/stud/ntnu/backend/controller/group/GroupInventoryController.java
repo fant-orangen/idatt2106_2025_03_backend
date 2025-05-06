@@ -177,7 +177,7 @@ public class GroupInventoryController {
       boolean isContributed = groupInventoryService.isContributedToGroup(productBatchId, email);
       return ResponseEntity.ok(isContributed);
     } catch (Exception e) {
-      return ResponseEntity.status(400).body(false); // TODO: Change this status code?
+      return ResponseEntity.status(403).body(false); // TODO: Change this status code?
     }
   }
 }

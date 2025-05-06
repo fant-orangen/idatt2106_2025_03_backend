@@ -305,7 +305,7 @@ public class GroupInventoryService {
 
     // Check if batch belongs to user's household
     if (!batch.getProductType().getHousehold().getId().equals(household.getId())) {
-        return false;
+        throw new IllegalArgumentException("Batch does not belong to user's household");
     }
 
     // Check if batch is contributed to any group
