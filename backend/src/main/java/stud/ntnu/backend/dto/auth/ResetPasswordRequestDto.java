@@ -1,6 +1,7 @@
 package stud.ntnu.backend.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +19,10 @@ public class ResetPasswordRequestDto {
   @NotBlank(message = "Token is required")
   private String token;
 
-  @NotBlank(message = "New password is required")
-  @Size(min = 8, message = "Password must be at least 8 characters long")
+  @Size(min = 8, max = 100, message = "Password must be at between 8 and 100 characters long")
+  @Pattern(
+          regexp = "^[A-Za-z0-9\\p{L}\\p{M}\\p{P}\\p{S}]+$",
+          message = "Invalid password format"
+  )
   private String newPassword;
 }
