@@ -40,19 +40,23 @@ public class GroupInventoryController {
    * Get a paginated list of all product types with batches contributed to the given group and
    * category.
    *
-   * @param request  JSON body with groupId and category
+   * @param groupId The ID of the group
+   * @param category The category to filter by
    * @param pageable pagination information
    * @return a page of ProductTypeDto
    */
   @GetMapping("/user/groups/inventory/product-types")
   public ResponseEntity<Page<ProductTypeDto>> getContributedProductTypes(
-      @RequestBody ContributedProductTypesRequestDto request, Pageable pageable) {
-    if (Objects.isNull(request.getGroupId()) || Objects.isNull(request.getCategory())) {
+      @RequestParam Integer groupId,
+      @RequestParam String category,
+      Pageable pageable) {
+    if (Objects.isNull(groupId) || Objects.isNull(category)) {
       return ResponseEntity.badRequest().build();
     }
     Page<ProductTypeDto> page = groupInventoryService.getContributedProductTypes(
-        request.getGroupId(),
-        request.getCategory(), pageable);
+        groupId,
+        category,
+        pageable);
     return ResponseEntity.ok(page);
   }
 
