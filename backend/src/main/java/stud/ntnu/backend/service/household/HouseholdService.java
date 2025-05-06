@@ -465,7 +465,8 @@ public class HouseholdService {
             member.getId(),
             member.getName(),
             member.getType(),
-            member.getDescription()
+            member.getDescription(),
+            member.getKcalRequirement()
         ))
         .collect(Collectors.toList());
   }
@@ -502,7 +503,8 @@ public class HouseholdService {
     EmptyHouseholdMember member = new EmptyHouseholdMember(
         createDto.getName(),
         createDto.getType(),
-        createDto.getDescription()
+        createDto.getDescription(),
+        createDto.getKcalRequirement()
     );
     member.setHousehold(household);
 
@@ -515,7 +517,8 @@ public class HouseholdService {
         member.getId(),
         member.getName(),
         member.getType(),
-        member.getDescription()
+        member.getDescription(),
+        member.getKcalRequirement()
     );
   }
 

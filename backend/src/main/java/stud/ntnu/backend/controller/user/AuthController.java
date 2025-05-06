@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.auth.*;
 import stud.ntnu.backend.service.user.AuthService;
 import stud.ntnu.backend.service.user.RecaptchaService;
+import stud.ntnu.backend.model.user.Notification;
+import stud.ntnu.backend.model.user.NotificationPreference;
+import stud.ntnu.backend.repository.user.NotificationPreferenceRepository;
+
 
 /**
  * Handles user authentication and account lifecycle actions. Includes user registration, email

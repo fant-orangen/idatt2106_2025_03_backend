@@ -19,10 +19,16 @@ import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.inventory.ProductBatchRepository;
 import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
 import stud.ntnu.backend.util.SearchUtil;
+import org.springframework.context.ApplicationEventPublisher;
+import stud.ntnu.backend.event.InventoryChangeEvent;
+import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.repository.household.HouseholdMemberRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+// IMPORTANT! This class has been deprecated and only exists in case of errors 
 
 /**
  * Service for managing product types and batches.
@@ -34,15 +40,24 @@ public class ProductService {
   private final ProductTypeRepository productTypeRepository;
   private final HouseholdRepository householdRepository;
   private final SearchUtil searchUtil;
+  private final ApplicationEventPublisher eventPublisher;
+  private final UserRepository userRepository;
+  private final HouseholdMemberRepository householdMemberRepository;
 
   public ProductService(ProductBatchRepository productBatchRepository,
       ProductTypeRepository productTypeRepository,
       HouseholdRepository householdRepository,
-      SearchUtil searchUtil) {
+      SearchUtil searchUtil,
+      ApplicationEventPublisher eventPublisher,
+      UserRepository userRepository,
+      HouseholdMemberRepository householdMemberRepository) {
     this.productBatchRepository = productBatchRepository;
     this.productTypeRepository = productTypeRepository;
     this.householdRepository = householdRepository;
     this.searchUtil = searchUtil;
+    this.eventPublisher = eventPublisher;
+    this.userRepository = userRepository;
+    this.householdMemberRepository = householdMemberRepository;
   }
 
   /**
@@ -157,12 +172,17 @@ public class ProductService {
         .orElseThrow(
             () -> new NoSuchElementException("Product batch not found with ID: " + batchId));
 
+    Integer householdId = batch.getProductType().getHousehold().getId();
+
     if (batch.getNumber() < updateDto.getUnitsToRemove()) {
       throw new IllegalArgumentException("Cannot remove more units than available in the batch");
     }
 
     batch.setNumber(batch.getNumber() - updateDto.getUnitsToRemove());
     ProductBatch updatedBatch = productBatchRepository.save(batch);
+
+    // Publish event after update
+    eventPublisher.publishEvent(new InventoryChangeEvent(householdId, "UPDATE"));
 
     return convertToDto(updatedBatch);
   }
@@ -174,10 +194,16 @@ public class ProductService {
    */
   @Transactional
   public void deleteProductBatch(Integer batchId) {
-    if (!productBatchRepository.existsById(batchId)) {
-      throw new NoSuchElementException("Product batch not found with ID: " + batchId);
-    }
+    ProductBatch batch = productBatchRepository.findById(batchId)
+        .orElseThrow(
+            () -> new NoSuchElementException("Product batch not found with ID: " + batchId));
+
+    Integer householdId = batch.getProductType().getHousehold().getId();
+
     productBatchRepository.deleteById(batchId);
+
+    // Publish event after deletion
+    eventPublisher.publishEvent(new InventoryChangeEvent(householdId, "DELETE"));
   }
 
   /**
@@ -203,6 +229,8 @@ public class ProductService {
 
     // Delete the product type - associated product batches will be deleted automatically via ON DELETE CASCADE
     productTypeRepository.deleteById(productTypeId);
+
+    eventPublisher.publishEvent(new InventoryChangeEvent(householdId, "DELETE"));
   }
 
   /**
@@ -382,5 +410,98 @@ public class ProductService {
             && pt.getCategory().equalsIgnoreCase(category))
         .toList();
     return new PageImpl<>(filteredList, pageable, filteredList.size()).map(this::convertToDto);
+  }
+
+  /**
+   * Calculate total calories available in a household's inventory.
+   *
+   * @param householdId the ID of the household
+   * @return total calories available
+   */
+  public Integer getTotalCaloriesByHousehold(Integer householdId) {
+    return productBatchRepository.sumTotalCaloriesByHousehold(householdId);
+  }
+
+  /**
+   * Calculate required water per day for a household (3L per person).
+   *
+   * @param householdId the ID of the household
+   * @return required water in litres per day
+   */
+  public Integer getHouseholdWaterRequirement(Integer householdId) {
+    Household household = householdRepository.findById(householdId)
+        .orElseThrow(
+            () -> new NoSuchElementException("Household not found with ID: " + householdId));
+
+    // Count users in household
+    int userCount = userRepository.countByHouseholdId(householdId);
+
+    // Count non-user household members (excluding pets)
+    int memberCount = householdMemberRepository.countByHouseholdIdAndTypeNot(householdId, "pet");
+
+    // Calculate total water requirement (3L per person per day)
+    return (userCount + memberCount) * 3;
+  }
+
+  /**
+   * Calculate required calories per day for a household.
+   *
+   * @param householdId the ID of the household
+   * @return required calories per day
+   */
+  public Integer getHouseholdCalorieRequirement(Integer householdId) {
+    // Sum kcal requirements for users
+    Integer userCalories = userRepository.sumKcalRequirementByHouseholdId(householdId);
+
+    // Sum kcal requirements for household members
+    Integer memberCalories = householdMemberRepository.sumKcalRequirementByHouseholdId(householdId);
+
+    return userCalories + memberCalories;
+  }
+
+  /**
+   * Calculate the number of days of water remaining in the household based on
+   * the recommended daily water consumption per person.
+   *
+   * @param householdId the ID of the household
+   * @return the number of days of water remaining
+   */
+  public Double getWaterDaysRemaining(Integer householdId) {
+    // Get total water in the household
+    Integer totalLitres = getTotalLitresOfWaterByHousehold(householdId);
+    
+    // Get the daily water requirement for the household
+    Integer dailyRequirement = getHouseholdWaterRequirement(householdId);
+    
+    // Avoid division by zero
+    if (dailyRequirement == 0) {
+      return 0.0;
+    }
+    
+    // Calculate days remaining
+    return totalLitres.doubleValue() / dailyRequirement.doubleValue();
+  }
+
+  /**
+   * Calculate the number of days of food remaining in the household based on
+   * the recommended daily food consumption per person.
+   *
+   * @param householdId the ID of the household
+   * @return the number of days of food remaining
+   */
+  public Double getFoodDaysRemaining(Integer householdId) {
+    // Get total calories available in the household
+    Integer totalCalories = getTotalCaloriesByHousehold(householdId);
+    
+    // Get the daily calorie requirement for the household
+    Integer dailyRequirement = getHouseholdCalorieRequirement(householdId);
+    
+    // Avoid division by zero
+    if (dailyRequirement == 0) {
+      return 0.0;
+    }
+    
+    // Calculate days remaining
+    return totalCalories.doubleValue() / dailyRequirement.doubleValue();
   }
 }
