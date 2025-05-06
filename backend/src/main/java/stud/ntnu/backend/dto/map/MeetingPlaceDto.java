@@ -12,17 +12,21 @@ import stud.ntnu.backend.model.map.MeetingPlace;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MeetingPlaceDto {
+    private Integer id;
     private String name;
     private BigDecimal latitude;
     private BigDecimal longitude;
     private String address;
+    private String status;
 
     public static MeetingPlaceDto fromEntity(MeetingPlace meetingPlace) {
         return new MeetingPlaceDto(
+            meetingPlace.getId(),
             meetingPlace.getName(),
             meetingPlace.getLatitude(),
             meetingPlace.getLongitude(),
-            meetingPlace.getAddress()
+            meetingPlace.getAddress(),
+            meetingPlace.getStatus()
         );
     }
 } 
