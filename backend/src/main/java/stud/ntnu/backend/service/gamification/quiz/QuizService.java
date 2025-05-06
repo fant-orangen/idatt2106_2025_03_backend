@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.dto.quiz.CreateQuizDto;
 import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
+import stud.ntnu.backend.dto.quiz.QuizAnswerDto;
 import stud.ntnu.backend.dto.quiz.QuizAttemptSummaryDto;
 import stud.ntnu.backend.dto.quiz.QuizPreviewDto;
 import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
@@ -210,6 +211,15 @@ public class QuizService {
   }
 
   /**
+   * Retrieves all correct answers for a given quiz.
+   * @param questionId the ID of the question
+   * @return a list of QuizAnswer objects that are correct
+   */
+  public List<QuizAnswerDto> getAnswersByQuestionIdAdmin(Long questionId) {
+    return quizAnswerRepository.findAllAnswersByQuestionId(questionId);
+  }
+
+  /**
    * Calculates the total number of correct answers for a given user quiz attempt.
    *
    * @param attemptId the ID of the user quiz attempt
@@ -233,12 +243,13 @@ public class QuizService {
    *
    * @param dto the DTO containing quiz question data
    */
-  public void saveQuizQuestion(CreateQuizQuestionDto dto) {
+  public Long saveQuizQuestion(CreateQuizQuestionDto dto) {
     QuizQuestion question = new QuizQuestion();
     question.setQuizId(dto.getQuizId());
     question.setQuestionBody(dto.getQuestionBody());
     question.setPosition(dto.getPosition());
-    quizQuestionRepository.save(question);
+    QuizQuestion savedQuestion = quizQuestionRepository.save(question);
+    return savedQuestion.getId();
   }
 
   /**
