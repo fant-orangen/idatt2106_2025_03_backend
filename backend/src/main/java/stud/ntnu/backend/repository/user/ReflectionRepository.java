@@ -33,7 +33,7 @@ public interface ReflectionRepository extends JpaRepository<Reflection, Integer>
      * @param pageable pagination information
      * @return a page of reflections
      */
-    Page<Reflection> findByUserIdAndDeletedFalse(Integer userId, Pageable pageable);
+    Page<Reflection> findByUserIdAndDeletedFalseOrderByCreatedAtDesc(Integer userId, Pageable pageable);
 
     /**
      * Find all shared and non-deleted reflections for users in a specific household.
@@ -42,7 +42,7 @@ public interface ReflectionRepository extends JpaRepository<Reflection, Integer>
      * @param pageable pagination information
      * @return a page of shared reflections
      */
-    @Query("SELECT r FROM Reflection r WHERE r.shared = true AND r.deleted = false AND r.user.household.id = :householdId")
+    @Query("SELECT r FROM Reflection r WHERE r.shared = true AND r.deleted = false AND r.user.household.id = :householdId ORDER BY r.createdAt DESC")
     Page<Reflection> findSharedByHouseholdId(@Param("householdId") Integer householdId, Pageable pageable);
 
     /**
@@ -53,7 +53,8 @@ public interface ReflectionRepository extends JpaRepository<Reflection, Integer>
      * @return a page of shared reflections
      */
     @Query("SELECT r FROM Reflection r JOIN r.user u JOIN u.household h JOIN GroupMembership gm ON gm.household.id = h.id " +
-           "WHERE r.shared = true AND r.deleted = false AND gm.group.id = :groupId AND (gm.leftAt IS NULL OR gm.leftAt > CURRENT_TIMESTAMP)")
+           "WHERE r.shared = true AND r.deleted = false AND gm.group.id = :groupId AND (gm.leftAt IS NULL OR gm.leftAt > CURRENT_TIMESTAMP) " +
+           "ORDER BY r.createdAt DESC")
     Page<Reflection> findSharedByGroupId(@Param("groupId") Integer groupId, Pageable pageable);
 
     /**
@@ -75,6 +76,7 @@ public interface ReflectionRepository extends JpaRepository<Reflection, Integer>
            "    ) " +
            "    AND (gm.leftAt IS NULL OR gm.leftAt > CURRENT_TIMESTAMP)" +
            "  ))" +
-           ") AND r.user.id != :userId")
+           ") AND r.user.id != :userId " +
+           "ORDER BY r.createdAt DESC")
     Page<Reflection> findSharedVisibleToUser(@Param("userId") Integer userId, Pageable pageable);
 }

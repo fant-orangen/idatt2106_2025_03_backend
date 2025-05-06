@@ -76,7 +76,7 @@ public class ReflectionService {
    * @return a page of reflections
    */
   public Page<ReflectionResponseDto> getReflectionsByUserId(Integer userId, Pageable pageable) {
-    return reflectionRepository.findByUserIdAndDeletedFalse(userId, pageable)
+    return reflectionRepository.findByUserIdAndDeletedFalseOrderByCreatedAtDesc(userId, pageable)
         .map(ReflectionResponseDto::fromEntity);
   }
 
@@ -126,6 +126,7 @@ public class ReflectionService {
             .map(ReflectionResponseDto::fromEntity)
             .getContent().stream())
         .distinct() // Remove duplicates
+        .sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt())) // Sort by createdAt DESC
         .collect(Collectors.toList());
 
     // Convert to Page
