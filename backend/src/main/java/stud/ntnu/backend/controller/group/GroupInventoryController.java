@@ -64,18 +64,21 @@ public class GroupInventoryController {
    * Get all product batches for a given product type that are currently contributed to the given
    * group.
    *
-   * @param request  JSON body with groupId and productTypeId
+   * @param groupId The ID of the group
+   * @param productTypeId The ID of the product type
    * @param pageable pagination information
    * @return a paginated list of product batches
    */
   @GetMapping("/user/groups/inventory/product-types/batches")
   public ResponseEntity<Page<ProductBatchDto>> getContributedProductBatchesByType(
-      @RequestBody ContributedProductBatchesRequestDto request, Pageable pageable) {
-    if (Objects.isNull(request.getGroupId()) || Objects.isNull(request.getProductTypeId())) {
+      @RequestParam Integer groupId,
+      @RequestParam Integer productTypeId,
+      Pageable pageable) {
+    if (Objects.isNull(groupId) || Objects.isNull(productTypeId)) {
       return ResponseEntity.badRequest().build();
     }
     Page<ProductBatchDto> page = groupInventoryService.getContributedProductBatchesByType(
-        request.getGroupId(), request.getProductTypeId(), pageable);
+        groupId, productTypeId, pageable);
     return ResponseEntity.ok(page);
   }
 
