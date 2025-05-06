@@ -149,7 +149,7 @@ public class CrisisEventController {
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
   @PutMapping(path = "/admin/crisis-events/deactivate/{id}")
-  public ResponseEntity<?> deleteCrisisEvent(
+  public ResponseEntity<?> deactivateCrisisEvent(
       @PathVariable Integer id,
       Principal principal) {
     try {

@@ -68,6 +68,9 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "kcal_requirement", nullable = false)
+    private Integer kcalRequirement = 2000;
+
     @OneToMany(mappedBy = "createdByUser")
     @JsonManagedReference
     private List<Group> createdGroups;

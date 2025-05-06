@@ -1,10 +1,12 @@
 package stud.ntnu.backend.controller.map;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.map.CreateMeetingPlaceDto;
 import stud.ntnu.backend.dto.map.MeetingPlaceDto;
+import stud.ntnu.backend.dto.map.MeetingPlacePreviewDto;
 import stud.ntnu.backend.model.map.MeetingPlace;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
@@ -124,6 +126,63 @@ public class MeetingPlaceController {
                     .map(MeetingPlaceDto::fromEntity)
                     .toList();
             return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Gets a paginated list of all meeting places.
+     *
+     * @param page the page number (0-based, defaults to 0)
+     * @param size the size of each page (defaults to 10)
+     * @return paginated list of meeting places
+     */
+    @GetMapping("/public/meeting-places/all")
+    public ResponseEntity<Page<MeetingPlaceDto>> getAllMeetingPlaces(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Page<MeetingPlace> meetingPlaces = meetingPlaceService.getAllMeetingPlacesPaginated(page, size);
+            Page<MeetingPlaceDto> dtos = meetingPlaces.map(MeetingPlaceDto::fromEntity);
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Gets a paginated list of all meeting place previews.
+     *
+     * @param page the page number (0-based, defaults to 0)
+     * @param size the size of each page (defaults to 10)
+     * @return paginated list of meeting place previews
+     */
+    @GetMapping("/public/meeting-places/all/previews")
+    public ResponseEntity<Page<MeetingPlacePreviewDto>> getAllMeetingPlacePreviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Page<MeetingPlacePreviewDto> previews = meetingPlaceService.getAllMeetingPlacePreviewsPaginated(page, size);
+            return ResponseEntity.ok(previews);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Gets a meeting place by its ID.
+     *
+     * @param id the ID of the meeting place
+     * @return the meeting place if found, or 404 if not found
+     */
+    @GetMapping("/public/meeting-places/{id}")
+    public ResponseEntity<MeetingPlaceDto> getMeetingPlaceById(@PathVariable Integer id) {
+        try {
+            return meetingPlaceService.getMeetingPlaceById(id)
+                .map(MeetingPlaceDto::fromEntity)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }

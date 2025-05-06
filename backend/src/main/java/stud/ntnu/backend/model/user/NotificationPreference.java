@@ -21,11 +21,11 @@ public class NotificationPreference {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @Enumerated(EnumType.STRING)
   @Column(name = "preference_type", nullable = false)
-  private PreferenceType preferenceType;
+  @Enumerated(EnumType.STRING)
+  private Notification.PreferenceType preferenceType;
 
-  @Column(name = "enabled", nullable = false)
+  @Column(nullable = false)
   private Boolean enabled = true;
 
   @Column(name = "created_at", nullable = false, updatable = false)
@@ -47,12 +47,7 @@ public class NotificationPreference {
     updatedAt = LocalDateTime.now();
   }
 
-  // Enum for preference type
-  public enum PreferenceType {
-    expiration_reminder, crisis_alert, location_request
-  }
-
-  public NotificationPreference(User user, PreferenceType preferenceType) {
+  public NotificationPreference(User user, Notification.PreferenceType preferenceType) {
     this.user = user;
     this.preferenceType = preferenceType;
   }

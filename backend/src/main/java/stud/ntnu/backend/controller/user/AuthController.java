@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.auth.*;
 import stud.ntnu.backend.service.user.AuthService;
 import stud.ntnu.backend.service.user.RecaptchaService;
+import stud.ntnu.backend.model.user.Notification;
+import stud.ntnu.backend.model.user.NotificationPreference;
+import stud.ntnu.backend.repository.user.NotificationPreferenceRepository;
+
 
 /**
  * Handles user authentication and account lifecycle actions. Includes user registration, email
@@ -53,7 +57,6 @@ public class AuthController {
   @PostMapping("/login")
   public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
     // Verify the reCAPTCHA token
-    System.out.println("Recaptcha token: " + authRequest.getRecaptchaToken());
     log.info("Login request received: {}", authRequest);
         /*
         if (!recaptchaService.verifyRecaptcha(authRequest.getRecaptchaToken())) {
@@ -173,10 +176,8 @@ public class AuthController {
   public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDto request) {
     try {
       authService.forgotPassword(request.getEmail());
-      return ResponseEntity.ok("Password reset email sent successfully.");
+      return ResponseEntity.ok("If your email exists in our system, you will receive a password reset link.");
     } catch (IllegalArgumentException e) {
-      // Don't reveal if the email exists or not for security reasons
-      // Just return a generic success message
       log.info("Forgot password request for non-existent email: {}", request.getEmail());
       return ResponseEntity.ok(
           "If your email exists in our system, you will receive a password reset link.");

@@ -1,6 +1,7 @@
 package stud.ntnu.backend.controller.household;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -12,7 +13,6 @@ import java.security.Principal;
 import java.util.NoSuchElementException;
 import stud.ntnu.backend.dto.inventory.*;
 import stud.ntnu.backend.service.inventory.InventoryService;
-import stud.ntnu.backend.service.inventory.ProductService;
 
 /**
  * Handles inventory management at the household level. Includes listing, adding, editing, or
@@ -25,14 +25,11 @@ import stud.ntnu.backend.service.inventory.ProductService;
 public class InventoryController {
 
   private final InventoryService inventoryService;
-  private final ProductService productService;
   private final Logger log = LoggerFactory.getLogger(InventoryController.class);
 
-  public InventoryController(InventoryService inventoryService, ProductService productService) {
+  public InventoryController(InventoryService inventoryService) {
     this.inventoryService = inventoryService;
-    this.productService = productService;
   }
-
 
   /**
    * Get all product batches for a given product type.
@@ -45,7 +42,24 @@ public class InventoryController {
   public ResponseEntity<Page<ProductBatchDto>> getProductBatchesByProductType(
       @PathVariable Integer productTypeId,
       Pageable pageable) {
-    Page<ProductBatchDto> productBatches = productService.getProductBatchesByProductType(
+    Page<ProductBatchDto> productBatches = inventoryService.getProductBatchesByProductType(
+        productTypeId, pageable);
+    return ResponseEntity.ok(productBatches);
+  }
+
+  // TODO: test this endpoint
+  /**
+   * Get all expiring product batches for a given product type.
+   *
+   * @param productTypeId the ID of the product type
+   * @param pageable      pagination information
+   * @return a paginated list of expiring product batches
+   */
+  @GetMapping("/product-types/{productTypeId}/batches/expiring")
+  public ResponseEntity<Page<ProductBatchDto>> getExpiringProductBatchesByProductType(
+      @PathVariable Integer productTypeId,
+      Pageable pageable) {
+    Page<ProductBatchDto> productBatches = inventoryService.getExpiringProductBatchesByProductType(
         productTypeId, pageable);
     return ResponseEntity.ok(productBatches);
   }
@@ -68,7 +82,7 @@ public class InventoryController {
       Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
 
       // Get the total number of units, validating household ownership
-      Integer totalUnits = productService.getTotalUnitsForProductType(productTypeId, householdId);
+      Integer totalUnits = inventoryService.getTotalUnitsForProductType(productTypeId, householdId);
       return ResponseEntity.ok(totalUnits);
     } catch (NoSuchElementException e) {
       log.error("Error getting total units for product type", e);
@@ -94,7 +108,7 @@ public class InventoryController {
     try {
       String email = principal.getName();
       Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
-      Page<ProductTypeDto> productTypes = productService.getAllFoodProductTypes(householdId,
+      Page<ProductTypeDto> productTypes = inventoryService.getAllFoodProductTypes(householdId,
           pageable);
       return ResponseEntity.ok(productTypes);
     } catch (Exception e) {
@@ -123,7 +137,7 @@ public class InventoryController {
       // Set the household ID in the DTO
       createDto.setHouseholdId(householdId);
 
-      productService.createProductType(createDto);
+      inventoryService.createProductType(createDto);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       log.error("Error creating food product type", e);
@@ -148,7 +162,7 @@ public class InventoryController {
       Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
 
       // Validate that the product type belongs to the user's household
-      productService.createProductBatch(createDto, householdId);
+      inventoryService.createProductBatch(createDto, householdId);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       log.error("Error creating product batch", e);
@@ -168,7 +182,7 @@ public class InventoryController {
       @PathVariable Integer batchId,
       @Valid @RequestBody ProductBatchUpdateDto updateDto) {
     try {
-      productService.updateProductBatch(batchId, updateDto);
+      inventoryService.updateProductBatch(batchId, updateDto);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       log.error("Error updating product batch", e);
@@ -185,7 +199,7 @@ public class InventoryController {
   @DeleteMapping("/product-batches/{batchId}")
   public ResponseEntity<?> deleteProductBatch(@PathVariable Integer batchId) {
     try {
-      productService.deleteProductBatch(batchId);
+      inventoryService.deleteProductBatch(batchId);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       log.error("Error deleting product batch", e);
@@ -210,7 +224,7 @@ public class InventoryController {
       Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
 
       // Delete the product type, validating household ownership
-      productService.deleteProductType(productTypeId, householdId);
+      inventoryService.deleteProductType(productTypeId, householdId);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       log.error("Error deleting product type", e);
@@ -229,13 +243,58 @@ public class InventoryController {
     try {
       String email = principal.getName();
       Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
-      Integer totalLitres = productService.getTotalLitresOfWaterByHousehold(householdId);
+      Integer totalLitres = inventoryService.getTotalLitresOfWaterByHousehold(householdId);
       return ResponseEntity.ok(totalLitres);
     } catch (Exception e) {
       log.error("Error getting total litres of water", e);
       return ResponseEntity.badRequest().build();
     }
   }
+
+  // TODO: add endpoint to get the number of days left of water in the household
+
+  /**
+   * Get the number of days of water remaining in the household based on the recommended daily
+   * water consumption per person.
+   *
+   * @param principal the Principal representing the current user
+   * @return the number of days of water remaining
+   */
+  @GetMapping("/water/days-remaining")
+  public ResponseEntity<Double> getWaterDaysRemaining(Principal principal) {
+    try {
+      String email = principal.getName();
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Double daysRemaining = inventoryService.getWaterDaysRemaining(householdId);
+      return ResponseEntity.ok(daysRemaining);
+    } catch (Exception e) {
+      log.error("Error getting days of water remaining", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  // TODO: call getWaterDaysRemaining endpoint and getFoodDaysRemaining endpoint on frontend
+  /**
+   * Get the number of days of food remaining in the household based on the recommended daily
+   * food consumption per person.
+   *
+   * @param principal the Principal representing the current user
+   * @return the number of days of food remaining
+   */
+  @GetMapping("/food/days-remaining")
+  public ResponseEntity<Double> getFoodDaysRemaining(Principal principal) {
+    try {
+      String email = principal.getName();
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Double daysRemaining = inventoryService.getFoodDaysRemaining(householdId);
+      return ResponseEntity.ok(daysRemaining);
+    } catch (Exception e) {
+      log.error("Error getting days of food remaining", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+
+  // TODO: add endpoint to get the number of days left of food in the household
 
   /**
    * Get all water product types for the current household, paginated.
@@ -249,7 +308,7 @@ public class InventoryController {
     String email = principal.getName();
     try {
       Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
-      Page<ProductTypeDto> productTypes = productService.getWaterProductTypesByHousehold(
+      Page<ProductTypeDto> productTypes = inventoryService.getWaterProductTypesByHousehold(
           householdId, pageable);
       return ResponseEntity.ok(productTypes);
     } catch (Exception e) {
@@ -270,11 +329,38 @@ public class InventoryController {
     String email = principal.getName();
     try {
       Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
-      Page<ProductTypeDto> productTypes = productService.getMedicineProductTypesByHousehold(
+      Page<ProductTypeDto> productTypes = inventoryService.getMedicineProductTypesByHousehold(
           householdId, pageable);
       return ResponseEntity.ok(productTypes);
     } catch (Exception e) {
       log.error("Error getting medicine product types", e);
+      return ResponseEntity.badRequest().build();
+    }
+  }
+  // TODO: test this endpoint
+  /**
+   * Get all expiring product types for the current household, filtered by category and expiration time.
+   * 
+   * @param category            the category to filter by (food, water, medicine)
+   * @param expirationTimeInDays the expiration time in days
+   * @param pageable            pagination information
+   * @param principal           the authenticated user
+   * @return a page of ProductTypeDto
+   */
+  @GetMapping("/product-types/expiring")
+  public ResponseEntity<Page<ProductTypeDto>> getExpiringProductTypes(
+      @RequestParam @Valid String category,
+      @RequestParam @Valid @Positive Integer expirationTimeInDays,
+      Pageable pageable,
+      Principal principal) {
+    String email = principal.getName();
+    try {
+      Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+      Page<ProductTypeDto> productTypes = inventoryService.getExpiringProductTypes(
+          householdId, category, expirationTimeInDays, pageable);
+      return ResponseEntity.ok(productTypes);
+    } catch (Exception e) {
+      log.error("Error getting expiring product types", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -293,7 +379,7 @@ public class InventoryController {
     try {
       Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
       createDto.setHouseholdId(householdId);
-      productService.createWaterProductType(createDto);
+      inventoryService.createWaterProductType(createDto);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       log.error("Error creating water product type", e);
@@ -315,7 +401,7 @@ public class InventoryController {
     try {
       Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
       createDto.setHouseholdId(householdId);
-      productService.createMedicineProductType(createDto);
+      inventoryService.createMedicineProductType(createDto);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       log.error("Error creating medicine product type", e);
@@ -342,7 +428,7 @@ public class InventoryController {
     try {
       String email = principal.getName();
       Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
-      Page<ProductTypeDto> result = productService.searchProductTypesByNameAndCategoryAndHousehold(
+      Page<ProductTypeDto> result = inventoryService.searchProductTypesByNameAndCategoryAndHousehold(
           householdId, category, search, pageable);
       return ResponseEntity.ok(result);
     } catch (Exception e) {
@@ -350,4 +436,6 @@ public class InventoryController {
       return ResponseEntity.badRequest().build();
     }
   }
+
+
 }
