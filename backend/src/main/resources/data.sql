@@ -4,9 +4,9 @@ INSERT INTO roles (name) VALUES ('ADMIN');
 INSERT INTO roles (name) VALUES ('SUPERADMIN');
 
 -- HOUSEHOLDS
-INSERT INTO households (name, address, population_count) VALUES ('Smith Family', '123 Main St, Anytown', 4);
-INSERT INTO households (name, address, population_count) VALUES ('Johnson Household', '456 Oak Ave, Somewhere', 3);
-INSERT INTO households (name, address, population_count) VALUES ('Brown Residence', '789 Pine St, Elsewhere', 2);
+INSERT INTO households (name, address, population_count, latitude, longitude) VALUES ('Smith Family', '123 Main St, Anytown', 4, 63.4305, 10.3951);
+INSERT INTO households (name, address, population_count, latitude, longitude) VALUES ('Johnson Household', '456 Oak Ave, Somewhere', 3, 63.4305, 10.3951);
+INSERT INTO households (name, address, population_count, latitude, longitude) VALUES ('Brown Residence', '789 Pine St, Elsewhere', 2, 63.4305, 10.3951);
 
 -- USERS (password_hash is 'password' for all users)
 INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, email_verified, location_sharing_enabled)

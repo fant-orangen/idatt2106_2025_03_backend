@@ -2,6 +2,8 @@ package stud.ntnu.backend.service.crisis;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
@@ -15,6 +17,7 @@ import stud.ntnu.backend.dto.map.CrisisEventDetailsDto;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.map.CrisisEventChange;
 import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.repository.map.CrisisEventChangeRepository;
 import stud.ntnu.backend.repository.map.CrisisEventRepository;
 import stud.ntnu.backend.repository.map.ScenarioThemeRepository;
@@ -38,6 +41,7 @@ public class CrisisEventService {
   private final NotificationService notificationService;
   private final UserService userService;
   private final ScenarioThemeRepository scenarioThemeRepository;
+  private final MessageSource messageSource;
   private final Logger log = LoggerFactory.getLogger(CrisisEventService.class);
 
   /**
@@ -47,17 +51,20 @@ public class CrisisEventService {
    * @param notificationService     service for notification operations
    * @param userService             service for user operations
    * @param scenarioThemeRepository repository for scenario theme operations
+   * @param messageSource           for internationalization
    */
   public CrisisEventService(CrisisEventRepository crisisEventRepository,
       CrisisEventChangeRepository crisisEventChangeRepository,
       NotificationService notificationService,
       UserService userService,
-      ScenarioThemeRepository scenarioThemeRepository) {
+      ScenarioThemeRepository scenarioThemeRepository,
+      MessageSource messageSource) {
     this.crisisEventRepository = crisisEventRepository;
     this.crisisEventChangeRepository = crisisEventChangeRepository;
     this.notificationService = notificationService;
     this.userService = userService;
     this.scenarioThemeRepository = scenarioThemeRepository;
+    this.messageSource = messageSource;
   }
 
   /**
@@ -114,7 +121,42 @@ public class CrisisEventService {
     );
     crisisEventChangeRepository.save(change);
 
+    // Get all users within the crisis radius before deactivating
+    // TODO: Calculate this in LocationUtil itself
+    List<User> affectedUsers = userService.getAllUsers().stream()
+        .filter(user -> user.getHousehold() != null 
+            && user.getHousehold().getLatitude() != null 
+            && user.getHousehold().getLongitude() != null
+            && LocationUtil.calculateDistance(
+                crisisEvent.getEpicenterLatitude().doubleValue(),
+                crisisEvent.getEpicenterLongitude().doubleValue(),
+                user.getHousehold().getLatitude().doubleValue(),
+                user.getHousehold().getLongitude().doubleValue()
+            ) <= crisisEvent.getRadius().doubleValue() * 1000 // Convert to meters
+        )
+        .toList();
+
+    // Deactivate the crisis event
     crisisEventRepository.deactivateCrisisEvent(id);
+
+    // Send notifications to affected users using message from properties file
+    String notificationMessage = messageSource.getMessage(
+        "notification.crisis.deactivated",
+        new Object[]{crisisEvent.getName()},
+        LocaleContextHolder.getLocale()
+    );
+
+    // Send notifications to affected users
+    for (User user : affectedUsers) {
+        Notification notification = notificationService.createNotification(
+            user,
+            Notification.PreferenceType.crisis_alert,
+            Notification.TargetType.event,
+            crisisEvent.getId(),
+            notificationMessage
+        );
+        notificationService.sendNotification(notification);
+    }
   }
 
   /**
