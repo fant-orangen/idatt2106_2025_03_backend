@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.auth.AuthRequestDto;
 import stud.ntnu.backend.dto.auth.AuthResponseDto;
+import stud.ntnu.backend.dto.auth.ChangePasswordDto;
 import stud.ntnu.backend.dto.auth.RegisterRequestDto;
 import stud.ntnu.backend.model.user.EmailToken;
 import stud.ntnu.backend.model.user.Role;
@@ -22,6 +23,11 @@ import stud.ntnu.backend.util.JwtUtil;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import stud.ntnu.backend.model.user.Notification;
+import stud.ntnu.backend.model.user.NotificationPreference;
+import stud.ntnu.backend.repository.user.NotificationPreferenceRepository;
+import stud.ntnu.backend.validation.PasswordValidator;
+
 
 /**
  * Service for handling authentication-related operations.
@@ -36,13 +42,15 @@ public class AuthService {
   private final EmailService emailService;
   private final EmailTokenRepository emailTokenRepository;
   private final TwoFactorCodeService twoFactorCodeService;
+  private final NotificationPreferenceRepository notificationPreferenceRepository;
   private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
   public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
       UserRepository userRepository, PasswordEncoder passwordEncoder,
       EmailService emailService,
       EmailTokenRepository emailTokenRepository,
-      TwoFactorCodeService twoFactorCodeService) {
+      TwoFactorCodeService twoFactorCodeService,
+      NotificationPreferenceRepository notificationPreferenceRepository) {
     this.authenticationManager = authenticationManager;
     this.jwtUtil = jwtUtil;
     this.userRepository = userRepository;
@@ -50,6 +58,7 @@ public class AuthService {
     this.emailService = emailService;
     this.emailTokenRepository = emailTokenRepository;
     this.twoFactorCodeService = twoFactorCodeService;
+    this.notificationPreferenceRepository = notificationPreferenceRepository;
   }
 
   /**
@@ -130,6 +139,12 @@ public class AuthService {
 
     // Save the user
     User savedUser = userRepository.save(newUser);
+
+    // Create notification preferences for all types
+    for (Notification.PreferenceType preferenceType : Notification.PreferenceType.values()) {
+        NotificationPreference preference = new NotificationPreference(savedUser, preferenceType);
+        notificationPreferenceRepository.save(preference);
+    }
 
     // Generate verification token
     String token = UUID.randomUUID().toString();
@@ -233,7 +248,7 @@ public class AuthService {
 
     // Generate reset token
     String token = UUID.randomUUID().toString();
-    LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
+    LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(10);
 
     // Create and save the EmailToken
     EmailToken resetToken = new EmailToken(
@@ -292,4 +307,30 @@ public class AuthService {
 
     log.info("Password reset successfully for user: {}", user.getEmail());
   }
+    /**
+     * Changes the password for the currently authenticated user.
+     *
+     * @param changePasswordDto DTO containing the old and new passwords
+     * @throws IllegalArgumentException if the old password does not match
+     */
+    @Transactional
+    public void changePassword(ChangePasswordDto changePasswordDto) {
+      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+      String email = authentication.getName();
+
+      User user = userRepository.findByEmail(email)
+              .orElseThrow(() -> new IllegalArgumentException("No user found with email: " + email));
+
+      if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), user.getPasswordHash())) {
+        throw new IllegalArgumentException("Failed to authenticate user");
+      }
+
+      PasswordValidator.validate(changePasswordDto.getOldPassword(), changePasswordDto.getNewPassword(),
+              changePasswordDto.getConfirmNewPassword());
+
+      user.setPasswordHash(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+      userRepository.save(user);
+
+      log.info("Password changed successfully for user: {}", email);
+    }
 }

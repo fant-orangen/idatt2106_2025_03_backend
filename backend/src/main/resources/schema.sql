@@ -33,6 +33,7 @@ CREATE TABLE users (
     location_sharing_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_using_2fa BOOLEAN NOT NULL DEFAULT FALSE,
+    kcal_requirement INT NOT NULL DEFAULT 2000,
     FOREIGN KEY (role_id) REFERENCES roles(id),
     FOREIGN KEY (household_id) REFERENCES households(id)
 );
@@ -45,6 +46,7 @@ CREATE TABLE household_member (
     description TEXT,
     type VARCHAR(10) NOT NULL CHECK (type IN ('child', 'adult', 'pet')),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    kcal_requirement INT NOT NULL DEFAULT 2000,
     FOREIGN KEY (household_id) REFERENCES households(id)
 );
 
@@ -67,6 +69,7 @@ CREATE TABLE invitations (
     token VARCHAR(255) NOT NULL UNIQUE,
     expires_at DATETIME NOT NULL,
     accepted_at DATETIME,
+    declined_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (inviter_user_id) REFERENCES users(id),
     FOREIGN KEY (household_id) REFERENCES households(id),
@@ -124,14 +127,13 @@ CREATE TABLE group_inventory_contributions (
 -- MEETING PLACES (user/household–defined POIs)
 CREATE TABLE meeting_places (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    household_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
     latitude DECIMAL(10,7) NOT NULL,
     longitude DECIMAL(10,7) NOT NULL,
     address TEXT,
+    status VARCHAR(10) NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
     created_by_user_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (household_id) REFERENCES households(id),
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
 );
 
@@ -164,7 +166,9 @@ CREATE TABLE scenario_themes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
-    instructions TEXT,
+    before TEXT,
+    under TEXT,
+    after TEXT,
     status VARCHAR(10) NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
     created_by_user_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -265,7 +269,7 @@ CREATE TABLE household_admins (
 CREATE TABLE notification_preferences (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request')),
+    preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request', 'remaining_supply_alert', 'system')),
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -276,8 +280,8 @@ CREATE TABLE notification_preferences (
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request', 'system')),
-    target_type VARCHAR(20) CHECK (target_type IN ('inventory','event','location_request')), -- If the notification is associated with another table, add a target type and target id pointing to the table
+    preference_type VARCHAR(25) NOT NULL CHECK (preference_type IN ('expiration_reminder', 'remaining_supply_alert', 'crisis_alert','location_request', 'system')),
+    target_type VARCHAR(20) CHECK (target_type IN ('inventory','event','location_request','invitation')), -- If the notification is associated with another table, add a target type and target id pointing to the table
     target_id INT,
     description TEXT DEFAULT NULL,
     notify_at DATETIME NOT NULL,

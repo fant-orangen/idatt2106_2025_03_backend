@@ -21,7 +21,7 @@ import java.util.List;
  * Controller for managing notifications.
  */
 @RestController
-@RequestMapping("/api/notifications")
+@RequestMapping("/api")
 public class NotificationController {
 
   private final NotificationService notificationService;
@@ -43,7 +43,7 @@ public class NotificationController {
    * @param pageable  pagination information
    * @return ResponseEntity with a page of notifications
    */
-  @GetMapping
+  @GetMapping("/user/notifications")
   public ResponseEntity<?> getNotifications(Principal principal, Pageable pageable) {
     try {
       User user = userService.getUserByEmail(principal.getName())
@@ -68,7 +68,7 @@ public class NotificationController {
    * @param principal the Principal object representing the current user
    * @return ResponseEntity with the updated notification
    */
-  @PutMapping("/{id}/read")
+  @PutMapping("/user/notifications/{id}/read")
   public ResponseEntity<?> markAsRead(@PathVariable Integer id, Principal principal) {
     try {
       User user = userService.getUserByEmail(principal.getName())
@@ -108,7 +108,7 @@ public class NotificationController {
    * @param principal the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
-  @PostMapping("/system")
+  @PostMapping("/admin/notifications/system")
   public ResponseEntity<?> createSystemNotification(
       @Valid @RequestBody SystemNotificationCreateDto createDto,
       Principal principal) {

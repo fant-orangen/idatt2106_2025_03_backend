@@ -55,12 +55,16 @@ public class Notification {
 
   // Enum for preference type
   public enum PreferenceType {
-    expiration_reminder, crisis_alert, location_request, system
+    expiration_reminder,
+    remaining_supply_alert,
+    crisis_alert,
+    location_request,
+    system
   }
 
   // Enum for target type
   public enum TargetType {
-    inventory, event, location_request
+    inventory, event, location_request, invitation
   }
 
   // Constructor with required fields

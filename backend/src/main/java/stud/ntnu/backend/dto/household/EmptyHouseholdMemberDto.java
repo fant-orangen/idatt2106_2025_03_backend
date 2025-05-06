@@ -13,4 +13,5 @@ public class EmptyHouseholdMemberDto {
   private String name;
   private String type;
   private String description;
+  private Integer kcal_requirement;
 } 

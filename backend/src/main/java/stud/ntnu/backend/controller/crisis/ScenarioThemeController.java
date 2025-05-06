@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
+import java.util.List;
 import stud.ntnu.backend.dto.map.CreateScenarioThemeDto;
 import stud.ntnu.backend.dto.map.UpdateScenarioThemeDto;
 import stud.ntnu.backend.dto.map.ScenarioThemeDetailsDto;
@@ -22,7 +23,7 @@ import stud.ntnu.backend.service.user.UserService;
  */
 
 @RestController
-@RequestMapping("/api/scenario-themes")
+@RequestMapping("/api")
 public class ScenarioThemeController {
 
   private final ScenarioThemeService scenarioThemeService;
@@ -42,7 +43,7 @@ public class ScenarioThemeController {
    * @param principal              the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
-  @PostMapping
+  @PostMapping(path = "/admin/scenario-themes")
   public ResponseEntity<?> createScenarioTheme(
       @Valid @RequestBody CreateScenarioThemeDto createScenarioThemeDto,
       Principal principal) {
@@ -69,7 +70,7 @@ public class ScenarioThemeController {
    * @param principal              the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
-  @PatchMapping
+  @PatchMapping(path = "/admin/scenario-themes")
   public ResponseEntity<?> updateScenarioTheme(
       @Valid @RequestBody UpdateScenarioThemeDto updateScenarioThemeDto,
       Principal principal) {
@@ -91,13 +92,24 @@ public class ScenarioThemeController {
    * @param pageable the pagination information
    * @return ResponseEntity with a page of scenario themes
    */
-  @GetMapping("/all")
+  @GetMapping("/public/scenario-themes/all")
   public ResponseEntity<Page<ScenarioTheme>> getAllScenarioThemes(Pageable pageable) {
     Page<ScenarioTheme> scenarioThemes = scenarioThemeService.getAllScenarioThemes(pageable);
     return ResponseEntity.ok(scenarioThemes);
   }
 
-  // TODO: Add endpoint to get only the names and ids of all scenario themes
+  
+  /**
+   * Gets a list of all scenario themes with just their names and IDs.
+   * This is a lightweight endpoint for UI components that only need basic theme information.
+   *
+   * @return ResponseEntity with a list of ScenarioThemeNameDto objects
+   */
+  @GetMapping("/public/scenario-themes/previews/all")
+  public ResponseEntity<List<ScenarioThemeNameDto>> getAllScenarioThemePreviews() {
+    List<ScenarioThemeNameDto> previews = scenarioThemeService.getAllScenarioThemePreviews();
+    return ResponseEntity.ok(previews);
+  }
 
   /**
    * Gets scenario theme details (name, description, instructions) by id.
@@ -105,7 +117,7 @@ public class ScenarioThemeController {
    * @param id the scenario theme id
    * @return ResponseEntity with ScenarioThemeDetailsDto or 404 if not found
    */
-  @GetMapping("/{id}")
+  @GetMapping("/public/scenario-themes/{id}")
   public ResponseEntity<ScenarioThemeDetailsDto> getScenarioTheme(@PathVariable Integer id) {
     return scenarioThemeService.getScenarioThemeDetailsById(id)
         .map(ResponseEntity::ok)
@@ -118,7 +130,7 @@ public class ScenarioThemeController {
    * @param id the scenario theme id
    * @return ResponseEntity with ScenarioThemeNameDto or 404 if not found
    */
-  @GetMapping("/{id}/name")
+  @GetMapping("/public/scenario-themes/{id}/name")
   public ResponseEntity<ScenarioThemeNameDto> getScenarioThemeName(@PathVariable Integer id) {
     return scenarioThemeService.getScenarioThemeNameById(id)
         .map(ResponseEntity::ok)

@@ -9,6 +9,7 @@ import stud.ntnu.backend.dto.user.UserPreferencesDto;
 import stud.ntnu.backend.dto.user.UserHistoryDto;
 import stud.ntnu.backend.dto.user.UserHistoryDto.GamificationActivityDto;
 import stud.ntnu.backend.dto.user.UserHistoryDto.ReflectionDto;
+import stud.ntnu.backend.dto.user.UserBasicInfoDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -179,6 +180,26 @@ public class UserService {
     List<ReflectionDto> reflections = new ArrayList<>();
 
     return new UserHistoryDto(completedActivities, reflections);
+  }
+
+  /**
+   * Gets a user's basic information by their ID.
+   *
+   * @param id the ID of the user
+   * @return the user's basic information
+   * @throws IllegalStateException if the user is not found
+   */
+  public UserBasicInfoDto getUserBasicInfo(Integer id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    return new UserBasicInfoDto(
+        user.getFirstName(),
+        user.getLastName(),
+        user.getEmail(),
+        user.getHousehold() != null ? user.getHousehold().getName() : null,
+        user.getEmailVerified()
+    );
   }
 
   /**

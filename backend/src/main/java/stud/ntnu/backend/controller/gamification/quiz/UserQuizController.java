@@ -16,7 +16,7 @@ import stud.ntnu.backend.service.gamification.quiz.UserQuizService;
 import stud.ntnu.backend.service.user.UserService;
 
 @RestController
-@RequestMapping("/api/quizzes/user")
+@RequestMapping("/api/user/quizzes")
 public class UserQuizController {
 
   private final UserQuizService userQuizService;

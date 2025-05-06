@@ -251,11 +251,6 @@ public class QuizController {
         return ResponseEntity.ok(questions);
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<String> testEndpoint() {
-        return ResponseEntity.ok("GET request successful!");
-    }
-
     /**
      * Gets all answers for a quiz question by question id.
      *

@@ -1,9 +1,18 @@
 package stud.ntnu.backend.service.map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import stud.ntnu.backend.repository.map.MeetingPlaceRepository;
+import org.springframework.transaction.annotation.Transactional;
+import stud.ntnu.backend.dto.map.CreateMeetingPlaceDto;
 import stud.ntnu.backend.model.map.MeetingPlace;
+import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.repository.map.MeetingPlaceRepository;
+import stud.ntnu.backend.util.LocationUtil;
+import stud.ntnu.backend.dto.map.CoordinatesItemDto;
+import stud.ntnu.backend.dto.map.MeetingPlacePreviewDto;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,5 +70,86 @@ public class MeetingPlaceService {
    */
   public void deleteMeetingPlace(Integer id) {
     meetingPlaceRepository.deleteById(id);
+  }
+
+  @Transactional
+  public MeetingPlace createMeetingPlace(CreateMeetingPlaceDto createDto, User currentUser) {
+    // If address is provided but not coordinates, convert address to coordinates
+    if (createDto.getAddress() != null && (createDto.getLatitude() == null || createDto.getLongitude() == null)) {
+      CoordinatesItemDto coordinates = LocationUtil.getCoordinatesByAddress(createDto.getAddress());
+      // Create meeting place with converted coordinates
+      MeetingPlace meetingPlace = new MeetingPlace(
+        createDto.getName(),
+        coordinates.getLatitude(),
+        coordinates.getLongitude(),
+        currentUser
+      );
+      meetingPlace.setAddress(createDto.getAddress());
+      return meetingPlaceRepository.save(meetingPlace);
+    }
+
+    // If coordinates are provided directly
+    MeetingPlace meetingPlace = new MeetingPlace(
+      createDto.getName(),
+      createDto.getLatitude(),
+      createDto.getLongitude(),
+      currentUser
+    );
+    meetingPlace.setAddress(createDto.getAddress());
+
+    return meetingPlaceRepository.save(meetingPlace);
+  }
+
+  @Transactional
+  public MeetingPlace archiveMeetingPlace(Integer id) {
+    MeetingPlace meetingPlace = meetingPlaceRepository.findById(id)
+      .orElseThrow(() -> new IllegalStateException("Meeting place not found"));
+    meetingPlace.setStatus("archived");
+    return meetingPlaceRepository.save(meetingPlace);
+  }
+
+  @Transactional
+  public MeetingPlace activateMeetingPlace(Integer id) {
+    MeetingPlace meetingPlace = meetingPlaceRepository.findById(id)
+      .orElseThrow(() -> new IllegalStateException("Meeting place not found"));
+    meetingPlace.setStatus("active");
+    return meetingPlaceRepository.save(meetingPlace);
+  }
+
+  public List<MeetingPlace> getNearbyMeetingPlaces(BigDecimal latitude, BigDecimal longitude, double maxDistanceKm) {
+    List<MeetingPlace> allMeetingPlaces = meetingPlaceRepository.findByStatus("active");
+    
+    return allMeetingPlaces.stream()
+      .filter(place -> LocationUtil.calculateDistance(
+        latitude.doubleValue(),
+        longitude.doubleValue(),
+        place.getLatitude().doubleValue(),
+        place.getLongitude().doubleValue()
+      ) <= maxDistanceKm * 1000) // Convert km to meters
+      .toList();
+  }
+
+  /**
+   * Retrieves a paginated list of all meeting places.
+   *
+   * @param page the page number (0-based)
+   * @param size the size of each page
+   * @return paginated list of meeting places
+   */
+  public Page<MeetingPlace> getAllMeetingPlacesPaginated(int page, int size) {
+    PageRequest pageRequest = PageRequest.of(page, size);
+    return meetingPlaceRepository.findAll(pageRequest);
+  }
+
+  /**
+   * Retrieves a paginated list of meeting place previews (only id and name).
+   *
+   * @param page the page number (0-based)
+   * @param size the size of each page
+   * @return paginated list of meeting place previews
+   */
+  public Page<MeetingPlacePreviewDto> getAllMeetingPlacePreviewsPaginated(int page, int size) {
+    PageRequest pageRequest = PageRequest.of(page, size);
+    return meetingPlaceRepository.findAll(pageRequest).map(MeetingPlacePreviewDto::fromEntity);
   }
 }

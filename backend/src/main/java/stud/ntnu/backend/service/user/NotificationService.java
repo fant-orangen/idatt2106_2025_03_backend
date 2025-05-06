@@ -243,7 +243,7 @@ public class NotificationService {
     BigDecimal eventLat = crisisEvent.getEpicenterLatitude(); //
     BigDecimal eventLon = crisisEvent.getEpicenterLongitude(); //
     // Use radius directly in meters for calculations.
-    double radiusMeters = crisisEvent.getRadius().doubleValue(); //
+    double radiusMeters = crisisEvent.getRadius().doubleValue() * 1000; // MUST BE IN METERS
 
     // Fetch ALL users.
     List<User> allUsers = userService.getAllUsers(); //
@@ -289,17 +289,17 @@ public class NotificationService {
         // Both user home and household are affected
         if (user.getHomeLatitude().equals(household.getLatitude()) && user.getHomeLongitude()
             .equals(household.getLongitude())) { //
-          // If home and household location are the same
-          notificationReason = "din registrerte hjemme-/husholdningsposisjon"; //
+          // If your position and household location are the same 
+          notificationReason = "din posisjon/husholdningsposisjon"; //
         } else { //
-          notificationReason = "både din registrerte hjemmeposisjon og din husholdnings posisjon"; //
+          notificationReason = "både din posisjon og din husholdnings posisjon"; //
         }
       } else if (householdAffected) { //
         // ONLY household is affected
         notificationReason = "din husholdnings posisjon"; //
       } else if (userHomeAffected) { //
-        // ONLY user home is affected
-        notificationReason = "din registrerte hjemmeposisjon"; //
+        // ONLY your location is affected
+        notificationReason = "din posisjon"; //
       }
 
       // 4. Only proceed if a reason was determined

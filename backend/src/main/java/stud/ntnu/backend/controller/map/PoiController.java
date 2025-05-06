@@ -1,6 +1,9 @@
 package stud.ntnu.backend.controller.map;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.poi.CreatePoiDto;
@@ -22,9 +25,8 @@ import java.util.List;
  * 2025 for Krisefikser.no.
  */
 
-
 @RestController
-@RequestMapping("/api/poi")
+@RequestMapping("/api")
 public class PoiController {
 
   private final PoiService poiService;
@@ -40,20 +42,40 @@ public class PoiController {
    *
    * @return a list of all public points of interest
    */
-  @GetMapping("/public")
+  @GetMapping("/public/poi/public")
   public List<PoiItemDto> getPublicPointsOfInterest() {
     return poiService.getAllPointsOfInterest()
         .stream()
         .map(PoiItemDto::fromEntity)
         .toList();
   }
+    /**
+     * Retrieves all points of interest with pagination and sorting.
+     *
+     * @param page the page number (default is 0)
+     * @param size the page size (default is 10)
+     * @param sort the sorting criteria (default is "id,asc")
+     * @return a paginated list of points of interest
+     */
+  @GetMapping("public/poi/previews")
+  public ResponseEntity<?> getPoiPreviews(
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "10") int size,
+          @RequestParam(defaultValue = "id,asc") String sort) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")[0]).ascending());
+    if (sort.endsWith(",desc")) {
+      pageable = PageRequest.of(page, size, Sort.by(sort.split(",")[0]).descending());
+    }
+    return ResponseEntity.ok(poiService.getPoiPreviews(pageable));
+  }
+
 
   /**
    * Retrieves all points of interest of a specific type.
    *
    * @return a list of all points of interest of a specific type
    */
-  @GetMapping("/type/{id}")
+  @GetMapping("/public/poi/type/{id}")
   public List<PoiItemDto> getPointsOfInterestByTypeId(@PathVariable int id) {
     return poiService.getPointsOfInterestByTypeId(id)
         .stream()
@@ -67,7 +89,7 @@ public class PoiController {
    * @param id the id of the poi
    * @return the poi with the given id as a PoiItemDto
    */
-  @GetMapping("/{id}")
+  @GetMapping("/public/poi/{id}")
   public PoiItemDto getPointOfInterestById(@PathVariable int id) {
     return poiService.getPointOfInterestById(id)
         .map(PoiItemDto::fromEntity)
@@ -84,8 +106,8 @@ public class PoiController {
    * @param distance  the distance in meters
    * @return a list of points of interest within the specified distance
    */
-  //To test with postman http://localhost:8080/api/poi/type/nearby?latitude=63.4308&longitude=10.3943&distance=1000
-  @GetMapping("/type/nearby")
+  //To test with postman http://localhost:8080/api/user/poi/type/nearby?latitude=63.4308&longitude=10.3943&distance=1000
+  @GetMapping("/public/poi/type/nearby")
   public List<PoiItemDto> getPointsOfInterestByTypeIdAndDistance(
       @RequestParam(required = false) Integer id,
       @RequestParam double latitude,
@@ -108,7 +130,7 @@ public class PoiController {
    * @param longitude the longitude of the location
    * @return the nearest point of interest of the specified type
    */
-  @GetMapping("/type/nearest/{id}")
+  @GetMapping("/public/poi/type/nearest/{id}")
   public PoiItemDto getNearestPointOfInterestByType(
       @PathVariable int id,
       @RequestParam double latitude,
@@ -126,7 +148,7 @@ public class PoiController {
    * @param principal    the authenticated user
    * @return the created point of interest
    */
-  @PostMapping
+  @PostMapping("/admin/poi")
   public ResponseEntity<?> createPointOfInterest(
       @Valid @RequestBody CreatePoiDto createPoiDto,
       Principal principal) {
@@ -161,7 +183,7 @@ public class PoiController {
    * @return the updated point of interest
    */
 
-  @PutMapping("/{id}")
+  @PutMapping("/admin/poi/{id}")
   public ResponseEntity<?> updatePointOfInterest(
       @PathVariable Integer id,
       @RequestBody UpdatePoiDto updatePoiDto,
@@ -189,7 +211,7 @@ public class PoiController {
    * @param principal the authenticated user
    * @return a response indicating success or failure
    */
-  @DeleteMapping("/{id}")
+  @DeleteMapping("/admin/poi/{id}")
   public ResponseEntity<?> deletePointOfInterest(
       @PathVariable Integer id,
       Principal principal) {

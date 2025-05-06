@@ -1,17 +1,19 @@
 package stud.ntnu.backend.model.household;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Represents an empty household member (non-user member like a child, pet, etc.)
  * These members are stored in the household_member table.
  */
-@Data
-@NoArgsConstructor
 @Entity
 @Table(name = "household_member")
+@Getter
+@Setter
+@NoArgsConstructor
 public class EmptyHouseholdMember {
 
   @Id
@@ -31,6 +33,9 @@ public class EmptyHouseholdMember {
   @Column(name = "description")
   private String description;
 
+  @Column(name = "kcal_requirement", nullable = false)
+  private Integer kcalRequirement = 2000;
+
   @Column(name = "created_at", nullable = false)
   private java.time.LocalDateTime createdAt;
 
@@ -39,5 +44,10 @@ public class EmptyHouseholdMember {
     this.type = type;
     this.description = description;
     this.createdAt = java.time.LocalDateTime.now();
+  }
+
+  public EmptyHouseholdMember(String name, String type, String description, Integer kcalRequirement) {
+    this(name, type, description);
+    this.kcalRequirement = kcalRequirement != null ? kcalRequirement : 2000;
   }
 } 

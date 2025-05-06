@@ -4,9 +4,9 @@ INSERT INTO roles (name) VALUES ('ADMIN');
 INSERT INTO roles (name) VALUES ('SUPERADMIN');
 
 -- HOUSEHOLDS
-INSERT INTO households (name, address, population_count) VALUES ('Smith Family', '123 Main St, Anytown', 4);
-INSERT INTO households (name, address, population_count) VALUES ('Johnson Household', '456 Oak Ave, Somewhere', 3);
-INSERT INTO households (name, address, population_count) VALUES ('Brown Residence', '789 Pine St, Elsewhere', 2);
+INSERT INTO households (name, address, population_count, latitude, longitude) VALUES ('Smith Family', '123 Main St, Anytown', 4, 63.4305, 10.3951);
+INSERT INTO households (name, address, population_count, latitude, longitude) VALUES ('Johnson Household', '456 Oak Ave, Somewhere', 3, 63.4305, 10.3951);
+INSERT INTO households (name, address, population_count, latitude, longitude) VALUES ('Brown Residence', '789 Pine St, Elsewhere', 2, 63.4305, 10.3951);
 
 -- USERS (password_hash is 'password' for all users)
 INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, email_verified, location_sharing_enabled)
@@ -204,20 +204,20 @@ VALUES (8, 'Jonsvatnet Water Treatment Plant', 'Primary water source and treatme
 
 
 -- MEETING PLACES
-INSERT INTO meeting_places (household_id, name, latitude, longitude, address, created_by_user_id)
-VALUES (1, 'Park Entrance', 63.4290, 10.3940, 'City Park Main Entrance', 2);
-INSERT INTO meeting_places (household_id, name, latitude, longitude, address, created_by_user_id)
-VALUES (2, 'School Playground', 63.4300, 10.3960, 'Elementary School', 3);
-INSERT INTO meeting_places (household_id, name, latitude, longitude, address, created_by_user_id)
-VALUES (3, 'Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
+INSERT INTO meeting_places (name, latitude, longitude, address, created_by_user_id)
+VALUES ('Park Entrance', 63.4290, 10.3940, 'City Park Main Entrance', 2);
+INSERT INTO meeting_places (name, latitude, longitude, address, created_by_user_id)
+VALUES ('School Playground', 63.4300, 10.3960, 'Elementary School', 3);
+INSERT INTO meeting_places (name, latitude, longitude, address, created_by_user_id)
+VALUES ('Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
 
 -- SCENARIO THEMES
-INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
-VALUES ('Power Outage', 'Preparing for extended power outages', 'Have flashlights, batteries, and non-perishable food ready. Unplug sensitive electronics.', 'active', 1);
-INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
-VALUES ('Natural Disaster', 'Earthquake, flood, or storm preparation', 'Follow evacuation orders. Prepare an emergency kit and know your local shelter locations.', 'active', 1);
-INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
-VALUES ('Public Health Emergency', 'Pandemic or disease outbreak', 'Practice good hygiene, follow public health advice, and stock up on essential medicines.', 'active', 1);
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+VALUES ('Power Outage', 'Preparing for extended power outages', 'Prepare flashlights and batteries.', 'Unplug sensitive electronics.', 'Check on neighbors and elderly.', 'active', 1);
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+VALUES ('Natural Disaster', 'Earthquake, flood, or storm preparation', 'Prepare an emergency kit.', 'Follow evacuation orders.', 'Check for structural damage before returning home.', 'active', 1);
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+VALUES ('Public Health Emergency', 'Pandemic or disease outbreak', 'Stock up on essential medicines.', 'Practice good hygiene and follow public health advice.', 'Monitor symptoms and seek medical help if needed.', 'active', 1);
 
 -- CRISIS EVENTS
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
@@ -272,8 +272,153 @@ INSERT INTO news_articles (title, content, published_at, created_by_user_id, cri
 VALUES ('Draft Article', 'This is a draft article that is not yet published...', CURRENT_TIMESTAMP, 1, 1, 'draft');
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
 VALUES ('Archived Article', 'This is an old article that has been archived...', DATEADD('DAY', -30, CURRENT_TIMESTAMP), 1, 2, 'archived');
+
+-- Winter storms
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
 VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+
+-- End of winter storms
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
 VALUES ('New Emergency Response Guidelines', 'The city has updated its emergency response guidelines. Key changes include...', DATEADD('DAY', -2, CURRENT_TIMESTAMP), 1, 2, 'published');
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)

@@ -18,10 +18,9 @@ import stud.ntnu.backend.service.user.UserService;
 import java.security.Principal;
 import java.util.NoSuchElementException;
 
-
 @RestController
-@RequestMapping("/api/news")
 @Validated
+@RequestMapping("/api")
 public class NewsController {
 
   private final NewsService newsService;
@@ -41,7 +40,7 @@ public class NewsController {
    * @param principal      - The principal object containing the user's email
    * @return - The created news article or 403 Forbidden if unauthorized
    */
-  @PostMapping
+  @PostMapping("/admin/news")
   public ResponseEntity<?> createNewsArticle(@Validated @RequestBody NewsArticleDTO newsArticleDTO,
       Principal principal) {
     try {
@@ -70,7 +69,7 @@ public class NewsController {
    * @return ResponseEntity with a page of news articles if successful, or an error message if the
    * crisis event doesn't exist
    */
-  @GetMapping("/{crisisEventId}")
+  @GetMapping("/public/news/{crisisEventId}")
   public ResponseEntity<?> getNewsArticlesByCrisisEvent(
       @PathVariable Integer crisisEventId,
       Pageable pageable, Principal principal) {
@@ -95,7 +94,7 @@ public class NewsController {
    * @return ResponseEntity with a page of news articles if successful, or an error message if the
    * user is not found
    */
-  @GetMapping("/digest")
+  @GetMapping("/user/news/digest")
   public ResponseEntity<?> getNewsDigest(Principal principal, Pageable pageable) {
     try {
       // Get the current user
@@ -121,7 +120,7 @@ public class NewsController {
    * @param principal     - The principal object containing the user's email
    * @return - The updated news article or 403 Forbidden if unauthorized
    */
-  @PatchMapping("/{newsArticleId}")
+  @PatchMapping("/admin/news/{newsArticleId}")
   public ResponseEntity<?> updateNewsArticle(
       @PathVariable Long newsArticleId,
       @Validated @RequestBody UpdateNewsArticleDTO updateDto,

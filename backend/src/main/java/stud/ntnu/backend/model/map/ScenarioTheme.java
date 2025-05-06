@@ -23,8 +23,14 @@ public class ScenarioTheme {
   @Column(name = "description", columnDefinition = "TEXT")
   private String description;
 
-  @Column(name = "instructions", columnDefinition = "TEXT")
-  private String instructions;
+  @Column(name = "before", columnDefinition = "TEXT")
+  private String before;
+
+  @Column(name = "under", columnDefinition = "TEXT")
+  private String under;
+
+  @Column(name = "after", columnDefinition = "TEXT")
+  private String after;
 
   @ManyToOne
   @JoinColumn(name = "created_by_user_id", nullable = false)
@@ -56,6 +62,15 @@ public class ScenarioTheme {
 
   public ScenarioTheme(String name, User createdByUser) {
     this.name = name;
+    this.createdByUser = createdByUser;
+  }
+
+  public ScenarioTheme(String name, String description, String before, String under, String after, User createdByUser) {
+    this.name = name;
+    this.description = description;
+    this.before = before;
+    this.under = under;
+    this.after = after;
     this.createdByUser = createdByUser;
   }
 
