@@ -219,10 +219,13 @@ CREATE TABLE user_gamification_activities (
 CREATE TABLE reflections (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    crisis_event_id INT,
     content TEXT NOT NULL,
     shared BOOLEAN NOT NULL DEFAULT FALSE,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (crisis_event_id) REFERENCES crisis_events(id)
 );
 
 -- NEWS ARTICLES
