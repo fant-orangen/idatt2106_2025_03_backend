@@ -53,8 +53,8 @@ public class User {
     @Column(name = "home_longitude", precision = 10, scale = 7)
     private BigDecimal homeLongitude;
 
-    @Column(name = "privacy_accepted_at")
-    private LocalDateTime privacyAcceptedAt;
+    @Column(name = "privacy_accepted")
+    private Boolean privacyAccepted;
 
     @Column(name = "email_verified", nullable = false)
     private Boolean emailVerified = false;
@@ -202,12 +202,12 @@ public class User {
         this.homeLongitude = homeLongitude;
     }
 
-    public LocalDateTime getPrivacyAcceptedAt() {
-        return privacyAcceptedAt;
+    public Boolean getPrivacyAccepted() {
+        return privacyAccepted;
     }
 
-    public void setPrivacyAcceptedAt(LocalDateTime privacyAcceptedAt) {
-        this.privacyAcceptedAt = privacyAcceptedAt;
+    public void setPrivacyAccepted(Boolean privacyAcceptedAt) {
+        this.privacyAccepted = privacyAcceptedAt;
     }
 
     public Boolean getEmailVerified() {

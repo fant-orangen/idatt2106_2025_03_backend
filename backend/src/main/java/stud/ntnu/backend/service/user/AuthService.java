@@ -136,6 +136,7 @@ public class AuthService {
     newUser.setHomeAddress(registrationRequest.getHomeAddress());
     newUser.setHomeLatitude(registrationRequest.getHomeLatitude());
     newUser.setHomeLongitude(registrationRequest.getHomeLongitude());
+    newUser.setPrivacyAccepted(registrationRequest.getPrivacyPolicyAccepted());
 
     // Save the user
     User savedUser = userRepository.save(newUser);
