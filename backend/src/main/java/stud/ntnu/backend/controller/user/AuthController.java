@@ -3,21 +3,14 @@ package stud.ntnu.backend.controller.user;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import stud.ntnu.backend.dto.auth.AuthRequestDto;
-import stud.ntnu.backend.dto.auth.AuthResponseDto;
-import stud.ntnu.backend.dto.auth.ForgotPasswordRequestDto;
-import stud.ntnu.backend.dto.auth.RegisterRequestDto;
-import stud.ntnu.backend.dto.auth.ResetPasswordRequestDto;
-import stud.ntnu.backend.dto.auth.Send2FACodeRequestDto;
+import org.springframework.web.bind.annotation.*;
+import stud.ntnu.backend.dto.auth.*;
 import stud.ntnu.backend.service.user.AuthService;
-import stud.ntnu.backend.dto.auth.TwoFactorRequestDto;
 import stud.ntnu.backend.service.user.RecaptchaService;
+import stud.ntnu.backend.model.user.Notification;
+import stud.ntnu.backend.model.user.NotificationPreference;
+import stud.ntnu.backend.repository.user.NotificationPreferenceRepository;
+
 
 /**
  * Handles user authentication and account lifecycle actions. Includes user registration, email
@@ -215,4 +208,23 @@ public class AuthController {
       return ResponseEntity.status(500).body("Failed to reset password.");
     }
   }
+    /**
+     * Changes the password for the currently authenticated user.
+     *
+     * @param request The change password request containing the new password
+     * @return ResponseEntity with status 200 OK if successful, or an error message
+     */
+  @PatchMapping ("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordDto request) {
+        try {
+
+        authService.changePassword(request);
+        return ResponseEntity.ok("Password changed successfully.");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+        log.error("Error changing password: {}", e.getMessage());
+        return ResponseEntity.status(500).body("Failed to change password - " + e.getMessage());
+        }
+    }
 }

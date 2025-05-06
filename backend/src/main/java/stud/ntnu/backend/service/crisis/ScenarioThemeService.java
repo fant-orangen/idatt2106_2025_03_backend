@@ -81,7 +81,9 @@ public class ScenarioThemeService {
     ScenarioTheme scenarioTheme = new ScenarioTheme();
     scenarioTheme.setName(dto.getName());
     scenarioTheme.setDescription(dto.getDescription());
-    scenarioTheme.setInstructions(dto.getInstructions());
+    scenarioTheme.setBefore(dto.getBefore());
+    scenarioTheme.setUnder(dto.getUnder());
+    scenarioTheme.setAfter(dto.getAfter());
     scenarioTheme.setCreatedByUser(user);
     // createdAt and updatedAt are set by @PrePersist
     return scenarioThemeRepository.save(scenarioTheme);
@@ -103,8 +105,14 @@ public class ScenarioThemeService {
     if (dto.getDescription() != null) {
       scenarioTheme.setDescription(dto.getDescription());
     }
-    if (dto.getInstructions() != null) {
-      scenarioTheme.setInstructions(dto.getInstructions());
+    if (dto.getBefore() != null) {
+      scenarioTheme.setBefore(dto.getBefore());
+    }
+    if (dto.getUnder() != null) {
+      scenarioTheme.setUnder(dto.getUnder());
+    }
+    if (dto.getAfter() != null) {
+      scenarioTheme.setAfter(dto.getAfter());
     }
     if (dto.getStatus() != null) {
       scenarioTheme.setStatus(dto.getStatus());
@@ -130,8 +138,12 @@ public class ScenarioThemeService {
    */
   public Optional<ScenarioThemeDetailsDto> getScenarioThemeDetailsById(Integer id) {
     return scenarioThemeRepository.findById(id)
-        .map(theme -> new ScenarioThemeDetailsDto(theme.getName(), theme.getDescription(),
-            theme.getInstructions()));
+        .map(theme -> new ScenarioThemeDetailsDto(
+            theme.getName(),
+            theme.getDescription(),
+            theme.getBefore(),
+            theme.getUnder(),
+            theme.getAfter()));
   }
 
   /**

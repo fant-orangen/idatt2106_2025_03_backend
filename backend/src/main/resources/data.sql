@@ -212,12 +212,12 @@ INSERT INTO meeting_places (name, latitude, longitude, address, created_by_user_
 VALUES ('Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
 
 -- SCENARIO THEMES
-INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
-VALUES ('Power Outage', 'Preparing for extended power outages', 'Have flashlights, batteries, and non-perishable food ready. Unplug sensitive electronics.', 'active', 1);
-INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
-VALUES ('Natural Disaster', 'Earthquake, flood, or storm preparation', 'Follow evacuation orders. Prepare an emergency kit and know your local shelter locations.', 'active', 1);
-INSERT INTO scenario_themes (name, description, instructions, status, created_by_user_id)
-VALUES ('Public Health Emergency', 'Pandemic or disease outbreak', 'Practice good hygiene, follow public health advice, and stock up on essential medicines.', 'active', 1);
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+VALUES ('Power Outage', 'Preparing for extended power outages', 'Prepare flashlights and batteries.', 'Unplug sensitive electronics.', 'Check on neighbors and elderly.', 'active', 1);
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+VALUES ('Natural Disaster', 'Earthquake, flood, or storm preparation', 'Prepare an emergency kit.', 'Follow evacuation orders.', 'Check for structural damage before returning home.', 'active', 1);
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+VALUES ('Public Health Emergency', 'Pandemic or disease outbreak', 'Stock up on essential medicines.', 'Practice good hygiene and follow public health advice.', 'Monitor symptoms and seek medical help if needed.', 'active', 1);
 
 -- CRISIS EVENTS
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
@@ -418,7 +418,7 @@ VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your house
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
 VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
 
--- End of winter storms 
+-- End of winter storms
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
 VALUES ('New Emergency Response Guidelines', 'The city has updated its emergency response guidelines. Key changes include...', DATEADD('DAY', -2, CURRENT_TIMESTAMP), 1, 2, 'published');
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)

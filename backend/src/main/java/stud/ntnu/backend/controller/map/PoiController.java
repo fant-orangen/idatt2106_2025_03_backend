@@ -1,6 +1,9 @@
 package stud.ntnu.backend.controller.map;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.poi.CreatePoiDto;
@@ -46,6 +49,26 @@ public class PoiController {
         .map(PoiItemDto::fromEntity)
         .toList();
   }
+    /**
+     * Retrieves all points of interest with pagination and sorting.
+     *
+     * @param page the page number (default is 0)
+     * @param size the page size (default is 10)
+     * @param sort the sorting criteria (default is "id,asc")
+     * @return a paginated list of points of interest
+     */
+  @GetMapping("public/poi/previews")
+  public ResponseEntity<?> getPoiPreviews(
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "10") int size,
+          @RequestParam(defaultValue = "id,asc") String sort) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")[0]).ascending());
+    if (sort.endsWith(",desc")) {
+      pageable = PageRequest.of(page, size, Sort.by(sort.split(",")[0]).descending());
+    }
+    return ResponseEntity.ok(poiService.getPoiPreviews(pageable));
+  }
+
 
   /**
    * Retrieves all points of interest of a specific type.
