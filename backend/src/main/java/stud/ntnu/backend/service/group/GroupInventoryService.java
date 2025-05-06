@@ -111,12 +111,24 @@ public class GroupInventoryService {
    * Get all product types that have batches contributed to the specified group.
    *
    * @param groupId The ID of the group
+   * @param email The email of the current user
    * @param pageable pagination information
    * @return a page of ProductTypeDto
    */
-  public Page<ProductTypeDto> getContributedProductTypes(Integer groupId, Pageable pageable) {
+  public Page<ProductTypeDto> getContributedProductTypes(Integer groupId, String email, Pageable pageable) {
+    // Get user's household
+    var user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    
+    var household = user.getHousehold();
+    if (household == null) {
+        throw new IllegalArgumentException("User is not in a household");
+    }
+
     Page<ProductType> page = productTypeRepository.findContributedProductTypesByGroup(
-        groupId, pageable);
+        groupId,
+        household.getId(),
+        pageable);
     return page.map(pt -> new ProductTypeDto(
         pt.getId(),
         pt.getHousehold() != null ? pt.getHousehold().getId() : null,

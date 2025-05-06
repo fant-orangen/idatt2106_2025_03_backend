@@ -18,29 +18,26 @@ public interface GroupInventoryContributionRepository extends JpaRepository<Grou
     // Basic CRUD operations are provided by JpaRepository
     // Custom query methods can be added as needed
 
-    @Query("SELECT gic.product FROM GroupInventoryContribution gic WHERE gic.group.id = :groupId AND gic.product.productType.id = :productTypeId")
-    Page<ProductBatch> findContributedProductBatchesByGroupAndProductType(@Param("groupId") Integer groupId, @Param("productTypeId") Integer productTypeId, Pageable pageable);
+    @Query("SELECT DISTINCT pb FROM ProductBatch pb " +
+           "JOIN GroupInventoryContribution gic ON gic.product = pb " +
+           "WHERE gic.group.id = :groupId " +
+           "AND pb.productType.id = :productTypeId " +
+           "AND gic.product IS NOT NULL")
+    Page<ProductBatch> findContributedProductBatchesByGroupAndProductType(
+        @Param("groupId") Integer groupId,
+        @Param("productTypeId") Integer productTypeId,
+        Pageable pageable);
 
-    @Query(value = """
-            SELECT DISTINCT pt.* FROM product_types pt
-            JOIN product_batch pb ON pb.product_type_id = pt.id
-            JOIN group_inventory_contributions gic ON gic.product_id = pb.id
-            WHERE gic.group_id = :groupId
-            AND gic.household_id = :householdId
-            AND LOWER(pt.name) LIKE LOWER(CONCAT('%', :search, '%'))
-            """,
-            countQuery = """
-            SELECT COUNT(DISTINCT pt.id) FROM product_types pt
-            JOIN product_batch pb ON pb.product_type_id = pt.id
-            JOIN group_inventory_contributions gic ON gic.product_id = pb.id
-            WHERE gic.group_id = :groupId
-            AND gic.household_id = :householdId
-            AND LOWER(pt.name) LIKE LOWER(CONCAT('%', :search, '%'))
-            """,
-            nativeQuery = true)
+    @Query("SELECT DISTINCT pt FROM ProductType pt " +
+           "JOIN ProductBatch pb ON pb.productType = pt " +
+           "JOIN GroupInventoryContribution gic ON gic.product = pb " +
+           "WHERE gic.group.id = :groupId " +
+           "AND gic.household.id = :householdId " +
+           "AND gic.product IS NOT NULL " +
+           "AND LOWER(pt.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
     Page<ProductType> findContributedProductTypesByGroupAndHouseholdAndNameContaining(
         @Param("groupId") Integer groupId,
         @Param("householdId") Integer householdId,
-        @Param("search") String search,
+        @Param("searchTerm") String searchTerm,
         Pageable pageable);
 }

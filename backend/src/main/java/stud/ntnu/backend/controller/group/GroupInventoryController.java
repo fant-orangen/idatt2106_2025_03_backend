@@ -41,17 +41,20 @@ public class GroupInventoryController {
    *
    * @param groupId The ID of the group
    * @param pageable pagination information
+   * @param principal the authenticated user
    * @return a page of ProductTypeDto
    */
   @GetMapping("/user/groups/inventory/product-types")
   public ResponseEntity<Page<ProductTypeDto>> getContributedProductTypes(
       @RequestParam Integer groupId,
-      Pageable pageable) {
+      Pageable pageable,
+      Principal principal) {
     if (Objects.isNull(groupId)) {
       return ResponseEntity.badRequest().build();
     }
     Page<ProductTypeDto> page = groupInventoryService.getContributedProductTypes(
         groupId,
+        principal.getName(),
         pageable);
     return ResponseEntity.ok(page);
   }
