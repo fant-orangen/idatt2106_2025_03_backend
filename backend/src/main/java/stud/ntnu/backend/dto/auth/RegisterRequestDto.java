@@ -1,5 +1,6 @@
 package stud.ntnu.backend.dto.auth;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import lombok.Getter;
@@ -25,6 +26,9 @@ public class RegisterRequestDto extends AuthRequestDto {
   @NotBlank(message = "Phone number is required")
   private String phoneNumber;
 
+  @AssertTrue
+  private Boolean privacyPolicyAccepted;
+
   // Optional field, no validation needed
   private String homeAddress;
 
@@ -41,7 +45,7 @@ public class RegisterRequestDto extends AuthRequestDto {
   public RegisterRequestDto(String email, String password, String recaptchaToken,
       String firstName, String lastName,
       String phoneNumber, String homeAddress,
-      BigDecimal homeLatitude, BigDecimal homeLongitude) {
+      BigDecimal homeLatitude, BigDecimal homeLongitude, Boolean privacyPolicyAccepted) {
     super(email, password, recaptchaToken);
     this.firstName = firstName;
     this.lastName = lastName;
@@ -49,13 +53,14 @@ public class RegisterRequestDto extends AuthRequestDto {
     this.homeAddress = homeAddress;
     this.homeLatitude = homeLatitude;
     this.homeLongitude = homeLongitude;
+    this.privacyPolicyAccepted = privacyPolicyAccepted;
   }
 
   // Constructor with combined name for backward compatibility
   public RegisterRequestDto(String email, String password, String recaptchaToken,
       String name,
       String phoneNumber, String homeAddress,
-      BigDecimal homeLatitude, BigDecimal homeLongitude) {
+      BigDecimal homeLatitude, BigDecimal homeLongitude, Boolean privacyPolicyAccepted) {
     super(email, password, recaptchaToken);
     if (name != null) {
       String[] parts = name.split(" ", 2);
@@ -66,6 +71,7 @@ public class RegisterRequestDto extends AuthRequestDto {
     this.homeAddress = homeAddress;
     this.homeLatitude = homeLatitude;
     this.homeLongitude = homeLongitude;
+    this.privacyPolicyAccepted = privacyPolicyAccepted; // Default to true for backward compatibility
   }
 
   // For backward compatibility
