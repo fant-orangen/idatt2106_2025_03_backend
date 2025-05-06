@@ -273,6 +273,7 @@ public class InventoryController {
     }
   }
 
+  // TODO: call getWaterDaysRemaining endpoint and getFoodDaysRemaining endpoint on frontend
   /**
    * Get the number of days of food remaining in the household based on the recommended daily
    * food consumption per person.
