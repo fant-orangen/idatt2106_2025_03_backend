@@ -27,6 +27,7 @@ public class RegisterRequestDto extends AuthRequestDto {
   private String phoneNumber;
 
   @AssertTrue
+  @NotBlank
   private Boolean privacyPolicyAccepted;
 
   // Optional field, no validation needed
