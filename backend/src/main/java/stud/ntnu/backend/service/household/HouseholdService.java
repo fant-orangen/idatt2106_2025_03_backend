@@ -105,6 +105,60 @@ public class HouseholdService {
   }
 
   /**
+   * Updates a household's name and address. Only household admins can update households.
+   *
+   * @param email the email of the user updating the household
+   * @param name the new name for the household
+   * @param address the new address for the household
+   * @return the updated household
+   * @throws IllegalStateException if the user is not found, doesn't have a household, or is not an admin
+   */
+  @Transactional
+  public Household updateHousehold(String email, String name, String address) {
+    log.info("User {} attempting to update household with name: {} and address: {}", email, name, address);
+
+    // Check if the user exists
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    // Check if the user has a household
+    Household household = user.getHousehold();
+    if (household == null) {
+      throw new IllegalStateException("User doesn't have a household");
+    }
+
+    // Check if the user is an admin
+    if (!isUserHouseholdAdmin(user)) {
+      throw new IllegalStateException("Only household admins can update households");
+    }
+
+    // Update the household
+    household.setName(name);
+    household.setAddress(address);
+
+    // If the address changed, try to update the coordinates
+    if (!address.equals(household.getAddress())) {
+      try {
+        CoordinatesItemDto coordinates = LocationUtil.getCoordinatesByAddress(address);
+        if (coordinates != null) {
+          household.setLatitude(coordinates.getLatitude());
+          household.setLongitude(coordinates.getLongitude());
+          log.info("Updated coordinates for household {}: lat={}, lng={}",
+              household.getId(), coordinates.getLatitude(), coordinates.getLongitude());
+        }
+      } catch (Exception e) {
+        log.warn("Failed to update coordinates for household {}: {}", household.getId(), e.getMessage());
+        // Continue without updating coordinates
+      }
+    }
+
+    Household updatedHousehold = householdRepository.save(household);
+    log.info("Successfully updated household {}", updatedHousehold.getId());
+
+    return updatedHousehold;
+  }
+
+  /**
    * Deletes a household by its ID.
    *
    * @param id the ID of the household to delete

@@ -11,6 +11,7 @@ import stud.ntnu.backend.dto.household.HouseholdInviteRequestDto;
 import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
 import stud.ntnu.backend.dto.household.HouseholdJoinRequestDto;
 import stud.ntnu.backend.dto.household.HouseholdSwitchRequestDto;
+import stud.ntnu.backend.dto.household.HouseholdUpdateRequestDto;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.household.Invitation;
 import stud.ntnu.backend.service.household.HouseholdService;
@@ -60,28 +61,6 @@ public class HouseholdController {
       return ResponseEntity.ok(household);
     } catch (IllegalStateException e) {
       log.info("Household creation failed: {}", e.getMessage());
-      return ResponseEntity.badRequest().body(e.getMessage());
-    }
-  }
-
-  /**
-   * Switches the authenticated user to a different household.
-   *
-   * @param requestDto the household switch request
-   * @param principal  the Principal object representing the current user
-   * @return ResponseEntity with the updated household if successful, or an error message if the
-   * user or household is not found
-   */
-  @PutMapping("/switch")
-  public ResponseEntity<?> switchHousehold(
-      @Valid @RequestBody HouseholdSwitchRequestDto requestDto,
-      Principal principal) {
-    try {
-      Household household = householdService.switchHousehold(principal.getName(),
-          requestDto.getHouseholdId());
-      return ResponseEntity.ok(household);
-    } catch (IllegalStateException e) {
-      log.info("Household switch failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -415,6 +394,44 @@ public class HouseholdController {
       log.info("Delete household failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     } catch (Exception e) {
+      return ResponseEntity.status(500).body("An unexpected error occurred: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Updates the current user's household name and address. Only household admins can update households.
+   *
+   * @param updateRequestDto the household update request containing the new name and address
+   * @param principal the Principal object representing the current user (admin)
+   * @return ResponseEntity with the updated household if successful, or an error message if the user is not
+   * found, doesn't have a household, or is not an admin
+   */
+  @PutMapping("/update")
+  public ResponseEntity<?> updateHousehold(
+      @Valid @RequestBody HouseholdUpdateRequestDto updateRequestDto,
+      Principal principal) {
+    try {
+      log.info("Update household request from user: {}", principal.getName());
+      Household updatedHousehold = householdService.updateHousehold(
+          principal.getName(),
+          updateRequestDto.getName(),
+          updateRequestDto.getAddress());
+
+      // Convert to DTO for response
+      HouseholdDto householdDto = new HouseholdDto(
+          updatedHousehold.getId(),
+          updatedHousehold.getName(),
+          updatedHousehold.getAddress(),
+          updatedHousehold.getPopulationCount(),
+          updatedHousehold.getLatitude(),
+          updatedHousehold.getLongitude());
+
+      return ResponseEntity.ok(householdDto);
+    } catch (IllegalStateException e) {
+      log.error("Update household failed due to validation error: {}", e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+      log.error("Unexpected error updating household: {}", e.getMessage(), e);
       return ResponseEntity.status(500).body("An unexpected error occurred: " + e.getMessage());
     }
   }
