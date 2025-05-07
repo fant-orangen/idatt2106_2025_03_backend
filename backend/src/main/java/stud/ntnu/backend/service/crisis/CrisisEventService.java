@@ -471,20 +471,23 @@ public class CrisisEventService {
 
   /**
    * Retrieves a paginated list of crisis events affecting the given user. A crisis event affects a
-   * user if the user's home or household location is within the event's radius.
+   * user if the user's home or household location is within the event's radius. Events are sorted
+   * by severity (red > yellow > green).
    *
    * @param user     the user to check
    * @param pageable pagination information
-   * @return a page of crisis events affecting the user
+   * @return a page of crisis events affecting the user, sorted by severity
    */
   @Transactional(readOnly = true)
   public Page<CrisisEvent> getCrisisEventsAffectingUser(User user, Pageable pageable) {
     // Get all active crisis events (could be optimized with a custom query if needed)
     List<CrisisEvent> allActiveEvents = crisisEventRepository.findByActiveTrue();
-    // Filter events that affect the user
+    // Filter events that affect the user and sort by severity
     List<CrisisEvent> affectingEvents = allActiveEvents.stream()
         .filter(event -> event.getRadius() != null &&
             LocationUtil.isCrisisEventNearUser(user, event, event.getRadius().doubleValue()))
+        .sorted((a, b) -> Integer.compare(severityOrder(b.getSeverity()),
+            severityOrder(a.getSeverity())))
         .toList();
     // Manual pagination
     int start = (int) pageable.getOffset();

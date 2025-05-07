@@ -235,6 +235,16 @@ VALUES ('lightning storm', 'Potential flooding in downtown area', 'red', 59.4300
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
 VALUES ('Past Earthquake', 'Earthquake event that has ended', 'red', 63.4200, 12.4000, 20, DATEADD('DAY', -10, CURRENT_TIMESTAMP), 1, FALSE, 2);
 
+INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
+VALUES ('Severe Storm Warning', 'Heavy storm with potential flooding in central Trondheim', 'red', 63.4300, 10.3950, 2.0, CURRENT_TIMESTAMP, 1, TRUE, 2);
+
+INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
+VALUES ('Power Outage Alert', 'Planned maintenance causing temporary power disruption', 'yellow', 63.4280, 10.3940, 1.5, CURRENT_TIMESTAMP, 1, TRUE, 1);
+
+INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
+VALUES ('Minor Traffic Incident', 'Road closure due to minor accident', 'green', 63.4290, 10.3960, 0.5, CURRENT_TIMESTAMP, 1, TRUE, 3);
+
+
 -- CRISIS EVENTS CHANGES
 
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
