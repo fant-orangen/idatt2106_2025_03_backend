@@ -42,7 +42,7 @@ public class GroupInventoryController {
    * @param groupId The ID of the group
    * @param pageable pagination information
    * @param principal the authenticated user
-   * @return a page of ProductTypeDto
+   * @return a page of ProductTypeDt
    */
   @GetMapping("/user/groups/inventory/product-types")
   public ResponseEntity<Page<ProductTypeDto>> getContributedProductTypes(
@@ -206,4 +206,5 @@ public class GroupInventoryController {
       return ResponseEntity.badRequest().body(0);
     }
   }
+
 }

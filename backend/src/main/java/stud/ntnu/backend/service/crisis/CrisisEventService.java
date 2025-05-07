@@ -559,4 +559,26 @@ public class CrisisEventService {
   public Optional<CrisisEventDetailsDto> getCrisisEventDetailsById(Integer id) {
     return crisisEventRepository.findById(id).map(CrisisEventDetailsDto::fromEntity);
   }
+
+  /**
+   * Retrieves a preview (id, name, severity, startTime) of all inactive crisis events with
+   * pagination, sorted by severity (red > yellow > green).
+   *
+   * @param pageable pagination information
+   * @return page of crisis event previews
+   */
+  @Transactional(readOnly = true)
+  public Page<CrisisEventPreviewDto> getInactiveCrisisEventPreviews(Pageable pageable) {
+    List<CrisisEvent> inactiveEvents = crisisEventRepository.findByActiveFalse();
+    List<CrisisEventPreviewDto> previews = inactiveEvents.stream()
+        .map(CrisisEventPreviewDto::fromEntity)
+        .sorted((a, b) -> Integer.compare(severityOrder(b.getSeverity()),
+            severityOrder(a.getSeverity())))
+        .toList();
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), previews.size());
+    List<CrisisEventPreviewDto> pagedList =
+        (start <= end) ? previews.subList(start, end) : List.of();
+    return new PageImpl<>(pagedList, pageable, previews.size());
+  }
 }

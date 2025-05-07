@@ -170,8 +170,6 @@ INSERT INTO group_inventory_contributions (group_id, household_id, product_id) V
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 2, 29);
 
 
-
-
 -- POI TYPES
 INSERT INTO poi_types (name) VALUES ('Hospital');
 INSERT INTO poi_types (name) VALUES ('Police Station');
