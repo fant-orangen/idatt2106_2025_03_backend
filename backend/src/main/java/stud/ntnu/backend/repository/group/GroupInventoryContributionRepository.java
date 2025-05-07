@@ -50,4 +50,14 @@ public interface GroupInventoryContributionRepository extends JpaRepository<Grou
     @Query("DELETE FROM GroupInventoryContribution gic " +
            "WHERE gic.group.id = :groupId AND gic.household.id = :householdId")
     void deleteByGroupIdAndHouseholdId(@Param("groupId") Integer groupId, @Param("householdId") Integer householdId);
+
+    @Query("SELECT COALESCE(SUM(pb.number), 0) FROM GroupInventoryContribution gic " +
+           "JOIN gic.product pb " +
+           "WHERE gic.group.id = :groupId " +
+           "AND pb.productType.id = :productTypeId " +
+           "AND gic.household.id = :householdId")
+    Integer sumTotalUnitsForProductTypeAndGroupAndHousehold(
+        @Param("productTypeId") Integer productTypeId,
+        @Param("groupId") Integer groupId,
+        @Param("householdId") Integer householdId);
 }

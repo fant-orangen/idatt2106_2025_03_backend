@@ -180,4 +180,31 @@ public class GroupInventoryController {
       return ResponseEntity.status(403).body(false); // TODO: Change this status code?
     }
   }
+
+  /**
+   * Get the total number of units of a specific product type that have been contributed to a group by the current user's household.
+   *
+   * @param productTypeId The ID of the product type
+   * @param groupId The ID of the group
+   * @param principal the authenticated user
+   * @return The total number of units contributed by the user's household
+   */
+  @GetMapping("user/groups/inventory/product-types/sum")
+  public ResponseEntity<Integer> getTotalUnitsForProductType(
+      @RequestParam Integer productTypeId,
+      @RequestParam Integer groupId,
+      Principal principal) {
+    if (Objects.isNull(productTypeId) || Objects.isNull(groupId)) {
+      return ResponseEntity.badRequest().build();
+    }
+    try {
+      Integer totalUnits = groupInventoryService.getTotalUnitsForProductType(
+          productTypeId,
+          groupId,
+          principal.getName());
+      return ResponseEntity.ok(totalUnits);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(0);
+    }
+  }
 }

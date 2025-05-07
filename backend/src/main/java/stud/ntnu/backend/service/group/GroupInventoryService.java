@@ -311,4 +311,45 @@ public class GroupInventoryService {
     // Check if batch is contributed to any group
     return groupInventoryContributionRepository.existsByProductBatchId(productBatchId);
   }
+
+  /**
+   * Get the total number of units of a specific product type that have been contributed to a group by the user's household.
+   *
+   * @param productTypeId The ID of the product type
+   * @param groupId The ID of the group
+   * @param email The email of the user making the request
+   * @return The total number of units contributed by the user's household, or 0 if none found
+   * @throws IllegalArgumentException if the product type or group doesn't exist, or if the user is not in a household
+   */
+  public Integer getTotalUnitsForProductType(Integer productTypeId, Integer groupId, String email) {
+    // Validate inputs
+    if (productTypeId == null || groupId == null || email == null) {
+        throw new IllegalArgumentException("Product type ID, group ID, and email cannot be null");
+    }
+
+    // Get user's household
+    var user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    
+    var household = user.getHousehold();
+    if (household == null) {
+        throw new IllegalArgumentException("User is not in a household");
+    }
+
+    // Validate that the product type exists
+    if (!productTypeRepository.existsById(productTypeId)) {
+        throw new IllegalArgumentException("Product type not found");
+    }
+
+    // Validate that the group exists
+    if (!groupRepository.existsById(groupId)) {
+        throw new IllegalArgumentException("Group not found");
+    }
+
+    // Get the sum of units from the repository for this household only
+    return groupInventoryContributionRepository.sumTotalUnitsForProductTypeAndGroupAndHousehold(
+        productTypeId, 
+        groupId,
+        household.getId());
+  }
 }
