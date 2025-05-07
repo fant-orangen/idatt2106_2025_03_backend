@@ -3,6 +3,7 @@ package stud.ntnu.backend.service.user;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import stud.ntnu.backend.dto.user.NotificationDto;
+import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.Notification.PreferenceType;
 import stud.ntnu.backend.model.user.Notification.TargetType;
@@ -30,6 +32,7 @@ import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.NotificationPreferenceRepository;
 import stud.ntnu.backend.repository.user.NotificationRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.util.LocationUtil;
 
 public class NotificationServiceTest {
 
