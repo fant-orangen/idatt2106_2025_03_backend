@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -25,7 +27,8 @@ import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.crisis.CrisisEventService;
 import stud.ntnu.backend.service.user.UserService;
-
+import java.util.List;
+import org.springframework.data.web.PageableDefault;
 /**
  * Manages crisis events and live updates. Admin functions include creating, editing, and deleting
  * events, setting severity levels, and defining epicenter locations. Also exposes current events
@@ -273,6 +276,25 @@ public class CrisisEventController {
     }
   }
 
+  /**
+   * Search for crisis events by name.
+   *
+   * @param nameSearch the search term to filter event names by
+   * @param isActive whether to search among active (true) or inactive (false) events
+   * @param pageable pagination information
+   * @return page of crisis events matching the name search
+   */
+  @GetMapping("/public/crisis-events/search")
+  public ResponseEntity<Page<CrisisEventPreviewDto>> searchCrisisEventsByName(
+      @RequestParam(required = false) String nameSearch,
+      @RequestParam(required = false, defaultValue = "true") boolean isActive,
+      @PageableDefault(size = 10, sort = "startTime", direction = Sort.Direction.DESC) Pageable pageable) {
+    
+    Page<CrisisEvent> events = crisisEventService.searchCrisisEvents(nameSearch, isActive, pageable);
+    Page<CrisisEventPreviewDto> previewDtos = events.map(CrisisEventPreviewDto::fromEntity);
+    return ResponseEntity.ok(previewDtos);
+  }
+
   private int severityOrder(CrisisEvent.Severity severity) {
     return switch (severity) {
       case red -> 3;
@@ -280,4 +302,6 @@ public class CrisisEventController {
       case green -> 1;
     };
   }
+
+ 
 }

@@ -158,4 +158,16 @@ public class NewsController {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
+
+  /**
+   * Get paginated draft news articles.
+   *
+   * @param pageable pagination information
+   * @return ResponseEntity with a page of draft news articles
+   */
+  @GetMapping("/public/news/drafts")
+  public ResponseEntity<?> getDraftNewsArticles(Pageable pageable) {
+    Page<NewsArticleResponseDTO> draftNewsArticles = newsService.getDraftNewsArticles(pageable);
+    return ResponseEntity.ok(draftNewsArticles);
+  }
 }

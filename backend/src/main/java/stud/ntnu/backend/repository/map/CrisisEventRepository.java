@@ -3,6 +3,8 @@ package stud.ntnu.backend.repository.map;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -60,4 +62,20 @@ public interface CrisisEventRepository extends JpaRepository<CrisisEvent, Intege
   @Modifying
   @Query("UPDATE CrisisEvent c SET c.active = false WHERE c.id = :id")
   void deactivateCrisisEvent(@Param("id") Integer id);
+
+  /**
+   * Find all active crisis events with pagination.
+   *
+   * @param pageable pagination information
+   * @return page of active crisis events
+   */
+  Page<CrisisEvent> findByActiveTrue(Pageable pageable);
+
+  /**
+   * Find all inactive crisis events with pagination.
+   *
+   * @param pageable pagination information
+   * @return page of inactive crisis events
+   */
+  Page<CrisisEvent> findByActiveFalse(Pageable pageable);
 }
