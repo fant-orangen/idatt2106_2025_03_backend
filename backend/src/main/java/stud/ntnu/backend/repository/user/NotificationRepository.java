@@ -39,8 +39,12 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
      * @return a page of notifications
      */
     Page<Notification> findByUserId(Integer userId, Pageable pageable);
-
-    // TODO: Documentation
+    /**
+     * Find all notifications for a specific user ID, ordered by notification date in descending order.
+     *
+     * @param userId the user ID
+     * @return a list of notifications ordered by notification date
+     */
     List<Notification> findByUserIdOrderByNotifyAtDesc(Integer userId);
 
 
