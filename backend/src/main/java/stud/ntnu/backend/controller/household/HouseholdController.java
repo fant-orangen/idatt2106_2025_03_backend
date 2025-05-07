@@ -190,6 +190,27 @@ public class HouseholdController {
   }
 
   /**
+   * Gets only non-admin members of the current user's household.
+   *
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity with the list of non-admin household members if successful, or 404 if the user has
+   * no household
+   */
+  @GetMapping("/members/non-admin")
+  public ResponseEntity<?> getNonAdminHouseholdMembers(Principal principal) {
+    try {
+      List<HouseholdMemberDto> members = householdService.getNonAdminHouseholdMembers(principal.getName());
+      return ResponseEntity.ok(members);
+    } catch (IllegalStateException e) {
+      log.info("Get non-admin household members failed: {}", e.getMessage());
+      if (e.getMessage().equals("User doesn't have a household")) {
+        return ResponseEntity.notFound().build();
+      }
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
    * Gets all empty members of the current user's household.
    *
    * @param principal the Principal object representing the current user

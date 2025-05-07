@@ -438,6 +438,37 @@ public class HouseholdService {
   }
 
   /**
+   * Gets only non-admin members of the current user's household.
+   *
+   * @param email the email of the user
+   * @return list of non-admin household members
+   * @throws IllegalStateException if the user is not found or doesn't have a household
+   */
+  public List<HouseholdMemberDto> getNonAdminHouseholdMembers(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    Household household = user.getHousehold();
+    if (household == null) {
+      throw new IllegalStateException("User doesn't have a household");
+    }
+
+    return userRepository.findByHousehold(household).stream()
+        .map(member -> {
+          boolean isAdmin = householdAdminRepository.existsByUser(member);
+          return new HouseholdMemberDto(
+              member.getId(),
+              member.getEmail(),
+              member.getFirstName(),
+              member.getLastName(),
+              isAdmin
+          );
+        })
+        .filter(memberDto -> !memberDto.isAdmin()) // Filter out admin members
+        .collect(Collectors.toList());
+  }
+
+  /**
    * Gets all empty members of the current user's household.
    *
    * @param email the email of the user
