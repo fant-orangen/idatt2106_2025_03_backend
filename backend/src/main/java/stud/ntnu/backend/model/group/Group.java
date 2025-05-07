@@ -35,7 +35,7 @@ public class Group {
 
   @Column(name = "status", nullable = false)
   @Enumerated(EnumType.STRING)
-  private GroupStatus status = GroupStatus.ACTIVE;
+  private GroupStatus status = GroupStatus.active;
 
   // Set createdAt before persist
   @PrePersist
@@ -49,7 +49,7 @@ public class Group {
   }
 
   public enum GroupStatus {
-    ACTIVE,
-    ARCHIVED
+    active,
+    archived
   }
 }

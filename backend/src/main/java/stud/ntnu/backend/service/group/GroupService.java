@@ -125,7 +125,7 @@ public class GroupService {
 
   public Page<GroupSummaryDto> getCurrentUserGroups(String email, Pageable pageable) {
     Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
-    Page<GroupMembership> memberships = groupMembershipRepository.findAllCurrentByHouseholdId(
+    Page<GroupMembership> memberships = groupMembershipRepository.findAllCurrentByHouseholdIdAndGroupStatus(
         householdId, LocalDateTime.now(), pageable);
     return memberships.map(membership -> {
       Group group = membership.getGroup();
@@ -162,7 +162,7 @@ public class GroupService {
     if (remainingMemberships.isEmpty()) {
       // This was the last household, archive the group
       Group group = membership.getGroup();
-      group.setStatus(Group.GroupStatus.ARCHIVED);
+      group.setStatus(Group.GroupStatus.archived);
       groupRepository.save(group);
     }
     
