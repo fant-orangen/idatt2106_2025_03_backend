@@ -305,6 +305,32 @@ public class HouseholdController {
   }
 
   /**
+   * Cancels a pending invitation by token. Only household admins can cancel invitations.
+   * Matches the frontend endpoint: /api/user/households/invitations/{token}
+   *
+   * @param token the token of the invitation to cancel
+   * @param principal the Principal object representing the current user (admin)
+   * @return ResponseEntity with success message if successful, or an error message if the user is not
+   * found, is not an admin, or the invitation is not found
+   */
+  @DeleteMapping("/invitations/{token}")
+  public ResponseEntity<?> cancelInvitation(
+      @PathVariable String token,
+      Principal principal) {
+    try {
+      log.info("Cancel invitation request for token: {}", token);
+      householdService.cancelInvitationByToken(principal.getName(), token);
+      return ResponseEntity.ok("Successfully canceled invitation");
+    } catch (IllegalStateException e) {
+      log.error("Cancel invitation failed: {}", e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+      log.error("Unexpected error canceling invitation: {}", e.getMessage(), e);
+      return ResponseEntity.status(500).body("An unexpected error occurred: " + e.getMessage());
+    }
+  }
+
+  /**
    * Promotes a user to household admin.
    *
    * @param email     the email of the user to promote

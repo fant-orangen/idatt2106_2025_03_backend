@@ -646,6 +646,53 @@ public class HouseholdService {
   }
 
   /**
+   * Cancels a pending invitation by token. Only household admins can cancel invitations.
+   *
+   * @param adminEmail the email of the admin canceling the invitation
+   * @param token the token of the invitation to cancel
+   * @throws IllegalStateException if the admin is not found, is not an admin, or the invitation is not found
+   */
+  @Transactional
+  public void cancelInvitationByToken(String adminEmail, String token) {
+    log.info("User {} attempting to cancel invitation with token {}", adminEmail, token);
+
+    // Check if the user exists
+    User admin = userRepository.findByEmail(adminEmail)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    // Check if the user has a household
+    Household household = admin.getHousehold();
+    if (household == null) {
+      throw new IllegalStateException("User doesn't have a household");
+    }
+
+    // Check if the user is an admin
+    if (!isUserHouseholdAdmin(admin)) {
+      throw new IllegalStateException("Only household admins can cancel invitations");
+    }
+
+    // Find the invitation by token
+    Invitation invitation = invitationRepository.findByToken(token)
+        .orElseThrow(() -> new IllegalStateException("Invitation not found"));
+
+    // Check if the invitation belongs to the admin's household
+    if (invitation.getHousehold() == null || !invitation.getHousehold().getId().equals(household.getId())) {
+      throw new IllegalStateException("Invitation does not belong to the admin's household");
+    }
+
+    // Check if the invitation is still pending
+    if (!invitation.isPending()) {
+      throw new IllegalStateException("Invitation is not pending");
+    }
+
+    // Cancel the invitation by setting declinedAt
+    invitation.setDeclinedAt(LocalDateTime.now());
+    invitationRepository.save(invitation);
+
+    log.info("Invitation with token {} canceled by admin {}", token, adminEmail);
+  }
+
+  /**
    * Promotes a user to household admin.
    *
    * @param adminEmail the email of the current admin
