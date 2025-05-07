@@ -8,8 +8,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.group.GroupInventoryContribution;
+import stud.ntnu.backend.model.group.Group;
 import stud.ntnu.backend.model.inventory.ProductBatch;
 import stud.ntnu.backend.model.inventory.ProductType;
+import java.util.Optional;
 
 /**
  * Repository interface for GroupInventoryContribution entity operations.
@@ -54,10 +56,12 @@ public interface GroupInventoryContributionRepository extends JpaRepository<Grou
     @Query("SELECT COALESCE(SUM(pb.number), 0) FROM GroupInventoryContribution gic " +
            "JOIN gic.product pb " +
            "WHERE gic.group.id = :groupId " +
-           "AND pb.productType.id = :productTypeId " +
-           "AND gic.household.id = :householdId")
-    Integer sumTotalUnitsForProductTypeAndGroupAndHousehold(
+           "AND pb.productType.id = :productTypeId")
+    Integer sumTotalUnitsForProductTypeAndGroup(
         @Param("productTypeId") Integer productTypeId,
-        @Param("groupId") Integer groupId,
-        @Param("householdId") Integer householdId);
+        @Param("groupId") Integer groupId);
+
+    @Query("SELECT gic FROM GroupInventoryContribution gic " +
+           "WHERE gic.product.id = :productBatchId")
+    Optional<GroupInventoryContribution> findByProductBatchId(@Param("productBatchId") Integer productBatchId);
 }
