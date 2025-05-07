@@ -3,6 +3,7 @@ package stud.ntnu.backend.service.group;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.dto.inventory.ProductBatchDto;
 import stud.ntnu.backend.dto.inventory.ProductTypeDto;
@@ -17,9 +18,13 @@ import stud.ntnu.backend.repository.group.GroupRepository;
 import stud.ntnu.backend.repository.inventory.ProductBatchRepository;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.util.SearchUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing group inventory contributions. Handles creation, retrieval, updating, and
@@ -34,6 +39,8 @@ public class GroupInventoryService {
   private final ProductBatchRepository productBatchRepository;
   private final HouseholdRepository householdRepository;
   private final UserRepository userRepository;
+  private final SearchUtil searchUtil;
+  private final Logger logger = LoggerFactory.getLogger(GroupInventoryService.class);
 
   /**
    * Constructor for dependency injection.
@@ -45,6 +52,7 @@ public class GroupInventoryService {
    * @param productBatchRepository               repository for product batch operations
    * @param householdRepository                  repository for household operations
    * @param userRepository                       repository for user operations
+   * @param searchUtil                           utility for search operations
    */
   @Autowired
   public GroupInventoryService(
@@ -53,13 +61,15 @@ public class GroupInventoryService {
       GroupRepository groupRepository,
       ProductBatchRepository productBatchRepository,
       HouseholdRepository householdRepository,
-      UserRepository userRepository) {
+      UserRepository userRepository,
+      SearchUtil searchUtil) {
     this.groupInventoryContributionRepository = groupInventoryContributionRepository;
     this.productTypeRepository = productTypeRepository;
     this.groupRepository = groupRepository;
     this.productBatchRepository = productBatchRepository;
     this.householdRepository = householdRepository;
     this.userRepository = userRepository;
+    this.searchUtil = searchUtil;
   }
 
   /**
@@ -100,10 +110,28 @@ public class GroupInventoryService {
     groupInventoryContributionRepository.deleteById(id);
   }
 
-  public Page<ProductTypeDto> getContributedProductTypes(Integer groupId, String category,
-      Pageable pageable) {
-    Page<ProductType> page = productTypeRepository.findContributedProductTypesByGroupAndCategory(
-        groupId, category, pageable);
+  /**
+   * Get all product types that have batches contributed to the specified group.
+   *
+   * @param groupId The ID of the group
+   * @param email The email of the current user
+   * @param pageable pagination information
+   * @return a page of ProductTypeDto
+   */
+  public Page<ProductTypeDto> getContributedProductTypes(Integer groupId, String email, Pageable pageable) {
+    // Get user's household
+    var user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    
+    var household = user.getHousehold();
+    if (household == null) {
+        throw new IllegalArgumentException("User is not in a household");
+    }
+
+    Page<ProductType> page = productTypeRepository.findContributedProductTypesByGroup(
+        groupId,
+        household.getId(),
+        pageable);
     return page.map(pt -> new ProductTypeDto(
         pt.getId(),
         pt.getHousehold() != null ? pt.getHousehold().getId() : null,
@@ -196,5 +224,91 @@ public class GroupInventoryService {
         batch);
     groupInventoryContributionRepository.save(contribution);
     return true;
+  }
+
+  /**
+   * Search for product types that have at least one batch contributed to the specified group by the user's household.
+   *
+   * @param groupId The ID of the group to search within
+   * @param search The search term to filter product types by name
+   * @param email The email of the current user
+   * @param pageable pagination information
+   * @return a page of ProductTypeDto matching the search criteria
+   * @throws IllegalArgumentException if the user is not found, not in a household, or not a member of the group
+   */
+  public Page<ProductTypeDto> searchContributedProductTypes(Integer groupId, String search, String email, Pageable pageable) {
+    // Validate group exists
+    Group group = groupRepository.findById(groupId)
+        .orElseThrow(() -> new IllegalArgumentException("Group not found"));
+
+    // Get user's household
+    var user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    
+    var household = user.getHousehold();
+    if (household == null) {
+        throw new IllegalArgumentException("User is not in a household");
+    }
+
+    // Validate user's household is member of the group
+    boolean isMember = groupRepository.existsByIdAndMemberHouseholds_Id(groupId, household.getId());
+    if (!isMember) {
+        throw new IllegalArgumentException("User's household is not a member of this group");
+    }
+
+    // Handle empty search string
+    String searchTerm = search != null ? search.trim() : "";
+
+    // Use the repository to get matching product types
+    Page<ProductType> searchResults = groupInventoryContributionRepository
+        .findContributedProductTypesByGroupAndHouseholdAndNameContaining(
+            groupId,
+            household.getId(),
+            searchTerm,
+            pageable
+        );
+
+    // Convert to DTOs
+    return searchResults.map(pt -> new ProductTypeDto(
+        pt.getId(),
+        pt.getHousehold() != null ? pt.getHousehold().getId() : null,
+        pt.getName(),
+        pt.getUnit(),
+        pt.getCaloriesPerUnit(),
+        pt.getCategory()
+    ));
+  }
+
+  /**
+   * Checks if a product batch is contributed to any group by the user's household.
+   * 
+   * @param productBatchId the ID of the product batch to check
+   * @param email the email of the user making the request
+   * @return true if the batch exists, belongs to the user's household, and is contributed to at least one group
+   * @throws IllegalArgumentException if the user is not found
+   */
+  public boolean isContributedToGroup(Integer productBatchId, String email) {
+    // Check if batch exists
+    ProductBatch batch = productBatchRepository.findById(productBatchId).orElse(null);
+    if (batch == null) {
+      return false;
+    } 
+    // Check if the batch is contributed to a group associated with the user's household
+    // Get user's household
+    var user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    
+    var household = user.getHousehold();
+    if (household == null) {
+        return false;
+    }
+
+    // Check if batch belongs to user's household
+    if (!batch.getProductType().getHousehold().getId().equals(household.getId())) {
+        throw new IllegalArgumentException("Batch does not belong to user's household");
+    }
+
+    // Check if batch is contributed to any group
+    return groupInventoryContributionRepository.existsByProductBatchId(productBatchId);
   }
 }

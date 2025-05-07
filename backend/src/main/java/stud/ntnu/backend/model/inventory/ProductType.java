@@ -2,16 +2,16 @@ package stud.ntnu.backend.model.inventory;
 
 import jakarta.persistence.*;
 import java.util.List;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import stud.ntnu.backend.model.household.Household;
 
 @Entity
 @Table(name = "product_types")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class ProductType {
 
   @Id
@@ -22,16 +22,16 @@ public class ProductType {
   @JoinColumn(name = "household_id", nullable = false)
   private Household household;
 
-  @Column(name = "name", nullable = false)
+  @Column(nullable = false)
   private String name;
 
-  @Column(name = "unit", nullable = false)
+  @Column(nullable = false)
   private String unit;
 
   @Column(name = "calories_per_unit")
   private Double caloriesPerUnit;
 
-  @Column(name = "category", nullable = false)
+  @Column(nullable = false)
   private String category;
 
   @OneToMany(mappedBy = "productType")

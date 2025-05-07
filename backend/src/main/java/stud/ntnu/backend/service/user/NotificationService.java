@@ -15,7 +15,8 @@ import stud.ntnu.backend.repository.user.NotificationRepository; //
 import stud.ntnu.backend.repository.user.UserRepository; //
 import stud.ntnu.backend.util.LocationUtil; //
 import stud.ntnu.backend.model.household.Household; //
-
+import stud.ntnu.backend.model.user.NotificationPreference; //
+import stud.ntnu.backend.repository.user.NotificationPreferenceRepository; //
 
 import java.math.BigDecimal; //
 import java.time.LocalDateTime; //
@@ -31,6 +32,7 @@ import java.util.stream.Collectors; //
 public class NotificationService {
 
   private final NotificationRepository notificationRepository; //
+  private final NotificationPreferenceRepository notificationPreferenceRepository;
   private final UserRepository userRepository; //
   private final SimpMessagingTemplate messagingTemplate;
   private final UserService userService; //
@@ -40,15 +42,18 @@ public class NotificationService {
    * Constructs the NotificationService with necessary dependencies.
    *
    * @param notificationRepository Repository for notification data access.
+   * @param notificationPreferenceRepository Repository for notification preference data access.
    * @param userRepository         Repository for user data access.
    * @param messagingTemplate      Template for sending messages via WebSocket.
    * @param userService            Service for user-related operations.
    */
-  public NotificationService(NotificationRepository notificationRepository, //
+  public NotificationService(NotificationRepository notificationRepository,
+      NotificationPreferenceRepository notificationPreferenceRepository,
       UserRepository userRepository, //
       SimpMessagingTemplate messagingTemplate,
       UserService userService) { //
     this.notificationRepository = notificationRepository; //
+    this.notificationPreferenceRepository = notificationPreferenceRepository;
     this.userRepository = userRepository; //
     this.messagingTemplate = messagingTemplate;
     this.userService = userService; //
@@ -473,5 +478,34 @@ public class NotificationService {
     return newCoord.subtract(oldCoord).abs().compareTo(new BigDecimal("0.00001")) > 0; //
   }
 
+  /**
+   * Changes a user's notification preference for a specific type.
+   * If the preference doesn't exist, creates a new one with the specified setting.
+   *
+   * @param user The user whose preference to change
+   * @param preferenceType The type of notification preference as a string
+   * @param enable Whether to enable or disable the preference
+   */
+  @Transactional
+  public void changeNotificationPreference(User user, String preferenceType, boolean enable) {
+    NotificationPreference preference = notificationPreferenceRepository
+        .findByUserAndPreferenceType(user, Notification.PreferenceType.valueOf(preferenceType))
+        .orElseGet(() -> NotificationPreference.builder()
+            .user(user)
+            .preferenceType(Notification.PreferenceType.valueOf(preferenceType))
+            .enabled(enable)
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build());
+
+    if (preference.getId() != null) {
+        preference.setEnabled(enable);
+        preference.setUpdatedAt(LocalDateTime.now());
+    }
+    
+    notificationPreferenceRepository.save(preference);
+    log.info("Updated notification preference '{}' to {} for user {}", 
+        preferenceType, enable, user.getEmail());
+  }
 
 }

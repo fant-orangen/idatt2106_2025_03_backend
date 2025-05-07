@@ -11,11 +11,13 @@ import stud.ntnu.backend.model.map.MeetingPlace;
 public class MeetingPlacePreviewDto {
     private Integer id;
     private String name;
+    private String status;
 
     public static MeetingPlacePreviewDto fromEntity(MeetingPlace meetingPlace) {
         return new MeetingPlacePreviewDto(
             meetingPlace.getId(),
-            meetingPlace.getName()
+            meetingPlace.getName(),
+            meetingPlace.getStatus()
         );
     }
 } 

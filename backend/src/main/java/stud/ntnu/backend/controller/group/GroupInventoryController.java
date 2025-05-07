@@ -37,22 +37,25 @@ public class GroupInventoryController {
   }
 
   /**
-   * Get a paginated list of all product types with batches contributed to the given group and
-   * category.
+   * Get a paginated list of all product types with batches contributed to the given group.
    *
-   * @param request  JSON body with groupId and category
+   * @param groupId The ID of the group
    * @param pageable pagination information
+   * @param principal the authenticated user
    * @return a page of ProductTypeDto
    */
   @GetMapping("/user/groups/inventory/product-types")
   public ResponseEntity<Page<ProductTypeDto>> getContributedProductTypes(
-      @RequestBody ContributedProductTypesRequestDto request, Pageable pageable) {
-    if (Objects.isNull(request.getGroupId()) || Objects.isNull(request.getCategory())) {
+      @RequestParam Integer groupId,
+      Pageable pageable,
+      Principal principal) {
+    if (Objects.isNull(groupId)) {
       return ResponseEntity.badRequest().build();
     }
     Page<ProductTypeDto> page = groupInventoryService.getContributedProductTypes(
-        request.getGroupId(),
-        request.getCategory(), pageable);
+        groupId,
+        principal.getName(),
+        pageable);
     return ResponseEntity.ok(page);
   }
 
@@ -60,18 +63,21 @@ public class GroupInventoryController {
    * Get all product batches for a given product type that are currently contributed to the given
    * group.
    *
-   * @param request  JSON body with groupId and productTypeId
+   * @param groupId The ID of the group
+   * @param productTypeId The ID of the product type
    * @param pageable pagination information
    * @return a paginated list of product batches
    */
   @GetMapping("/user/groups/inventory/product-types/batches")
   public ResponseEntity<Page<ProductBatchDto>> getContributedProductBatchesByType(
-      @RequestBody ContributedProductBatchesRequestDto request, Pageable pageable) {
-    if (Objects.isNull(request.getGroupId()) || Objects.isNull(request.getProductTypeId())) {
+      @RequestParam Integer groupId,
+      @RequestParam Integer productTypeId,
+      Pageable pageable) {
+    if (Objects.isNull(groupId) || Objects.isNull(productTypeId)) {
       return ResponseEntity.badRequest().build();
     }
     Page<ProductBatchDto> page = groupInventoryService.getContributedProductBatchesByType(
-        request.getGroupId(), request.getProductTypeId(), pageable);
+        groupId, productTypeId, pageable);
     return ResponseEntity.ok(page);
   }
 
@@ -127,4 +133,51 @@ public class GroupInventoryController {
     return ResponseEntity.ok().build();
   }
 
+  /**
+   * Search for product types that have at least one batch contributed to the specified group by the current user's household.
+   *
+   * @param groupId The ID of the group to search within
+   * @param search The search term to filter product types by name
+   * @param pageable pagination information
+   * @param principal the authenticated user
+   * @return a page of ProductTypeDto matching the search criteria
+   */
+  @GetMapping("/user/groups/inventory/product-types/search")
+  public ResponseEntity<Page<ProductTypeDto>> searchContributedProductTypes(
+      @RequestParam Integer groupId,
+      @RequestParam String search,
+      Pageable pageable,
+      Principal principal) {
+    if (Objects.isNull(groupId) || Objects.isNull(search)) {
+      return ResponseEntity.badRequest().build();
+    }
+    String email = principal.getName();
+    Page<ProductTypeDto> page = groupInventoryService.searchContributedProductTypes(
+        groupId,
+        search,
+        email,
+        pageable);
+    return ResponseEntity.ok(page);
+  }
+
+  /**
+   * Check if a product batch is contributed to a group by the current user's household.
+   *
+   * @param productBatchId the id of the product batch
+   * @param principal the authenticated user
+   * @return true if the product batch is contributed to a group, false otherwise
+   */
+  @GetMapping("user/groups/inventory/{productBatchId}/contributed")
+  public ResponseEntity<Boolean> isContributedToGroup(@PathVariable Integer productBatchId, Principal principal) {
+    if (Objects.isNull(productBatchId)) {
+      return ResponseEntity.badRequest().build();
+    }
+    String email = principal.getName();
+    try {
+      boolean isContributed = groupInventoryService.isContributedToGroup(productBatchId, email);
+      return ResponseEntity.ok(isContributed);
+    } catch (Exception e) {
+      return ResponseEntity.status(403).body(false); // TODO: Change this status code?
+    }
+  }
 }

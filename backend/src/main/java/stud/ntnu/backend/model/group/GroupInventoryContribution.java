@@ -1,20 +1,18 @@
 package stud.ntnu.backend.model.group;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import stud.ntnu.backend.model.household.Household;
-import stud.ntnu.backend.model.inventory.Product;
 import stud.ntnu.backend.model.inventory.ProductBatch;
 
 @Entity
 @Table(name = "group_inventory_contributions")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class GroupInventoryContribution {
 
   @Id
@@ -37,21 +35,16 @@ public class GroupInventoryContribution {
   private String customName;
 
   @Column(name = "expiration_date")
-  private LocalDate expirationDate;
+  private LocalDateTime expirationDate;
 
-  @Column(name = "contributed_at", nullable = false, updatable = false)
+  @Column(name = "contributed_at", nullable = false)
   private LocalDateTime contributedAt;
-
-  // Set contributedAt before persist
-  @PrePersist
-  protected void onCreate() {
-    contributedAt = LocalDateTime.now();
-  }
 
   public GroupInventoryContribution(Group group, Household household, ProductBatch product) {
     this.group = group;
     this.household = household;
     this.product = product;
+    this.contributedAt = LocalDateTime.now();
   }
 
   public GroupInventoryContribution(Group group, Household household, String customName) {

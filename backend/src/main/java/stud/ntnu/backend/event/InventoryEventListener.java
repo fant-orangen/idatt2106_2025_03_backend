@@ -70,7 +70,7 @@ public class InventoryEventListener {
         Optional<NotificationPreference> preference = notificationPreferenceRepository
             .findByUserAndPreferenceType(user, Notification.PreferenceType.remaining_supply_alert);
         
-        if (preference.isEmpty() || preference.get().getEnabled()) {
+        if (preference.isEmpty() || preference.get().isEnabled()) {
           Notification notification = notificationService.createNotification(
               user,
               Notification.PreferenceType.remaining_supply_alert,
@@ -100,7 +100,7 @@ public class InventoryEventListener {
         Optional<NotificationPreference> preference = notificationPreferenceRepository
             .findByUserAndPreferenceType(user, Notification.PreferenceType.remaining_supply_alert);
         
-        if (preference.isEmpty() || preference.get().getEnabled()) {
+        if (preference.isEmpty() || preference.get().isEnabled()) {
           Notification notification = notificationService.createNotification(
               user,
               Notification.PreferenceType.remaining_supply_alert,
