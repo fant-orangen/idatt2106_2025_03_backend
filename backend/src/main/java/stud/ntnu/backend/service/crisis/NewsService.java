@@ -148,4 +148,10 @@ public class NewsService {
 
     return newsArticleRepository.save(newsArticle);
   }
+
+  @Transactional(readOnly = true)
+  public NewsArticle getNewsArticleById(Long newsArticleId) {
+    return newsArticleRepository.findById(newsArticleId)
+        .orElseThrow(() -> new NoSuchElementException("News article not found with id: " + newsArticleId));
+  }
 }

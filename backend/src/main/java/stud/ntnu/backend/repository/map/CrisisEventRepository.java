@@ -23,6 +23,9 @@ public interface CrisisEventRepository extends JpaRepository<CrisisEvent, Intege
   // Find active crisis events
   List<CrisisEvent> findByActiveTrue();
 
+  // Find inactive crisis events
+  List<CrisisEvent> findByActiveFalse();
+
   // Find crisis events by severity
   List<CrisisEvent> findBySeverity(Severity severity);
 

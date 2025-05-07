@@ -116,7 +116,7 @@ public class CrisisEventController {
   }
 
   /**
-   * Gets a preview of all crisis events with pagination (id, name, severity, startTime only).
+   * Gets a preview of all ACTIVE crisis events with pagination (id, name, severity, startTime only).
    *
    * @param pageable the pagination information
    * @return ResponseEntity with a page of crisis event previews
@@ -124,6 +124,19 @@ public class CrisisEventController {
   @GetMapping("/public/crisis-events/all/previews")
   public ResponseEntity<Page<CrisisEventPreviewDto>> getAllCrisisEventPreviews(Pageable pageable) {
     Page<CrisisEventPreviewDto> crisisEventPreviews = crisisEventService.getAllCrisisEventPreviews(
+        pageable);
+    return ResponseEntity.ok(crisisEventPreviews);
+  }
+
+  /**
+   * Gets a preview of all INACTIVE crisis events with pagination (id, name, severity, startTime only).
+   *
+   * @param pageable the pagination information
+   * @return ResponseEntity with a page of crisis event previews
+   */
+  @GetMapping("/public/crisis-events/inactive/previews")
+  public ResponseEntity<Page<CrisisEventPreviewDto>> getInactiveCrisisEventPreviews(Pageable pageable) {
+    Page<CrisisEventPreviewDto> crisisEventPreviews = crisisEventService.getInactiveCrisisEventPreviews(
         pageable);
     return ResponseEntity.ok(crisisEventPreviews);
   }

@@ -471,20 +471,23 @@ public class CrisisEventService {
 
   /**
    * Retrieves a paginated list of crisis events affecting the given user. A crisis event affects a
-   * user if the user's home or household location is within the event's radius.
+   * user if the user's home or household location is within the event's radius. Events are sorted
+   * by severity (red > yellow > green).
    *
    * @param user     the user to check
    * @param pageable pagination information
-   * @return a page of crisis events affecting the user
+   * @return a page of crisis events affecting the user, sorted by severity
    */
   @Transactional(readOnly = true)
   public Page<CrisisEvent> getCrisisEventsAffectingUser(User user, Pageable pageable) {
     // Get all active crisis events (could be optimized with a custom query if needed)
     List<CrisisEvent> allActiveEvents = crisisEventRepository.findByActiveTrue();
-    // Filter events that affect the user
+    // Filter events that affect the user and sort by severity
     List<CrisisEvent> affectingEvents = allActiveEvents.stream()
         .filter(event -> event.getRadius() != null &&
             LocationUtil.isCrisisEventNearUser(user, event, event.getRadius().doubleValue()))
+        .sorted((a, b) -> Integer.compare(severityOrder(b.getSeverity()),
+            severityOrder(a.getSeverity())))
         .toList();
     // Manual pagination
     int start = (int) pageable.getOffset();
@@ -558,5 +561,27 @@ public class CrisisEventService {
   @Transactional(readOnly = true)
   public Optional<CrisisEventDetailsDto> getCrisisEventDetailsById(Integer id) {
     return crisisEventRepository.findById(id).map(CrisisEventDetailsDto::fromEntity);
+  }
+
+  /**
+   * Retrieves a preview (id, name, severity, startTime) of all inactive crisis events with
+   * pagination, sorted by severity (red > yellow > green).
+   *
+   * @param pageable pagination information
+   * @return page of crisis event previews
+   */
+  @Transactional(readOnly = true)
+  public Page<CrisisEventPreviewDto> getInactiveCrisisEventPreviews(Pageable pageable) {
+    List<CrisisEvent> inactiveEvents = crisisEventRepository.findByActiveFalse();
+    List<CrisisEventPreviewDto> previews = inactiveEvents.stream()
+        .map(CrisisEventPreviewDto::fromEntity)
+        .sorted((a, b) -> Integer.compare(severityOrder(b.getSeverity()),
+            severityOrder(a.getSeverity())))
+        .toList();
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), previews.size());
+    List<CrisisEventPreviewDto> pagedList =
+        (start <= end) ? previews.subList(start, end) : List.of();
+    return new PageImpl<>(pagedList, pageable, previews.size());
   }
 }
