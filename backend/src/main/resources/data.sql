@@ -461,7 +461,7 @@ VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your house
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
 VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', DATEADD('DAY', -2, CURRENT_TIMESTAMP), 1, 1, 'published');
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
 VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)

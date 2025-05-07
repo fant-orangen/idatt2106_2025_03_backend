@@ -72,7 +72,7 @@ public class NewsService {
    * Get paginated news articles for a specific crisis event.
    *
    * @param crisisEventId the crisis event ID
-   * @param pageable      pagination information
+   * @param pageable pagination information
    * @return a page of news article DTOs
    * @throws NoSuchElementException if the crisis event doesn't exist
    */
@@ -84,8 +84,8 @@ public class NewsService {
       throw new NoSuchElementException("Crisis event not found with id: " + crisisEventId);
     }
 
-    // Get the news articles
-    Page<NewsArticle> newsArticles = newsArticleRepository.findByCrisisEventId(crisisEventId,
+    // Get the news articles ordered by published date
+    Page<NewsArticle> newsArticles = newsArticleRepository.findByCrisisEventIdOrderByPublishedAtDesc(crisisEventId,
         pageable);
 
     // Convert to DTOs
@@ -95,6 +95,7 @@ public class NewsService {
   /**
    * Get paginated news articles for crisis events that are within a specified distance of the
    * user's location. This includes both the user's home address and the user's household address.
+   * Articles are returned in order of newest to oldest.
    *
    * @param user         the user
    * @param distanceInKm the distance in kilometers
@@ -118,7 +119,7 @@ public class NewsService {
       return Page.empty(pageable);
     }
 
-    // Get published news articles for the nearby crisis events
+    // Get published news articles for the nearby crisis events, ordered by publish date
     Page<NewsArticle> newsArticles = newsArticleRepository.findByCrisisEventIdInAndStatusOrderByPublishedAtDesc(
         nearbyCrisisEventIds, ArticleStatus.published, pageable);
 
@@ -156,14 +157,14 @@ public class NewsService {
   }
 
   /**
-   * Get paginated draft news articles.
+   * Get paginated draft news articles ordered by creation date (newest first).
    *
    * @param pageable pagination information
    * @return a page of draft news article DTOs
    */
   @Transactional(readOnly = true)
   public Page<NewsArticleResponseDTO> getDraftNewsArticles(Pageable pageable) {
-    Page<NewsArticle> draftArticles = newsArticleRepository.findByStatus(ArticleStatus.draft, pageable);
+    Page<NewsArticle> draftArticles = newsArticleRepository.findByStatusOrderByCreatedAtDesc(ArticleStatus.draft, pageable);
     return draftArticles.map(NewsArticleResponseDTO::fromEntity);
   }
 }
