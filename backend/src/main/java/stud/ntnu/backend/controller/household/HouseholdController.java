@@ -373,13 +373,14 @@ public class HouseholdController {
   }
 
   /**
-   * Deletes the current user's household. Only household admins can delete households.
+   * Soft deletes the current user's household. Only household admins can delete households.
+   * This marks the household as deleted but keeps the data in the database.
    *
    * @param principal the Principal object representing the current user (admin)
    * @return ResponseEntity with success message if successful, or an error message if the user is not
    * found, doesn't have a household, or is not an admin
    */
-  @DeleteMapping
+  @DeleteMapping("/delete")
   public ResponseEntity<?> deleteHousehold(Principal principal) {
     try {
       householdService.deleteCurrentHousehold(principal.getName());
@@ -387,6 +388,8 @@ public class HouseholdController {
     } catch (IllegalStateException e) {
       log.info("Delete household failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.status(500).body("An unexpected error occurred: " + e.getMessage());
     }
   }
 }

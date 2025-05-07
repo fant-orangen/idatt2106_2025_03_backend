@@ -12,7 +12,8 @@ CREATE TABLE households (
     population_count INT DEFAULT 1,
     latitude DECIMAL(10,7),
     longitude DECIMAL(10,7),
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- USERS
