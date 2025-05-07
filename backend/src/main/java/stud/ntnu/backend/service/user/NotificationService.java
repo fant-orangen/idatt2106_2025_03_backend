@@ -142,6 +142,32 @@ public class NotificationService {
   }
 
   /**
+   * Marks all unread notifications for a user as read.
+   *
+   * @param email The email of the user whose notifications should be marked as read.
+   * @return The number of notifications marked as read.
+   * @throws IllegalStateException if the user with the given email is not found.
+   */
+  @Transactional
+  public int markAllNotificationsAsRead(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("User not found with email: " + email));
+
+    List<Notification> unreadNotifications = notificationRepository.findByUserIdAndReadAtIsNull(user.getId());
+    int count = unreadNotifications.size();
+    
+    if (count > 0) {
+      LocalDateTime now = LocalDateTime.now();
+      unreadNotifications.forEach(notification -> notification.setReadAt(now));
+      notificationRepository.saveAll(unreadNotifications);
+      
+      log.info("Marked {} notifications as read for user {}", count, email);
+    }
+    
+    return count;
+  }
+
+  /**
    * Creates a system notification for all users in the database. System notifications have a
    * preference type of 'system' and no target type/ID.
    *

@@ -89,6 +89,23 @@ public class NotificationController {
   }
 
   /**
+   * Marks all unread notifications as read for the current user.
+   *
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity with status 200 OK if successful, or 400 Bad Request if an error occurs
+   */
+  @PatchMapping("/user/notifications/read-all") 
+  public ResponseEntity<?> markAllAsRead(Principal principal) {
+    try {
+      String email = principal.getName();
+      notificationService.markAllNotificationsAsRead(email);
+      return ResponseEntity.ok().build();
+    } catch(Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
    * Sends a notification to a specific topic.
    * TODO: Untested!
    *
