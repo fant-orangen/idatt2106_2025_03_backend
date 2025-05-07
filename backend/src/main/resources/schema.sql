@@ -28,7 +28,7 @@ CREATE TABLE users (
     home_address TEXT,
     home_latitude DECIMAL(10,7),
     home_longitude DECIMAL(10,7),
-    privacy_accepted_at DATETIME,
+    privacy_accepted BOOLEAN NOT NULL DEFAULT FALSE,
     email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     location_sharing_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -221,10 +221,13 @@ CREATE TABLE user_gamification_activities (
 CREATE TABLE reflections (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    crisis_event_id INT,
     content TEXT NOT NULL,
     shared BOOLEAN NOT NULL DEFAULT FALSE,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (crisis_event_id) REFERENCES crisis_events(id)
 );
 
 -- NEWS ARTICLES
@@ -269,7 +272,7 @@ CREATE TABLE household_admins (
 CREATE TABLE notification_preferences (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    preference_type VARCHAR(20) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request', 'remaining_supply_alert', 'system')),
+    preference_type VARCHAR(50) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request', 'remaining_supply_alert', 'system')),
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
