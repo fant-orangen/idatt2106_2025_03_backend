@@ -10,6 +10,7 @@ import stud.ntnu.backend.dto.poi.CreatePoiDto;
 import stud.ntnu.backend.dto.poi.PoiItemDto;
 import stud.ntnu.backend.dto.poi.UpdatePoiDto;
 import stud.ntnu.backend.model.map.PointOfInterest;
+import stud.ntnu.backend.model.map.PoiType;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.map.PoiService;
@@ -228,6 +229,16 @@ public class PoiController {
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
+
+  /**
+   * Retrieves all POI types.
+   *
+   * @return a list of all POI types
+   */
+  @GetMapping("/public/poi/types")
+  public List<PoiType> getAllPoiTypes() {
+    return poiService.getAllPoiTypes();
   }
 
 }
