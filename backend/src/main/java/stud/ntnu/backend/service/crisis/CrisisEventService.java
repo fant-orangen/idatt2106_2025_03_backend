@@ -25,9 +25,12 @@ import stud.ntnu.backend.model.map.ScenarioTheme;
 import stud.ntnu.backend.service.user.NotificationService;
 import stud.ntnu.backend.service.user.UserService;
 import stud.ntnu.backend.util.LocationUtil;
+import stud.ntnu.backend.util.SearchUtil;
 
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Service for managing crisis events. Handles creation, retrieval, updating, and deletion of crisis
@@ -43,6 +46,9 @@ public class CrisisEventService {
   private final ScenarioThemeRepository scenarioThemeRepository;
   private final MessageSource messageSource;
   private final Logger log = LoggerFactory.getLogger(CrisisEventService.class);
+
+  @Autowired
+  private SearchUtil searchUtil;
 
   /**
    * Constructor for dependency injection.
@@ -595,22 +601,17 @@ public class CrisisEventService {
    */
   @Transactional(readOnly = true)
   public Page<CrisisEvent> searchCrisisEvents(String searchTerm, boolean isActive, Pageable pageable) {
-    // Get base list of events based on active status
-    Page<CrisisEvent> eventsPage = isActive ? 
-        crisisEventRepository.findByActiveTrue(pageable) :
-        crisisEventRepository.findByActiveFalse(pageable);
+    // First, use SearchUtil to search by name across all crisis events
+    Page<CrisisEvent> allMatchingEvents = searchUtil.searchByDescription(
+        CrisisEvent.class,
+        "name",
+        searchTerm,
+        pageable
+    );
 
-    // If no search term, return all events for the given active status
-    if (searchTerm == null || searchTerm.trim().isEmpty()) {
-      return eventsPage;
-    }
-
-    String search = searchTerm.trim().toLowerCase();
-    
-    // Filter events based on name only
-    List<CrisisEvent> filteredEvents = eventsPage.getContent().stream()
-        .filter(event -> event.getName() != null && 
-            event.getName().toLowerCase().contains(search))
+    // Then filter by active status
+    List<CrisisEvent> filteredEvents = allMatchingEvents.getContent().stream()
+        .filter(event -> event.getActive() == isActive)
         .sorted((a, b) -> Integer.compare(severityOrder(b.getSeverity()), 
             severityOrder(a.getSeverity())))
         .toList();
