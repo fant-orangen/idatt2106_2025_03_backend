@@ -228,14 +228,14 @@ VALUES ('Public Health Emergency', 'Pandemic or disease outbreak', 'Stock up on 
 
 -- CRISIS EVENTS
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
-VALUES ('Flood Warning', 'Potential flooding in downtown area', 'yellow', 63.4300, 10.3950, 1000.0, CURRENT_TIMESTAMP, 1, TRUE, 1);
+VALUES ('Flood Warning', 'Potential flooding in downtown area', 'yellow', 60.4300, 10.3950, 1.0, CURRENT_TIMESTAMP, 1, TRUE, 1);
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
-VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 60.4250, 11.3900, 5000.0, DATEADD('DAY', 1, CURRENT_TIMESTAMP), 1, TRUE, 2);
+VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 60.4250, 11.3900, 5.0, DATEADD('DAY', 1, CURRENT_TIMESTAMP), 1, TRUE, 2);
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
-VALUES ('lightning storm', 'Potential flooding in downtown area', 'red', 63.4300, 10.3950, 1000.0, TIMESTAMP '2025-05-01 12:00:00', 1, TRUE, 3);
+VALUES ('lightning storm', 'Potential flooding in downtown area', 'red', 59.4300, 10.3950, 1.0, TIMESTAMP '2025-05-01 12:00:00', 1, TRUE, 3);
 -- Inactive crisis event
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
-VALUES ('Past Earthquake', 'Earthquake event that has ended', 'red', 63.4200, 10.4000, 20, DATEADD('DAY', -10, CURRENT_TIMESTAMP), 1, FALSE, 2);
+VALUES ('Past Earthquake', 'Earthquake event that has ended', 'red', 63.4200, 12.4000, 20, DATEADD('DAY', -10, CURRENT_TIMESTAMP), 1, FALSE, 2);
 
 -- CRISIS EVENTS CHANGES
 
