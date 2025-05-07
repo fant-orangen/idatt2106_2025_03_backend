@@ -191,4 +191,22 @@ public class GroupService {
     return households.stream()
         .anyMatch(h -> h.getId() != null && h.getId().equals(userHouseholdId));
   }
+
+  /**
+   * Creates a new group if the user is a household admin.
+   *
+   * @param name  the name of the group to create
+   * @param email the email of the user creating the group
+   * @return true if the group was created successfully, false if the user is not a household admin
+   */
+  public boolean createGroup(String name, String email) {
+    User user = userRepository.findByEmail(email).orElse(null);
+    if (user == null || !householdAdminRepository.existsByUser(user)) {
+      return false;
+    }
+
+    Group group = new Group(name, user);
+    groupRepository.save(group);
+    return true;
+  }
 }

@@ -91,12 +91,23 @@ public class GroupController {
     List<HouseholdDto> households = groupService.getCurrentHouseholdsInGroup(groupId);
     return ResponseEntity.ok(households);
   }
-
-  @PostMapping(path = "/user/groups")
-  public ResponseEntity<GroupDto> createGroup(@RequestBody GroupDto groupDto, Principal principal) {
+ 
+  /**
+   * Create a new group with the given name.
+   * This endpoint requires admin authentication and is under /api/user/groups.
+   *
+   * @param name      the name of the group to create
+   * @param principal the authenticated user
+   * @return 200 OK if successful, 403 if user is not a household admin
+   */
+  @PostMapping(path = "/user/groups/{name}")
+  public ResponseEntity<?> createGroup(@PathVariable("name") String name, Principal principal) {
     String email = principal.getName();
-    Group group = groupService.createGroup(groupDto, email);
-    return ResponseEntity.ok(group);
+    boolean created = groupService.createGroup(name, email);
+    if (!created) {
+      return ResponseEntity.status(403).build();
+    }
+    return ResponseEntity.ok().build();
   }
 
 }
