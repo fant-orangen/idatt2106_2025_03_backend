@@ -44,9 +44,6 @@ public class Household {
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
-  @Column(name = "deleted", nullable = false)
-  private Boolean deleted = false;
-
   @OneToMany(mappedBy = "household", cascade = CascadeType.ALL)
   private List<User> users = new ArrayList<>();
 

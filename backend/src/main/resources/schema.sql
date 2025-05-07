@@ -12,8 +12,7 @@ CREATE TABLE households (
     population_count INT DEFAULT 1,
     latitude DECIMAL(10,7),
     longitude DECIMAL(10,7),
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted BOOLEAN NOT NULL DEFAULT FALSE
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- USERS
@@ -23,7 +22,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     phone_number VARCHAR(20) NOT NULL,
     role_id INT NOT NULL,
-    household_id INT,
+    household_id INT, -- Can be NULL if user has no household
     first_name VARCHAR(255),
     last_name VARCHAR(255),
     home_address TEXT,
@@ -36,7 +35,7 @@ CREATE TABLE users (
     is_using_2fa BOOLEAN NOT NULL DEFAULT FALSE,
     kcal_requirement INT NOT NULL DEFAULT 2000,
     FOREIGN KEY (role_id) REFERENCES roles(id),
-    FOREIGN KEY (household_id) REFERENCES households(id)
+    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE SET NULL
 );
 
 -- HOUSEHOLD MEMBERS
@@ -48,7 +47,7 @@ CREATE TABLE household_member (
     type VARCHAR(10) NOT NULL CHECK (type IN ('child', 'adult', 'pet')),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     kcal_requirement INT NOT NULL DEFAULT 2000,
-    FOREIGN KEY (household_id) REFERENCES households(id)
+    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE
 );
 
 -- GROUPS
@@ -65,7 +64,7 @@ CREATE TABLE invitations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     inviter_user_id INT NOT NULL,
     invitee_email VARCHAR(255) NOT NULL,
-    household_id INT,
+    household_id INT, -- Can be NULL if invitation is not for a household
     group_id INT,
     token VARCHAR(255) NOT NULL UNIQUE,
     expires_at DATETIME NOT NULL,
@@ -73,7 +72,7 @@ CREATE TABLE invitations (
     declined_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (inviter_user_id) REFERENCES users(id),
-    FOREIGN KEY (household_id) REFERENCES households(id),
+    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE,
     FOREIGN KEY (group_id) REFERENCES groups(id)
 );
 
@@ -86,7 +85,7 @@ CREATE TABLE group_memberships (
     left_at DATETIME DEFAULT NULL,
     PRIMARY KEY (group_id, household_id),
     FOREIGN KEY (group_id) REFERENCES groups(id),
-    FOREIGN KEY (household_id) REFERENCES households(id),
+    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE,
     FOREIGN KEY (invited_by_user_id) REFERENCES users(id)
 );
 
@@ -98,7 +97,7 @@ CREATE TABLE product_types (
     unit VARCHAR(10) NOT NULL CHECK (unit IN ('l', 'stk', 'kg', 'gram', 'dl', 'mg', 'dose', 'mcg')),
     calories_per_unit DECIMAL(10,2),
     category VARCHAR(10) NOT NULL CHECK (category IN ('food', 'water', 'medicine')),
-    FOREIGN KEY (household_id) REFERENCES households(id),
+    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE,
     UNIQUE (household_id, name)
 );
 
@@ -265,7 +264,7 @@ CREATE TABLE household_admins (
     household_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (household_id) REFERENCES households(id),
+    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE,
     UNIQUE (user_id)
 );
 

@@ -378,8 +378,8 @@ public class HouseholdController {
   }
 
   /**
-   * Soft deletes the current user's household. Only household admins can delete households.
-   * This marks the household as deleted but keeps the data in the database.
+   * Hard deletes the current user's household. Only household admins can delete households.
+   * This permanently removes the household and all related data from the database.
    *
    * @param principal the Principal object representing the current user (admin)
    * @return ResponseEntity with success message if successful, or an error message if the user is not
@@ -391,9 +391,10 @@ public class HouseholdController {
       householdService.deleteCurrentHousehold(principal.getName());
       return ResponseEntity.ok("Successfully deleted household");
     } catch (IllegalStateException e) {
-      log.info("Delete household failed: {}", e.getMessage());
+      log.error("Delete household failed due to validation error: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     } catch (Exception e) {
+      log.error("Unexpected error deleting household: {}", e.getMessage(), e);
       return ResponseEntity.status(500).body("An unexpected error occurred: " + e.getMessage());
     }
   }

@@ -15,6 +15,10 @@ import stud.ntnu.backend.dto.household.EmptyHouseholdMemberCreateDto;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.repository.household.InvitationRepository;
+
+import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
+import stud.ntnu.backend.repository.inventory.ProductBatchRepository;
+import stud.ntnu.backend.repository.group.GroupMembershipRepository;
 import stud.ntnu.backend.service.user.InvitationService;
 import stud.ntnu.backend.util.LocationUtil;
 import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
@@ -22,6 +26,10 @@ import stud.ntnu.backend.repository.household.EmptyHouseholdMemberRepository;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.household.EmptyHouseholdMember;
 import stud.ntnu.backend.model.household.Invitation;
+
+import stud.ntnu.backend.model.group.GroupMembership;
+import stud.ntnu.backend.model.inventory.ProductBatch;
+import stud.ntnu.backend.model.inventory.ProductType;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.model.household.HouseholdAdmin;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +55,10 @@ public class HouseholdService {
   private final EmptyHouseholdMemberRepository emptyHouseholdMemberRepository;
   private final InvitationService invitationService;
   private final InvitationRepository invitationRepository;
+
+  private final ProductTypeRepository productTypeRepository;
+  private final ProductBatchRepository productBatchRepository;
+  private final GroupMembershipRepository groupMembershipRepository;
   private static final Logger log = LoggerFactory.getLogger(HouseholdService.class);
 
   @PersistenceContext
@@ -61,37 +73,47 @@ public class HouseholdService {
    * @param emptyHouseholdMemberRepository repository for empty household member operations
    * @param invitationService              service for invitation operations
    * @param invitationRepository           repository for invitation operations
+
+   * @param productTypeRepository          repository for product type operations
    */
   public HouseholdService(HouseholdRepository householdRepository, UserRepository userRepository,
       HouseholdAdminRepository householdAdminRepository,
       EmptyHouseholdMemberRepository emptyHouseholdMemberRepository,
       InvitationService invitationService,
-      InvitationRepository invitationRepository) {
+      InvitationRepository invitationRepository,
+
+      ProductTypeRepository productTypeRepository,
+      ProductBatchRepository productBatchRepository,
+      GroupMembershipRepository groupMembershipRepository) {
     this.householdRepository = householdRepository;
     this.userRepository = userRepository;
     this.householdAdminRepository = householdAdminRepository;
     this.emptyHouseholdMemberRepository = emptyHouseholdMemberRepository;
     this.invitationService = invitationService;
     this.invitationRepository = invitationRepository;
+
+    this.productTypeRepository = productTypeRepository;
+    this.productBatchRepository = productBatchRepository;
+    this.groupMembershipRepository = groupMembershipRepository;
   }
 
   /**
-   * Retrieves all non-deleted households.
+   * Retrieves all households.
    *
-   * @return list of all non-deleted households
+   * @return list of all households
    */
   public List<Household> getAllHouseholds() {
-    return householdRepository.findByDeletedFalse();
+    return householdRepository.findAll();
   }
 
   /**
-   * Retrieves a non-deleted household by its ID.
+   * Retrieves a household by its ID.
    *
    * @param id the ID of the household
-   * @return an Optional containing the household if found and not deleted
+   * @return an Optional containing the household if found
    */
   public Optional<Household> getHouseholdById(Integer id) {
-    return householdRepository.findByIdAndDeletedFalse(id);
+    return householdRepository.findById(id);
   }
 
   /**
@@ -159,24 +181,83 @@ public class HouseholdService {
   }
 
   /**
-   * Deletes a household by its ID.
+   * Hard deletes a household by its ID.
+   * This is a direct deletion method and should be used with caution.
+   * Consider using deleteCurrentHousehold for a more controlled deletion process.
    *
    * @param id the ID of the household to delete
    */
+  @Transactional
   public void deleteHousehold(Integer id) {
-    householdRepository.deleteById(id);
+    log.info("Attempting to hard delete household with ID: {}", id);
+
+    Household household = householdRepository.findById(id)
+        .orElseThrow(() -> new IllegalStateException("Household not found"));
+
+    // Get all users in the household
+    List<User> householdUsers = userRepository.findByHousehold(household);
+
+    // Remove all users from the household
+    for (User householdUser : householdUsers) {
+      householdUser.setHousehold(null);
+      userRepository.save(householdUser);
+    }
+
+    // Delete all household admins for this household
+    List<HouseholdAdmin> admins = householdAdminRepository.findByHousehold(household);
+    householdAdminRepository.deleteAll(admins);
+
+    // Delete all invitations for this household
+    List<Invitation> invitations = invitationRepository.findByHousehold(household);
+    invitationRepository.deleteAll(invitations);
+
+    // Delete all empty household members for this household
+    List<EmptyHouseholdMember> emptyMembers = emptyHouseholdMemberRepository.findByHousehold(household);
+    emptyHouseholdMemberRepository.deleteAll(emptyMembers);
+
+    // Note: Household inventory has been replaced by product types and product batches
+
+    // Get all product types for this household
+    List<ProductType> productTypes = entityManager.createQuery(
+        "SELECT pt FROM ProductType pt WHERE pt.household.id = :householdId", ProductType.class)
+        .setParameter("householdId", household.getId())
+        .getResultList();
+
+    // Delete all product batches for this household's product types
+    for (ProductType productType : productTypes) {
+        List<ProductBatch> productBatches = entityManager.createQuery(
+            "SELECT pb FROM ProductBatch pb WHERE pb.productType.id = :productTypeId", ProductBatch.class)
+            .setParameter("productTypeId", productType.getId())
+            .getResultList();
+        productBatchRepository.deleteAll(productBatches);
+        log.info("Deleted {} product batches for product type {}", productBatches.size(), productType.getId());
+    }
+
+    // Delete all product types
+    productTypeRepository.deleteAll(productTypes);
+
+    // Find and delete all group memberships for this household
+    List<GroupMembership> groupMemberships = entityManager.createQuery(
+        "SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId", GroupMembership.class)
+        .setParameter("householdId", household.getId())
+        .getResultList();
+    groupMembershipRepository.deleteAll(groupMemberships);
+
+    // Hard delete the household
+    householdRepository.delete(household);
+    log.info("Successfully hard deleted household {}", id);
   }
 
   /**
-   * Soft deletes the current user's household. Only household admins can delete households.
-   * This marks the household as deleted but keeps the data in the database.
+   * Hard deletes the current user's household. Only household admins can delete households.
+   * This permanently removes the household and all related data from the database.
    *
    * @param email the email of the user deleting the household
    * @throws IllegalStateException if the user is not found, doesn't have a household, or is not an admin
    */
   @Transactional
   public void deleteCurrentHousehold(String email) {
-    log.info("User {} attempting to soft delete household", email);
+    log.info("User {} attempting to hard delete household", email);
 
     try {
       // Check if the user exists
@@ -213,13 +294,54 @@ public class HouseholdService {
       householdAdminRepository.deleteAll(admins);
       log.info("Deleted {} household admins for household {}", admins.size(), household.getId());
 
-      // Mark the household as deleted (soft delete)
-      household.setDeleted(true);
-      householdRepository.save(household);
-      log.info("Successfully soft deleted household {}", household.getId());
+      // Delete all invitations for this household
+      List<Invitation> invitations = invitationRepository.findByHousehold(household);
+      invitationRepository.deleteAll(invitations);
+      log.info("Deleted {} invitations for household {}", invitations.size(), household.getId());
+
+      // Delete all empty household members for this household
+      List<EmptyHouseholdMember> emptyMembers = emptyHouseholdMemberRepository.findByHousehold(household);
+      emptyHouseholdMemberRepository.deleteAll(emptyMembers);
+      log.info("Deleted {} empty household members for household {}", emptyMembers.size(), household.getId());
+
+      // Note: Household inventory has been replaced by product types and product batches
+      log.info("Skipping household inventory deletion as it has been replaced by product types and batches");
+
+      // Get all product types for this household
+      List<ProductType> productTypes = entityManager.createQuery(
+          "SELECT pt FROM ProductType pt WHERE pt.household.id = :householdId", ProductType.class)
+          .setParameter("householdId", household.getId())
+          .getResultList();
+
+      // Delete all product batches for this household's product types
+      for (ProductType productType : productTypes) {
+          List<ProductBatch> productBatches = entityManager.createQuery(
+              "SELECT pb FROM ProductBatch pb WHERE pb.productType.id = :productTypeId", ProductBatch.class)
+              .setParameter("productTypeId", productType.getId())
+              .getResultList();
+          productBatchRepository.deleteAll(productBatches);
+          log.info("Deleted {} product batches for product type {}", productBatches.size(), productType.getId());
+      }
+
+      // Delete all product types
+      productTypeRepository.deleteAll(productTypes);
+      log.info("Deleted {} product types for household {}", productTypes.size(), household.getId());
+
+      // Find and delete all group memberships for this household
+      // Even though we have ON DELETE CASCADE in the database, it's better to handle this explicitly
+      List<GroupMembership> groupMemberships = entityManager.createQuery(
+          "SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId", GroupMembership.class)
+          .setParameter("householdId", household.getId())
+          .getResultList();
+      groupMembershipRepository.deleteAll(groupMemberships);
+      log.info("Deleted {} group memberships for household {}", groupMemberships.size(), household.getId());
+
+      // Hard delete the household
+      householdRepository.delete(household);
+      log.info("Successfully hard deleted household {}", household.getId());
 
     } catch (Exception e) {
-      log.error("Error soft deleting household: {}", e.getMessage(), e);
+      log.error("Error hard deleting household: {}", e.getMessage(), e);
       throw e; // Re-throw the exception to be handled by the controller
     }
   }
