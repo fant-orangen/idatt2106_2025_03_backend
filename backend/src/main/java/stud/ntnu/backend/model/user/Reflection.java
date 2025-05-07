@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import stud.ntnu.backend.model.map.CrisisEvent;
 
 @Entity
 @Table(name = "reflections")
@@ -21,11 +22,18 @@ public class Reflection {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
+  @ManyToOne
+  @JoinColumn(name = "crisis_event_id")
+  private CrisisEvent crisisEvent;
+
   @Column(name = "content", nullable = false, columnDefinition = "TEXT")
   private String content;
 
   @Column(name = "shared", nullable = false)
   private Boolean shared = false;
+
+  @Column(name = "deleted", nullable = false)
+  private Boolean deleted = false;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;

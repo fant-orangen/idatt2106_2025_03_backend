@@ -1,54 +1,55 @@
 package stud.ntnu.backend.model.user;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.time.LocalDateTime;
 
+@Data
 @Entity
-@Table(name = "notification_preferences")
-@Getter
-@Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "notification_preferences")
 public class NotificationPreference {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-  @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false)
-  private User user;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "preference_type", nullable = false)
+    private Notification.PreferenceType preferenceType;
 
-  @Column(name = "preference_type", nullable = false)
-  @Enumerated(EnumType.STRING)
-  private Notification.PreferenceType preferenceType;
+    @Column(nullable = false)
+    private boolean enabled = true;
 
-  @Column(nullable = false)
-  private Boolean enabled = true;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private LocalDateTime createdAt;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
-  @Column(name = "updated_at", nullable = false)
-  private LocalDateTime updatedAt;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
-  // Set createdAt and updatedAt before persist
-  @PrePersist
-  protected void onCreate() {
-    createdAt = LocalDateTime.now();
-    updatedAt = LocalDateTime.now();
-  }
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
-  // Set updatedAt before update
-  @PreUpdate
-  protected void onUpdate() {
-    updatedAt = LocalDateTime.now();
-  }
-
-  public NotificationPreference(User user, Notification.PreferenceType preferenceType) {
-    this.user = user;
-    this.preferenceType = preferenceType;
-  }
+    public NotificationPreference(User user, Notification.PreferenceType preferenceType) {
+        this.user = user;
+        this.preferenceType = preferenceType;
+        this.enabled = true;
+        onCreate();
+    }
 }

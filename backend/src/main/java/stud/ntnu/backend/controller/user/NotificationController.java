@@ -135,4 +135,30 @@ public class NotificationController {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
+
+  /**
+   * Changes a user's notification preference for a specific type.
+   *
+   * @param principal the Principal object representing the current user
+   * @param preferenceType the type of notification preference to change
+   * @param enable whether to enable or disable the preference
+   * @return ResponseEntity with status 200 OK if successful, or 400 Bad Request if there's an error
+   */
+  @PatchMapping("/user/notifications/preferences/{preferenceType}")
+  public ResponseEntity<?> changeNotificationPreference(
+      Principal principal,
+      @PathVariable String preferenceType,
+      @RequestParam boolean enable) {
+    try {
+      String email = principal.getName();
+      User currentUser = userService.getUserByEmail(email)
+          .orElseThrow(() -> new IllegalStateException("User not found"));
+      
+      notificationService.changeNotificationPreference(currentUser, preferenceType, enable);
+      return ResponseEntity.ok().build();
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+  
 }

@@ -136,6 +136,7 @@ public class AuthService {
     newUser.setHomeAddress(registrationRequest.getHomeAddress());
     newUser.setHomeLatitude(registrationRequest.getHomeLatitude());
     newUser.setHomeLongitude(registrationRequest.getHomeLongitude());
+    newUser.setPrivacyAccepted(registrationRequest.getPrivacyPolicyAccepted());
 
     // Save the user
     User savedUser = userRepository.save(newUser);
@@ -228,6 +229,7 @@ public class AuthService {
         false
     );
   }
+
 
   public void send2FACode(String email) {
     twoFactorCodeService.sendVerificationCode(email);
