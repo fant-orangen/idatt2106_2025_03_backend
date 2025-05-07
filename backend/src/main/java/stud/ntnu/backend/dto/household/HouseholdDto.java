@@ -32,6 +32,17 @@ public class HouseholdDto {
     this.members = members;
   }
 
+  // Constructor without members
+  public HouseholdDto(Integer id, String name, String address, Integer populationCount,
+      BigDecimal latitude, BigDecimal longitude) {
+    this.id = id;
+    this.name = name;
+    this.address = address;
+    this.populationCount = populationCount;
+    this.latitude = latitude;
+    this.longitude = longitude;
+  }
+
   // Getters and setters
   public Integer getId() {
     return id;

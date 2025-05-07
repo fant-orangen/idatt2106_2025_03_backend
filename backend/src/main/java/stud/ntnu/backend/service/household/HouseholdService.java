@@ -1,5 +1,7 @@
 package stud.ntnu.backend.service.household;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,11 @@ import stud.ntnu.backend.dto.household.EmptyHouseholdMemberDto;
 import stud.ntnu.backend.dto.household.EmptyHouseholdMemberCreateDto;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.repository.household.InvitationRepository;
+
+import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
+import stud.ntnu.backend.repository.inventory.ProductBatchRepository;
+import stud.ntnu.backend.repository.group.GroupMembershipRepository;
 import stud.ntnu.backend.service.user.InvitationService;
 import stud.ntnu.backend.util.LocationUtil;
 import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
@@ -19,6 +26,10 @@ import stud.ntnu.backend.repository.household.EmptyHouseholdMemberRepository;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.household.EmptyHouseholdMember;
 import stud.ntnu.backend.model.household.Invitation;
+
+import stud.ntnu.backend.model.group.GroupMembership;
+import stud.ntnu.backend.model.inventory.ProductBatch;
+import stud.ntnu.backend.model.inventory.ProductType;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.model.household.HouseholdAdmin;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +54,15 @@ public class HouseholdService {
   private final HouseholdAdminRepository householdAdminRepository;
   private final EmptyHouseholdMemberRepository emptyHouseholdMemberRepository;
   private final InvitationService invitationService;
+  private final InvitationRepository invitationRepository;
+
+  private final ProductTypeRepository productTypeRepository;
+  private final ProductBatchRepository productBatchRepository;
+  private final GroupMembershipRepository groupMembershipRepository;
   private static final Logger log = LoggerFactory.getLogger(HouseholdService.class);
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   /**
    * Constructor for dependency injection.
@@ -53,16 +72,29 @@ public class HouseholdService {
    * @param householdAdminRepository       repository for household admin operations
    * @param emptyHouseholdMemberRepository repository for empty household member operations
    * @param invitationService              service for invitation operations
+   * @param invitationRepository           repository for invitation operations
+
+   * @param productTypeRepository          repository for product type operations
    */
   public HouseholdService(HouseholdRepository householdRepository, UserRepository userRepository,
       HouseholdAdminRepository householdAdminRepository,
       EmptyHouseholdMemberRepository emptyHouseholdMemberRepository,
-      InvitationService invitationService) {
+      InvitationService invitationService,
+      InvitationRepository invitationRepository,
+
+      ProductTypeRepository productTypeRepository,
+      ProductBatchRepository productBatchRepository,
+      GroupMembershipRepository groupMembershipRepository) {
     this.householdRepository = householdRepository;
     this.userRepository = userRepository;
     this.householdAdminRepository = householdAdminRepository;
     this.emptyHouseholdMemberRepository = emptyHouseholdMemberRepository;
     this.invitationService = invitationService;
+    this.invitationRepository = invitationRepository;
+
+    this.productTypeRepository = productTypeRepository;
+    this.productBatchRepository = productBatchRepository;
+    this.groupMembershipRepository = groupMembershipRepository;
   }
 
   /**
@@ -95,23 +127,17 @@ public class HouseholdService {
   }
 
   /**
-   * Deletes a household by its ID.
+   * Updates a household's name and address. Only household admins can update households.
    *
-   * @param id the ID of the household to delete
-   */
-  public void deleteHousehold(Integer id) {
-    householdRepository.deleteById(id);
-  }
-
-  /**
-   * Deletes the current user's household. Only household admins can delete households.
-   *
-   * @param email the email of the user deleting the household
+   * @param email the email of the user updating the household
+   * @param name the new name for the household
+   * @param address the new address for the household
+   * @return the updated household
    * @throws IllegalStateException if the user is not found, doesn't have a household, or is not an admin
    */
   @Transactional
-  public void deleteCurrentHousehold(String email) {
-    log.info("User {} attempting to delete household", email);
+  public Household updateHousehold(String email, String name, String address) {
+    log.info("User {} attempting to update household with name: {} and address: {}", email, name, address);
 
     // Check if the user exists
     User user = userRepository.findByEmail(email)
@@ -125,30 +151,131 @@ public class HouseholdService {
 
     // Check if the user is an admin
     if (!isUserHouseholdAdmin(user)) {
-      throw new IllegalStateException("Only household admins can delete households");
+      throw new IllegalStateException("Only household admins can update households");
     }
 
-    // Get all users in the household
-    List<User> householdUsers = userRepository.findByHousehold(household);
+    // Update the household
+    household.setName(name);
+    household.setAddress(address);
 
-    // Remove all users from the household
-    for (User householdUser : householdUsers) {
-      householdUser.setHousehold(null);
-      userRepository.save(householdUser);
+    // If the address changed, try to update the coordinates
+    if (!address.equals(household.getAddress())) {
+      try {
+        CoordinatesItemDto coordinates = LocationUtil.getCoordinatesByAddress(address);
+        if (coordinates != null) {
+          household.setLatitude(coordinates.getLatitude());
+          household.setLongitude(coordinates.getLongitude());
+          log.info("Updated coordinates for household {}: lat={}, lng={}",
+              household.getId(), coordinates.getLatitude(), coordinates.getLongitude());
+        }
+      } catch (Exception e) {
+        log.warn("Failed to update coordinates for household {}: {}", household.getId(), e.getMessage());
+        // Continue without updating coordinates
+      }
     }
 
-    // Delete all household admins for this household
-    List<HouseholdAdmin> admins = householdAdminRepository.findByHousehold(household);
-    householdAdminRepository.deleteAll(admins);
+    Household updatedHousehold = householdRepository.save(household);
+    log.info("Successfully updated household {}", updatedHousehold.getId());
 
-    // Delete all empty household members for this household
-    List<EmptyHouseholdMember> emptyMembers = emptyHouseholdMemberRepository.findByHousehold(household);
-    emptyHouseholdMemberRepository.deleteAll(emptyMembers);
+    return updatedHousehold;
+  }
 
-    // Delete the household
-    householdRepository.delete(household);
+  /**
+   * Hard deletes a household by its ID.
+   * This method removes all household-related data but preserves user accounts.
+   *
+   * @param id the ID of the household to delete
+   * @throws IllegalStateException if the household is not found
+   */
+  @Transactional
+  public void deleteHousehold(Integer id) {
+    log.info("Attempting to hard delete household with ID: {}", id);
 
-    log.info("Household {} deleted by user {}", household.getId(), email);
+    Household household = householdRepository.findById(id)
+        .orElseThrow(() -> new IllegalStateException("Household not found"));
+
+    try {
+      List<User> householdUsers = userRepository.findByHousehold(household);
+      for (User user : householdUsers) {
+        user.setHousehold(null);
+        userRepository.save(user);
+      }
+      log.info("Unlinked {} users from household {}", householdUsers.size(), id);
+
+      householdAdminRepository.deleteAll(householdAdminRepository.findByHousehold(household));
+
+      invitationRepository.deleteAll(invitationRepository.findByHousehold(household));
+
+      emptyHouseholdMemberRepository.deleteAll(emptyHouseholdMemberRepository.findByHousehold(household));
+
+      List<ProductType> productTypes = entityManager.createQuery(
+          "SELECT pt FROM ProductType pt WHERE pt.household.id = :householdId", ProductType.class)
+          .setParameter("householdId", household.getId())
+          .getResultList();
+
+      for (ProductType productType : productTypes) {
+        productBatchRepository.deleteAll(
+          entityManager.createQuery(
+            "SELECT pb FROM ProductBatch pb WHERE pb.productType.id = :productTypeId", ProductBatch.class)
+            .setParameter("productTypeId", productType.getId())
+            .getResultList()
+        );
+      }
+
+      productTypeRepository.deleteAll(productTypes);
+
+      groupMembershipRepository.deleteAll(
+        entityManager.createQuery(
+          "SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId", GroupMembership.class)
+          .setParameter("householdId", household.getId())
+          .getResultList()
+      );
+
+      householdRepository.delete(household);
+      log.info("Successfully deleted household {}", id);
+    } catch (Exception e) {
+      log.error("Error deleting household {}: {}", id, e.getMessage(), e);
+      throw e;
+    }
+  }
+
+  /**
+   * Hard deletes the current user's household. Only household admins can delete households.
+   * This permanently removes the household and all related data from the database.
+   *
+   * @param email the email of the user deleting the household
+   * @throws IllegalStateException if the user is not found, doesn't have a household, or is not an admin
+   */
+  @Transactional
+  public void deleteCurrentHousehold(String email) {
+    log.info("User {} attempting to hard delete household", email);
+
+    try {
+      // Check if the user exists
+      User user = userRepository.findByEmail(email)
+          .orElseThrow(() -> new IllegalStateException("User not found"));
+      log.info("Found user with ID: {}", user.getId());
+
+      // Check if the user has a household
+      Household household = user.getHousehold();
+      if (household == null) {
+        throw new IllegalStateException("User doesn't have a household");
+      }
+      log.info("Found household with ID: {}", household.getId());
+
+      // Check if the user is an admin
+      if (!isUserHouseholdAdmin(user)) {
+        throw new IllegalStateException("Only household admins can delete households");
+      }
+      log.info("User is confirmed as household admin");
+
+      // Call the deleteHousehold method to handle the actual deletion
+      deleteHousehold(household.getId());
+
+    } catch (Exception e) {
+      log.error("Error hard deleting household: {}", e.getMessage(), e);
+      throw e; // Re-throw the exception to be handled by the controller
+    }
   }
 
   /**
@@ -438,6 +565,37 @@ public class HouseholdService {
   }
 
   /**
+   * Gets only non-admin members of the current user's household.
+   *
+   * @param email the email of the user
+   * @return list of non-admin household members
+   * @throws IllegalStateException if the user is not found or doesn't have a household
+   */
+  public List<HouseholdMemberDto> getNonAdminHouseholdMembers(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    Household household = user.getHousehold();
+    if (household == null) {
+      throw new IllegalStateException("User doesn't have a household");
+    }
+
+    return userRepository.findByHousehold(household).stream()
+        .map(member -> {
+          boolean isAdmin = householdAdminRepository.existsByUser(member);
+          return new HouseholdMemberDto(
+              member.getId(),
+              member.getEmail(),
+              member.getFirstName(),
+              member.getLastName(),
+              isAdmin
+          );
+        })
+        .filter(memberDto -> !memberDto.isAdmin()) // Filter out admin members
+        .collect(Collectors.toList());
+  }
+
+  /**
    * Gets all empty members of the current user's household.
    *
    * @param email the email of the user
@@ -593,6 +751,53 @@ public class HouseholdService {
    */
   public List<Invitation> getPendingInvitationsForHousehold(Integer householdId) {
     return invitationService.getPendingInvitationsForHousehold(householdId);
+  }
+
+  /**
+   * Cancels a pending invitation by token. Only household admins can cancel invitations.
+   *
+   * @param adminEmail the email of the admin canceling the invitation
+   * @param token the token of the invitation to cancel
+   * @throws IllegalStateException if the admin is not found, is not an admin, or the invitation is not found
+   */
+  @Transactional
+  public void cancelInvitationByToken(String adminEmail, String token) {
+    log.info("User {} attempting to cancel invitation with token {}", adminEmail, token);
+
+    // Check if the user exists
+    User admin = userRepository.findByEmail(adminEmail)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    // Check if the user has a household
+    Household household = admin.getHousehold();
+    if (household == null) {
+      throw new IllegalStateException("User doesn't have a household");
+    }
+
+    // Check if the user is an admin
+    if (!isUserHouseholdAdmin(admin)) {
+      throw new IllegalStateException("Only household admins can cancel invitations");
+    }
+
+    // Find the invitation by token
+    Invitation invitation = invitationRepository.findByToken(token)
+        .orElseThrow(() -> new IllegalStateException("Invitation not found"));
+
+    // Check if the invitation belongs to the admin's household
+    if (invitation.getHousehold() == null || !invitation.getHousehold().getId().equals(household.getId())) {
+      throw new IllegalStateException("Invitation does not belong to the admin's household");
+    }
+
+    // Check if the invitation is still pending
+    if (!invitation.isPending()) {
+      throw new IllegalStateException("Invitation is not pending");
+    }
+
+    // Cancel the invitation by setting declinedAt
+    invitation.setDeclinedAt(LocalDateTime.now());
+    invitationRepository.save(invitation);
+
+    log.info("Invitation with token {} canceled by admin {}", token, adminEmail);
   }
 
   /**
