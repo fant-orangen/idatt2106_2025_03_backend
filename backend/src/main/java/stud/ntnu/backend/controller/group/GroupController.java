@@ -19,6 +19,8 @@ import stud.ntnu.backend.dto.household.HouseholdDto;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import stud.ntnu.backend.model.group.Group;
+import stud.ntnu.backend.dto.group.GroupDto;
 
 @RestController
 @RequestMapping("/api")
@@ -88,6 +90,13 @@ public class GroupController {
     }
     List<HouseholdDto> households = groupService.getCurrentHouseholdsInGroup(groupId);
     return ResponseEntity.ok(households);
+  }
+
+  @PostMapping(path = "/user/groups")
+  public ResponseEntity<GroupDto> createGroup(@RequestBody GroupDto groupDto, Principal principal) {
+    String email = principal.getName();
+    Group group = groupService.createGroup(groupDto, email);
+    return ResponseEntity.ok(group);
   }
 
 }

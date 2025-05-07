@@ -150,6 +150,10 @@ public class GroupService {
     GroupMembership membership = membershipOpt.get();
     membership.setLeftAt(LocalDateTime.now());
     groupMembershipRepository.save(membership);
+
+    // Delete all group inventory contributions from this household to this group
+    groupInventoryContributionRepository.deleteByGroupIdAndHouseholdId(groupId, householdId);
+    
     return true;
   }
 

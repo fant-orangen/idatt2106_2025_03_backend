@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.group.GroupInventoryContribution;
@@ -44,4 +45,9 @@ public interface GroupInventoryContributionRepository extends JpaRepository<Grou
     @Query("SELECT CASE WHEN COUNT(gic) > 0 THEN true ELSE false END FROM GroupInventoryContribution gic " +
            "WHERE gic.product.id = :productBatchId")
     boolean existsByProductBatchId(@Param("productBatchId") Integer productBatchId);
+
+    @Modifying // TODO: does this work?
+    @Query("DELETE FROM GroupInventoryContribution gic " +
+           "WHERE gic.group.id = :groupId AND gic.household.id = :householdId")
+    void deleteByGroupIdAndHouseholdId(@Param("groupId") Integer groupId, @Param("householdId") Integer householdId);
 }
