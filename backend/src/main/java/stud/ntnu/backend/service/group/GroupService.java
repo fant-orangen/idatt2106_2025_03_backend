@@ -2,6 +2,7 @@ package stud.ntnu.backend.service.group;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.repository.group.GroupRepository;
 import stud.ntnu.backend.repository.group.GroupMembershipRepository;
 import stud.ntnu.backend.model.group.Group;
@@ -136,6 +137,7 @@ public class GroupService {
     });
   }
 
+  @Transactional
   public boolean removeHouseholdFromGroup(String email, Integer groupId) {
     User user = userRepository.findByEmail(email).orElse(null);
     if (user == null || !householdAdminRepository.existsByUser(user)) {

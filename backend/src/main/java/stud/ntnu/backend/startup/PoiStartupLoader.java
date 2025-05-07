@@ -27,9 +27,9 @@ public class PoiStartupLoader {
    */
   @EventListener(ApplicationReadyEvent.class)
   public void onApplicationReady() {
-    poiImportService.importGasStationsFromOverpass();
-    poiImportService.importHospitalsFromOverpass();
-    poiImportService.importSheltersFromOverpass();
-    poiImportService.importGroceryStoresFromOverpass();
+    // poiImportService.importGasStationsFromOverpass();
+    // poiImportService.importHospitalsFromOverpass();
+    // poiImportService.importSheltersFromOverpass();
+    // poiImportService.importGroceryStoresFromOverpass();
   }
 }
