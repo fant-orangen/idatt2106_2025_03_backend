@@ -156,6 +156,16 @@ public class GroupService {
     // Delete all group inventory contributions from this household to this group
     groupInventoryContributionRepository.deleteByGroupIdAndHouseholdId(groupId, householdId);
     
+    // Check if this was the last household in the group
+    List<GroupMembership> remainingMemberships = groupMembershipRepository.findAllCurrentByGroupId(
+        groupId, LocalDateTime.now());
+    if (remainingMemberships.isEmpty()) {
+      // This was the last household, archive the group
+      Group group = membership.getGroup();
+      group.setStatus(Group.GroupStatus.ARCHIVED);
+      groupRepository.save(group);
+    }
+    
     return true;
   }
 

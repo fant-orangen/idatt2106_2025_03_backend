@@ -33,6 +33,10 @@ public class Group {
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
+  @Column(name = "status", nullable = false)
+  @Enumerated(EnumType.STRING)
+  private GroupStatus status = GroupStatus.ACTIVE;
+
   // Set createdAt before persist
   @PrePersist
   protected void onCreate() {
@@ -42,5 +46,10 @@ public class Group {
   public Group(String name, User createdByUser) {
     this.name = name;
     this.createdByUser = createdByUser;
+  }
+
+  public enum GroupStatus {
+    ACTIVE,
+    ARCHIVED
   }
 }
