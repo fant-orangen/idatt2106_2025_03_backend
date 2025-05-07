@@ -219,7 +219,7 @@ public class PoiController {
     try {
       // Check if the current user is an admin using AdminChecker with Principal
       if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
-        return ResponseEntity.status(403).body("Only administrators can delete points of interest");
+        return ResponseEntity.status(403).body("Only administrators can delete po ints of interest");
       }
 
       // Delegate to service for deleting the point of interest
