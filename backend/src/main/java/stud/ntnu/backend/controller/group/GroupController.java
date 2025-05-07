@@ -20,6 +20,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 @RestController
 @RequestMapping("/api")
 public class GroupController {
@@ -88,6 +89,24 @@ public class GroupController {
     }
     List<HouseholdDto> households = groupService.getCurrentHouseholdsInGroup(groupId);
     return ResponseEntity.ok(households);
+  }
+ 
+  /**
+   * Create a new group with the given name.
+   * This endpoint requires admin authentication and is under /api/user/groups.
+   *
+   * @param name      the name of the group to create
+   * @param principal the authenticated user
+   * @return 200 OK if successful, 403 if user is not a household admin
+   */
+  @PostMapping(path = "/user/groups/{name}")
+  public ResponseEntity<?> createGroup(@PathVariable("name") String name, Principal principal) {
+    String email = principal.getName();
+    boolean created = groupService.createGroup(name, email);
+    if (!created) {
+      return ResponseEntity.status(403).build();
+    }
+    return ResponseEntity.ok().build();
   }
 
 }
