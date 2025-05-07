@@ -35,10 +35,9 @@ public interface GroupInventoryContributionRepository extends JpaRepository<Grou
            "JOIN ProductBatch pb ON pb.productType = pt " +
            "JOIN GroupInventoryContribution gic ON gic.product = pb " +
            "WHERE gic.group.id = :groupId " +
-           "AND gic.household.id = :householdId " +
            "AND gic.product IS NOT NULL " +
            "AND LOWER(pt.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
-    Page<ProductType> findContributedProductTypesByGroupAndHouseholdAndNameContaining(
+    Page<ProductType> findContributedProductTypesByGroupAndNameContaining(
         @Param("groupId") Integer groupId,
         @Param("householdId") Integer householdId,
         @Param("searchTerm") String searchTerm,

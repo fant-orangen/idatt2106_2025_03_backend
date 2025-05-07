@@ -144,7 +144,7 @@ INSERT INTO product_batch (product_type_id, date_added, expiration_time, number)
 INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (27, CURRENT_TIMESTAMP, DATEADD('MONTH', 10, CURRENT_TIMESTAMP), 6);
 -- Canned Corn (id=28)
 INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (28, CURRENT_TIMESTAMP, DATEADD('YEAR', 1, CURRENT_TIMESTAMP), 2);
--- Canned Tomatoes (id=29)
+-- Pasta (id=29)
 INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (29, CURRENT_TIMESTAMP, DATEADD('YEAR', 1, CURRENT_TIMESTAMP), 2);
 -- Apple Juice (id=30)
 INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (30, CURRENT_TIMESTAMP, DATEADD('MONTH', 6, CURRENT_TIMESTAMP), 3);
@@ -168,6 +168,8 @@ INSERT INTO group_inventory_contributions (group_id, household_id, product_id) V
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 4);
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 5);
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 2, 29);
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 2, 30);
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 2, 31);
 
 
 -- POI TYPES

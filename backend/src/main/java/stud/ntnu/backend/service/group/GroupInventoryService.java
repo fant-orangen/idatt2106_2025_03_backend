@@ -128,10 +128,14 @@ public class GroupInventoryService {
         throw new IllegalArgumentException("User is not in a household");
     }
 
-    Page<ProductType> page = productTypeRepository.findContributedProductTypesByGroup(
-        groupId,
-        household.getId(),
-        pageable);
+    // Validate that the user's household is a member of the group
+    boolean isMember = groupRepository.existsByIdAndMemberHouseholds_Id(groupId, household.getId());
+    if (!isMember) {
+        throw new IllegalArgumentException("User's household is not a member of this group");
+    }
+
+    // Get all product types contributed to the group by any household
+    Page<ProductType> page = productTypeRepository.findContributedProductTypesByGroup(groupId, pageable);
     return page.map(pt -> new ProductTypeDto(
         pt.getId(),
         pt.getHousehold() != null ? pt.getHousehold().getId() : null,
@@ -281,7 +285,7 @@ public class GroupInventoryService {
 
     // Use the repository to get matching product types
     Page<ProductType> searchResults = groupInventoryContributionRepository
-        .findContributedProductTypesByGroupAndHouseholdAndNameContaining(
+        .findContributedProductTypesByGroupAndNameContaining(
             groupId,
             household.getId(),
             searchTerm,
