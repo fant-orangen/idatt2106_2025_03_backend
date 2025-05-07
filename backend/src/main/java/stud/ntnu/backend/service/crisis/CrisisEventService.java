@@ -584,4 +584,42 @@ public class CrisisEventService {
         (start <= end) ? previews.subList(start, end) : List.of();
     return new PageImpl<>(pagedList, pageable, previews.size());
   }
+
+  /**
+   * Search for crisis events based on a name search term and active status.
+   *
+   * @param searchTerm the search term to filter event names by
+   * @param isActive whether to search among active (true) or inactive (false) events
+   * @param pageable pagination information
+   * @return a page of crisis events matching the search criteria
+   */
+  @Transactional(readOnly = true)
+  public Page<CrisisEvent> searchCrisisEvents(String searchTerm, boolean isActive, Pageable pageable) {
+    // Get base list of events based on active status
+    Page<CrisisEvent> eventsPage = isActive ? 
+        crisisEventRepository.findByActiveTrue(pageable) :
+        crisisEventRepository.findByActiveFalse(pageable);
+
+    // If no search term, return all events for the given active status
+    if (searchTerm == null || searchTerm.trim().isEmpty()) {
+      return eventsPage;
+    }
+
+    String search = searchTerm.trim().toLowerCase();
+    
+    // Filter events based on name only
+    List<CrisisEvent> filteredEvents = eventsPage.getContent().stream()
+        .filter(event -> event.getName() != null && 
+            event.getName().toLowerCase().contains(search))
+        .sorted((a, b) -> Integer.compare(severityOrder(b.getSeverity()), 
+            severityOrder(a.getSeverity())))
+        .toList();
+
+    // Manual pagination
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), filteredEvents.size());
+    List<CrisisEvent> pageContent = filteredEvents.subList(start, end);
+
+    return new PageImpl<>(pageContent, pageable, filteredEvents.size());
+  }
 }
