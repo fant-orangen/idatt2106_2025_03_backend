@@ -106,6 +106,23 @@ public class NotificationController {
   }
 
   /**
+   * Checks if the current user has any unread notifications.
+   * 
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity with status 200 OK if successful, or 400 Bad Request if an error occurs
+   */
+  @GetMapping("/user/notifications/any-unread")
+  public ResponseEntity<?> anyUnread(Principal principal) {
+    try {
+      String email = principal.getName();
+      boolean hasUnread = notificationService.hasUnreadNotifications(email);
+      return ResponseEntity.ok(hasUnread);
+    } catch(Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
    * Sends a notification to a specific topic.
    * TODO: Untested!
    *

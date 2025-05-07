@@ -59,4 +59,12 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
      * @return a list of unread notifications
      */
     List<Notification> findByUserIdAndReadAtIsNull(Integer userId);
+
+    /**
+     * Check if a user has any unread notifications.
+     *
+     * @param userId the user ID
+     * @return true if the user has any unread notifications, false otherwise
+     */
+    boolean existsByUserIdAndReadAtIsNull(Integer userId);
 }

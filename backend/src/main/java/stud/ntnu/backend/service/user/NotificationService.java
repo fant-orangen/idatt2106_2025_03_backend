@@ -168,6 +168,21 @@ public class NotificationService {
   }
 
   /**
+   * Checks if a user has any unread notifications.
+   *
+   * @param email The email of the user to check for unread notifications.
+   * @return true if the user has any unread notifications, false otherwise.
+   * @throws IllegalStateException if the user with the given email is not found.
+   */
+  @Transactional(readOnly = true)
+  public boolean hasUnreadNotifications(String email) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("User not found with email: " + email));
+    
+    return notificationRepository.existsByUserIdAndReadAtIsNull(user.getId());
+  }
+
+  /**
    * Creates a system notification for all users in the database. System notifications have a
    * preference type of 'system' and no target type/ID.
    *
