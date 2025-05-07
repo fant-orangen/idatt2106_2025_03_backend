@@ -263,7 +263,7 @@ CREATE TABLE household_admins (
     user_id INT NOT NULL,
     household_id INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE,
     UNIQUE (user_id)
 );

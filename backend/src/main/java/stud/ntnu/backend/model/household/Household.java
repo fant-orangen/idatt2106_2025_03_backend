@@ -44,7 +44,7 @@ public class Household {
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
-  @OneToMany(mappedBy = "household", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "household")
   private List<User> users = new ArrayList<>();
 
   // Set createdAt before persist

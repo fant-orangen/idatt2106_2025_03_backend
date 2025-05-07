@@ -197,55 +197,66 @@ public class HouseholdService {
     // Get all users in the household
     List<User> householdUsers = userRepository.findByHousehold(household);
 
-    // Remove all users from the household
+    // Remove all users from the household (don't delete users, just unlink them)
     for (User householdUser : householdUsers) {
       householdUser.setHousehold(null);
       userRepository.save(householdUser);
     }
+    log.info("Unlinked {} users from household {}", householdUsers.size(), id);
 
     // Delete all household admins for this household
     List<HouseholdAdmin> admins = householdAdminRepository.findByHousehold(household);
     householdAdminRepository.deleteAll(admins);
+    log.info("Deleted {} household admins for household {}", admins.size(), id);
 
     // Delete all invitations for this household
     List<Invitation> invitations = invitationRepository.findByHousehold(household);
     invitationRepository.deleteAll(invitations);
+    log.info("Deleted {} invitations for household {}", invitations.size(), id);
 
     // Delete all empty household members for this household
     List<EmptyHouseholdMember> emptyMembers = emptyHouseholdMemberRepository.findByHousehold(household);
     emptyHouseholdMemberRepository.deleteAll(emptyMembers);
+    log.info("Deleted {} empty household members for household {}", emptyMembers.size(), id);
 
     // Note: Household inventory has been replaced by product types and product batches
 
-    // Get all product types for this household
-    List<ProductType> productTypes = entityManager.createQuery(
-        "SELECT pt FROM ProductType pt WHERE pt.household.id = :householdId", ProductType.class)
-        .setParameter("householdId", household.getId())
-        .getResultList();
+    try {
+      // Get all product types for this household
+      List<ProductType> productTypes = entityManager.createQuery(
+          "SELECT pt FROM ProductType pt WHERE pt.household.id = :householdId", ProductType.class)
+          .setParameter("householdId", household.getId())
+          .getResultList();
 
-    // Delete all product batches for this household's product types
-    for (ProductType productType : productTypes) {
-        List<ProductBatch> productBatches = entityManager.createQuery(
-            "SELECT pb FROM ProductBatch pb WHERE pb.productType.id = :productTypeId", ProductBatch.class)
-            .setParameter("productTypeId", productType.getId())
-            .getResultList();
-        productBatchRepository.deleteAll(productBatches);
-        log.info("Deleted {} product batches for product type {}", productBatches.size(), productType.getId());
+      // Delete all product batches for this household's product types
+      for (ProductType productType : productTypes) {
+          List<ProductBatch> productBatches = entityManager.createQuery(
+              "SELECT pb FROM ProductBatch pb WHERE pb.productType.id = :productTypeId", ProductBatch.class)
+              .setParameter("productTypeId", productType.getId())
+              .getResultList();
+          productBatchRepository.deleteAll(productBatches);
+          log.info("Deleted {} product batches for product type {}", productBatches.size(), productType.getId());
+      }
+
+      // Delete all product types
+      productTypeRepository.deleteAll(productTypes);
+      log.info("Deleted {} product types for household {}", productTypes.size(), id);
+
+      // Find and delete all group memberships for this household
+      List<GroupMembership> groupMemberships = entityManager.createQuery(
+          "SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId", GroupMembership.class)
+          .setParameter("householdId", household.getId())
+          .getResultList();
+      groupMembershipRepository.deleteAll(groupMemberships);
+      log.info("Deleted {} group memberships for household {}", groupMemberships.size(), id);
+
+      // Hard delete the household
+      householdRepository.delete(household);
+      log.info("Successfully hard deleted household {}", id);
+    } catch (Exception e) {
+      log.error("Error deleting household-related data: {}", e.getMessage(), e);
+      throw e;
     }
-
-    // Delete all product types
-    productTypeRepository.deleteAll(productTypes);
-
-    // Find and delete all group memberships for this household
-    List<GroupMembership> groupMemberships = entityManager.createQuery(
-        "SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId", GroupMembership.class)
-        .setParameter("householdId", household.getId())
-        .getResultList();
-    groupMembershipRepository.deleteAll(groupMemberships);
-
-    // Hard delete the household
-    householdRepository.delete(household);
-    log.info("Successfully hard deleted household {}", id);
   }
 
   /**
@@ -278,67 +289,8 @@ public class HouseholdService {
       }
       log.info("User is confirmed as household admin");
 
-      // Get all users in the household
-      List<User> householdUsers = userRepository.findByHousehold(household);
-      log.info("Found {} users in household {}", householdUsers.size(), household.getId());
-
-      // Remove all users from the household
-      for (User householdUser : householdUsers) {
-        householdUser.setHousehold(null);
-        userRepository.save(householdUser);
-      }
-      log.info("Removed all users from household {}", household.getId());
-
-      // Delete all household admins for this household
-      List<HouseholdAdmin> admins = householdAdminRepository.findByHousehold(household);
-      householdAdminRepository.deleteAll(admins);
-      log.info("Deleted {} household admins for household {}", admins.size(), household.getId());
-
-      // Delete all invitations for this household
-      List<Invitation> invitations = invitationRepository.findByHousehold(household);
-      invitationRepository.deleteAll(invitations);
-      log.info("Deleted {} invitations for household {}", invitations.size(), household.getId());
-
-      // Delete all empty household members for this household
-      List<EmptyHouseholdMember> emptyMembers = emptyHouseholdMemberRepository.findByHousehold(household);
-      emptyHouseholdMemberRepository.deleteAll(emptyMembers);
-      log.info("Deleted {} empty household members for household {}", emptyMembers.size(), household.getId());
-
-      // Note: Household inventory has been replaced by product types and product batches
-      log.info("Skipping household inventory deletion as it has been replaced by product types and batches");
-
-      // Get all product types for this household
-      List<ProductType> productTypes = entityManager.createQuery(
-          "SELECT pt FROM ProductType pt WHERE pt.household.id = :householdId", ProductType.class)
-          .setParameter("householdId", household.getId())
-          .getResultList();
-
-      // Delete all product batches for this household's product types
-      for (ProductType productType : productTypes) {
-          List<ProductBatch> productBatches = entityManager.createQuery(
-              "SELECT pb FROM ProductBatch pb WHERE pb.productType.id = :productTypeId", ProductBatch.class)
-              .setParameter("productTypeId", productType.getId())
-              .getResultList();
-          productBatchRepository.deleteAll(productBatches);
-          log.info("Deleted {} product batches for product type {}", productBatches.size(), productType.getId());
-      }
-
-      // Delete all product types
-      productTypeRepository.deleteAll(productTypes);
-      log.info("Deleted {} product types for household {}", productTypes.size(), household.getId());
-
-      // Find and delete all group memberships for this household
-      // Even though we have ON DELETE CASCADE in the database, it's better to handle this explicitly
-      List<GroupMembership> groupMemberships = entityManager.createQuery(
-          "SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId", GroupMembership.class)
-          .setParameter("householdId", household.getId())
-          .getResultList();
-      groupMembershipRepository.deleteAll(groupMemberships);
-      log.info("Deleted {} group memberships for household {}", groupMemberships.size(), household.getId());
-
-      // Hard delete the household
-      householdRepository.delete(household);
-      log.info("Successfully hard deleted household {}", household.getId());
+      // Call the deleteHousehold method to handle the actual deletion
+      deleteHousehold(household.getId());
 
     } catch (Exception e) {
       log.error("Error hard deleting household: {}", e.getMessage(), e);
