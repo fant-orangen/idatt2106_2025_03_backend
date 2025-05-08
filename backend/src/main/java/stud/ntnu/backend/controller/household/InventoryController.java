@@ -2,8 +2,6 @@ package stud.ntnu.backend.controller.household;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +18,6 @@ import stud.ntnu.backend.service.inventory.InventoryService;
 public class InventoryController {
 
   private final InventoryService inventoryService;
-  private final Logger log = LoggerFactory.getLogger(InventoryController.class);
 
   public InventoryController(InventoryService inventoryService) {
     this.inventoryService = inventoryService;
@@ -63,13 +60,10 @@ public class InventoryController {
       Integer totalUnits = inventoryService.getTotalUnitsForProductType(productTypeId, householdId);
       return ResponseEntity.ok(totalUnits);
     } catch (NoSuchElementException e) {
-      log.error("Error getting total units for product type", e);
       return ResponseEntity.notFound().build();
     } catch (IllegalArgumentException e) {
-      log.error("Error getting total units for product type", e);
       return ResponseEntity.status(403).body(e.getMessage()); // Forbidden
     } catch (Exception e) {
-      log.error("Error getting total units for product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -90,7 +84,6 @@ public class InventoryController {
           pageable);
       return ResponseEntity.ok(productTypes);
     } catch (Exception e) {
-      log.error("Error getting food product types", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -118,7 +111,6 @@ public class InventoryController {
       inventoryService.createProductType(createDto);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error creating food product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -143,7 +135,6 @@ public class InventoryController {
       inventoryService.createProductBatch(createDto, householdId);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error creating product batch", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -163,7 +154,6 @@ public class InventoryController {
       inventoryService.updateProductBatch(batchId, newNumberOfUnits);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error updating product batch", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -180,7 +170,6 @@ public class InventoryController {
       inventoryService.deleteProductBatch(batchId);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error deleting product batch", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -205,7 +194,6 @@ public class InventoryController {
       inventoryService.deleteProductType(productTypeId, householdId);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error deleting product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -224,7 +212,6 @@ public class InventoryController {
       Integer totalLitres = inventoryService.getTotalLitresOfWaterByHousehold(householdId);
       return ResponseEntity.ok(totalLitres);
     } catch (Exception e) {
-      log.error("Error getting total litres of water", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -246,7 +233,6 @@ public class InventoryController {
       Double daysRemaining = inventoryService.getWaterDaysRemaining(householdId);
       return ResponseEntity.ok(daysRemaining);
     } catch (Exception e) {
-      log.error("Error getting days of water remaining", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -267,7 +253,6 @@ public class InventoryController {
       Double daysRemaining = inventoryService.getFoodDaysRemaining(householdId);
       return ResponseEntity.ok(daysRemaining);
     } catch (Exception e) {
-      log.error("Error getting days of food remaining", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -290,7 +275,6 @@ public class InventoryController {
           householdId, pageable);
       return ResponseEntity.ok(productTypes);
     } catch (Exception e) {
-      log.error("Error getting water product types", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -311,7 +295,6 @@ public class InventoryController {
           householdId, pageable);
       return ResponseEntity.ok(productTypes);
     } catch (Exception e) {
-      log.error("Error getting medicine product types", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -338,7 +321,6 @@ public class InventoryController {
           householdId, category, expirationTimeInDays, pageable);
       return ResponseEntity.ok(productTypes);
     } catch (Exception e) {
-      log.error("Error getting expiring product types", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -360,7 +342,6 @@ public class InventoryController {
       inventoryService.createWaterProductType(createDto);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error creating water product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -382,7 +363,6 @@ public class InventoryController {
       inventoryService.createMedicineProductType(createDto);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error creating medicine product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -410,7 +390,6 @@ public class InventoryController {
           householdId, category, search, pageable);
       return ResponseEntity.ok(result);
     } catch (Exception e) {
-      log.error("Error searching product types", e);
       return ResponseEntity.badRequest().build();
     }
   }
