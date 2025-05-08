@@ -12,6 +12,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.UserRepository;
+import java.util.List;
+import stud.ntnu.backend.model.household.Household;
 
 /**
  * Service responsible for handling email sending operations, such as verification emails. Uses
@@ -33,6 +35,7 @@ public class EmailService {
    * @param mailSender  The Spring JavaMailSender bean for sending emails.
    * @param senderEmail The sender's email address, injected from application properties
    *                    (spring.mail.username).
+   * @param userRepository The repository for user operations.
    */
   @Autowired
   public EmailService(JavaMailSender mailSender,
@@ -103,6 +106,7 @@ public class EmailService {
 
       mailSender.send(message);
       log.info("Verification email sent successfully to: {}", user.getEmail());
+
 
     } catch (MailException e) {
       log.error("Mail sending error for verification email to {}", user.getEmail());
@@ -231,6 +235,79 @@ public class EmailService {
       log.error("Mail sending error for password reset email to {}", user.getEmail());
     } catch (Exception e) {
       log.error("Unexpected error sending password reset email to {}: {}", user.getEmail(), e.getMessage());
+    }
+  }
+
+  /**
+   * Sends safety confirmation emails to all other members of a user's household.
+   *
+   * @param user  The User object representing the person requesting safety confirmation
+   * @param token The unique token string to include in the confirmation link
+   */
+  public void sendSafetyConfirmationEmail(User user, String token) {
+    if (user == null || user.getEmail() == null || token == null) {
+      log.error("Cannot send safety confirmation email. User or token is null or user email is null.");
+      return;
+    }
+
+    Household household = user.getHousehold();
+    if (household == null) {
+      log.error("Cannot send safety confirmation email. User {} does not belong to a household.", user.getEmail());
+      return;
+    }
+
+    List<User> householdMembers = userRepository.findByHousehold(household);
+    String requestingUserName = (user.getName() != null ? user.getName() : "et husstandsmedlem");
+
+    for (User member : householdMembers) {
+      // Skip sending email to the requesting user
+      if (member.getEmail().equals(user.getEmail())) {
+        continue;
+      }
+
+      try {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+
+        helper.setFrom(senderEmail);
+        helper.setTo(member.getEmail());
+        helper.setSubject("Krisefikser.no - Bekreft din sikkerhetsstatus");
+
+        String memberName = (member.getName() != null ? member.getName() : "Bruker");
+        String confirmationUrl = "http://localhost:8080/api/user/confirm-safety/" + token;
+
+        String emailBody = """
+            <html>
+            <body>
+                <p>Hei %s,</p>
+                
+                <p>%s fra din husstand har bedt om en bekreftelse på at du er trygg.</p>
+                
+                <p>Vennligst klikk på lenken under for å bekrefte at du er i sikkerhet:</p>
+                
+                <p><a href="%s">Klikk her for å bekrefte at du er trygg</a></p>
+                
+                <p>Hvis du ikke kan klikke på lenken, kan du kopiere og lime inn denne adressen i nettleseren din:</p>
+                <p>%s</p>
+                
+                <p>Hvis du ikke er i stand til å bekrefte din sikkerhet, vennligst kontakt nødetatene umiddelbart.</p>
+                
+                <p>Med vennlig hilsen,<br>
+                Krisefikser-teamet</p>
+            </body>
+            </html>
+            """.formatted(memberName, requestingUserName, confirmationUrl, confirmationUrl);
+
+        helper.setText(emailBody, true); // Set 'true' to indicate HTML content
+
+        mailSender.send(mimeMessage);
+        log.info("Safety confirmation email sent successfully to: {}", member.getEmail());
+
+      } catch (MailException e) {
+        log.error("Mail sending error for safety confirmation email to {}", member.getEmail());
+      } catch (Exception e) {
+        log.error("Unexpected error sending safety confirmation email to {}: {}", member.getEmail(), e.getMessage());
+      }
     }
   }
 }
