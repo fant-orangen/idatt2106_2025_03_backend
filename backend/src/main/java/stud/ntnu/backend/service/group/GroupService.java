@@ -1,31 +1,34 @@
 package stud.ntnu.backend.service.group;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import stud.ntnu.backend.repository.group.GroupRepository;
-import stud.ntnu.backend.repository.group.GroupMembershipRepository;
-import stud.ntnu.backend.model.group.Group;
-import stud.ntnu.backend.model.group.GroupMembership;
-import stud.ntnu.backend.dto.group.GroupSummaryDto;
-import stud.ntnu.backend.service.inventory.InventoryService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import stud.ntnu.backend.dto.household.HouseholdDto;
-import stud.ntnu.backend.model.household.Household;
-import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.time.LocalDateTime;
-import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
-import stud.ntnu.backend.repository.user.UserRepository;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import stud.ntnu.backend.dto.group.GroupSummaryDto;
+import stud.ntnu.backend.dto.household.HouseholdDto;
+import stud.ntnu.backend.model.group.Group;
+import stud.ntnu.backend.model.group.GroupMembership;
+import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.user.User;
-import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
 import stud.ntnu.backend.repository.group.GroupInventoryContributionRepository;
+import stud.ntnu.backend.repository.group.GroupMembershipRepository;
+import stud.ntnu.backend.repository.group.GroupRepository;
+import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
+import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
+import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.service.inventory.InventoryService;
 
 /**
  * Service for managing groups. Handles creation, retrieval, updating, and deletion of groups.
+ * Provides functionality for managing group memberships and household associations.
  */
 @Service
 public class GroupService {
@@ -48,8 +51,7 @@ public class GroupService {
    * @param householdAdminRepository             repository for household admin operations
    * @param userRepository                       repository for user operations
    * @param productTypeRepository                repository for product type operations
-   * @param groupInventoryContributionRepository repository for group inventory contribution
-   *                                             operations
+   * @param groupInventoryContributionRepository repository for group inventory contribution operations
    * @param householdRepository                  repository for household operations
    */
   @Autowired
@@ -70,7 +72,7 @@ public class GroupService {
   }
 
   /**
-   * Retrieves all groups.
+   * Retrieves all groups in the system.
    *
    * @return list of all groups
    */
@@ -81,18 +83,18 @@ public class GroupService {
   /**
    * Retrieves a group by its ID.
    *
-   * @param id the ID of the group
-   * @return an Optional containing the group if found
+   * @param id the ID of the group to retrieve
+   * @return an Optional containing the group if found, empty otherwise
    */
   public Optional<Group> getGroupById(Integer id) {
     return groupRepository.findById(id);
   }
 
   /**
-   * Saves a group.
+   * Saves a group to the database.
    *
    * @param group the group to save
-   * @return the saved group
+   * @return the saved group with updated fields
    */
   public Group saveGroup(Group group) {
     return groupRepository.save(group);
@@ -110,8 +112,8 @@ public class GroupService {
   /**
    * Gets the group associated with the current user's household.
    *
-   * @param email the user's email
-   * @return GroupSummaryDto or null if not found
+   * @param email the user's email address
+   * @return GroupSummaryDto containing group details, or null if no group is found
    */
   public GroupSummaryDto getCurrentUserGroup(String email) {
     Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
@@ -128,6 +130,13 @@ public class GroupService {
     return dto;
   }
 
+  /**
+   * Retrieves a paginated list of groups associated with the current user's household.
+   *
+   * @param email    the user's email address
+   * @param pageable pagination information
+   * @return a Page of GroupSummaryDto objects
+   */
   public Page<GroupSummaryDto> getCurrentUserGroups(String email, Pageable pageable) {
     Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
     Page<GroupMembership> memberships = groupMembershipRepository.findAllCurrentByHouseholdIdAndGroupStatus(
@@ -142,6 +151,13 @@ public class GroupService {
     });
   }
 
+  /**
+   * Removes a household from a group if the user is a household admin.
+   *
+   * @param email   the email of the user requesting the removal
+   * @param groupId the ID of the group to remove the household from
+   * @return true if the removal was successful, false otherwise
+   */
   @Transactional
   public boolean removeHouseholdFromGroup(String email, Integer groupId) {
     User user = userRepository.findByEmail(email).orElse(null);
@@ -158,14 +174,11 @@ public class GroupService {
     membership.setLeftAt(LocalDateTime.now());
     groupMembershipRepository.save(membership);
 
-    // Delete all group inventory contributions from this household to this group
     groupInventoryContributionRepository.deleteByGroupIdAndHouseholdId(groupId, householdId);
     
-    // Check if this was the last household in the group
     List<GroupMembership> remainingMemberships = groupMembershipRepository.findAllCurrentByGroupId(
         groupId, LocalDateTime.now());
     if (remainingMemberships.isEmpty()) {
-      // This was the last household, archive the group
       Group group = membership.getGroup();
       group.setStatus(Group.GroupStatus.archived);
       groupRepository.save(group);
@@ -174,6 +187,12 @@ public class GroupService {
     return true;
   }
 
+  /**
+   * Retrieves all current households in a specific group.
+   *
+   * @param groupId the ID of the group
+   * @return list of HouseholdDto objects representing the households in the group
+   */
   public List<HouseholdDto> getCurrentHouseholdsInGroup(Integer groupId) {
     List<GroupMembership> memberships = groupMembershipRepository.findAllCurrentByGroupId(groupId,
         LocalDateTime.now());
@@ -186,11 +205,17 @@ public class GroupService {
       dto.setPopulationCount(h.getPopulationCount());
       dto.setLatitude(h.getLatitude());
       dto.setLongitude(h.getLongitude());
-      dto.setMembers(null); // or Collections.emptyList() for summary
+      dto.setMembers(null);
       return dto;
     }).collect(Collectors.toList());
   }
 
+  /**
+   * Gets the household ID associated with a user's email.
+   *
+   * @param email the user's email address
+   * @return the household ID, or null if not found
+   */
   public Integer getHouseholdIdByUserEmail(String email) {
     return inventoryService.getHouseholdIdByUserEmail(email);
   }
@@ -198,9 +223,9 @@ public class GroupService {
   /**
    * Checks if the user (by email) is a member of any household in the given group.
    *
-   * @param groupId the group id
-   * @param email   the user's email
-   * @return true if the user is a member, false otherwise
+   * @param groupId the ID of the group to check
+   * @param email   the user's email address
+   * @return true if the user is a member of a household in the group, false otherwise
    */
   public boolean isUserMemberOfGroup(Integer groupId, String email) {
     Integer userHouseholdId = getHouseholdIdByUserEmail(email);
