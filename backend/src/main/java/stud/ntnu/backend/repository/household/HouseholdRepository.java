@@ -5,7 +5,12 @@ import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.household.Household;
 
 /**
- * Repository interface for Household entity operations.
+ * Repository interface for managing Household entities.
+ * Provides basic CRUD operations through JpaRepository and serves as the data access layer
+ * for household-related database operations.
+ * 
+ * @see Household
+ * @see JpaRepository
  */
 @Repository
 public interface HouseholdRepository extends JpaRepository<Household, Integer> {
