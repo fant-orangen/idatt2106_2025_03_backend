@@ -2,6 +2,7 @@ package stud.ntnu.backend.service.user;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,13 +19,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
+import org.springframework.test.annotation.DirtiesContext;
 import stud.ntnu.backend.dto.user.NotificationDto;
+import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.Notification.PreferenceType;
@@ -36,6 +40,7 @@ import stud.ntnu.backend.repository.user.NotificationRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.util.LocationUtil;
 
+@DirtiesContext(classMode = AFTER_CLASS)
 public class NotificationServiceTest {
 
     @Mock
@@ -53,6 +58,7 @@ public class NotificationServiceTest {
     @Mock
     private UserService userService;
 
+    @Spy
     @InjectMocks
     private NotificationService notificationService;
 
@@ -516,8 +522,6 @@ public class NotificationServiceTest {
         }
     }
 
-
-
     @Nested
     class SendNotificationsToAllUsersTests {
         @Nested
@@ -562,7 +566,298 @@ public class NotificationServiceTest {
                 );
             }
         }
+    }
 
+    @Nested
+    class SendCrisisEventNotificationsInternalTests {
+        @Nested
+        class Positive {
+            @Test
+            void shouldSendNotificationsToUsersWithinRadius() {
+                // Arrange
+                User user1 = new User();
+                user1.setId(1);
+                user1.setHomeLatitude(new BigDecimal("63.4306"));
+                user1.setHomeLongitude(new BigDecimal("10.3952"));
 
+                User user2 = new User();
+                user2.setId(2);
+                user2.setHomeLatitude(new BigDecimal("64.0000"));
+                user2.setHomeLongitude(new BigDecimal("11.0000"));
+
+                CrisisEvent crisisEvent = new CrisisEvent();
+                crisisEvent.setId(123);
+                crisisEvent.setName("Test Crisis");
+                crisisEvent.setEpicenterLatitude(new BigDecimal("63.4305"));
+                crisisEvent.setEpicenterLongitude(new BigDecimal("10.3951"));
+                crisisEvent.setRadius(new BigDecimal("1")); // 1 km radius
+                crisisEvent.setSeverity(CrisisEvent.Severity.red);
+                crisisEvent.setStartTime(LocalDateTime.now());
+
+                String messageTemplate = "🚨 Kriselarsel: 'Test Crisis' (høy alvorlighetsgrad). Du varsles fordi {reason} er innenfor faresonen. Startet %s.";
+
+                when(userService.getAllUsers()).thenReturn(Arrays.asList(user1, user2));
+
+                // Mock createNotification to return a valid notification
+                Notification mockNotification = new Notification(
+                    user1, Notification.PreferenceType.crisis_alert, Notification.TargetType.event, 
+                    crisisEvent.getId(), "Test notification", LocalDateTime.now()
+                );
+                mockNotification.setId(1);
+                doReturn(mockNotification).when(notificationService).createNotification(
+                    eq(user1),
+                    eq(Notification.PreferenceType.crisis_alert),
+                    eq(Notification.TargetType.event),
+                    eq(crisisEvent.getId()),
+                    anyString()
+                );
+
+                try (MockedStatic<LocationUtil> mockedLocationUtil = mockStatic(LocationUtil.class)) {
+                    // User 1 is within radius
+                    mockedLocationUtil.when(() -> LocationUtil.calculateDistance(
+                            eq(63.4305), eq(10.3951), eq(63.4306), eq(10.3952)))
+                            .thenReturn(500.0); // Within radius
+                    // User 2 is outside radius
+                    mockedLocationUtil.when(() -> LocationUtil.calculateDistance(
+                            eq(63.4305), eq(10.3951), eq(64.0000), eq(11.0000)))
+                            .thenReturn(20000.0); // Outside radius
+
+                    // Act
+                    notificationService.sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true);
+
+                    // Assert
+                    verify(userService).getAllUsers();
+                    verify(notificationService).createNotification(
+                            eq(user1),
+                            eq(Notification.PreferenceType.crisis_alert),
+                            eq(Notification.TargetType.event),
+                            eq(crisisEvent.getId()),
+                            anyString()
+                    );
+                    verify(notificationService).sendNotification(any(Notification.class));
+                    verify(notificationService, never()).createNotification(
+                            eq(user2),
+                            any(),
+                            any(),
+                            any(),
+                            any()
+                    );
+                }
+            }
+
+            @Test
+            void shouldSendNotificationsToUsersWithHouseholdWithinRadius() {
+                // Arrange
+                User user = new User();
+                user.setId(1);
+                user.setHomeLatitude(new BigDecimal("64.0000"));
+                user.setHomeLongitude(new BigDecimal("11.0000"));
+
+                Household household = new Household();
+                household.setId(1);
+                household.setLatitude(new BigDecimal("63.4306"));
+                household.setLongitude(new BigDecimal("10.3952"));
+                user.setHousehold(household);
+
+                CrisisEvent crisisEvent = new CrisisEvent();
+                crisisEvent.setId(123);
+                crisisEvent.setName("Test Crisis");
+                crisisEvent.setEpicenterLatitude(new BigDecimal("63.4305"));
+                crisisEvent.setEpicenterLongitude(new BigDecimal("10.3951"));
+                crisisEvent.setRadius(new BigDecimal("1")); // 1 km radius
+                crisisEvent.setSeverity(CrisisEvent.Severity.red);
+                crisisEvent.setStartTime(LocalDateTime.now());
+
+                String messageTemplate = "🚨 Kriselarsel: 'Test Crisis' (høy alvorlighetsgrad). Du varsles fordi {reason} er innenfor faresonen. Startet %s.";
+
+                when(userService.getAllUsers()).thenReturn(Collections.singletonList(user));
+
+                // Mock createNotification to return a valid notification
+                Notification mockNotification = new Notification(
+                    user, Notification.PreferenceType.crisis_alert, Notification.TargetType.event, 
+                    crisisEvent.getId(), "Test notification", LocalDateTime.now()
+                );
+                mockNotification.setId(1);
+                doReturn(mockNotification).when(notificationService).createNotification(
+                    eq(user),
+                    eq(Notification.PreferenceType.crisis_alert),
+                    eq(Notification.TargetType.event),
+                    eq(crisisEvent.getId()),
+                    anyString()
+                );
+
+                try (MockedStatic<LocationUtil> mockedLocationUtil = mockStatic(LocationUtil.class)) {
+                    // User's home is outside radius
+                    mockedLocationUtil.when(() -> LocationUtil.calculateDistance(
+                            eq(63.4305), eq(10.3951), eq(64.0000), eq(11.0000)))
+                            .thenReturn(20000.0); // Outside radius
+                    // User's household is within radius
+                    mockedLocationUtil.when(() -> LocationUtil.calculateDistance(
+                            eq(63.4305), eq(10.3951), eq(63.4306), eq(10.3952)))
+                            .thenReturn(500.0); // Within radius
+
+                    // Act
+                    notificationService.sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true);
+
+                    // Assert
+                    verify(userService).getAllUsers();
+                    verify(notificationService).createNotification(
+                            eq(user),
+                            eq(Notification.PreferenceType.crisis_alert),
+                            eq(Notification.TargetType.event),
+                            eq(crisisEvent.getId()),
+                            anyString()
+                    );
+                    verify(notificationService).sendNotification(any(Notification.class));
+                }
+            }
+
+            @Test
+            void shouldSendNotificationsToUsersWithBothHomeAndHouseholdWithinRadius() {
+                // Arrange
+                User user = new User();
+                user.setId(1);
+                user.setHomeLatitude(new BigDecimal("63.4306"));
+                user.setHomeLongitude(new BigDecimal("10.3952"));
+
+                Household household = new Household();
+                household.setId(1);
+                household.setLatitude(new BigDecimal("63.4306"));
+                household.setLongitude(new BigDecimal("10.3952"));
+                user.setHousehold(household);
+
+                CrisisEvent crisisEvent = new CrisisEvent();
+                crisisEvent.setId(123);
+                crisisEvent.setName("Test Crisis");
+                crisisEvent.setEpicenterLatitude(new BigDecimal("63.4305"));
+                crisisEvent.setEpicenterLongitude(new BigDecimal("10.3951"));
+                crisisEvent.setRadius(new BigDecimal("1")); // 1 km radius
+                crisisEvent.setSeverity(CrisisEvent.Severity.red);
+                crisisEvent.setStartTime(LocalDateTime.now());
+
+                String messageTemplate = "🚨 Kriselarsel: 'Test Crisis' (høy alvorlighetsgrad). Du varsles fordi {reason} er innenfor faresonen. Startet %s.";
+
+                when(userService.getAllUsers()).thenReturn(Collections.singletonList(user));
+
+                // Mock createNotification to return a valid notification
+                Notification mockNotification = new Notification(
+                    user, Notification.PreferenceType.crisis_alert, Notification.TargetType.event, 
+                    crisisEvent.getId(), "Test notification", LocalDateTime.now()
+                );
+                mockNotification.setId(1);
+                doReturn(mockNotification).when(notificationService).createNotification(
+                    eq(user),
+                    eq(Notification.PreferenceType.crisis_alert),
+                    eq(Notification.TargetType.event),
+                    eq(crisisEvent.getId()),
+                    anyString()
+                );
+
+                try (MockedStatic<LocationUtil> mockedLocationUtil = mockStatic(LocationUtil.class)) {
+                    // Both user's home and household are within radius
+                    mockedLocationUtil.when(() -> LocationUtil.calculateDistance(
+                            eq(63.4305), eq(10.3951), eq(63.4306), eq(10.3952)))
+                            .thenReturn(500.0); // Within radius
+
+                    // Act
+                    notificationService.sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true);
+
+                    // Assert
+                    verify(userService).getAllUsers();
+                    verify(notificationService).createNotification(
+                            eq(user),
+                            eq(Notification.PreferenceType.crisis_alert),
+                            eq(Notification.TargetType.event),
+                            eq(crisisEvent.getId()),
+                            anyString()
+                    );
+                    verify(notificationService).sendNotification(any(Notification.class));
+                }
+            }
+        }
+
+        @Nested
+        class Negative {
+            @Test
+            void shouldNotSendNotificationsWhenCrisisEventDataIsIncomplete() {
+                // Arrange
+                CrisisEvent crisisEvent = new CrisisEvent();
+                crisisEvent.setId(123);
+                // Missing required fields: epicenterLatitude, epicenterLongitude, radius
+
+                String messageTemplate = "Test message template";
+
+                // Act
+                notificationService.sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true);
+
+                // Assert
+                verify(userService, never()).getAllUsers();
+                verify(notificationService, never()).createNotification(
+                        any(User.class),
+                        any(),
+                        any(),
+                        any(),
+                        any()
+                );
+            }
+
+            @Test
+            void shouldNotSendNotificationsWhenNoUsersExist() {
+                // Arrange
+                CrisisEvent crisisEvent = new CrisisEvent();
+                crisisEvent.setId(123);
+                crisisEvent.setEpicenterLatitude(new BigDecimal("63.4305"));
+                crisisEvent.setEpicenterLongitude(new BigDecimal("10.3951"));
+                crisisEvent.setRadius(new BigDecimal("1"));
+
+                String messageTemplate = "Test message template";
+
+                when(userService.getAllUsers()).thenReturn(Collections.emptyList());
+
+                // Act
+                notificationService.sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true);
+
+                // Assert
+                verify(userService).getAllUsers();
+                verify(notificationService, never()).createNotification(
+                        any(User.class),
+                        any(),
+                        any(),
+                        any(),
+                        any()
+                );
+            }
+
+            @Test
+            void shouldNotSendNotificationsWhenUserHasNoLocationData() {
+                // Arrange
+                User user = new User();
+                user.setId(1);
+                // No home or household location set
+
+                CrisisEvent crisisEvent = new CrisisEvent();
+                crisisEvent.setId(123);
+                crisisEvent.setEpicenterLatitude(new BigDecimal("63.4305"));
+                crisisEvent.setEpicenterLongitude(new BigDecimal("10.3951"));
+                crisisEvent.setRadius(new BigDecimal("1"));
+
+                String messageTemplate = "Test message template";
+
+                when(userService.getAllUsers()).thenReturn(Collections.singletonList(user));
+
+                // Act
+                notificationService.sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true);
+
+                // Assert
+                verify(userService).getAllUsers();
+                verify(notificationService, never()).createNotification(
+                        any(User.class),
+                        any(),
+                        any(),
+                        any(),
+                        any()
+                );
+            }
+        }
     }
 }

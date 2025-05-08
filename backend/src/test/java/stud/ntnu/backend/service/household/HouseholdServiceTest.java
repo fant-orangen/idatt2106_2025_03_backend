@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.household.HouseholdAdmin;
 import stud.ntnu.backend.model.household.Invitation;
 import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.model.group.GroupMembership;
+import stud.ntnu.backend.model.inventory.ProductBatch;
+import stud.ntnu.backend.model.inventory.ProductType;
 import stud.ntnu.backend.repository.household.EmptyHouseholdMemberRepository;
 import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
@@ -367,6 +371,148 @@ public class HouseholdServiceTest {
 
             verify(userRepository).save(regularUser);
             assertNull(regularUser.getHousehold());
+        }
+    }
+
+    @Nested
+    class GetCurrentUserHouseholdTests {
+        @Test
+        void shouldGetCurrentUserHouseholdSuccessfully() {
+            // Set up the household with the test user
+            testUser.setHousehold(testHousehold);
+            testHousehold.setUsers(Collections.singletonList(testUser));
+            
+            when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+            when(householdAdminRepository.existsByUser(testUser)).thenReturn(false);
+
+            HouseholdDto result = householdService.getCurrentUserHousehold("test@example.com");
+
+            assertNotNull(result);
+            assertEquals(testHousehold.getId(), result.getId());
+            assertEquals(testHousehold.getName(), result.getName());
+            assertEquals(testHousehold.getAddress(), result.getAddress());
+            assertEquals(1, result.getMembers().size());
+            
+            // Verify the member details
+            HouseholdMemberDto member = result.getMembers().get(0);
+            assertEquals(testUser.getId(), member.getId());
+            assertEquals(testUser.getEmail(), member.getEmail());
+            assertEquals(testUser.getFirstName(), member.getFirstName());
+            assertEquals(testUser.getLastName(), member.getLastName());
+            assertFalse(member.isAdmin());
+        }
+
+        @Test
+        void shouldThrowExceptionWhenUserNotFound() {
+            when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
+
+            assertThrows(IllegalStateException.class, () ->
+                householdService.getCurrentUserHousehold("nonexistent@example.com"));
+        }
+
+        @Test
+        void shouldThrowExceptionWhenUserHasNoHousehold() {
+            testUser.setHousehold(null);
+            when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+
+            assertThrows(IllegalStateException.class, () ->
+                householdService.getCurrentUserHousehold("test@example.com"));
+        }
+    }
+
+    @Nested
+    class GetHouseholdMembersTests {
+        @Test
+        void shouldGetAllHouseholdMembersSuccessfully() {
+            testUser.setHousehold(testHousehold);
+            adminUser.setHousehold(testHousehold);
+            regularUser.setHousehold(testHousehold);
+            List<User> members = Arrays.asList(testUser, adminUser, regularUser);
+
+            when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+            when(userRepository.findByHousehold(testHousehold)).thenReturn(members);
+            when(householdAdminRepository.existsByUser(testUser)).thenReturn(false);
+            when(householdAdminRepository.existsByUser(adminUser)).thenReturn(true);
+            when(householdAdminRepository.existsByUser(regularUser)).thenReturn(false);
+
+            List<HouseholdMemberDto> result = householdService.getHouseholdMembers("test@example.com");
+
+            assertNotNull(result);
+            assertEquals(3, result.size());
+            assertTrue(result.stream().anyMatch(m -> m.getEmail().equals(adminUser.getEmail()) && m.isAdmin()));
+            assertTrue(result.stream().anyMatch(m -> m.getEmail().equals(regularUser.getEmail()) && !m.isAdmin()));
+        }
+
+        @Test
+        void shouldGetNonAdminHouseholdMembersSuccessfully() {
+            testUser.setHousehold(testHousehold);
+            adminUser.setHousehold(testHousehold);
+            regularUser.setHousehold(testHousehold);
+            List<User> members = Arrays.asList(testUser, adminUser, regularUser);
+
+            when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+            when(userRepository.findByHousehold(testHousehold)).thenReturn(members);
+            when(householdAdminRepository.existsByUser(testUser)).thenReturn(false);
+            when(householdAdminRepository.existsByUser(adminUser)).thenReturn(true);
+            when(householdAdminRepository.existsByUser(regularUser)).thenReturn(false);
+
+            List<HouseholdMemberDto> result = householdService.getNonAdminHouseholdMembers("test@example.com");
+
+            assertNotNull(result);
+            assertEquals(2, result.size());
+            assertTrue(result.stream().noneMatch(HouseholdMemberDto::isAdmin));
+        }
+    }
+
+    @Nested
+    class LeaveHouseholdTests {
+        @Test
+        void shouldLeaveHouseholdSuccessfully() {
+            regularUser.setHousehold(testHousehold);
+            when(userRepository.findByEmail("regular@example.com")).thenReturn(Optional.of(regularUser));
+            when(householdAdminRepository.existsByUser(regularUser)).thenReturn(false);
+
+            householdService.leaveHousehold("regular@example.com");
+
+            verify(userRepository).save(regularUser);
+            assertNull(regularUser.getHousehold());
+        }
+
+
+        @Nested
+        class SwitchHouseholdTests {
+            @Test
+            void shouldSwitchHouseholdSuccessfully() {
+                Household oldHousehold = new Household("Old Household", "Old Address", 2);
+                oldHousehold.setId(2);
+                Household newHousehold = new Household("New Household", "New Address", 3);
+                newHousehold.setId(3);
+
+                regularUser.setHousehold(oldHousehold);
+                when(userRepository.findByEmail("regular@example.com")).thenReturn(Optional.of(regularUser));
+                when(householdRepository.findById(3)).thenReturn(Optional.of(newHousehold));
+                when(householdAdminRepository.existsByUser(regularUser)).thenReturn(false);
+
+                Household result = householdService.switchHousehold("regular@example.com", 3);
+
+                assertEquals(newHousehold, result);
+                verify(userRepository).save(regularUser);
+                assertEquals(newHousehold, regularUser.getHousehold());
+            }
+        }
+
+        @Nested
+        class DeleteHouseholdTests {
+
+            @Test
+            void shouldThrowExceptionWhenNonAdminTriesToDeleteHousehold() {
+                regularUser.setHousehold(testHousehold);
+                when(userRepository.findByEmail("regular@example.com")).thenReturn(Optional.of(regularUser));
+                when(householdAdminRepository.existsByUser(regularUser)).thenReturn(false);
+
+                assertThrows(IllegalStateException.class, () ->
+                        householdService.deleteCurrentHousehold("regular@example.com"));
+            }
         }
     }
 }
