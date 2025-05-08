@@ -179,7 +179,7 @@ public class NewsController {
    * @return ResponseEntity with a page of news articles
    */
   @GetMapping("/public/news/latest")
-  public ResponseEntity<?> getLatestNews(Pageable pageable) {
+  public ResponseEntity<?> getAllNews(Pageable pageable) {
     try {
       Page<NewsArticleResponseDTO> newsArticles = newsService.getNewestNewsArticles(pageable);
       return ResponseEntity.ok(newsArticles);
