@@ -5,7 +5,7 @@
 const https = require('https');
 const fs = require('fs');
 const express = require('express');
-
+const { createProxyMiddleware } = require('http-proxy-middleware');
 const app = express();
 
 app.get('/', (req, res) => {
@@ -22,3 +22,9 @@ const options = {
 https.createServer(options, app).listen(443, () => {
     console.log('HTTPS server running on port 443');
 });
+
+app.use('/ws', createProxyMiddleware({
+    target: 'http://localhost:8080',
+    changeOrigin: true,
+    ws: true
+}));
