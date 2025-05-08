@@ -26,7 +26,7 @@ public interface PointOfInterestRepository extends JpaRepository<PointOfInterest
     @Modifying
     @Query("UPDATE PointOfInterest p SET p.name = :name, p.latitude = :latitude, " +
             "p.longitude = :longitude, p.description = :description, " +
-            "p.openFrom = :openingFrom, p.openTo = :openTo, p.contactInfo = :contactInfo, " +
+            "p.openFrom = :openFrom, p.openTo = :openTo, p.contactInfo = :contactInfo, " +
             "p.poiType = :poiType WHERE p.id = :id")
     void updatePointOfInterest(
             @Param("id") Integer id,

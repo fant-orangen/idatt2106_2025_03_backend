@@ -48,10 +48,8 @@ public interface ProductTypeRepository extends JpaRepository<ProductType, Intege
            "JOIN ProductBatch pb ON pb.productType = pt " +
            "JOIN GroupInventoryContribution gic ON gic.product = pb " +
            "WHERE gic.group.id = :groupId " +
-           "AND gic.household.id = :householdId " +
            "AND gic.product IS NOT NULL")
     Page<ProductType> findContributedProductTypesByGroup(
         @Param("groupId") Integer groupId,
-        @Param("householdId") Integer householdId,
         Pageable pageable);
 }

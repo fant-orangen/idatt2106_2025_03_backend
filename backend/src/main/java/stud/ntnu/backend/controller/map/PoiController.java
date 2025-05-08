@@ -1,6 +1,7 @@
 package stud.ntnu.backend.controller.map;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -10,6 +11,7 @@ import stud.ntnu.backend.dto.poi.CreatePoiDto;
 import stud.ntnu.backend.dto.poi.PoiItemDto;
 import stud.ntnu.backend.dto.poi.UpdatePoiDto;
 import stud.ntnu.backend.model.map.PointOfInterest;
+import stud.ntnu.backend.model.map.PoiType;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.map.PoiService;
@@ -218,7 +220,7 @@ public class PoiController {
     try {
       // Check if the current user is an admin using AdminChecker with Principal
       if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
-        return ResponseEntity.status(403).body("Only administrators can delete points of interest");
+        return ResponseEntity.status(403).body("Only administrators can delete po ints of interest");
       }
 
       // Delegate to service for deleting the point of interest
@@ -228,6 +230,47 @@ public class PoiController {
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
+
+  /**
+   * Retrieves all POI types.
+   *
+   * @return a list of all POI types
+   */
+  @GetMapping("/public/poi/types")
+  public List<PoiType> getAllPoiTypes() {
+    return poiService.getAllPoiTypes();
+  }
+
+  /**
+   * Searches POIs by name (case-insensitive substring match), paged and sorted.
+   *
+   * GET /api/public/poi/search?q={term}&page={i}&size={n}&sort={field,dir}
+   *
+   * @param q     required substring to match in POI.name
+   * @param page  zero-based page index (default 0)
+   * @param size  items per page (default 10)
+   * @param sort  “property,direction” (default “id,desc”)
+   * @return      a Page of PoiItemDto matching the query
+   */
+  @GetMapping("/public/poi/search")
+  public Page<PoiItemDto> searchPois(
+      @RequestParam("q") String q,
+      @RequestParam(defaultValue = "0")   int page,
+      @RequestParam(defaultValue = "10")  int size,
+      @RequestParam(defaultValue = "id,desc") String sort
+  ) {
+    // parse “field,dir”
+    String[] parts = sort.split(",");
+    Sort.Direction dir = parts.length > 1 && parts[1].equalsIgnoreCase("desc")
+        ? Sort.Direction.DESC
+        : Sort.Direction.ASC;
+    Pageable pageable = PageRequest.of(page, size, Sort.by(dir, parts[0]));
+
+    // delegate to your service (which uses SearchUtil under the hood)
+    return poiService
+        .searchPoisByName(q, pageable)
+        .map(PoiItemDto::fromEntity);
   }
 
 }
