@@ -113,6 +113,26 @@ public class QuizController {
     }
 
     /**
+     * Unarchives a quiz by id.
+     *
+     * @param id        the quiz id
+     * @param principal the Principal object representing the current user
+     * @return ResponseEntity with 200 OK or error message
+     */
+    @PatchMapping("/quizzes/admin/{id}/unarchive")
+    public ResponseEntity<?> unArchiveQuiz(@PathVariable Long id, Principal principal) {
+        try {
+            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Forbidden");
+            }
+            quizService.updateQuizStatus(id, "active");
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /**
      * Saves a quiz question.
      *
      * @param dto       the CreateQuizQuestionDto containing question data
