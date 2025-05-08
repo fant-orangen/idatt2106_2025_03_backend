@@ -252,6 +252,7 @@ public class GroupInventoryService {
 
   /**
    * Search for product types that have at least one batch contributed to the specified group by the user's household.
+   * First searches all product types by name using SearchUtil, then filters for those contributed to the group.
    *
    * @param groupId The ID of the group to search within
    * @param search The search term to filter product types by name
@@ -280,27 +281,42 @@ public class GroupInventoryService {
         throw new IllegalArgumentException("User's household is not a member of this group");
     }
 
-    // Handle empty search string
-    String searchTerm = search != null ? search.trim() : "";
+    // Get list of product type IDs that are contributed to this group
+    List<Integer> contributedTypeIds = groupInventoryContributionRepository.findProductTypeIdsContributedToGroup(groupId);
+    
+    // If no contributions exist, return empty page
+    if (contributedTypeIds.isEmpty()) {
+        return Page.empty(pageable);
+    }
 
-    // Use the repository to get matching product types
-    Page<ProductType> searchResults = groupInventoryContributionRepository
-        .findContributedProductTypesByGroupAndNameContaining(
-            groupId,
-            household.getId(),
-            searchTerm,
-            pageable
-        );
+    // First use SearchUtil to search among all product types by name
+    Page<ProductType> searchResults = searchUtil.searchByDescription(
+        ProductType.class,
+        "name",
+        search != null ? search : "",
+        pageable
+    );
 
-    // Convert to DTOs
-    return searchResults.map(pt -> new ProductTypeDto(
-        pt.getId(),
-        pt.getHousehold() != null ? pt.getHousehold().getId() : null,
-        pt.getName(),
-        pt.getUnit(),
-        pt.getCaloriesPerUnit(),
-        pt.getCategory()
-    ));
+    // Filter the search results to only include product types that are contributed to the group
+    List<ProductType> filteredResults = searchResults.getContent().stream()
+        .filter(pt -> contributedTypeIds.contains(pt.getId()))
+        .collect(Collectors.toList());
+
+    // Create a new page with the filtered results
+    return new PageImpl<>(
+        filteredResults.stream()
+            .map(pt -> new ProductTypeDto(
+                pt.getId(),
+                pt.getHousehold() != null ? pt.getHousehold().getId() : null,
+                pt.getName(),
+                pt.getUnit(),
+                pt.getCaloriesPerUnit(),
+                pt.getCategory()
+            ))
+            .collect(Collectors.toList()),
+        pageable,
+        filteredResults.size()
+    );
   }
 
   /**

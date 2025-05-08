@@ -11,6 +11,7 @@ import stud.ntnu.backend.model.group.GroupInventoryContribution;
 import stud.ntnu.backend.model.group.Group;
 import stud.ntnu.backend.model.inventory.ProductBatch;
 import stud.ntnu.backend.model.inventory.ProductType;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -41,26 +42,7 @@ public interface GroupInventoryContributionRepository extends JpaRepository<Grou
         @Param("productTypeId") Integer productTypeId,
         Pageable pageable);
 
-    /**
-     * Searches for product types contributed to a group by name.
-     *
-     * @param groupId The ID of the group to search in
-     * @param householdId The ID of the household to filter by
-     * @param searchTerm The search term to match against product names
-     * @param pageable Pagination information
-     * @return A page of ProductType entities that match the search criteria
-     */
-    @Query("SELECT DISTINCT pt FROM ProductType pt " +
-           "JOIN ProductBatch pb ON pb.productType = pt " +
-           "JOIN GroupInventoryContribution gic ON gic.product = pb " +
-           "WHERE gic.group.id = :groupId " +
-           "AND gic.product IS NOT NULL " +
-           "AND LOWER(pt.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
-    Page<ProductType> findContributedProductTypesByGroupAndNameContaining(
-        @Param("groupId") Integer groupId,
-        @Param("householdId") Integer householdId,
-        @Param("searchTerm") String searchTerm,
-        Pageable pageable);
+    
 
     /**
      * Checks if a product batch has been contributed to any group.
@@ -107,4 +89,17 @@ public interface GroupInventoryContributionRepository extends JpaRepository<Grou
     @Query("SELECT gic FROM GroupInventoryContribution gic " +
            "WHERE gic.product.id = :productBatchId")
     Optional<GroupInventoryContribution> findByProductBatchId(@Param("productBatchId") Integer productBatchId);
+
+    /**
+     * Gets all product types that have been contributed to a specific group.
+     *
+     * @param groupId The ID of the group
+     * @return A list of product type IDs that have been contributed to the group
+     */
+    @Query("SELECT DISTINCT pt.id FROM ProductType pt " +
+           "JOIN ProductBatch pb ON pb.productType = pt " +
+           "JOIN GroupInventoryContribution gic ON gic.product = pb " +
+           "WHERE gic.group.id = :groupId " +
+           "AND gic.product IS NOT NULL")
+    List<Integer> findProductTypeIdsContributedToGroup(@Param("groupId") Integer groupId);
 }
