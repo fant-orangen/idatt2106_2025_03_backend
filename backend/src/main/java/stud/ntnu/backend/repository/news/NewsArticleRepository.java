@@ -78,4 +78,24 @@ public interface NewsArticleRepository extends JpaRepository<NewsArticle, Long> 
      * @return a page of news articles
      */
     Page<NewsArticle> findByStatus(ArticleStatus status, Pageable pageable);
+
+    /**
+     * Find all news articles for a specific crisis event ordered by published date (newest first) with pagination.
+     *
+     * @param crisisEventId the crisis event ID
+     * @param pageable pagination information
+     * @return a page of news articles
+     */
+    @Query("SELECT n FROM NewsArticle n WHERE n.crisisEvent.id = :crisisEventId ORDER BY n.publishedAt DESC")
+    Page<NewsArticle> findByCrisisEventIdOrderByPublishedAtDesc(@Param("crisisEventId") Integer crisisEventId, Pageable pageable);
+
+    /**
+     * Find all draft news articles ordered by creation date (newest first) with pagination.
+     *
+     * @param status the article status
+     * @param pageable pagination information
+     * @return a page of news articles
+     */
+    @Query("SELECT n FROM NewsArticle n WHERE n.status = :status ORDER BY n.createdAt DESC")
+    Page<NewsArticle> findByStatusOrderByCreatedAtDesc(@Param("status") ArticleStatus status, Pageable pageable);
 }
