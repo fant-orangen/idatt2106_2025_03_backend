@@ -308,6 +308,15 @@ public class UserService {
       throw new IllegalStateException("Du må være medlem av en husstand for å be om sikkerhetsbekreftelser. / You must be a member of a household to request safety confirmations.");
     }
 
+    // Automatically mark the requesting user as safe
+    LocalDateTime now = LocalDateTime.now();
+    // Delete any existing safety confirmations for the requesting user
+    safetyConfirmationRepository.deleteByUser(requestingUser);
+    // Create new safety confirmation for the requesting user
+    SafetyConfirmation requestingUserConfirmation = new SafetyConfirmation(requestingUser, true, now);
+    safetyConfirmationRepository.save(requestingUserConfirmation);
+    log.info("Marked requesting user {} as safe", email);
+
     List<User> householdMembers = userRepository.findByHousehold(requestingUser.getHousehold());
     if (householdMembers.isEmpty() || householdMembers.size() == 1) {
       log.error("No other members found in household for user {}", email);
