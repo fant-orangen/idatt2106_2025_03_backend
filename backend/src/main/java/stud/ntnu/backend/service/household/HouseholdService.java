@@ -265,6 +265,11 @@ public class HouseholdService {
       throw new IllegalStateException("User already has a household");
     }
 
+    // Check if a household with this name already exists
+    if (householdRepository.existsByName(requestDto.getName())) {
+      throw new IllegalStateException("A household with this name already exists");
+    }
+
     // Create a new household
     Household household = new Household(requestDto.getName(), requestDto.getAddress(),
         requestDto.getPopulationCount());

@@ -7,7 +7,7 @@ CREATE TABLE roles (
 -- HOUSEHOLDS
 CREATE TABLE households (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255),
+    name VARCHAR(255) NOT NULL UNIQUE,
     address TEXT NOT NULL,
     population_count INT DEFAULT 1,
     latitude DECIMAL(10,7),
@@ -67,7 +67,7 @@ CREATE TABLE invitations (
     invitee_email VARCHAR(255) NOT NULL,
     household_id INT, -- Can be NULL if invitation is not for a household
     group_id INT,
-    token VARCHAR(255) NOT NULL UNIQUE,
+    token VARCHAR(255) UNIQUE,
     expires_at DATETIME NOT NULL,
     accepted_at DATETIME,
     declined_at DATETIME,
