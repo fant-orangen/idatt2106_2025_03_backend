@@ -352,10 +352,10 @@ public class UserService {
   }
 
   /**
-   * Checks if a user has confirmed their safety.
+   * Checks if a user has confirmed their safety within the last 24 hours.
    *
    * @param userId The ID of the user to check
-   * @return true if the user has confirmed their safety, false otherwise
+   * @return true if the user has confirmed their safety within the last 24 hours, false otherwise
    * @throws IllegalStateException if the user is not found
    */
   public boolean isSafe(Integer userId) {
@@ -367,6 +367,14 @@ public class UserService {
     Optional<SafetyConfirmation> safetyConfirmation = safetyConfirmationRepository.findByUser(
         userRepository.getReferenceById(userId));
     
-    return safetyConfirmation.isPresent() && safetyConfirmation.get().getIsSafe();
+    if (!safetyConfirmation.isPresent() || !safetyConfirmation.get().getIsSafe()) {
+      return false;
+    }
+
+    // Check if the confirmation is less than 24 hours old
+    LocalDateTime confirmationTime = safetyConfirmation.get().getSafeAt();
+    LocalDateTime oneDayAgo = LocalDateTime.now().minusHours(24);
+    
+    return confirmationTime.isAfter(oneDayAgo);
   }
 }
