@@ -2,7 +2,11 @@ package stud.ntnu.backend.service.user;
 
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.repository.user.EmailTokenRepository;
+import stud.ntnu.backend.repository.user.SafetyConfirmationRepository;
 import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.model.user.EmailToken;
+import stud.ntnu.backend.model.user.SafetyConfirmation;
 import stud.ntnu.backend.dto.user.UserProfileDto;
 import stud.ntnu.backend.dto.user.UserUpdateDto;
 import stud.ntnu.backend.dto.user.UserPreferencesDto;
@@ -10,6 +14,8 @@ import stud.ntnu.backend.dto.user.UserHistoryDto;
 import stud.ntnu.backend.dto.user.UserHistoryDto.GamificationActivityDto;
 import stud.ntnu.backend.dto.user.UserHistoryDto.ReflectionDto;
 import stud.ntnu.backend.dto.user.UserBasicInfoDto;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +29,22 @@ import java.util.Optional;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final EmailTokenRepository emailTokenRepository;
+  private final SafetyConfirmationRepository safetyConfirmationRepository;
 
   /**
    * Constructor for dependency injection.
    *
    * @param userRepository repository for user operations
+   * @param emailTokenRepository repository for email tokens
+   * @param safetyConfirmationRepository repository for safety confirmations
    */
-  public UserService(UserRepository userRepository) {
+  public UserService(UserRepository userRepository,
+                    EmailTokenRepository emailTokenRepository,
+                    SafetyConfirmationRepository safetyConfirmationRepository) {
     this.userRepository = userRepository;
+    this.emailTokenRepository = emailTokenRepository;
+    this.safetyConfirmationRepository = safetyConfirmationRepository;
   }
 
   /**
@@ -222,5 +236,47 @@ public class UserService {
         user.getHousehold() != null ? user.getHousehold().getId() : null,
         user.getHousehold() != null ? user.getHousehold().getName() : null
     );
+  }
+
+  /**
+   * Confirms a user's safety using a token received via email.
+   *
+   * @param token The safety confirmation token
+   * @throws IllegalArgumentException if the token is invalid
+   * @throws IllegalStateException if the token has expired
+   */
+  @Transactional
+  public void confirmSafety(String token) {
+    // Find and validate the token
+    EmailToken emailToken = emailTokenRepository.findByToken(token)
+        .orElseThrow(() -> new IllegalArgumentException("Ugyldig token. / Invalid token."));
+
+    // Check token type
+    if (emailToken.getType() != EmailToken.TokenType.SAFETY_CONFIRMATION) {
+      throw new IllegalArgumentException("Ugyldig token type. / Invalid token type.");
+    }
+
+    // Check if token has expired
+    if (emailToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+      throw new IllegalStateException("Token er utløpt. / Token has expired.");
+    }
+
+    User user = emailToken.getUser();
+    LocalDateTime now = LocalDateTime.now();
+
+    // Find existing safety confirmation or create new one
+    Optional<SafetyConfirmation> existingConfirmation = safetyConfirmationRepository.findByUser(user);
+    
+    if (existingConfirmation.isPresent()) {
+      // Update existing confirmation
+      SafetyConfirmation confirmation = existingConfirmation.get();
+      confirmation.setIsSafe(true);
+      confirmation.setSafeAt(now);
+      safetyConfirmationRepository.save(confirmation);
+    } else {
+      // Create new confirmation
+      SafetyConfirmation confirmation = new SafetyConfirmation(user, true, now);
+      safetyConfirmationRepository.save(confirmation);
+    }
   }
 }

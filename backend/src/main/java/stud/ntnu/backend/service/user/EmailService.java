@@ -12,8 +12,14 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.repository.user.EmailTokenRepository;
+import stud.ntnu.backend.model.user.EmailToken;
+import stud.ntnu.backend.model.user.EmailToken.TokenType;
 import java.util.List;
+import java.util.UUID;
+import java.time.LocalDateTime;
 import stud.ntnu.backend.model.household.Household;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service responsible for handling email sending operations, such as verification emails. Uses
@@ -27,7 +33,7 @@ public class EmailService {
   private final JavaMailSender mailSender;
   private final String senderEmail;
   private final UserRepository userRepository;
-
+  private final EmailTokenRepository emailTokenRepository;
 
   /**
    * Constructs the EmailService with necessary dependencies injected by Spring.
@@ -36,14 +42,17 @@ public class EmailService {
    * @param senderEmail The sender's email address, injected from application properties
    *                    (spring.mail.username).
    * @param userRepository The repository for user operations.
+   * @param emailTokenRepository The repository for email token operations.
    */
   @Autowired
   public EmailService(JavaMailSender mailSender,
       @Value("${spring.mail.username}") String senderEmail,
-      UserRepository userRepository) {
+      UserRepository userRepository,
+      EmailTokenRepository emailTokenRepository) {
     this.mailSender = mailSender;
     this.senderEmail = senderEmail;
     this.userRepository = userRepository;
+    this.emailTokenRepository = emailTokenRepository;
   }
 
   /**
@@ -240,13 +249,14 @@ public class EmailService {
 
   /**
    * Sends safety confirmation emails to all other members of a user's household.
+   * Each member receives their own unique token for confirmation.
    *
-   * @param user  The User object representing the person requesting safety confirmation
-   * @param token The unique token string to include in the confirmation link
+   * @param user The User object representing the person requesting safety confirmation
    */
-  public void sendSafetyConfirmationEmail(User user, String token) {
-    if (user == null || user.getEmail() == null || token == null) {
-      log.error("Cannot send safety confirmation email. User or token is null or user email is null.");
+  @Transactional
+  public void sendSafetyConfirmationEmails(User user) {
+    if (user == null || user.getEmail() == null) {
+      log.error("Cannot send safety confirmation email. User is null or user email is null.");
       return;
     }
 
@@ -266,6 +276,20 @@ public class EmailService {
       }
 
       try {
+        // Generate unique token for this member
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiresAt = LocalDateTime.now().plusHours(168); // 1 week
+
+        // Create and save token
+        EmailToken safetyToken = new EmailToken(
+            member,
+            token,
+            TokenType.SAFETY_CONFIRMATION,
+            expiresAt
+        );
+        emailTokenRepository.save(safetyToken);
+
+        // Send email with the unique token
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
 
@@ -274,7 +298,7 @@ public class EmailService {
         helper.setSubject("Krisefikser.no - Bekreft din sikkerhetsstatus");
 
         String memberName = (member.getName() != null ? member.getName() : "Bruker");
-        String confirmationUrl = "http://localhost:8080/api/user/confirm-safety/" + token;
+        String confirmationUrl = "http://localhost:8080/api/user/confirm-safety?token=" + token;
 
         String emailBody = """
             <html>
@@ -283,12 +307,18 @@ public class EmailService {
                 
                 <p>%s fra din husstand har bedt om en bekreftelse på at du er trygg.</p>
                 
-                <p>Vennligst klikk på lenken under for å bekrefte at du er i sikkerhet:</p>
+                <p>For å bekrefte at du er i sikkerhet, vennligst bruk denne lenken:</p>
                 
-                <p><a href="%s">Klikk her for å bekrefte at du er trygg</a></p>
+                <form action="http://localhost:8080/api/user/confirm-safety" method="post">
+                    <input type="hidden" name="token" value="%s">
+                    <button type="submit" style="background-color: #4CAF50; color: white; padding: 14px 20px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer;">
+                        Bekreft at jeg er trygg
+                    </button>
+                </form>
                 
-                <p>Hvis du ikke kan klikke på lenken, kan du kopiere og lime inn denne adressen i nettleseren din:</p>
-                <p>%s</p>
+                <p>Alternativt kan du sende en POST-forespørsel til denne adressen med token i request body:</p>
+                <p>http://localhost:8080/api/user/confirm-safety</p>
+                <p>Token: %s</p>
                 
                 <p>Hvis du ikke er i stand til å bekrefte din sikkerhet, vennligst kontakt nødetatene umiddelbart.</p>
                 
@@ -296,7 +326,7 @@ public class EmailService {
                 Krisefikser-teamet</p>
             </body>
             </html>
-            """.formatted(memberName, requestingUserName, confirmationUrl, confirmationUrl);
+            """.formatted(memberName, requestingUserName, token, token);
 
         helper.setText(emailBody, true); // Set 'true' to indicate HTML content
 

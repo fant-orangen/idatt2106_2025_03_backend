@@ -45,7 +45,7 @@ public class EmailToken {
 
   // Enum for token type
   public enum TokenType {
-    VERIFICATION, RESET
+    VERIFICATION, RESET, SAFETY_CONFIRMATION
   }
 
   public EmailToken(User user, String token, TokenType type, LocalDateTime expiresAt) {

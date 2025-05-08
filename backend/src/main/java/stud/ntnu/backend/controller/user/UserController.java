@@ -103,4 +103,22 @@ public class UserController {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
+
+  /**
+   * Confirms a user's safety using a token received via email.
+   *
+   * @param token The safety confirmation token
+   * @return ResponseEntity with status 200 OK if successful, or an error message
+   */
+  @PostMapping("/confirm-safety")
+  public ResponseEntity<?> confirmSafety(@RequestParam String token) {
+    try {
+      userService.confirmSafety(token);
+      return ResponseEntity.ok("Din sikkerhet er bekreftet. / Your safety has been confirmed.");
+    } catch (IllegalArgumentException | IllegalStateException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.internalServerError().body("En feil oppstod. Vennligst prøv igjen senere. / An error occurred. Please try again later.");
+    }
+  }
 }
