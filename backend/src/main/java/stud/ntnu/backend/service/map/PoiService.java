@@ -12,6 +12,7 @@ import stud.ntnu.backend.repository.map.PoiTypeRepository;
 import stud.ntnu.backend.repository.map.PointOfInterestRepository;
 import stud.ntnu.backend.model.map.PoiType;
 import stud.ntnu.backend.model.map.PointOfInterest;
+import stud.ntnu.backend.util.SearchUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,7 @@ public class PoiService {
 
   private final PointOfInterestRepository pointOfInterestRepository;
   private final PoiTypeRepository poiTypeRepository;
+  private final SearchUtil searchUtil;
 
   /**
    * Constructor for dependency injection.
@@ -35,9 +37,10 @@ public class PoiService {
    * @param poiTypeRepository         repository for POI type operations
    */
   public PoiService(PointOfInterestRepository pointOfInterestRepository,
-      PoiTypeRepository poiTypeRepository) {
+      PoiTypeRepository poiTypeRepository, SearchUtil searchUtil) {
     this.pointOfInterestRepository = pointOfInterestRepository;
     this.poiTypeRepository = poiTypeRepository;
+    this.searchUtil                = searchUtil;
   }
 
   //Constants
@@ -271,4 +274,22 @@ public class PoiService {
     // Save directly using the repository
     return pointOfInterestRepository.save(poi);
   }
+    /**
+      * Perform a case‐insensitive, paged search for POIs by their name.
+      * Delegates to SearchUtil for safe JPQL construction and execution.
+      *
+      * @param nameQuery substring to match in PointOfInterest.name; blank or null ⇒ empty page
+      * @param pageable  page index, size, and sort criteria
+      * @return a Page of matching PointOfInterest entities
+      * @throws IllegalArgumentException if the entity or field is invalid (developer error)
+      */
+        @Transactional(readOnly = true)
+        public Page<PointOfInterest> searchPoisByName(String nameQuery, Pageable pageable) {
+              return searchUtil.searchByDescription(
+                    PointOfInterest.class,
+                    "name",
+                    nameQuery,
+                    pageable
+                      );
+            }
 }

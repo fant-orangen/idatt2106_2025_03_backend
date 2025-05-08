@@ -144,7 +144,7 @@ INSERT INTO product_batch (product_type_id, date_added, expiration_time, number)
 INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (27, CURRENT_TIMESTAMP, DATEADD('MONTH', 10, CURRENT_TIMESTAMP), 6);
 -- Canned Corn (id=28)
 INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (28, CURRENT_TIMESTAMP, DATEADD('YEAR', 1, CURRENT_TIMESTAMP), 2);
--- Canned Tomatoes (id=29)
+-- Pasta (id=29)
 INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (29, CURRENT_TIMESTAMP, DATEADD('YEAR', 1, CURRENT_TIMESTAMP), 2);
 -- Apple Juice (id=30)
 INSERT INTO product_batch (product_type_id, date_added, expiration_time, number) VALUES (30, CURRENT_TIMESTAMP, DATEADD('MONTH', 6, CURRENT_TIMESTAMP), 3);
@@ -168,8 +168,8 @@ INSERT INTO group_inventory_contributions (group_id, household_id, product_id) V
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 4);
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 1, 5);
 INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 2, 29);
-
-
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 2, 30);
+INSERT INTO group_inventory_contributions (group_id, household_id, product_id) VALUES (1, 2, 31);
 
 
 -- POI TYPES
@@ -220,11 +220,176 @@ VALUES ('Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
 
 -- SCENARIO THEMES
 INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
-VALUES ('Power Outage', 'Preparing for extended power outages', 'Prepare flashlights and batteries.', 'Unplug sensitive electronics.', 'Check on neighbors and elderly.', 'active', 1);
+VALUES (
+    'Power Outage',
+    'Comprehensive guide for preparing and managing extended power outages in your area. Power outages can occur due to severe weather, equipment failure, or planned maintenance. Being prepared is crucial for maintaining safety and comfort during these situations.',
+    '## Before a Power Outage
+
+### Emergency Kit Preparation
+- **Flashlights** and extra batteries
+- **Battery-powered radio**
+- **Portable phone chargers**
+- **Non-perishable food** and water
+- **First aid supplies**
+
+### Additional Preparations
+1. Install surge protectors for sensitive electronics
+2. Keep your vehicle''s gas tank at least half full
+3. Learn how to manually open your garage door
+4. Consider installing a backup generator
+5. Keep important phone numbers in a physical list',
+    '## During a Power Outage
+
+### Immediate Actions
+1. **Unplug sensitive electronics** to prevent damage from power surges
+2. Keep refrigerator and freezer doors closed
+3. Use flashlights instead of candles for safety
+
+### Ongoing Safety Measures
+- Monitor local news via battery-powered radio
+- Check on neighbors, especially elderly or vulnerable individuals
+- Use generators outdoors only, away from windows
+- Keep mobile devices charged and use them sparingly',
+    '## After Power is Restored
+
+### Safety Checks
+1. **Check food** in refrigerator and freezer for spoilage
+2. Reset clocks, alarms, and other electronic devices
+3. Restock emergency supplies
+
+### Follow-up Actions
+- Report any damage to utility companies
+- Review your emergency plan and update as needed
+- Check on neighbors and community members
+- Document any losses for insurance purposes',
+    'active',
+    1
+);
+
 INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
-VALUES ('Natural Disaster', 'Earthquake, flood, or storm preparation', 'Prepare an emergency kit.', 'Follow evacuation orders.', 'Check for structural damage before returning home.', 'active', 1);
+VALUES (
+    'Natural Disaster',
+    'Detailed preparation and response guide for various natural disasters including earthquakes, floods, storms, and extreme weather events. Natural disasters can strike with little warning, making preparedness essential for community safety.',
+    '## Before a Natural Disaster
+
+### Emergency Plan Creation
+1. **Identify safe meeting places**
+2. **Establish communication protocols**
+3. **Plan evacuation routes**
+
+### Emergency Supply Preparation
+- **Three days** of food and water per person
+- **First aid kit**
+- **Emergency blankets**
+- **Weather-appropriate clothing**
+- **Important documents** in waterproof container
+
+### Home Security Measures
+- Anchor heavy furniture
+- Install storm shutters
+- Clear gutters and drains
+- Trim trees and remove dead branches
+
+> **Important:** Stay informed about local risks and warning systems',
+    '## During a Natural Disaster
+
+### Critical Safety Rules
+1. **Follow official evacuation orders immediately**
+2. Stay indoors if advised
+3. Avoid floodwaters and downed power lines
+
+### Communication & Monitoring
+- Listen to emergency broadcasts
+- Use social media to check in with family
+- Keep emergency supplies accessible
+- Stay away from windows and exterior walls
+- Monitor local emergency services for updates',
+    '## After a Natural Disaster
+
+### Immediate Safety Steps
+1. **Wait for official clearance** before returning home
+2. Check for structural damage before entering buildings
+3. Document all damage with photos
+
+### Recovery Actions
+- Contact insurance companies
+- Check utilities for damage
+- Help neighbors if safe to do so
+- Report hazards to authorities
+
+### Long-term Steps
+1. Begin cleanup only when safe
+2. Seek professional help for repairs
+3. Update emergency plans based on experience',
+    'active',
+    1
+);
+
 INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
-VALUES ('Public Health Emergency', 'Pandemic or disease outbreak', 'Stock up on essential medicines.', 'Practice good hygiene and follow public health advice.', 'Monitor symptoms and seek medical help if needed.', 'active', 1);
+VALUES (
+    'Public Health Emergency',
+    'Comprehensive guide for preparing and responding to public health emergencies such as pandemics, disease outbreaks, and other health crises. Public health emergencies require both individual and community-level preparedness.',
+    '## Before a Public Health Emergency
+
+### Health Emergency Kit
+- **Prescription medications** (30-day supply)
+- **Over-the-counter medicines**
+- **First aid supplies**
+- **Thermometer**
+- **Face masks and gloves**
+- **Hand sanitizer**
+- **Disinfectant wipes**
+
+### Preparedness Steps
+1. Stay informed about local health risks
+2. Maintain up-to-date vaccinations
+3. Establish a support network
+4. Keep important medical records accessible
+5. Learn basic first aid and CPR
+6. Identify local healthcare resources',
+    '## During a Public Health Emergency
+
+### Safety Protocols
+1. **Follow official health guidelines strictly**
+2. Practice enhanced hygiene:
+   - Frequent hand washing
+   - Proper cough/sneeze etiquette
+   - Regular surface disinfection
+3. Maintain social distancing when required
+4. Wear appropriate protective equipment
+
+### Health Monitoring
+- Monitor symptoms daily
+- Stay informed through reliable sources
+- Support vulnerable community members
+
+### Mental Health Care
+- Regular exercise
+- Healthy eating
+- Adequate sleep
+- Stress management techniques',
+    '## After a Public Health Emergency
+
+### Health Monitoring
+1. Continue monitoring health for any delayed symptoms
+2. Complete any required quarantine periods
+3. Seek medical attention if needed
+
+### Recovery Steps
+- Update vaccination records
+- Restock emergency supplies
+- Review and update emergency plans
+- Participate in community recovery efforts
+
+### Mental Health Recovery
+1. Share lessons learned with community
+2. Support mental health recovery
+3. Document experience for future reference
+
+> **Remember:** Mental health is as important as physical health during recovery.',
+    'active',
+    1
+);
 
 -- CRISIS EVENTS
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
@@ -236,6 +401,16 @@ VALUES ('lightning storm', 'Potential flooding in downtown area', 'red', 59.4300
 -- Inactive crisis event
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
 VALUES ('Past Earthquake', 'Earthquake event that has ended', 'red', 63.4200, 12.4000, 20, DATEADD('DAY', -10, CURRENT_TIMESTAMP), 1, FALSE, 2);
+
+INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
+VALUES ('Severe Storm Warning', 'Heavy storm with potential flooding in central Trondheim', 'red', 63.4300, 10.3950, 2.0, CURRENT_TIMESTAMP, 1, TRUE, 2);
+
+INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
+VALUES ('Power Outage Alert', 'Planned maintenance causing temporary power disruption', 'yellow', 63.4280, 10.3940, 1.5, CURRENT_TIMESTAMP, 1, TRUE, 1);
+
+INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
+VALUES ('Minor Traffic Incident', 'Road closure due to minor accident', 'green', 63.4290, 10.3960, 0.5, CURRENT_TIMESTAMP, 1, TRUE, 3);
+
 
 -- CRISIS EVENTS CHANGES
 
@@ -424,12 +599,10 @@ VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your house
 
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
 VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-
--- End of winter storms
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('New Emergency Response Guidelines', 'The city has updated its emergency response guidelines. Key changes include...', DATEADD('DAY', -2, CURRENT_TIMESTAMP), 1, 2, 'published');
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Draft Article', 'This is a draft article that is not yet published...', CURRENT_TIMESTAMP, 1, 1, 'draft');
+VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
 VALUES ('Archived Article', 'This is an old article that has been archived...', DATEADD('DAY', -30, CURRENT_TIMESTAMP), 1, 2, 'archived');
 

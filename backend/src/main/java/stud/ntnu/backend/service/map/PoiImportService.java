@@ -3,6 +3,7 @@ package stud.ntnu.backend.service.map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Service responsible for importing Points of Interest (POIs) from the Overpass API
@@ -69,6 +72,41 @@ public class PoiImportService {
    * The email address of the admin user who will be set as the creator of imported POIs.
    */
   private static final String ADMIN_EMAIL = "admin@example.com"; //TODO: change this to a better admin email
+
+  /**
+   * Utility class to hold opening and closing times
+   */
+  @Data
+  @AllArgsConstructor
+  private static class OpeningHours {
+    private final String openFrom;
+    private final String openTo;
+  }
+
+  /**
+   * Parses opening hours string from OpenStreetMap format to separate opening and closing times.
+   * Only considers weekday (Monday-Friday) hours for simplicity.
+   * 
+   * @param openingHoursStr OpenStreetMap opening hours string (e.g. "Mo-Fr 07:00-20:30, Sa 08:00-20:30")
+   * @return OpeningHours object containing weekday opening and closing times, or null if no valid times found
+   */
+  private OpeningHours parseOpeningHours(String openingHoursStr) {
+    if (openingHoursStr == null || openingHoursStr.isEmpty()) {
+      return null;
+    }
+
+    // Pattern to match "Mo-Fr HH:MM-HH:MM" format
+    Pattern pattern = Pattern.compile("Mo-Fr\\s*(\\d{2}:\\d{2})-(\\d{2}:\\d{2})");
+    Matcher matcher = pattern.matcher(openingHoursStr);
+
+    if (matcher.find()) {
+      String openFrom = matcher.group(1);
+      String openTo = matcher.group(2);
+      return new OpeningHours(openFrom, openTo);
+    }
+
+    return null;
+  }
 
   /**
    * Imports gas stations from the Overpass API and saves them as POIs in the database.
@@ -157,6 +195,70 @@ public class PoiImportService {
   }
 
   /**
+   * Imports police stations from the Overpass API and saves them as POIs in the database.
+   * Only POIs with amenity "police" are imported.
+   */
+  @Transactional
+  public void importPoliceStationsFromOverpass() {
+    importPois(
+        "Police Station",
+        this::buildOverpassPoliceStationQuery,
+        el -> {
+          Map<String, String> tags = el.tags;
+          String amenity = tags != null ? tags.get("amenity") : null;
+          return "police".equals(amenity);
+        },
+        (el, type) -> {
+          Map<String, String> tags = el.tags;
+          return tags != null ? tags.getOrDefault("name", type) : type;
+        }
+    );
+  }
+
+  /**
+   * Imports pharmacies from the Overpass API and saves them as POIs in the database.
+   * Includes POIs with either amenity="pharmacy" or healthcare="pharmacy".
+   */
+  @Transactional
+  public void importPharmaciesFromOverpass() {
+    importPois(
+        "Pharmacy",
+        this::buildOverpassPharmacyQuery,
+        el -> {
+          Map<String, String> tags = el.tags;
+          String amenity = tags != null ? tags.get("amenity") : null;
+          String healthcare = tags != null ? tags.get("healthcare") : null;
+          return "pharmacy".equals(amenity) || "pharmacy".equals(healthcare);
+        },
+        (el, type) -> {
+          Map<String, String> tags = el.tags;
+          return tags != null ? tags.getOrDefault("name", type) : type;
+        }
+    );
+  }
+
+  /**
+   * Imports fire stations from the Overpass API and saves them as POIs in the database.
+   * Only POIs with amenity "fire_station" are imported.
+   */
+  @Transactional
+  public void importFireStationsFromOverpass() {
+    importPois(
+        "Fire Station",
+        this::buildOverpassFireStationQuery,
+        el -> {
+          Map<String, String> tags = el.tags;
+          String amenity = tags != null ? tags.get("amenity") : null;
+          return "fire_station".equals(amenity);
+        },
+        (el, type) -> {
+          Map<String, String> tags = el.tags;
+          return tags != null ? tags.getOrDefault("name", type) : type;
+        }
+    );
+  }
+
+  /**
    * Placeholder for future use or for importing all POI types.
    * Currently does nothing.
    */
@@ -207,7 +309,53 @@ public class PoiImportService {
         continue;
       }
       String name = nameExtractor.extract(el, typeName);
+      
+      // Extract opening hours and address from tags
+      Map<String, String> tags = el.tags;
+      String openingHoursStr = tags != null ? tags.get("opening_hours") : null;
+      
+      // Build address from available address tags
+      StringBuilder address = new StringBuilder();
+      if (tags != null) {
+        String street = tags.get("addr:street");
+        String housenumber = tags.get("addr:housenumber");
+        String postcode = tags.get("addr:postcode");
+        String city = tags.get("addr:city");
+        
+        if (street != null) {
+          address.append(street);
+          if (housenumber != null) {
+            address.append(" ").append(housenumber);
+          }
+        }
+        if (postcode != null || city != null) {
+          if (address.length() > 0) {
+            address.append(", ");
+          }
+          if (postcode != null) {
+            address.append(postcode).append(" ");
+          }
+          if (city != null) {
+            address.append(city);
+          }
+        }
+      }
+
       PointOfInterest poi = new PointOfInterest(poiType, name, lat, lon, adminUser);
+      
+      // Parse and set opening hours if available
+      if (openingHoursStr != null) {
+        OpeningHours hours = parseOpeningHours(openingHoursStr);
+        if (hours != null) {
+          poi.setOpenFrom(hours.getOpenFrom());
+          poi.setOpenTo(hours.getOpenTo());
+        }
+      }
+      
+      if (address.length() > 0) {
+        poi.setAddress(address.toString());
+      }
+      
       poiRepository.save(poi);
     }
   }
@@ -295,6 +443,48 @@ public class PoiImportService {
         "way[\"shop\"=\"grocery\"](area);" +
         "node[\"shop\"=\"convenience\"](area);" +
         "way[\"shop\"=\"convenience\"](area);" +
+        ");out center tags;";
+  }
+
+  /**
+   * Builds the Overpass query string for police stations in Norway.
+   *
+   * @return the Overpass query string for police stations
+   */
+  private String buildOverpassPoliceStationQuery() {
+    return "[out:json][timeout:180];" +
+        "area[\"ISO3166-1\"=\"NO\"][admin_level=2];(" +
+        "node[\"amenity\"=\"police\"](area);" +
+        "way[\"amenity\"=\"police\"](area);" +
+        ");out center tags;";
+  }
+
+  /**
+   * Builds the Overpass query string for pharmacies in Norway.
+   * Includes both amenity=pharmacy and healthcare=pharmacy tags.
+   *
+   * @return the Overpass query string for pharmacies
+   */
+  private String buildOverpassPharmacyQuery() {
+    return "[out:json][timeout:180];" +
+        "area[\"ISO3166-1\"=\"NO\"][admin_level=2];(" +
+        "node[\"amenity\"=\"pharmacy\"](area);" +
+        "way[\"amenity\"=\"pharmacy\"](area);" +
+        "node[\"healthcare\"=\"pharmacy\"](area);" +
+        "way[\"healthcare\"=\"pharmacy\"](area);" +
+        ");out center tags;";
+  }
+
+  /**
+   * Builds the Overpass query string for fire stations in Norway.
+   *
+   * @return the Overpass query string for fire stations
+   */
+  private String buildOverpassFireStationQuery() {
+    return "[out:json][timeout:180];" +
+        "area[\"ISO3166-1\"=\"NO\"][admin_level=2];(" +
+        "node[\"amenity\"=\"fire_station\"](area);" +
+        "way[\"amenity\"=\"fire_station\"](area);" +
         ");out center tags;";
   }
 

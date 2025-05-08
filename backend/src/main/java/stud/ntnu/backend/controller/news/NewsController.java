@@ -62,6 +62,24 @@ public class NewsController {
   }
 
   /**
+   * Get a news article by its ID.
+   *
+   * @param newsArticleId the ID of the news article
+   * @return the news article
+   */
+  @GetMapping("/public/news/article/{newsArticleId}")
+  public ResponseEntity<?> getNewsArticleById(@PathVariable Long newsArticleId) {
+    try {
+      NewsArticle newsArticle = newsService.getNewsArticleById(newsArticleId);
+      return ResponseEntity.ok(newsArticle);
+    } catch (NoSuchElementException e) {
+      return ResponseEntity.notFound().build();
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
    * Get paginated news articles for a specific crisis event.
    *
    * @param crisisEventId the crisis event ID
@@ -69,7 +87,7 @@ public class NewsController {
    * @return ResponseEntity with a page of news articles if successful, or an error message if the
    * crisis event doesn't exist
    */
-  @GetMapping("/public/news/{crisisEventId}")
+  @GetMapping("/public/news/crisis/{crisisEventId}")
   public ResponseEntity<?> getNewsArticlesByCrisisEvent(
       @PathVariable Integer crisisEventId,
       Pageable pageable, Principal principal) {
@@ -139,6 +157,18 @@ public class NewsController {
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
+
+  /**
+   * Get paginated draft news articles.
+   *
+   * @param pageable pagination information
+   * @return ResponseEntity with a page of draft news articles
+   */
+  @GetMapping("/public/news/drafts")
+  public ResponseEntity<?> getDraftNewsArticles(Pageable pageable) {
+    Page<NewsArticleResponseDTO> draftNewsArticles = newsService.getDraftNewsArticles(pageable);
+    return ResponseEntity.ok(draftNewsArticles);
   }
 
   /**

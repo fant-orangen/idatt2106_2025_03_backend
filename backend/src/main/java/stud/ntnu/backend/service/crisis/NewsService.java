@@ -149,6 +149,24 @@ public class NewsService {
     return newsArticleRepository.save(newsArticle);
   }
 
+  @Transactional(readOnly = true)
+  public NewsArticle getNewsArticleById(Long newsArticleId) {
+    return newsArticleRepository.findById(newsArticleId)
+        .orElseThrow(() -> new NoSuchElementException("News article not found with id: " + newsArticleId));
+  }
+
+  /**
+   * Get paginated draft news articles.
+   *
+   * @param pageable pagination information
+   * @return a page of draft news article DTOs
+   */
+  @Transactional(readOnly = true)
+  public Page<NewsArticleResponseDTO> getDraftNewsArticles(Pageable pageable) {
+    Page<NewsArticle> draftArticles = newsArticleRepository.findByStatus(ArticleStatus.draft, pageable);
+    return draftArticles.map(NewsArticleResponseDTO::fromEntity);
+  }
+
   /**
    * Get the newest news articles, ordered by published date (newest first).
    * Only returns articles with status 'published'.

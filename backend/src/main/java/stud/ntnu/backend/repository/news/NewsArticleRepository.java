@@ -71,6 +71,15 @@ public interface NewsArticleRepository extends JpaRepository<NewsArticle, Long> 
     Page<NewsArticle> findByCrisisEventIdAndStatus(Integer crisisEventId, ArticleStatus status, Pageable pageable);
 
     /**
+     * Find all news articles with a specific status with pagination.
+     *
+     * @param status the article status
+     * @param pageable pagination information
+     * @return a page of news articles
+     */
+    Page<NewsArticle> findByStatus(ArticleStatus status, Pageable pageable);
+
+    /**
      * Find all news articles with a specific status ordered by published date (newest first) with pagination.
      *
      * @param status the article status
