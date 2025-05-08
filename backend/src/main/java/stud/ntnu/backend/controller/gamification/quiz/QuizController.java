@@ -19,8 +19,10 @@ import org.springframework.data.domain.Pageable;
 import stud.ntnu.backend.dto.quiz.CreateQuizAnswerDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
+import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
+import stud.ntnu.backend.dto.quiz.QuizAttemptSummaryDto;
 import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
 import stud.ntnu.backend.dto.quiz.QuizPreviewDto;
 import stud.ntnu.backend.security.AdminChecker;
@@ -34,13 +36,13 @@ import stud.ntnu.backend.service.user.UserService;
 @RequestMapping("/api")
 public class QuizController {
 
-  private final QuizService quizService;
-  private final UserService userService;
+    private final QuizService quizService;
+    private final UserService userService;
 
-  public QuizController(QuizService quizService, UserService userService) {
-    this.quizService = quizService;
-    this.userService = userService;
-  }
+    public QuizController(QuizService quizService, UserService userService) {
+        this.quizService = quizService;
+        this.userService = userService;
+    }
 
     // -------------------- ADMIN ENDPOINTS --------------------
 
@@ -66,6 +68,29 @@ public class QuizController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    /**
+     * Deletes a quiz by its id.
+     *
+     * @param quizId    the id of the quiz to delete
+     * @param principal the Principal object representing the current user
+     * @return ResponseEntity with 200 OK or error message
+     */
+    @DeleteMapping("/quizzes/admin/{quiz_id}")
+    public ResponseEntity<?> deleteQuiz(@PathVariable("quiz_id") Long quizId, Principal principal) {
+        try {
+            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+                return ResponseEntity.status(403).body("Forbidden");
+            }
+            quizService.deleteQuiz(quizId);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An unexpected error occurred");
+        }
+    }
+
 
     /**
      * Archives a quiz by id.
@@ -188,7 +213,8 @@ public class QuizController {
     public ResponseEntity<?> getCorrectQuizAnswersByQuestionId(
         @PathVariable("question_id") Long questionId) {
         try {
-            List<QuizAnswerDto> correctAnswers = quizService.getAnswersByQuestionIdAdmin(questionId);
+            List<QuizAnswerDto> correctAnswers =
+                quizService.getAnswersByQuestionIdAdmin(questionId);
             return ResponseEntity.ok(correctAnswers);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -292,6 +318,129 @@ public class QuizController {
             return ResponseEntity.ok(archivedQuizzes);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Creates a new quiz attempt for the user.
+     *
+     * @param quizId    the quiz id
+     * @param principal the Principal object representing the current user
+     * @return ResponseEntity with 200 OK or error message
+     */
+    @PostMapping("/quizzes/user/{quiz_id}/attempts")
+    public ResponseEntity<?> createUserQuizAttempt(@PathVariable("quiz_id") Long quizId,
+                                                   Principal principal) {
+        try {
+            // Retrieve the user ID from the authenticated user's email
+            Integer userId = userService.getUserIdByEmail(principal.getName());
+
+            // Call the service method to create the quiz attempt and get the attempt ID
+            Long attemptId = quizService.createUserQuizAttempt(quizId, userId);
+
+            return ResponseEntity.ok(Collections.singletonMap("attemptId", attemptId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An unexpected error occurred");
+        }
+    }
+
+    /**
+     * Creates a new quiz answer for the user.
+     *
+     * @param dto the CreateUserQuizAnswerDto containing answer data
+     * @return ResponseEntity with 200 OK or error message
+     */
+    @PostMapping("/quizzes/user/attempts/answer")
+    public ResponseEntity<?> createUserQuizAnswer(@RequestBody CreateUserQuizAnswerDto dto) {
+        try {
+            // Call the service method to create the user quiz answer
+            quizService.createUserQuizAnswer(dto);
+
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An unexpected error occurred");
+        }
+    }
+
+    @GetMapping("/quizzes/user/attempts/{quiz_id}")
+    public ResponseEntity<Page<QuizAttemptSummaryDto>> getQuizAttemptsByQuizId(
+        @PathVariable("quiz_id") Long quizId,
+        Principal principal,
+        Pageable pageable) {
+        try {
+            // Retrieve the user ID from the authenticated user's email
+            Integer userId = userService.getUserIdByEmail(principal.getName());
+
+            // Fetch the paginated quiz attempts for the user
+            Page<QuizAttemptSummaryDto> attempts =
+                quizService.getQuizAttemptsByQuizId(quizId, userId, pageable);
+
+            return ResponseEntity.ok(attempts);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Page.empty());
+        }
+    }
+
+    /**
+     * Gets the total correct answers for a quiz attempt.
+     *
+     * @param attemptId the quiz attempt id
+     * @return ResponseEntity with the total correct answers
+     */
+    @GetMapping("/quizzes/user/attempts/{attempt_id}/correct-count")
+    public ResponseEntity<?> getTotalCorrectAnswers(@PathVariable("attempt_id") Long attemptId) {
+        try {
+            // Call the service method to get the total correct answers
+            int correctAnswers = quizService.getTotalCorrectAnswers(attemptId);
+            return ResponseEntity.ok(Collections.singletonMap("correctAnswers", correctAnswers));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An unexpected error occurred");
+        }
+    }
+
+    /**
+     * Retrieves the latest quiz attempt for a user.
+     *
+     * @param quizId    the quiz id
+     * @param principal the Principal object representing the current user
+     * @return ResponseEntity with the latest quiz attempt summary or an error message
+     */
+    @GetMapping("/quizzes/user/{quiz_id}/attempts/latest")
+    public ResponseEntity<?> getLatestQuizAttempt(@PathVariable("quiz_id") Long quizId,
+                                                  Principal principal) {
+        try {
+            Integer userId = userService.getUserIdByEmail(principal.getName());
+            QuizAttemptSummaryDto latestAttempt = quizService.getLatestQuizAttempt(quizId, userId);
+            return ResponseEntity.ok(latestAttempt);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An unexpected error occurred");
+        }
+    }
+
+    /**
+     * Retrieves the name of a quiz by its ID.
+     *
+     * @param quizId the ID of the quiz
+     * @return ResponseEntity with the quiz name or an error message
+     */
+    @GetMapping("/quizzes/{quiz_id}/name")
+    public ResponseEntity<?> getQuizNameById(@PathVariable("quiz_id") Long quizId) {
+        try {
+            String quizName = quizService.getQuizNameById(quizId);
+            System.out.println("Quiz name: " + quizName);
+            return ResponseEntity.ok(Collections.singletonMap("name", quizName));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An unexpected error occurred");
         }
     }
 }
