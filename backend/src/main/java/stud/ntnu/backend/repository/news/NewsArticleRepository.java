@@ -98,4 +98,13 @@ public interface NewsArticleRepository extends JpaRepository<NewsArticle, Long> 
      */
     @Query("SELECT n FROM NewsArticle n WHERE n.status = :status ORDER BY n.createdAt DESC")
     Page<NewsArticle> findByStatusOrderByCreatedAtDesc(@Param("status") ArticleStatus status, Pageable pageable);
+
+    /**
+     * Find all news articles with a specific status ordered by published date (newest first) with pagination.
+     *
+     * @param status the article status
+     * @param pageable pagination information
+     * @return a page of news articles
+     */
+    Page<NewsArticle> findByStatusOrderByPublishedAtDesc(ArticleStatus status, Pageable pageable);
 }
