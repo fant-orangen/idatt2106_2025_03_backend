@@ -1,162 +1,104 @@
 package stud.ntnu.backend.dto.user;
 
 import java.util.List;
+
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * DTO for returning a user's history (completed activities and reflections).
+ * Data Transfer Object (DTO) representing a user's history.
+ * This class encapsulates both completed gamification activities and reflections
+ * associated with a user, providing a comprehensive view of their engagement history.
  */
-@Setter
 @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserHistoryDto {
 
-  // Getters and setters
-  private List<GamificationActivityDto> completedActivities;
-  private List<ReflectionDto> reflections;
+    /**
+     * List of completed gamification activities for the user.
+     */
+    private List<GamificationActivityDto> completedActivities;
 
-  // Default constructor
-  public UserHistoryDto() {
-  }
+    /**
+     * List of reflections created by the user.
+     */
+    private List<ReflectionDto> reflections;
 
-  // Constructor with all fields
-  public UserHistoryDto(List<GamificationActivityDto> completedActivities,
-      List<ReflectionDto> reflections) {
-    this.completedActivities = completedActivities;
-    this.reflections = reflections;
-  }
+    /**
+     * Data Transfer Object (DTO) representing a completed gamification activity.
+     * This class encapsulates the details of an activity that a user has completed,
+     * including its identification, description, and completion information.
+     */
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class GamificationActivityDto {
 
-  /**
-   * DTO for a gamification activity.
-   */
-  public static class GamificationActivityDto {
+        /**
+         * Unique identifier for the activity.
+         */
+        private Integer id;
 
-    private Integer id;
-    private String title;
-    private String description;
-    private Integer points;
-    private String completedAt;
+        /**
+         * Title of the completed activity.
+         */
+        private String title;
 
-    // Default constructor
-    public GamificationActivityDto() {
+        /**
+         * Detailed description of the activity.
+         */
+        private String description;
+
+        /**
+         * Points earned for completing this activity.
+         */
+        private Integer points;
+
+        /**
+         * Timestamp when the activity was completed.
+         */
+        private String completedAt;
     }
 
-    // Constructor with all fields
-    public GamificationActivityDto(Integer id, String title, String description, Integer points,
-        String completedAt) {
-      this.id = id;
-      this.title = title;
-      this.description = description;
-      this.points = points;
-      this.completedAt = completedAt;
+    /**
+     * Data Transfer Object (DTO) representing a user reflection.
+     * This class encapsulates the content and metadata of a reflection entry,
+     * including its sharing status and creation timestamp.
+     */
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ReflectionDto {
+
+        /**
+         * Unique identifier for the reflection.
+         */
+        private Integer id;
+
+        /**
+         * Title of the reflection.
+         */
+        private String title;
+
+        /**
+         * Main content of the reflection.
+         */
+        private String content;
+
+        /**
+         * Indicates whether the reflection is shared or private.
+         */
+        private Boolean shared;
+
+        /**
+         * Timestamp when the reflection was created.
+         */
+        private String createdAt;
     }
-
-    // Getters and setters
-    public Integer getId() {
-      return id;
-    }
-
-    public void setId(Integer id) {
-      this.id = id;
-    }
-
-    public String getTitle() {
-      return title;
-    }
-
-    public void setTitle(String title) {
-      this.title = title;
-    }
-
-    public String getDescription() {
-      return description;
-    }
-
-    public void setDescription(String description) {
-      this.description = description;
-    }
-
-    public Integer getPoints() {
-      return points;
-    }
-
-    public void setPoints(Integer points) {
-      this.points = points;
-    }
-
-    public String getCompletedAt() {
-      return completedAt;
-    }
-
-    public void setCompletedAt(String completedAt) {
-      this.completedAt = completedAt;
-    }
-  }
-
-  /**
-   * DTO for a reflection.
-   */
-  public static class ReflectionDto {
-
-    private Integer id;
-    private String title;
-    private String content;
-    private Boolean shared;
-    private String createdAt;
-
-    // Default constructor
-    public ReflectionDto() {
-    }
-
-    // Constructor with all fields
-    public ReflectionDto(Integer id, String title, String content, Boolean shared,
-        String createdAt) {
-      this.id = id;
-      this.title = title;
-      this.content = content;
-      this.shared = shared;
-      this.createdAt = createdAt;
-    }
-
-    // Getters and setters
-    public Integer getId() {
-      return id;
-    }
-
-    public void setId(Integer id) {
-      this.id = id;
-    }
-
-    public String getTitle() {
-      return title;
-    }
-
-    public void setTitle(String title) {
-      this.title = title;
-    }
-
-    public String getContent() {
-      return content;
-    }
-
-    public void setContent(String content) {
-      this.content = content;
-    }
-
-    public Boolean getShared() {
-      return shared;
-    }
-
-    public void setShared(Boolean shared) {
-      this.shared = shared;
-    }
-
-    public String getCreatedAt() {
-      return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-      this.createdAt = createdAt;
-    }
-  }
 }

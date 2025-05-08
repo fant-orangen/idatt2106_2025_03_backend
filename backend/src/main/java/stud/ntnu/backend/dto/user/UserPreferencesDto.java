@@ -4,23 +4,35 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * DTO for updating a user's preferences.
+ * Data Transfer Object (DTO) representing a user's preferences.
+ * This class is used to transfer user preference data between layers of the application.
+ * It includes settings such as location sharing preferences and can be extended
+ * to include additional user preference settings in the future.
  */
 @Setter
 @Getter
 public class UserPreferencesDto {
 
-  private Boolean locationSharingEnabled;
+    /**
+     * Indicates whether the user has enabled location sharing.
+     * When true, the user's location can be shared with other users.
+     * When false, location sharing is disabled.
+     */
+    private Boolean locationSharingEnabled;
 
-  // Add more preferences as needed, such as notification settings
+    /**
+     * Default constructor for UserPreferencesDto.
+     * Creates a new instance with default values.
+     */
+    public UserPreferencesDto() {
+    }
 
-  // Default constructor
-  public UserPreferencesDto() {
-  }
-
-  // Constructor with all fields
-  public UserPreferencesDto(Boolean locationSharingEnabled) {
-    this.locationSharingEnabled = locationSharingEnabled;
-  }
-
+    /**
+     * Constructor for UserPreferencesDto with all fields.
+     *
+     * @param locationSharingEnabled The user's location sharing preference
+     */
+    public UserPreferencesDto(Boolean locationSharingEnabled) {
+        this.locationSharingEnabled = locationSharingEnabled;
+    }
 }
