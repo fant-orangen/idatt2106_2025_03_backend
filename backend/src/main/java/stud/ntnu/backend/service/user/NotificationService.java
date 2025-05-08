@@ -2,6 +2,7 @@ package stud.ntnu.backend.service.user;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -17,6 +18,8 @@ import stud.ntnu.backend.util.LocationUtil; //
 import stud.ntnu.backend.model.household.Household; //
 import stud.ntnu.backend.model.user.NotificationPreference; //
 import stud.ntnu.backend.repository.user.NotificationPreferenceRepository; //
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.math.BigDecimal; //
 import java.time.LocalDateTime; //
@@ -35,7 +38,7 @@ public class NotificationService {
   private final NotificationPreferenceRepository notificationPreferenceRepository;
   private final UserRepository userRepository; //
   private final SimpMessagingTemplate messagingTemplate;
-  private final UserService userService; //
+  private final MessageSource messageSource;
   private final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
   /**
@@ -45,18 +48,19 @@ public class NotificationService {
    * @param notificationPreferenceRepository Repository for notification preference data access.
    * @param userRepository         Repository for user data access.
    * @param messagingTemplate      Template for sending messages via WebSocket.
-   * @param userService            Service for user-related operations.
+   * @param messageSource          MessageSource for internationalization.
    */
+  @Autowired
   public NotificationService(NotificationRepository notificationRepository,
       NotificationPreferenceRepository notificationPreferenceRepository,
       UserRepository userRepository, //
       SimpMessagingTemplate messagingTemplate,
-      UserService userService) { //
+      MessageSource messageSource) { //
     this.notificationRepository = notificationRepository; //
     this.notificationPreferenceRepository = notificationPreferenceRepository;
     this.userRepository = userRepository; //
     this.messagingTemplate = messagingTemplate;
-    this.userService = userService; //
+    this.messageSource = messageSource;
   }
 
   /**
@@ -292,7 +296,7 @@ public class NotificationService {
     double radiusMeters = crisisEvent.getRadius().doubleValue() * 1000; // MUST BE IN METERS
 
     // Fetch ALL users.
-    List<User> allUsers = userService.getAllUsers(); //
+    List<User> allUsers = userRepository.findAll(); //
     log.info("Checking {} users against crisis event ID {}", allUsers.size(),
         crisisEvent.getId()); //
 
@@ -547,6 +551,30 @@ public class NotificationService {
     notificationPreferenceRepository.save(preference);
     log.info("Updated notification preference '{}' to {} for user {}", 
         preferenceType, enable, user.getEmail());
+  }
+
+  /**
+   * Creates a safety request notification for a user.
+   *
+   * @param receivingUser The user receiving the notification
+   * @param requestingUserName The name of the user requesting safety confirmation
+   */
+  public void createSafetyRequestNotification(User receivingUser, String requestingUserName) {
+    String message = messageSource.getMessage(
+        "notification.safety.request",
+        new Object[]{requestingUserName},
+        LocaleContextHolder.getLocale()
+    );
+    
+    Notification notification = createNotification(
+        receivingUser,
+        Notification.PreferenceType.safety_request,
+        null,
+        null,
+        message
+    );
+    
+    sendNotification(notification);
   }
 
 }

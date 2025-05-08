@@ -251,11 +251,20 @@ CREATE TABLE email_tokens (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     token VARCHAR(255) NOT NULL UNIQUE,
-    type VARCHAR(15) NOT NULL CHECK (type IN ('VERIFICATION','RESET')),
+    type VARCHAR(20) NOT NULL CHECK (type IN ('VERIFICATION','RESET','SAFETY_CONFIRMATION')),
     expires_at DATETIME NOT NULL,
     used_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- SAFETY CONFIRMATIONS
+CREATE TABLE safety_confirmations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    is_safe BOOLEAN NOT NULL,
+    safe_at DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- HOUSEHOLD ADMINS
@@ -273,7 +282,7 @@ CREATE TABLE household_admins (
 CREATE TABLE notification_preferences (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    preference_type VARCHAR(50) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request', 'remaining_supply_alert', 'system')),
+    preference_type VARCHAR(50) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request', 'remaining_supply_alert', 'system', 'safety_request')),
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -284,7 +293,7 @@ CREATE TABLE notification_preferences (
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    preference_type VARCHAR(25) NOT NULL CHECK (preference_type IN ('expiration_reminder', 'remaining_supply_alert', 'crisis_alert','location_request', 'system')),
+    preference_type VARCHAR(25) NOT NULL CHECK (preference_type IN ('expiration_reminder', 'remaining_supply_alert', 'crisis_alert','location_request', 'system', 'safety_request')),
     target_type VARCHAR(20) CHECK (target_type IN ('inventory','event','location_request','invitation')), -- If the notification is associated with another table, add a target type and target id pointing to the table
     target_id INT,
     description TEXT DEFAULT NULL,
