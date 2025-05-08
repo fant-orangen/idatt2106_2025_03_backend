@@ -30,7 +30,6 @@ import org.springframework.data.web.PageableDefault;
  * Provides endpoints for administrators to create, edit, and deactivate crisis events,
  * as well as endpoints for users to view crisis events affecting them.
  * <p>
- * Based on Visjonsdokument 2025 for Krisefikser.no.
  */
 @RestController
 @RequestMapping("/api")

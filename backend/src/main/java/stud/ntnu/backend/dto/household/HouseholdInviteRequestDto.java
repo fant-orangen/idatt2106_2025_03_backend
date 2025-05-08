@@ -4,22 +4,32 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * DTO for inviting a user to a household.
+ * Data Transfer Object (DTO) for household invitation requests.
+ * This class represents the data structure used when inviting a user to join a household,
+ * containing the email address of the invitee.
  */
-@Setter
 @Getter
+@Setter
 public class HouseholdInviteRequestDto {
 
-  // Getters and setters
-  private String email;
+    /**
+     * The email address of the user being invited to join the household.
+     * This field is required to identify the invitee.
+     */
+    private String email;
 
-  // Default constructor
-  public HouseholdInviteRequestDto() {
-  }
+    /**
+     * Default constructor required for JSON deserialization.
+     */
+    public HouseholdInviteRequestDto() {
+    }
 
-  // Constructor with all fields
-  public HouseholdInviteRequestDto(String email) {
-    this.email = email;
-  }
-
+    /**
+     * Constructs a new HouseholdInviteRequestDto with the specified email.
+     *
+     * @param email the email address of the user being invited
+     */
+    public HouseholdInviteRequestDto(String email) {
+        this.email = email;
+    }
 }

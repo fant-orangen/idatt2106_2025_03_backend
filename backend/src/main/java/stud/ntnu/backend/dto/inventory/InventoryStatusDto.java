@@ -6,11 +6,16 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * DTO for returning the preparedness status of a household.
+ * Data Transfer Object (DTO) for returning the preparedness status of a household.
  * <p>
- * This class encapsulates information about a household's inventory status, including the
- * household's identity, population, survival days, and details about the types and counts of
- * products in the inventory.
+ * This class encapsulates information about a household's inventory status, including:
+ * <ul>
+ *   <li>The household's identity (ID and name)</li>
+ *   <li>Population count</li>
+ *   <li>Survival days calculation</li>
+ *   <li>Detailed breakdown of product types and their counts</li>
+ *   <li>Status information for each product type</li>
+ * </ul>
  * </p>
  */
 @Setter
@@ -38,14 +43,20 @@ public class InventoryStatusDto {
   private Integer survivalDays;
 
   /**
-   * A map containing the count of each product type in the household's inventory. The key is the
-   * product type name, and the value is the count.
+   * A map containing the count of each product type in the household's inventory.
+   * <p>
+   * Key: Product type name
+   * Value: Current count of that product type
+   * </p>
    */
   private Map<String, Integer> productTypeCounts;
 
   /**
-   * A list of product type status objects, each representing the status of a specific product
-   * type.
+   * A list of product type status objects, each representing the status of a specific product type.
+   * <p>
+   * Each status object contains detailed information about the current count, recommended count,
+   * and whether the amount is sufficient.
+   * </p>
    */
   private List<ProductTypeStatusDto> productTypeStatus;
 
@@ -56,14 +67,14 @@ public class InventoryStatusDto {
   }
 
   /**
-   * Constructor with all fields.
+   * Constructs a new InventoryStatusDto with all fields.
    *
    * @param householdId       the unique identifier of the household
    * @param householdName     the name of the household
    * @param populationCount   the number of people in the household
-   * @param survivalDays      the number of days the household can survive
-   * @param productTypeCounts a map of product type names to their counts
-   * @param productTypeStatus a list of product type status DTOs
+   * @param survivalDays      the number of days the household can survive with current inventory
+   * @param productTypeCounts a map of product type names to their current counts
+   * @param productTypeStatus a list of detailed status information for each product type
    */
   public InventoryStatusDto(Integer householdId, String householdName, Integer populationCount,
       Integer survivalDays, Map<String, Integer> productTypeCounts,
@@ -77,12 +88,20 @@ public class InventoryStatusDto {
   }
 
   /**
-   * DTO for the status of a product type.
+   * Data Transfer Object (DTO) for the status of a product type.
    * <p>
-   * This class provides details about a specific product type in the inventory, including its name,
-   * current count, recommended count, and whether the amount is sufficient.
+   * This class provides detailed information about a specific product type in the inventory,
+   * including:
+   * <ul>
+   *   <li>Product type name</li>
+   *   <li>Current count in inventory</li>
+   *   <li>Recommended count</li>
+   *   <li>Sufficiency status</li>
+   * </ul>
    * </p>
    */
+  @Setter
+  @Getter
   public static class ProductTypeStatusDto {
 
     /**
@@ -112,90 +131,18 @@ public class InventoryStatusDto {
     }
 
     /**
-     * Constructor with all fields.
+     * Constructs a new ProductTypeStatusDto with all fields.
      *
      * @param productTypeName  the name of the product type
-     * @param count            the current count of the product type
+     * @param count            the current count of the product type in inventory
      * @param recommendedCount the recommended count for the product type
-     * @param sufficient       whether the current count is sufficient
+     * @param sufficient       whether the current count meets or exceeds the recommended count
      */
     public ProductTypeStatusDto(String productTypeName, Integer count, Integer recommendedCount,
         Boolean sufficient) {
       this.productTypeName = productTypeName;
       this.count = count;
       this.recommendedCount = recommendedCount;
-      this.sufficient = sufficient;
-    }
-
-    /**
-     * Gets the name of the product type.
-     *
-     * @return the product type name
-     */
-    public String getProductTypeName() {
-      return productTypeName;
-    }
-
-    /**
-     * Sets the name of the product type.
-     *
-     * @param productTypeName the product type name
-     */
-    public void setProductTypeName(String productTypeName) {
-      this.productTypeName = productTypeName;
-    }
-
-    /**
-     * Gets the current count of the product type.
-     *
-     * @return the count
-     */
-    public Integer getCount() {
-      return count;
-    }
-
-    /**
-     * Sets the current count of the product type.
-     *
-     * @param count the count
-     */
-    public void setCount(Integer count) {
-      this.count = count;
-    }
-
-    /**
-     * Gets the recommended count for the product type.
-     *
-     * @return the recommended count
-     */
-    public Integer getRecommendedCount() {
-      return recommendedCount;
-    }
-
-    /**
-     * Sets the recommended count for the product type.
-     *
-     * @param recommendedCount the recommended count
-     */
-    public void setRecommendedCount(Integer recommendedCount) {
-      this.recommendedCount = recommendedCount;
-    }
-
-    /**
-     * Gets whether the current count is sufficient.
-     *
-     * @return true if sufficient, false otherwise
-     */
-    public Boolean getSufficient() {
-      return sufficient;
-    }
-
-    /**
-     * Sets whether the current count is sufficient.
-     *
-     * @param sufficient true if sufficient, false otherwise
-     */
-    public void setSufficient(Boolean sufficient) {
       this.sufficient = sufficient;
     }
   }

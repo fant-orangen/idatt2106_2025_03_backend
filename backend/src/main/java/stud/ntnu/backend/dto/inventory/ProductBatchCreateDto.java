@@ -1,16 +1,19 @@
 package stud.ntnu.backend.dto.inventory;
 
+import java.time.LocalDateTime;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 /**
- * Data Transfer Object for creating a new ProductBatch.
+ * Data Transfer Object (DTO) for creating a new ProductBatch.
+ * This class represents the data structure required to create a new batch of products,
+ * including the product type, quantity, and optional expiration time.
  */
 @Data
 @Builder
@@ -18,12 +21,24 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ProductBatchCreateDto {
 
-  @NotNull(message = "Product type ID is required")
-  private Integer productTypeId;
+    /**
+     * The unique identifier of the product type for this batch.
+     * Must not be null.
+     */
+    @NotNull(message = "Product type ID is required")
+    private Integer productTypeId;
 
-  @NotNull(message = "Number of units is required")
-  @Positive(message = "Number of units must be positive")
-  private Integer number;
+    /**
+     * The number of units in this batch.
+     * Must be a positive number and not null.
+     */
+    @NotNull(message = "Number of units is required")
+    @Positive(message = "Number of units must be positive")
+    private Integer number;
 
-  private LocalDateTime expirationTime;
+    /**
+     * The expiration time for this batch of products.
+     * This field is optional and may be null if the products don't expire.
+     */
+    private LocalDateTime expirationTime;
 }

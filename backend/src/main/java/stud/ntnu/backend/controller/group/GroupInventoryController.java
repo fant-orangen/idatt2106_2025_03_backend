@@ -32,7 +32,6 @@ import stud.ntnu.backend.service.group.GroupService;
  * - Calculating total units contributed
  * <p>
  * All endpoints require user authentication and operate on behalf of the authenticated user's household.
- * Based on Visjonsdokument 2025 for Krisefikser.no.
  */
 @RestController
 @RequestMapping("/api")

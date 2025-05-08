@@ -29,7 +29,6 @@ import stud.ntnu.backend.service.group.GroupService;
  *   <li>Viewing group households</li>
  * </ul>
  * <p>
- * Based on Visjonsdokument 2025 for Krisefikser.no.
  */
 @RestController
 @RequestMapping("/api")
