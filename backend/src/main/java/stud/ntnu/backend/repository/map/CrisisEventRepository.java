@@ -1,0 +1,81 @@
+package stud.ntnu.backend.repository.map;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import stud.ntnu.backend.model.map.CrisisEvent;
+import stud.ntnu.backend.model.map.CrisisEvent.Severity;
+import stud.ntnu.backend.model.map.ScenarioTheme;
+import stud.ntnu.backend.model.user.User;
+
+/**
+ * Repository interface for CrisisEvent entity operations.
+ */
+@Repository
+public interface CrisisEventRepository extends JpaRepository<CrisisEvent, Integer> {
+
+  // Find active crisis events
+  List<CrisisEvent> findByActiveTrue();
+
+  // Find inactive crisis events
+  List<CrisisEvent> findByActiveFalse();
+
+  // Find crisis events by severity
+  List<CrisisEvent> findBySeverity(Severity severity);
+
+  // Find crisis events created by a specific user
+  List<CrisisEvent> findByCreatedByUser(User user);
+
+  // Find active crisis events by severity
+  List<CrisisEvent> findByActiveTrueAndSeverity(Severity severity);
+
+  // Find crisis events by scenario theme
+  List<CrisisEvent> findByScenarioTheme(ScenarioTheme scenarioTheme);
+
+  // Find active crisis events by scenario theme
+  List<CrisisEvent> findByActiveTrueAndScenarioTheme(ScenarioTheme scenarioTheme);
+
+  // Update crisis event fields directly using a query (excluding start time)
+  @Modifying
+  @Query("UPDATE CrisisEvent c SET c.name = :name, c.description = :description, " +
+      "c.severity = :severity, c.epicenterLatitude = :latitude, " +
+      "c.epicenterLongitude = :longitude, c.radius = :radius, c.updatedAt = CURRENT_TIMESTAMP WHERE c.id = :id")
+  void updateCrisisEvent(
+      @Param("id") Integer id,
+      @Param("name") String name,
+      @Param("description") String description,
+      @Param("severity") Severity severity,
+      @Param("latitude") BigDecimal latitude,
+      @Param("longitude") BigDecimal longitude,
+      @Param("radius") BigDecimal radius
+  );
+
+  // Set a crisis event as inactive
+  @Modifying
+  @Query("UPDATE CrisisEvent c SET c.active = false WHERE c.id = :id")
+  void deactivateCrisisEvent(@Param("id") Integer id);
+
+  /**
+   * Find all active crisis events with pagination.
+   *
+   * @param pageable pagination information
+   * @return page of active crisis events
+   */
+  Page<CrisisEvent> findByActiveTrue(Pageable pageable);
+
+  /**
+   * Find all inactive crisis events with pagination.
+   *
+   * @param pageable pagination information
+   * @return page of inactive crisis events
+   */
+  Page<CrisisEvent> findByActiveFalse(Pageable pageable);
+}

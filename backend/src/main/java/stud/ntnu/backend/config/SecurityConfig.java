@@ -1,6 +1,7 @@
 package stud.ntnu.backend.config;
 
 import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,16 +11,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+// TODO: Improve security access configuration
 
 /**
  * <h2>SecurityConfig</h2>
@@ -48,9 +48,10 @@ public class SecurityConfig {
   private final UserDetailsService userDetailsService;
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-  public SecurityConfig(UserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
-      this.userDetailsService = userDetailsService;
-      this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+  public SecurityConfig(UserDetailsService userDetailsService,
+      JwtAuthenticationFilter jwtAuthenticationFilter) {
+    this.userDetailsService = userDetailsService;
+    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
   }
 
   /**
@@ -96,13 +97,34 @@ public class SecurityConfig {
         .csrf(csrf -> csrf.disable())
         .sessionManagement(session ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> 
-            auth.requestMatchers("/h2-console/**", "/swagger-ui/**", "/swagger-ui.html", 
-                                "/v3/api-docs/**", "/actuator/health", "/auth/**", "/api/auth/**").permitAll()
-                .anyRequest().authenticated());
+        .authorizeHttpRequests(auth ->
+            auth
+                // Public endpoints
+                .requestMatchers(
+                    "/h2-console/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**",
+                    "/actuator/health",
+                    "/auth/**",
+                    "/api/auth/**",
+                    "/api/public/**",
+                    "/ws/**"
+                ).permitAll()
+
+                // Authenticated user endpoints
+                .requestMatchers("/api/user/**").authenticated()
+                .requestMatchers("/topic/**", "/app/**").authenticated()
+
+                // Admin endpoints
+                .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPERADMIN")
+
+                // Super admin endpoints
+                .requestMatchers("/api/super-admin/**").hasRole("SUPERADMIN")
+        );
 
     // Allow H2 console frame options
-    http.headers(headers -> 
+    http.headers(headers ->
         headers.frameOptions(frameOptions -> frameOptions.disable()));
 
     // Add JWT authentication filter
@@ -122,7 +144,7 @@ public class SecurityConfig {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(
         Arrays.asList("http://localhost:5173", "http://localhost:8080"));
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
     configuration.setAllowCredentials(true);
 

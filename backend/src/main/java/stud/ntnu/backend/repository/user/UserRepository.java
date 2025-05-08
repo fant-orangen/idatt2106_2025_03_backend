@@ -1,0 +1,45 @@
+package stud.ntnu.backend.repository.user;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.model.household.Household;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Repository interface for User entity operations. Provides methods to find users by email and
+ * other criteria.
+ */
+@Repository
+public interface UserRepository extends JpaRepository<User, Integer> {
+
+  /**
+   * Find a user by their email address.
+   *
+   * @param email the email address to search for
+   * @return an Optional containing the user if found, or empty if not found
+   */
+  Optional<User> findByEmail(String email);
+
+  /**
+   * Check if a user exists with the given email address.
+   *
+   * @param email the email address to check
+   * @return true if a user exists with the email, false otherwise
+   */
+  boolean existsByEmail(String email);
+
+  List<User> findByHousehold(Household household);
+
+  List<User> findByHouseholdId(Integer householdId);
+
+  @Query("SELECT COUNT(u) FROM User u WHERE u.household.id = :householdId")
+  Integer countByHouseholdId(@Param("householdId") Integer householdId);
+
+  @Query("SELECT COALESCE(SUM(u.kcalRequirement), 0) FROM User u WHERE u.household.id = :householdId")
+  Integer sumKcalRequirementByHouseholdId(@Param("householdId") Integer householdId);
+}

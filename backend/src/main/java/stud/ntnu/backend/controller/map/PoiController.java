@@ -1,0 +1,276 @@
+package stud.ntnu.backend.controller.map;
+
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import stud.ntnu.backend.dto.poi.CreatePoiDto;
+import stud.ntnu.backend.dto.poi.PoiItemDto;
+import stud.ntnu.backend.dto.poi.UpdatePoiDto;
+import stud.ntnu.backend.model.map.PointOfInterest;
+import stud.ntnu.backend.model.map.PoiType;
+import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.security.AdminChecker;
+import stud.ntnu.backend.service.map.PoiService;
+import stud.ntnu.backend.service.user.UserService;
+import stud.ntnu.backend.util.LocationUtil;
+
+import java.security.Principal;
+import java.util.List;
+
+/**
+ * Provides access to public Points of Interest (POIs). Includes tilfluktsrom, hjertestartere,
+ * matstasjoner, and similar resources, with map-based filtering support. Based on Visjonsdokument
+ * 2025 for Krisefikser.no.
+ */
+
+@RestController
+@RequestMapping("/api")
+public class PoiController {
+
+  private final PoiService poiService;
+  private final UserService userService;
+
+  public PoiController(PoiService poiService, UserService userService) {
+    this.poiService = poiService;
+    this.userService = userService;
+  }
+
+  /**
+   * Retrieves all public points of interest.
+   *
+   * @return a list of all public points of interest
+   */
+  @GetMapping("/public/poi/public")
+  public List<PoiItemDto> getPublicPointsOfInterest() {
+    return poiService.getAllPointsOfInterest()
+        .stream()
+        .map(PoiItemDto::fromEntity)
+        .toList();
+  }
+    /**
+     * Retrieves all points of interest with pagination and sorting.
+     *
+     * @param page the page number (default is 0)
+     * @param size the page size (default is 10)
+     * @param sort the sorting criteria (default is "id,asc")
+     * @return a paginated list of points of interest
+     */
+  @GetMapping("public/poi/previews")
+  public ResponseEntity<?> getPoiPreviews(
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "10") int size,
+          @RequestParam(defaultValue = "id,asc") String sort) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")[0]).ascending());
+    if (sort.endsWith(",desc")) {
+      pageable = PageRequest.of(page, size, Sort.by(sort.split(",")[0]).descending());
+    }
+    return ResponseEntity.ok(poiService.getPoiPreviews(pageable));
+  }
+
+
+  /**
+   * Retrieves all points of interest of a specific type.
+   *
+   * @return a list of all points of interest of a specific type
+   */
+  @GetMapping("/public/poi/type/{id}")
+  public List<PoiItemDto> getPointsOfInterestByTypeId(@PathVariable int id) {
+    return poiService.getPointsOfInterestByTypeId(id)
+        .stream()
+        .map(PoiItemDto::fromEntity)
+        .toList();
+  }
+
+  /**
+   * Retrieves poi by id
+   *
+   * @param id the id of the poi
+   * @return the poi with the given id as a PoiItemDto
+   */
+  @GetMapping("/public/poi/{id}")
+  public PoiItemDto getPointOfInterestById(@PathVariable int id) {
+    return poiService.getPointOfInterestById(id)
+        .map(PoiItemDto::fromEntity)
+        .orElse(null);
+  }
+
+  /**
+   * Retrieves all points of interest of a specific type within a given distance from a specified
+   * location.
+   *
+   * @param id        the ID of the point of interest type (optional)
+   * @param latitude  the latitude of the location
+   * @param longitude the longitude of the location
+   * @param distance  the distance in meters
+   * @return a list of points of interest within the specified distance
+   */
+  //To test with postman http://localhost:8080/api/user/poi/type/nearby?latitude=63.4308&longitude=10.3943&distance=1000
+  @GetMapping("/public/poi/type/nearby")
+  public List<PoiItemDto> getPointsOfInterestByTypeIdAndDistance(
+      @RequestParam(required = false) Integer id,
+      @RequestParam double latitude,
+      @RequestParam double longitude,
+      @RequestParam double distance) {
+    return (id == null ? poiService.getAllPointsOfInterest()
+        : poiService.getPointsOfInterestByTypeId(id))
+        .stream()
+        .filter(poi -> LocationUtil.calculateDistance(latitude, longitude,
+            poi.getLatitude().doubleValue(), poi.getLongitude().doubleValue()) <= distance)
+        .map(PoiItemDto::fromEntity)
+        .toList();
+  }
+
+  /**
+   * Retrieves the nearest point of interest of a specific type from a given location.
+   *
+   * @param id        the ID of the point of interest type
+   * @param latitude  the latitude of the location
+   * @param longitude the longitude of the location
+   * @return the nearest point of interest of the specified type
+   */
+  @GetMapping("/public/poi/type/nearest/{id}")
+  public PoiItemDto getNearestPointOfInterestByType(
+      @PathVariable int id,
+      @RequestParam double latitude,
+      @RequestParam double longitude) {
+    PointOfInterest nearestPoi = PoiService.findNearestPoi(latitude, longitude,
+        poiService.getPointsOfInterestByTypeId(id));
+    return nearestPoi != null ? PoiItemDto.fromEntity(nearestPoi) : null;
+  }
+  //javadoc for createPointOfInterest
+
+  /**
+   * Creates a new point of interest. Only admin and superadmin can create points of interest.
+   *
+   * @param createPoiDto the DTO containing point of interest information
+   * @param principal    the authenticated user
+   * @return the created point of interest
+   */
+  @PostMapping("/admin/poi")
+  public ResponseEntity<?> createPointOfInterest(
+      @Valid @RequestBody CreatePoiDto createPoiDto,
+      Principal principal) {
+    try {
+      // Check if the current user is an admin using AdminChecker with Principal
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+        return ResponseEntity.status(403).body("Only administrators can create points of interest");
+      }
+
+      // Get the current authenticated user
+      String email = principal.getName();
+      User currentUser = userService.getUserByEmail(email)
+          .orElseThrow(() -> new IllegalStateException("User not found"));
+
+      // Delegate the creation logic to the service
+      PointOfInterest savedPoi = poiService.createPointOfInterest(createPoiDto, currentUser);
+
+      // Return the created POI
+      return ResponseEntity.ok(PoiItemDto.fromEntity(savedPoi));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Updates an existing point of interest. Only admin and superadmin can update points of
+   * interest.
+   *
+   * @param id           the ID of the point of interest to update
+   * @param updatePoiDto the DTO containing updated point of interest information
+   * @param principal    the authenticated user
+   * @return the updated point of interest
+   */
+
+  @PutMapping("/admin/poi/{id}")
+  public ResponseEntity<?> updatePointOfInterest(
+      @PathVariable Integer id,
+      @RequestBody UpdatePoiDto updatePoiDto,
+      Principal principal) {
+    try {
+      // Check if the current user is an admin using AdminChecker with Principal
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+        return ResponseEntity.status(403).body("Only administrators can update points of interest");
+      }
+
+      // Delegate to service for updating the point of interest
+      PointOfInterest updatedPoi = poiService.updatePointOfInterest(id, updatePoiDto);
+
+      return ResponseEntity.ok(PoiItemDto.fromEntity(updatedPoi));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Deletes a point of interest by its ID. Only admin and superadmin can delete points of
+   * interest.
+   *
+   * @param id        the ID of the point of interest to delete
+   * @param principal the authenticated user
+   * @return a response indicating success or failure
+   */
+  @DeleteMapping("/admin/poi/{id}")
+  public ResponseEntity<?> deletePointOfInterest(
+      @PathVariable Integer id,
+      Principal principal) {
+    try {
+      // Check if the current user is an admin using AdminChecker with Principal
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+        return ResponseEntity.status(403).body("Only administrators can delete po ints of interest");
+      }
+
+      // Delegate to service for deleting the point of interest
+      poiService.deletePointOfInterest(id);
+
+      return ResponseEntity.ok("Point of interest deleted successfully");
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Retrieves all POI types.
+   *
+   * @return a list of all POI types
+   */
+  @GetMapping("/public/poi/types")
+  public List<PoiType> getAllPoiTypes() {
+    return poiService.getAllPoiTypes();
+  }
+
+  /**
+   * Searches POIs by name (case-insensitive substring match), paged and sorted.
+   *
+   * GET /api/public/poi/search?q={term}&page={i}&size={n}&sort={field,dir}
+   *
+   * @param q     required substring to match in POI.name
+   * @param page  zero-based page index (default 0)
+   * @param size  items per page (default 10)
+   * @param sort  “property,direction” (default “id,desc”)
+   * @return      a Page of PoiItemDto matching the query
+   */
+  @GetMapping("/public/poi/search")
+  public Page<PoiItemDto> searchPois(
+      @RequestParam("q") String q,
+      @RequestParam(defaultValue = "0")   int page,
+      @RequestParam(defaultValue = "10")  int size,
+      @RequestParam(defaultValue = "id,desc") String sort
+  ) {
+    // parse “field,dir”
+    String[] parts = sort.split(",");
+    Sort.Direction dir = parts.length > 1 && parts[1].equalsIgnoreCase("desc")
+        ? Sort.Direction.DESC
+        : Sort.Direction.ASC;
+    Pageable pageable = PageRequest.of(page, size, Sort.by(dir, parts[0]));
+
+    // delegate to your service (which uses SearchUtil under the hood)
+    return poiService
+        .searchPoisByName(q, pageable)
+        .map(PoiItemDto::fromEntity);
+  }
+
+}
