@@ -278,20 +278,12 @@ public class UserService {
     User user = emailToken.getUser();
     LocalDateTime now = LocalDateTime.now();
 
-    // Find existing safety confirmation or create new one
-    Optional<SafetyConfirmation> existingConfirmation = safetyConfirmationRepository.findByUser(user);
-    
-    if (existingConfirmation.isPresent()) {
-      // Update existing confirmation
-      SafetyConfirmation confirmation = existingConfirmation.get();
-      confirmation.setIsSafe(true);
-      confirmation.setSafeAt(now);
-      safetyConfirmationRepository.save(confirmation);
-    } else {
-      // Create new confirmation
-      SafetyConfirmation confirmation = new SafetyConfirmation(user, true, now);
-      safetyConfirmationRepository.save(confirmation);
-    }
+    // Delete all existing safety confirmations for this user
+    safetyConfirmationRepository.deleteByUser(user);
+
+    // Create new confirmation
+    SafetyConfirmation confirmation = new SafetyConfirmation(user, true, now);
+    safetyConfirmationRepository.save(confirmation);
   }
 
   /**
