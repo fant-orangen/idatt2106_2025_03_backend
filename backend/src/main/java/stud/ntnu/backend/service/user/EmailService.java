@@ -1,5 +1,6 @@
 package stud.ntnu.backend.service.user;
 
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -252,22 +253,31 @@ public class EmailService {
    * Each member receives their own unique token for confirmation.
    *
    * @param user The User object representing the person requesting safety confirmation
+   * @throws IllegalArgumentException if the user data is invalid
+   * @throws IllegalStateException if the user has no household or is the only member
+   * @throws RuntimeException if there are email sending issues
    */
   @Transactional
   public void sendSafetyConfirmationEmails(User user) {
     if (user == null || user.getEmail() == null) {
       log.error("Cannot send safety confirmation email. User is null or user email is null.");
-      return;
+      throw new IllegalArgumentException("Invalid user data for safety confirmation.");
     }
 
     Household household = user.getHousehold();
     if (household == null) {
       log.error("Cannot send safety confirmation email. User {} does not belong to a household.", user.getEmail());
-      return;
+      throw new IllegalStateException("User does not belong to a household.");
     }
 
     List<User> householdMembers = userRepository.findByHousehold(household);
+    if (householdMembers.isEmpty() || householdMembers.size() == 1) {
+      log.error("No other members found in household for user {}", user.getEmail());
+      throw new IllegalStateException("Ingen andre medlemmer i husstanden. / No other members in the household.");
+    }
+    
     String requestingUserName = (user.getName() != null ? user.getName() : "et husstandsmedlem");
+    log.info("Sending safety confirmation emails for household {} requested by {}", household.getId(), user.getEmail());
 
     for (User member : householdMembers) {
       // Skip sending email to the requesting user
@@ -276,6 +286,8 @@ public class EmailService {
       }
 
       try {
+        log.info("Preparing to send safety confirmation email to member: {}", member.getEmail());
+        
         // Generate unique token for this member
         String token = UUID.randomUUID().toString();
         LocalDateTime expiresAt = LocalDateTime.now().plusHours(168); // 1 week
@@ -288,6 +300,7 @@ public class EmailService {
             expiresAt
         );
         emailTokenRepository.save(safetyToken);
+        log.info("Created safety confirmation token for member: {}", member.getEmail());
 
         // Send email with the unique token
         MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -298,7 +311,6 @@ public class EmailService {
         helper.setSubject("Krisefikser.no - Bekreft din sikkerhetsstatus");
 
         String memberName = (member.getName() != null ? member.getName() : "Bruker");
-        String confirmationUrl = "http://localhost:8080/api/user/confirm-safety?token=" + token;
 
         String emailBody = """
             <html>
@@ -307,18 +319,9 @@ public class EmailService {
                 
                 <p>%s fra din husstand har bedt om en bekreftelse på at du er trygg.</p>
                 
-                <p>For å bekrefte at du er i sikkerhet, vennligst bruk denne lenken:</p>
+                <p>For å bekrefte at du er i sikkerhet, vennligst klikk på denne lenken:</p>
                 
-                <form action="http://localhost:8080/api/user/confirm-safety" method="post">
-                    <input type="hidden" name="token" value="%s">
-                    <button type="submit" style="background-color: #4CAF50; color: white; padding: 14px 20px; margin: 8px 0; border: none; border-radius: 4px; cursor: pointer;">
-                        Bekreft at jeg er trygg
-                    </button>
-                </form>
-                
-                <p>Alternativt kan du sende en POST-forespørsel til denne adressen med token i request body:</p>
-                <p>http://localhost:8080/api/user/confirm-safety</p>
-                <p>Token: %s</p>
+                <p><a href="http://localhost:8080/api/user/confirm-safety?token=%s">Bekreft at jeg er trygg</a></p>
                 
                 <p>Hvis du ikke er i stand til å bekrefte din sikkerhet, vennligst kontakt nødetatene umiddelbart.</p>
                 
@@ -326,17 +329,19 @@ public class EmailService {
                 Krisefikser-teamet</p>
             </body>
             </html>
-            """.formatted(memberName, requestingUserName, token, token);
+            """.formatted(memberName, requestingUserName, token);
 
         helper.setText(emailBody, true); // Set 'true' to indicate HTML content
 
         mailSender.send(mimeMessage);
         log.info("Safety confirmation email sent successfully to: {}", member.getEmail());
 
-      } catch (MailException e) {
-        log.error("Mail sending error for safety confirmation email to {}", member.getEmail());
+      } catch (MessagingException e) {
+        log.error("Mail sending error for safety confirmation email to {}: {}", member.getEmail(), e.getMessage());
+        throw new RuntimeException("Failed to send safety confirmation email", e);
       } catch (Exception e) {
-        log.error("Unexpected error sending safety confirmation email to {}: {}", member.getEmail(), e.getMessage());
+        log.error("Unexpected error sending safety confirmation email to {}: {}", member.getEmail(), e.getMessage(), e);
+        throw new RuntimeException("Unexpected error during safety confirmation", e);
       }
     }
   }

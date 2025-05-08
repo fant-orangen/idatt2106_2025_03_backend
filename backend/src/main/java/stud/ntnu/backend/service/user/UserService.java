@@ -16,6 +16,8 @@ import stud.ntnu.backend.dto.user.UserHistoryDto.ReflectionDto;
 import stud.ntnu.backend.dto.user.UserBasicInfoDto;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +30,12 @@ import java.util.Optional;
 @Service
 public class UserService {
 
+  private static final Logger log = LoggerFactory.getLogger(UserService.class);
+
   private final UserRepository userRepository;
   private final EmailTokenRepository emailTokenRepository;
   private final SafetyConfirmationRepository safetyConfirmationRepository;
+  private final EmailService emailService;
 
   /**
    * Constructor for dependency injection.
@@ -38,13 +43,16 @@ public class UserService {
    * @param userRepository repository for user operations
    * @param emailTokenRepository repository for email tokens
    * @param safetyConfirmationRepository repository for safety confirmations
+   * @param emailService service for sending emails
    */
   public UserService(UserRepository userRepository,
                     EmailTokenRepository emailTokenRepository,
-                    SafetyConfirmationRepository safetyConfirmationRepository) {
+                    SafetyConfirmationRepository safetyConfirmationRepository,
+                    EmailService emailService) {
     this.userRepository = userRepository;
     this.emailTokenRepository = emailTokenRepository;
     this.safetyConfirmationRepository = safetyConfirmationRepository;
+    this.emailService = emailService;
   }
 
   /**
@@ -277,6 +285,39 @@ public class UserService {
       // Create new confirmation
       SafetyConfirmation confirmation = new SafetyConfirmation(user, true, now);
       safetyConfirmationRepository.save(confirmation);
+    }
+  }
+
+  /**
+   * Requests safety confirmation from all other members of the user's household.
+   * Each member will receive an email with a unique token to confirm their safety.
+   *
+   * @param email The email of the user requesting safety confirmation
+   * @throws IllegalStateException if the user is not found or does not belong to a household
+   */
+  @Transactional
+  public void requestSafetyConfirmation(String email) {
+    log.info("Requesting safety confirmation for user with email: {}", email);
+    
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> {
+          log.error("User not found with email: {}", email);
+          return new IllegalStateException("Bruker ikke funnet. / User not found.");
+        });
+
+    if (user.getHousehold() == null) {
+      log.error("User {} does not belong to any household", email);
+      throw new IllegalStateException("Du må være medlem av en husstand for å be om sikkerhetsbekreftelser. / You must be a member of a household to request safety confirmations.");
+    }
+
+    log.info("Found user {} in household {}", email, user.getHousehold().getId());
+    
+    try {
+      emailService.sendSafetyConfirmationEmails(user);
+      log.info("Successfully sent safety confirmation emails for user {}", email);
+    } catch (Exception e) {
+      log.error("Error sending safety confirmation emails for user {}: {}", email, e.getMessage(), e);
+      throw e;
     }
   }
 }

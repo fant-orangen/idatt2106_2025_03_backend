@@ -1,6 +1,7 @@
 package stud.ntnu.backend.controller.user;
 
 import java.security.Principal;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -110,11 +111,30 @@ public class UserController {
    * @param token The safety confirmation token
    * @return ResponseEntity with status 200 OK if successful, or an error message
    */
-  @PostMapping("/confirm-safety")
+  @GetMapping("/confirm-safety")
   public ResponseEntity<?> confirmSafety(@RequestParam String token) {
     try {
       userService.confirmSafety(token);
       return ResponseEntity.ok("Din sikkerhet er bekreftet. / Your safety has been confirmed.");
+    } catch (IllegalArgumentException | IllegalStateException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.internalServerError().body("En feil oppstod. Vennligst prøv igjen senere. / An error occurred. Please try again later.");
+    }
+  }
+
+  /**
+   * Requests safety confirmation from all other members of the user's household.
+   * Each member will receive an email with a unique token to confirm their safety.
+   *
+   * @param principal the Principal representing the current user
+   * @return ResponseEntity with status 200 OK if emails were sent successfully, or an error message
+   */
+  @PostMapping("/confirm-safety/requests")
+  public ResponseEntity<?> requestSafetyConfirmation(Principal principal) {
+    try {
+      userService.requestSafetyConfirmation(principal.getName());
+      return ResponseEntity.ok("Sikkerhetsbekreftelser er sendt til alle husstandsmedlemmer. / Safety confirmations have been sent to all household members.");
     } catch (IllegalArgumentException | IllegalStateException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     } catch (Exception e) {

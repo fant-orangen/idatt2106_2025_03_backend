@@ -112,6 +112,9 @@ public class SecurityConfig {
                     "/ws/**"
                 ).permitAll()
 
+                // Specific public endpoints
+                .requestMatchers("/api/user/confirm-safety").permitAll()
+
                 // Authenticated user endpoints
                 .requestMatchers("/api/user/**").authenticated()
                 .requestMatchers("/topic/**", "/app/**").authenticated()
