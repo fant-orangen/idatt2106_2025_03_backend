@@ -31,5 +31,8 @@ public class PoiStartupLoader {
     poiImportService.importHospitalsFromOverpass();
     poiImportService.importSheltersFromOverpass();
     poiImportService.importGroceryStoresFromOverpass();
+    poiImportService.importPoliceStationsFromOverpass();
+    poiImportService.importPharmaciesFromOverpass();
+    poiImportService.importFireStationsFromOverpass();
   }
 }

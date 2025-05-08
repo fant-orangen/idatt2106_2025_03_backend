@@ -32,7 +32,7 @@ import java.util.Optional;
 public class ExpirationNotificationScheduler {
 
   // Set this to true to enable test mode with notifications every 15 seconds
-  private static final boolean TEST_MODE = true; // TODO: set to false when ready
+  private static final boolean TEST_MODE = false; // TODO: set to false when ready
 
   private final ProductBatchRepository productBatchRepository;
   private final UserRepository userRepository;

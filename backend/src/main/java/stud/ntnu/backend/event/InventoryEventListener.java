@@ -19,6 +19,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Event listener that handles inventory change events and sends notifications to users when
+ * their household's supplies are running low.
+ * 
+ * This listener monitors both water and food supplies, calculating the number of days of supply
+ * remaining based on daily requirements. When supplies fall below the warning threshold,
+ * notifications are sent to all users in the household who have enabled supply alerts.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -30,8 +38,21 @@ public class InventoryEventListener {
   private final NotificationPreferenceRepository notificationPreferenceRepository;
   private final MessageSource messageSource;
 
+  /** The number of days of supply remaining that triggers a warning notification */
   private static final int DAYS_WARNING_THRESHOLD = 7;
 
+  /**
+   * Handles inventory change events by checking if supplies are running low and sending
+   * notifications to household members if necessary.
+   * 
+   * This method:
+   * 1. Calculates daily water and calorie requirements for the household
+   * 2. Gets current inventory levels for water and food
+   * 3. Calculates days of supply remaining
+   * 4. If supplies are below threshold, sends notifications to household members
+   * 
+   * @param event The inventory change event containing the household ID
+   */
   @Async
   @EventListener
   public void handleInventoryChangeEvent(InventoryChangeEvent event) {

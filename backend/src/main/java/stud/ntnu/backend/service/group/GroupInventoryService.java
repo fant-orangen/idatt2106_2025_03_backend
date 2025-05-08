@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import stud.ntnu.backend.dto.inventory.ProductBatchDto;
 import stud.ntnu.backend.dto.inventory.ProductTypeDto;
 import stud.ntnu.backend.model.group.GroupInventoryContribution;
+import stud.ntnu.backend.model.group.Group;
 import stud.ntnu.backend.model.inventory.ProductBatch;
 import stud.ntnu.backend.model.inventory.ProductType;
-import stud.ntnu.backend.model.group.Group;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.repository.group.GroupInventoryContributionRepository;
 import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
@@ -128,10 +128,14 @@ public class GroupInventoryService {
         throw new IllegalArgumentException("User is not in a household");
     }
 
-    Page<ProductType> page = productTypeRepository.findContributedProductTypesByGroup(
-        groupId,
-        household.getId(),
-        pageable);
+    // Validate that the user's household is a member of the group
+    boolean isMember = groupRepository.existsByIdAndMemberHouseholds_Id(groupId, household.getId());
+    if (!isMember) {
+        throw new IllegalArgumentException("User's household is not a member of this group");
+    }
+
+    // Get all product types contributed to the group by any household
+    Page<ProductType> page = productTypeRepository.findContributedProductTypesByGroup(groupId, pageable);
     return page.map(pt -> new ProductTypeDto(
         pt.getId(),
         pt.getHousehold() != null ? pt.getHousehold().getId() : null,
@@ -171,23 +175,43 @@ public class GroupInventoryService {
   }
 
   /**
-   * Removes a contributed product batch from a group if and only if it is contributed to exactly
-   * one group.
-   * <p>
-   * This logic exists because there isn't supposed to be more than one group per product batch.
+   * Removes a contributed product batch from a group if it belongs to the user's household.
    *
    * @param productBatchId the id of the product batch
-   * @return true if removed, false otherwise
+   * @param email the email of the user requesting the removal
+   * @return true if removed, false if not found
+   * @throws IllegalArgumentException if user not found or not in a household
+   * @throws SecurityException if the batch doesn't belong to user's household
    */
-  public boolean removeContributedBatch(Integer productBatchId) {
-    List<GroupInventoryContribution> contributions = groupInventoryContributionRepository.findAll()
-        .stream()
-        .filter(gic -> gic.getProduct() != null && gic.getProduct().getId().equals(productBatchId))
-        .toList();
-    if (contributions.size() != 1) {
+  public boolean removeContributedBatch(Integer productBatchId, String email) {
+    if (productBatchId == null || email == null) {
+      throw new IllegalArgumentException("Product batch ID and email cannot be null");
+    }
+
+    // Get user's household
+    var user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    
+    var household = user.getHousehold();
+    if (household == null) {
+        throw new IllegalArgumentException("User is not in a household");
+    }
+
+    // Find the contribution for this batch
+    var contribution = groupInventoryContributionRepository.findByProductBatchId(productBatchId)
+        .orElse(null);
+
+    // Check if contribution exists
+    if (contribution == null) {
       return false;
     }
-    groupInventoryContributionRepository.delete(contributions.get(0));
+
+    // Verify the contribution belongs to user's household
+    if (!contribution.getHousehold().getId().equals(household.getId())) {
+      throw new SecurityException("Not authorized to remove this contribution");
+    }
+
+    groupInventoryContributionRepository.delete(contribution);
     return true;
   }
 
@@ -228,6 +252,7 @@ public class GroupInventoryService {
 
   /**
    * Search for product types that have at least one batch contributed to the specified group by the user's household.
+   * First searches all product types by name using SearchUtil, then filters for those contributed to the group.
    *
    * @param groupId The ID of the group to search within
    * @param search The search term to filter product types by name
@@ -256,27 +281,42 @@ public class GroupInventoryService {
         throw new IllegalArgumentException("User's household is not a member of this group");
     }
 
-    // Handle empty search string
-    String searchTerm = search != null ? search.trim() : "";
+    // Get list of product type IDs that are contributed to this group
+    List<Integer> contributedTypeIds = groupInventoryContributionRepository.findProductTypeIdsContributedToGroup(groupId);
+    
+    // If no contributions exist, return empty page
+    if (contributedTypeIds.isEmpty()) {
+        return Page.empty(pageable);
+    }
 
-    // Use the repository to get matching product types
-    Page<ProductType> searchResults = groupInventoryContributionRepository
-        .findContributedProductTypesByGroupAndHouseholdAndNameContaining(
-            groupId,
-            household.getId(),
-            searchTerm,
-            pageable
-        );
+    // First use SearchUtil to search among all product types by name
+    Page<ProductType> searchResults = searchUtil.searchByDescription(
+        ProductType.class,
+        "name",
+        search != null ? search : "",
+        pageable
+    );
 
-    // Convert to DTOs
-    return searchResults.map(pt -> new ProductTypeDto(
-        pt.getId(),
-        pt.getHousehold() != null ? pt.getHousehold().getId() : null,
-        pt.getName(),
-        pt.getUnit(),
-        pt.getCaloriesPerUnit(),
-        pt.getCategory()
-    ));
+    // Filter the search results to only include product types that are contributed to the group
+    List<ProductType> filteredResults = searchResults.getContent().stream()
+        .filter(pt -> contributedTypeIds.contains(pt.getId()))
+        .collect(Collectors.toList());
+
+    // Create a new page with the filtered results
+    return new PageImpl<>(
+        filteredResults.stream()
+            .map(pt -> new ProductTypeDto(
+                pt.getId(),
+                pt.getHousehold() != null ? pt.getHousehold().getId() : null,
+                pt.getName(),
+                pt.getUnit(),
+                pt.getCaloriesPerUnit(),
+                pt.getCategory()
+            ))
+            .collect(Collectors.toList()),
+        pageable,
+        filteredResults.size()
+    );
   }
 
   /**
@@ -310,5 +350,35 @@ public class GroupInventoryService {
 
     // Check if batch is contributed to any group
     return groupInventoryContributionRepository.existsByProductBatchId(productBatchId);
+  }
+
+  /**
+   * Get the total number of units of a specific product type that have been contributed to a group across all households.
+   *
+   * @param productTypeId The ID of the product type
+   * @param groupId The ID of the group
+   * @return The total number of units contributed to the group
+   * @throws IllegalArgumentException if the product type or group doesn't exist
+   */
+  public Integer getTotalUnitsForProductType(Integer productTypeId, Integer groupId) {
+    // Validate inputs
+    if (productTypeId == null || groupId == null) {
+        throw new IllegalArgumentException("Product type ID and group ID cannot be null");
+    }
+
+    // Validate that the product type exists
+    if (!productTypeRepository.existsById(productTypeId)) {
+        throw new IllegalArgumentException("Product type not found");
+    }
+
+    // Validate that the group exists
+    if (!groupRepository.existsById(groupId)) {
+        throw new IllegalArgumentException("Group not found");
+    }
+
+    // Get the sum of units from the repository across all households
+    return groupInventoryContributionRepository.sumTotalUnitsForProductTypeAndGroup(
+        productTypeId, 
+        groupId);
   }
 }

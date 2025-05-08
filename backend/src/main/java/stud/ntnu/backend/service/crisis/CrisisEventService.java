@@ -25,9 +25,12 @@ import stud.ntnu.backend.model.map.ScenarioTheme;
 import stud.ntnu.backend.service.user.NotificationService;
 import stud.ntnu.backend.service.user.UserService;
 import stud.ntnu.backend.util.LocationUtil;
+import stud.ntnu.backend.util.SearchUtil;
 
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Service for managing crisis events. Handles creation, retrieval, updating, and deletion of crisis
@@ -43,6 +46,9 @@ public class CrisisEventService {
   private final ScenarioThemeRepository scenarioThemeRepository;
   private final MessageSource messageSource;
   private final Logger log = LoggerFactory.getLogger(CrisisEventService.class);
+
+  @Autowired
+  private SearchUtil searchUtil;
 
   /**
    * Constructor for dependency injection.
@@ -471,20 +477,23 @@ public class CrisisEventService {
 
   /**
    * Retrieves a paginated list of crisis events affecting the given user. A crisis event affects a
-   * user if the user's home or household location is within the event's radius.
+   * user if the user's home or household location is within the event's radius. Events are sorted
+   * by severity (red > yellow > green).
    *
    * @param user     the user to check
    * @param pageable pagination information
-   * @return a page of crisis events affecting the user
+   * @return a page of crisis events affecting the user, sorted by severity
    */
   @Transactional(readOnly = true)
   public Page<CrisisEvent> getCrisisEventsAffectingUser(User user, Pageable pageable) {
     // Get all active crisis events (could be optimized with a custom query if needed)
     List<CrisisEvent> allActiveEvents = crisisEventRepository.findByActiveTrue();
-    // Filter events that affect the user
+    // Filter events that affect the user and sort by severity
     List<CrisisEvent> affectingEvents = allActiveEvents.stream()
         .filter(event -> event.getRadius() != null &&
             LocationUtil.isCrisisEventNearUser(user, event, event.getRadius().doubleValue()))
+        .sorted((a, b) -> Integer.compare(severityOrder(b.getSeverity()),
+            severityOrder(a.getSeverity())))
         .toList();
     // Manual pagination
     int start = (int) pageable.getOffset();
@@ -558,5 +567,60 @@ public class CrisisEventService {
   @Transactional(readOnly = true)
   public Optional<CrisisEventDetailsDto> getCrisisEventDetailsById(Integer id) {
     return crisisEventRepository.findById(id).map(CrisisEventDetailsDto::fromEntity);
+  }
+
+  /**
+   * Retrieves a preview (id, name, severity, startTime) of all inactive crisis events with
+   * pagination, sorted by severity (red > yellow > green).
+   *
+   * @param pageable pagination information
+   * @return page of crisis event previews
+   */
+  @Transactional(readOnly = true)
+  public Page<CrisisEventPreviewDto> getInactiveCrisisEventPreviews(Pageable pageable) {
+    List<CrisisEvent> inactiveEvents = crisisEventRepository.findByActiveFalse();
+    List<CrisisEventPreviewDto> previews = inactiveEvents.stream()
+        .map(CrisisEventPreviewDto::fromEntity)
+        .sorted((a, b) -> Integer.compare(severityOrder(b.getSeverity()),
+            severityOrder(a.getSeverity())))
+        .toList();
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), previews.size());
+    List<CrisisEventPreviewDto> pagedList =
+        (start <= end) ? previews.subList(start, end) : List.of();
+    return new PageImpl<>(pagedList, pageable, previews.size());
+  }
+
+  /**
+   * Search for crisis events based on a name search term and active status.
+   *
+   * @param searchTerm the search term to filter event names by
+   * @param isActive whether to search among active (true) or inactive (false) events
+   * @param pageable pagination information
+   * @return a page of crisis events matching the search criteria
+   */
+  @Transactional(readOnly = true)
+  public Page<CrisisEvent> searchCrisisEvents(String searchTerm, boolean isActive, Pageable pageable) {
+    // First, use SearchUtil to search by name across all crisis events
+    Page<CrisisEvent> allMatchingEvents = searchUtil.searchByDescription(
+        CrisisEvent.class,
+        "name",
+        searchTerm,
+        pageable
+    );
+
+    // Then filter by active status
+    List<CrisisEvent> filteredEvents = allMatchingEvents.getContent().stream()
+        .filter(event -> event.getActive() == isActive)
+        .sorted((a, b) -> Integer.compare(severityOrder(b.getSeverity()), 
+            severityOrder(a.getSeverity())))
+        .toList();
+
+    // Manual pagination
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), filteredEvents.size());
+    List<CrisisEvent> pageContent = filteredEvents.subList(start, end);
+
+    return new PageImpl<>(pageContent, pageable, filteredEvents.size());
   }
 }

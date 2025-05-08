@@ -10,5 +10,4 @@ import stud.ntnu.backend.model.household.Household;
 @Repository
 public interface HouseholdRepository extends JpaRepository<Household, Integer> {
     // Basic CRUD operations are provided by JpaRepository
-    // Custom query methods can be added as needed
 }

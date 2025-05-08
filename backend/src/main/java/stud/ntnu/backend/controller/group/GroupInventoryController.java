@@ -42,7 +42,7 @@ public class GroupInventoryController {
    * @param groupId The ID of the group
    * @param pageable pagination information
    * @param principal the authenticated user
-   * @return a page of ProductTypeDto
+   * @return a page of ProductTypeDt
    */
   @GetMapping("/user/groups/inventory/product-types")
   public ResponseEntity<Page<ProductTypeDto>> getContributedProductTypes(
@@ -82,28 +82,30 @@ public class GroupInventoryController {
   }
 
   /**
-   * Remove a contributed product batch from a group by ProductBatch id.
-   * <p>
-   * If the batch is contributed to more than one group, return an error and do not remove it.
+   * Remove a contributed product batch from a group. Only allowed if the batch was contributed by the user's household.
    *
    * @param productBatchId the id of the product batch
-   * @return 200 OK if removed, 409 Conflict if batch is contributed to more than one group, 404 if
-   * not found
+   * @param principal the authenticated user
+   * @return 200 OK if removed, 403 Forbidden if not authorized, 404 if not found
    */
   @PatchMapping("/user/groups/inventory/product-batches/{productBatchId}")
-  public ResponseEntity<?> removeContributedBatch(@PathVariable Integer productBatchId) {
-    int count = groupInventoryService.countGroupContributionsForBatch(productBatchId);
-    if (count == 0) {
-      return ResponseEntity.notFound().build();
-    } else if (count > 1) {
-      return ResponseEntity.status(409)
-          .body("This product batch is being contributed to more than one group.");
+  public ResponseEntity<?> removeContributedBatch(
+      @PathVariable Integer productBatchId,
+      Principal principal) {
+    if (Objects.isNull(productBatchId)) {
+      return ResponseEntity.badRequest().build();
     }
-    boolean removed = groupInventoryService.removeContributedBatch(productBatchId);
-    if (!removed) {
-      return ResponseEntity.notFound().build();
+    try {
+      boolean removed = groupInventoryService.removeContributedBatch(productBatchId, principal.getName());
+      if (!removed) {
+        return ResponseEntity.notFound().build();
+      }
+      return ResponseEntity.ok().build();
+    } catch (SecurityException e) {
+      return ResponseEntity.status(403).body("Not authorized to remove this contribution");
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
-    return ResponseEntity.ok().build();
   }
 
   /**
@@ -180,4 +182,29 @@ public class GroupInventoryController {
       return ResponseEntity.status(403).body(false); // TODO: Change this status code?
     }
   }
+
+  /**
+   * Get the total number of units of a specific product type that have been contributed to a group across all households.
+   *
+   * @param productTypeId The ID of the product type
+   * @param groupId The ID of the group
+   * @return The total number of units contributed to the group
+   */
+  @GetMapping("user/groups/inventory/product-types/sum")
+  public ResponseEntity<Integer> getTotalUnitsForProductType(
+      @RequestParam Integer productTypeId,
+      @RequestParam Integer groupId) {
+    if (Objects.isNull(productTypeId) || Objects.isNull(groupId)) {
+      return ResponseEntity.badRequest().build();
+    }
+    try {
+      Integer totalUnits = groupInventoryService.getTotalUnitsForProductType(
+          productTypeId,
+          groupId);
+      return ResponseEntity.ok(totalUnits);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(0);
+    }
+  }
+
 }

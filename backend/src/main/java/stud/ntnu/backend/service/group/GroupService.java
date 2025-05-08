@@ -2,6 +2,7 @@ package stud.ntnu.backend.service.group;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.repository.group.GroupRepository;
 import stud.ntnu.backend.repository.group.GroupMembershipRepository;
 import stud.ntnu.backend.model.group.Group;
@@ -21,6 +22,7 @@ import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
 import stud.ntnu.backend.repository.group.GroupInventoryContributionRepository;
+import stud.ntnu.backend.repository.household.HouseholdRepository;
 
 /**
  * Service for managing groups. Handles creation, retrieval, updating, and deletion of groups.
@@ -35,6 +37,7 @@ public class GroupService {
   private final UserRepository userRepository;
   private final ProductTypeRepository productTypeRepository;
   private final GroupInventoryContributionRepository groupInventoryContributionRepository;
+  private final HouseholdRepository householdRepository;
 
   /**
    * Constructor for dependency injection.
@@ -47,13 +50,15 @@ public class GroupService {
    * @param productTypeRepository                repository for product type operations
    * @param groupInventoryContributionRepository repository for group inventory contribution
    *                                             operations
+   * @param householdRepository                  repository for household operations
    */
   @Autowired
   public GroupService(GroupRepository groupRepository,
       GroupMembershipRepository groupMembershipRepository, InventoryService inventoryService,
       HouseholdAdminRepository householdAdminRepository, UserRepository userRepository,
       ProductTypeRepository productTypeRepository,
-      GroupInventoryContributionRepository groupInventoryContributionRepository) {
+      GroupInventoryContributionRepository groupInventoryContributionRepository,
+      HouseholdRepository householdRepository) {
     this.groupRepository = groupRepository;
     this.groupMembershipRepository = groupMembershipRepository;
     this.inventoryService = inventoryService;
@@ -61,6 +66,7 @@ public class GroupService {
     this.userRepository = userRepository;
     this.productTypeRepository = productTypeRepository;
     this.groupInventoryContributionRepository = groupInventoryContributionRepository;
+    this.householdRepository = householdRepository;
   }
 
   /**
@@ -124,7 +130,7 @@ public class GroupService {
 
   public Page<GroupSummaryDto> getCurrentUserGroups(String email, Pageable pageable) {
     Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
-    Page<GroupMembership> memberships = groupMembershipRepository.findAllCurrentByHouseholdId(
+    Page<GroupMembership> memberships = groupMembershipRepository.findAllCurrentByHouseholdIdAndGroupStatus(
         householdId, LocalDateTime.now(), pageable);
     return memberships.map(membership -> {
       Group group = membership.getGroup();
@@ -136,6 +142,7 @@ public class GroupService {
     });
   }
 
+  @Transactional
   public boolean removeHouseholdFromGroup(String email, Integer groupId) {
     User user = userRepository.findByEmail(email).orElse(null);
     if (user == null || !householdAdminRepository.existsByUser(user)) {
@@ -150,6 +157,20 @@ public class GroupService {
     GroupMembership membership = membershipOpt.get();
     membership.setLeftAt(LocalDateTime.now());
     groupMembershipRepository.save(membership);
+
+    // Delete all group inventory contributions from this household to this group
+    groupInventoryContributionRepository.deleteByGroupIdAndHouseholdId(groupId, householdId);
+    
+    // Check if this was the last household in the group
+    List<GroupMembership> remainingMemberships = groupMembershipRepository.findAllCurrentByGroupId(
+        groupId, LocalDateTime.now());
+    if (remainingMemberships.isEmpty()) {
+      // This was the last household, archive the group
+      Group group = membership.getGroup();
+      group.setStatus(Group.GroupStatus.archived);
+      groupRepository.save(group);
+    }
+    
     return true;
   }
 
@@ -186,5 +207,41 @@ public class GroupService {
     List<HouseholdDto> households = getCurrentHouseholdsInGroup(groupId);
     return households.stream()
         .anyMatch(h -> h.getId() != null && h.getId().equals(userHouseholdId));
+  }
+
+  /**
+   * Creates a new group if the user is a household admin.
+   *
+   * @param name  the name of the group to create
+   * @param email the email of the user creating the group
+   * @return true if the group was created successfully, false if the user is not a household admin
+   */
+  @Transactional
+  public boolean createGroup(String name, String email) {
+    User user = userRepository.findByEmail(email).orElse(null);
+    if (user == null || !householdAdminRepository.existsByUser(user)) {
+      return false;
+    }
+
+    Group group = new Group(name, user);
+    group = groupRepository.save(group);
+
+    // Get the household ID of the current user
+    Integer householdId = inventoryService.getHouseholdIdByUserEmail(email);
+    if (householdId == null) {
+      return false;
+    }
+
+    // Get the household entity
+    Optional<Household> householdOpt = householdRepository.findById(householdId);
+    if (householdOpt.isEmpty()) {
+      return false;
+    }
+
+    // Create and save the membership
+    GroupMembership membership = new GroupMembership(group, householdOpt.get(), user);
+    groupMembershipRepository.save(membership);
+
+    return true;
   }
 }
