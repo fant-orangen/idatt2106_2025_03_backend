@@ -21,6 +21,8 @@ import java.util.UUID;
 import java.time.LocalDateTime;
 import stud.ntnu.backend.model.household.Household;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 /**
  * Service responsible for handling email sending operations, such as verification emails. Uses
@@ -35,6 +37,7 @@ public class EmailService {
   private final String senderEmail;
   private final UserRepository userRepository;
   private final EmailTokenRepository emailTokenRepository;
+  private final MessageSource messageSource;
 
   /**
    * Constructs the EmailService with necessary dependencies injected by Spring.
@@ -44,16 +47,19 @@ public class EmailService {
    *                    (spring.mail.username).
    * @param userRepository The repository for user operations.
    * @param emailTokenRepository The repository for email token operations.
+   * @param messageSource The MessageSource for internationalization.
    */
   @Autowired
   public EmailService(JavaMailSender mailSender,
       @Value("${spring.mail.username}") String senderEmail,
       UserRepository userRepository,
-      EmailTokenRepository emailTokenRepository) {
+      EmailTokenRepository emailTokenRepository,
+      MessageSource messageSource) {
     this.mailSender = mailSender;
     this.senderEmail = senderEmail;
     this.userRepository = userRepository;
     this.emailTokenRepository = emailTokenRepository;
+    this.messageSource = messageSource;
   }
 
   /**
@@ -66,8 +72,7 @@ public class EmailService {
    */
   public void sendVerificationEmail(User user, String token) {
     if (user == null || user.getEmail() == null || token == null) {
-      log.error(
-          "Cannot send verification email. User or token is null or user email is null.");
+      log.error("Cannot send verification email. User or token is null or user email is null.");
       return;
     }
 
@@ -75,54 +80,22 @@ public class EmailService {
       SimpleMailMessage message = new SimpleMailMessage();
       message.setFrom(senderEmail);
       message.setTo(user.getEmail());
-      message.setSubject(
-          "Krisefikser.no - Vennligst bekreft e-posten din / Please Verify Your Email");
-
-      String verificationUrl = "http://localhost:8080/api/auth/verify?token=" + token;
+      
       String userName = (user.getName() != null ? user.getName() : "Bruker/User");
+      String verificationUrl = "http://localhost:8080/api/auth/verify?token=" + token;
 
-      // Bilingual Email Body using Text Block and .formatted()
-      String emailBody = """
-          Hei %s,
-          
-          Takk for at du registrerte deg hos Krisefikser.no.
-          Vennligst klikk på lenken under for å bekrefte e-postadressen din:
-          
-          %s
-          
-          Hvis du ikke registrerte deg, vennligst se bort fra denne e-posten.
-          
-          Med vennlig hilsen,
-          Krisefikser-teamet
-          
-          ----------------------------------------
-          
-          Hello %s,
-          
-          Thank you for registering with Krisefikser.no.
-          Please click the link below to verify your email address:
-          
-          %s
-          
-          If you did not register, please ignore this email.
-          
-          Regards,
-          The Krisefikser Team
-          """.formatted(userName, verificationUrl, userName, verificationUrl);
-
-      message.setText(emailBody);
-
-      message.setText(emailBody);
+      message.setSubject(messageSource.getMessage("verification.email.subject", null, LocaleContextHolder.getLocale()));
+      message.setText(messageSource.getMessage("verification.email.body", 
+          new Object[]{userName, verificationUrl}, 
+          LocaleContextHolder.getLocale()));
 
       mailSender.send(message);
       log.info("Verification email sent successfully to: {}", user.getEmail());
 
-
     } catch (MailException e) {
       log.error("Mail sending error for verification email to {}", user.getEmail());
     } catch (Exception e) {
-      log.error("Unexpected error sending verification email to {}: {}", user.getEmail(),
-          e.getMessage());
+      log.error("Unexpected error sending verification email to {}: {}", user.getEmail(), e.getMessage());
     }
   }
 
@@ -145,36 +118,15 @@ public class EmailService {
       SimpleMailMessage message = new SimpleMailMessage();
       message.setTo(user.getEmail());
       message.setFrom(senderEmail);
-      message.setSubject("Krisefikser - 2FA Verification Code / Verifiseringskode");
-
+      
       String userName = (user.getName() != null ? user.getName() : "Bruker/User");
 
-      String emailBody = """
-          Hei %s,
-          
-          Din 2FA-verifiseringskode er: %s
-          
-          Vennligst skriv inn denne koden for å fullføre innloggingen din.
-          
-          Med vennlig hilsen,
-          Krisefikser-teamet
-          
-          ----------------------------------------
-          
-          Hello %s,
-          
-          Your 2FA verification code is: %s
-          
-          Please enter this code to complete your login.
-          
-          Regards,
-          The Krisefikser Team
-          """.formatted(userName, code, userName, code);
-
-      message.setText(emailBody);
+      message.setSubject(messageSource.getMessage("twofa.email.subject", null, LocaleContextHolder.getLocale()));
+      message.setText(messageSource.getMessage("twofa.email.body", 
+          new Object[]{userName, code}, 
+          LocaleContextHolder.getLocale()));
 
       mailSender.send(message);
-
       log.info("2FA email sent successfully to: {}", user.getEmail());
 
     } catch (MailException e) {
@@ -202,46 +154,19 @@ public class EmailService {
 
       helper.setFrom(senderEmail);
       helper.setTo(user.getEmail());
-      helper.setSubject("Krisefikser.no - Tilbakestill passord / Reset Your Password");
 
       String userName = (user.getName() != null ? user.getName() : "Bruker/User");
-
-      // Construct the reset password URL
       String resetPasswordUrl = "http://localhost:5173/reset-password/" + token;
 
-      // Bilingual HTML Email Body
-      String emailBody = """
-    <html>
-    <body>
-        <p>Hei %s,</p>
-        <p>Vi har mottatt en forespørsel om å tilbakestille passordet ditt.</p>
-        <p>Benytt denne koden og lenken for å tilbakestille passordet ditt:</p>
-        <p><strong>Kode:</strong> %s</p
-        <p>Vi anbefaler å kopiere koden</p>
-        <p>Koden er gyldig i 10 minutter.</p>
-        <p><strong>Lenke:</strong> <a href="%s" title="Tilbakestill passord">Klikk her for å tilbakestille passordet ditt</a></p>
-        <p>Hvis du ikke ba om å tilbakestille passordet ditt, vennligst se bort fra denne e-posten.</p>
-        <p>Med vennlig hilsen,<br>Krisefikser-teamet</p>
-        <hr>
-        <p>Hello %s,</p>
-        <p>We have received a request to reset your password.</p>
-        <p>Please use the code and link below to set a new password:</p>
-        <p><strong>Code:</strong> %s</p>
-        <p>We recommend copying the code</p>
-        <p>The code is valid for 10 minutes.</p>
-        <p><strong>Link:</strong> <a href="%s" title="Reset your password">Click here to reset your password</a></p>
-        <p>If you did not request a password reset, please ignore this email.</p>
-        <p>Regards,<br>The Krisefikser Team</p>
-    </body>
-    </html>
-    """.formatted(userName, token, resetPasswordUrl, userName, token, resetPasswordUrl);
-
-      helper.setText(emailBody, true); // Set 'true' to indicate HTML content
+      helper.setSubject(messageSource.getMessage("password.reset.subject", null, LocaleContextHolder.getLocale()));
+      helper.setText(messageSource.getMessage("password.reset.body", 
+          new Object[]{userName, token, resetPasswordUrl}, 
+          LocaleContextHolder.getLocale()), true);
 
       mailSender.send(mimeMessage);
       log.info("Password reset email sent successfully to: {}", user.getEmail());
 
-    } catch (MailException e) {
+    } catch (MessagingException e) {
       log.error("Mail sending error for password reset email to {}", user.getEmail());
     } catch (Exception e) {
       log.error("Unexpected error sending password reset email to {}: {}", user.getEmail(), e.getMessage());
@@ -274,28 +199,15 @@ public class EmailService {
 
       helper.setFrom(senderEmail);
       helper.setTo(receivingUser.getEmail());
-      helper.setSubject("Krisefikser.no - Bekreft din sikkerhetsstatus");
+      
+      String subject = messageSource.getMessage("safety.confirmation.subject", null, LocaleContextHolder.getLocale());
+      helper.setSubject(subject);
 
-      String emailBody = """
-          <html>
-          <body>
-              <p>Hei %s,</p>
-              
-              <p>%s fra din husstand har bedt om en bekreftelse på at du er trygg.</p>
-              
-              <p>For å bekrefte at du er i sikkerhet, vennligst klikk på denne lenken:</p>
-              
-              <p><a href="http://localhost:8080/api/user/confirm-safety?token=%s">Bekreft at jeg er trygg</a></p>
-              
-              <p>Hvis du ikke er i stand til å bekrefte din sikkerhet, vennligst kontakt nødetatene umiddelbart.</p>
-              
-              <p>Med vennlig hilsen,<br>
-              Krisefikser-teamet</p>
-          </body>
-          </html>
-          """.formatted(receivingUserName, requestingUserName, token);
+      String emailBody = messageSource.getMessage("safety.confirmation.body", 
+          new Object[]{receivingUserName, requestingUserName, token}, 
+          LocaleContextHolder.getLocale());
 
-      helper.setText(emailBody, true); // Set 'true' to indicate HTML content
+      helper.setText(emailBody, true);
 
       mailSender.send(mimeMessage);
       log.info("Safety confirmation email sent successfully to: {}", receivingUser.getEmail());
