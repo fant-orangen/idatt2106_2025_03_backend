@@ -20,6 +20,7 @@ import stud.ntnu.backend.dto.group.GroupInviteRequestDto;
 import stud.ntnu.backend.dto.group.GroupSummaryDto;
 import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.service.group.GroupService;
+import stud.ntnu.backend.model.group.GroupInvitation;
 
 /**
  * REST controller for managing crisis-supply groups.
@@ -30,6 +31,9 @@ import stud.ntnu.backend.service.group.GroupService;
  *   <li>Listing user's current groups</li>
  *   <li>Managing group membership</li>
  *   <li>Viewing group households</li>
+ *   <li>Inviting households to groups</li>
+ *   <li>Accepting and declining invitations</li>
+ *   <li>Retrieving pending invitations</li>
  * </ul>
  * <p>
  */
@@ -155,6 +159,68 @@ public class GroupController {
       return invited ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     } catch (IllegalStateException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  /**
+   * Retrieves all pending invitations for the current user.
+   * @param principal the authenticated user making the request
+   * @return ResponseEntity containing:
+   *         - 200 OK with list of GroupInvitation if successful
+   *         - 404 Not Found if no pending invitations exist
+   */
+  @GetMapping("/user/groups/invitations")
+  public ResponseEntity<?> getPendingInvitations(Principal principal) {
+    String email = principal.getName();
+    List<GroupInvitation> invitations = groupService.getPendingInvitations(email);
+    return ResponseEntity.ok(invitations);
+  }
+
+  /**
+   * Accepts a group invitation.
+   * Requires the user to be a member of the invited household.
+   *
+   * @param invitationId the ID of the invitation to accept
+   * @param principal the authenticated user making the request
+   * @return ResponseEntity containing:
+   *         - 200 OK if invitation was accepted successfully
+   *         - 403 Forbidden if user is not a member of the invited household
+   *         - 404 Not Found if invitation doesn't exist or is not pending
+   */
+  @PatchMapping("/user/groups/invitations/{invitationId}/accept")
+  public ResponseEntity<?> acceptInvitation(
+      @PathVariable("invitationId") Integer invitationId,
+      Principal principal) {
+    String email = principal.getName();
+    try {
+      boolean accepted = groupService.acceptInvitation(invitationId, email);
+      return accepted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+    } catch (IllegalStateException e) {
+      return ResponseEntity.status(403).body(e.getMessage());
+    }
+  }
+
+  /**
+   * Rejects a group invitation.
+   * Requires the user to be a member of the invited household.
+   *
+   * @param invitationId the ID of the invitation to reject
+   * @param principal the authenticated user making the request
+   * @return ResponseEntity containing:
+   *         - 200 OK if invitation was rejected successfully
+   *         - 403 Forbidden if user is not a member of the invited household
+   *         - 404 Not Found if invitation doesn't exist or is not pending
+   */
+  @PatchMapping("/user/groups/invitations/{invitationId}/reject")
+  public ResponseEntity<?> rejectInvitation(
+      @PathVariable("invitationId") Integer invitationId,
+      Principal principal) {
+    String email = principal.getName();
+    try {
+      boolean rejected = groupService.rejectInvitation(invitationId, email);
+      return rejected ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+    } catch (IllegalStateException e) {
+      return ResponseEntity.status(403).body(e.getMessage());
     }
   }
 

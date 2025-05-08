@@ -42,4 +42,20 @@ public interface GroupInvitationRepository extends JpaRepository<GroupInvitation
     boolean existsPendingInvitation(@Param("groupId") Integer groupId, 
                                   @Param("householdId") Integer householdId, 
                                   @Param("now") LocalDateTime now);
+
+    /**
+     * Finds all pending invitations for a household by its ID.
+     * An invitation is considered pending if it:
+     * - Has not been accepted (accepted_at is null)
+     * - Has not been declined (declined_at is null)
+     * - Has not expired (expires_at is in the future)
+     *
+     * @param householdId the ID of the household to find invitations for
+     * @param now the current time to check against expiration
+     * @return list of pending invitations
+     */
+    @Query("SELECT gi FROM GroupInvitation gi WHERE gi.invitedHousehold.id = :householdId " +
+           "AND gi.acceptedAt IS NULL AND gi.declinedAt IS NULL AND gi.expiresAt > :now")
+    List<GroupInvitation> findPendingInvitationsForHousehold(@Param("householdId") Integer householdId, 
+                                                            @Param("now") LocalDateTime now);
 } 

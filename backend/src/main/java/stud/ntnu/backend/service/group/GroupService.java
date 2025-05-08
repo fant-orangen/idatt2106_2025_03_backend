@@ -330,4 +330,114 @@ public class GroupService {
 
     return true;
   }
+
+  /**
+   * Gets all pending group invitations for the user's household.
+   * An invitation is considered pending if it:
+   * - Has not been accepted (accepted_at is null)
+   * - Has not been declined (declined_at is null)
+   * - Has not expired (expires_at is in the future)
+   *
+   * @param userEmail the email of the user
+   * @return List of pending GroupInvitation objects
+   */
+  public List<GroupInvitation> getPendingInvitations(String userEmail) {
+    // Get the user's household ID
+    Integer householdId = getHouseholdIdByUserEmail(userEmail);
+    if (householdId == null) {
+      return List.of(); // Return empty list if user has no household
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+    return groupInvitationRepository.findPendingInvitationsForHousehold(
+        householdId,
+        now
+    );
+  }
+
+  /**
+   * Accepts a group invitation if the user is a member of the invited household.
+   * Creates a new group membership when accepting.
+   *
+   * @param invitationId ID of the invitation to accept
+   * @param userEmail email of the user accepting the invitation
+   * @return true if accepted successfully, false if invitation not found
+   * @throws IllegalStateException if user is not authorized or invitation is not pending
+   */
+  @Transactional
+  public boolean acceptInvitation(Integer invitationId, String userEmail) {
+    // Get user's household ID
+    Integer userHouseholdId = getHouseholdIdByUserEmail(userEmail);
+    if (userHouseholdId == null) {
+      throw new IllegalStateException("User is not a member of any household");
+    }
+
+    // Find the invitation
+    GroupInvitation invitation = groupInvitationRepository.findById(invitationId)
+        .orElseThrow(() -> new IllegalStateException("Invitation not found"));
+
+    // Check if invitation is for user's household
+    if (!userHouseholdId.equals(invitation.getInvitedHousehold().getId())) {
+      throw new IllegalStateException("User is not authorized to accept this invitation");
+    }
+
+    // Check if invitation is still pending
+    if (!invitation.isPending()) {
+      throw new IllegalStateException("Invitation is no longer pending");
+    }
+
+    // Accept the invitation
+    invitation.accept();
+    groupInvitationRepository.save(invitation);
+
+    // Create group membership
+    User user = userRepository.findByEmail(userEmail)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+    
+    GroupMembership membership = new GroupMembership(
+        invitation.getGroup(),
+        invitation.getInvitedHousehold(),
+        user
+    );
+    groupMembershipRepository.save(membership);
+
+    return true;
+  }
+
+  /**
+   * Rejects a group invitation if the user is a member of the invited household.
+   *
+   * @param invitationId ID of the invitation to reject
+   * @param userEmail email of the user rejecting the invitation
+   * @return true if rejected successfully, false if invitation not found
+   * @throws IllegalStateException if user is not authorized or invitation is not pending
+   */
+  @Transactional
+  public boolean rejectInvitation(Integer invitationId, String userEmail) {
+    // Get user's household ID
+    Integer userHouseholdId = getHouseholdIdByUserEmail(userEmail);
+    if (userHouseholdId == null) {
+      throw new IllegalStateException("User is not a member of any household");
+    }
+
+    // Find the invitation
+    GroupInvitation invitation = groupInvitationRepository.findById(invitationId)
+        .orElseThrow(() -> new IllegalStateException("Invitation not found"));
+
+    // Check if invitation is for user's household
+    if (!userHouseholdId.equals(invitation.getInvitedHousehold().getId())) {
+      throw new IllegalStateException("User is not authorized to reject this invitation");
+    }
+
+    // Check if invitation is still pending
+    if (!invitation.isPending()) {
+      throw new IllegalStateException("Invitation is no longer pending");
+    }
+
+    // Reject the invitation
+    invitation.decline();
+    groupInvitationRepository.save(invitation);
+
+    return true;
+  }
 }
