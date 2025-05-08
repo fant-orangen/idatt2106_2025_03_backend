@@ -391,13 +391,13 @@ public class GroupService {
     groupInvitationRepository.save(invitation);
 
     // Create group membership
-    User user = userRepository.findByEmail(userEmail)
-        .orElseThrow(() -> new IllegalStateException("User not found"));
+    User inviter = userRepository.findByEmail(invitation.getInviterEmail())
+        .orElseThrow(() -> new IllegalStateException("Inviter not found"));
     
     GroupMembership membership = new GroupMembership(
         invitation.getGroup(),
         invitation.getInvitedHousehold(),
-        user
+        inviter
     );
     groupMembershipRepository.save(membership);
 
