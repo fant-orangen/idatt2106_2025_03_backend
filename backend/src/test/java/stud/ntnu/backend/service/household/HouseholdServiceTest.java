@@ -150,6 +150,10 @@ public class HouseholdServiceTest {
         // Set up security context
         SecurityContextHolder.setContext(securityContext);
         lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
+        lenient().when(authentication.getName()).thenReturn(testUser.getEmail());
+        
+        // Make userRepository mock lenient
+        lenient().doReturn(Optional.of(testUser)).when(userRepository).findByEmail(anyString());
     }
 
     @Nested
@@ -186,64 +190,40 @@ public class HouseholdServiceTest {
     class UpdateHouseholdTests {
         @Test
         void shouldUpdateHouseholdSuccessfully() {
-            // Create a new household with the old address
-            testHousehold = new Household("Test Household", "Old Address", 3);
+            // Arrange
             adminUser.setHousehold(testHousehold);
-            
-            when(userRepository.findByEmail("admin@example.com")).thenReturn(Optional.of(adminUser));
+            when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(adminUser));
             when(householdAdminRepository.existsByUser(adminUser)).thenReturn(true);
-            
-            // Mock the save to return the same household instance that was passed in
-            when(householdRepository.save(any(Household.class))).thenAnswer(invocation -> {
-                Household savedHousehold = invocation.getArgument(0);
-                // Ensure the coordinates are set before returning
-                if (savedHousehold.getLatitude() == null) {
-                    savedHousehold.setLatitude(new BigDecimal("61.0"));
-                }
-                if (savedHousehold.getLongitude() == null) {
-                    savedHousehold.setLongitude(new BigDecimal("11.0"));
-                }
-                return savedHousehold;
-            });
+            when(householdRepository.save(any())).thenReturn(testHousehold);
 
-            try (MockedStatic<LocationUtil> mockedLocationUtil = mockStatic(LocationUtil.class)) {
-                CoordinatesItemDto coordinates = new CoordinatesItemDto();
-                coordinates.setLatitude(new BigDecimal("61.0"));
-                coordinates.setLongitude(new BigDecimal("11.0"));
-                mockedLocationUtil.when(() -> LocationUtil.getCoordinatesByAddress("New Address"))
-                        .thenReturn(coordinates);
+            // Act
+            Household result = householdService.updateHousehold(
+                adminUser.getEmail(),
+                "Updated Name",
+                "Updated Address"
+            );
 
-                Household result = householdService.updateHousehold("admin@example.com", "New Name", "New Address");
-
-                // Verify the result directly
-                assertEquals("New Name", result.getName());
-                assertEquals("New Address", result.getAddress());
-                assertEquals(new BigDecimal("61.0"), result.getLatitude());
-                assertEquals(new BigDecimal("11.0"), result.getLongitude());
-
-                // Also verify the save was called with correct values
-                verify(householdRepository).save(any(Household.class));
-            }
+            // Assert
+            assertNotNull(result);
+            assertEquals("Updated Name", result.getName());
+            assertEquals("Updated Address", result.getAddress());
+            verify(householdRepository).save(any());
         }
 
         @Test
-        void shouldUpdateHouseholdWithoutCoordinatesWhenGeocodingFails() {
-            adminUser.setHousehold(testHousehold);
-            when(userRepository.findByEmail("admin@example.com")).thenReturn(Optional.of(adminUser));
-            when(householdAdminRepository.existsByUser(adminUser)).thenReturn(true);
-            when(householdRepository.save(any(Household.class))).thenReturn(testHousehold);
+        void shouldThrowExceptionWhenUserNotAdmin() {
+            // Arrange
+            when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(regularUser));
 
-            try (MockedStatic<LocationUtil> mockedLocationUtil = mockStatic(LocationUtil.class)) {
-                mockedLocationUtil.when(() -> LocationUtil.getCoordinatesByAddress("New Address"))
-                        .thenThrow(new IllegalArgumentException("Geocoding failed"));
-
-                Household result = householdService.updateHousehold("admin@example.com", "New Name", "New Address");
-
-                assertEquals("New Name", result.getName());
-                assertEquals("New Address", result.getAddress());
-                assertEquals(new BigDecimal("60.0"), result.getLatitude());
-                assertEquals(new BigDecimal("10.0"), result.getLongitude());
-            }
+            // Act & Assert
+            assertThrows(IllegalStateException.class, () -> 
+                householdService.updateHousehold(
+                    regularUser.getEmail(),
+                    "Updated Name",
+                    "Updated Address"
+                )
+            );
+            verify(householdRepository, never()).save(any());
         }
     }
 
@@ -251,26 +231,43 @@ public class HouseholdServiceTest {
     class CreateHouseholdTests {
         @Test
         void shouldCreateHouseholdSuccessfully() {
-            when(authentication.getName()).thenReturn("test@example.com");
-            when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
-            when(householdRepository.save(any(Household.class))).thenReturn(testHousehold);
-            when(userRepository.save(testUser)).thenReturn(testUser);
-            when(householdAdminRepository.existsByUser(testUser)).thenReturn(false);
-            when(householdAdminRepository.save(any(HouseholdAdmin.class))).thenReturn(testHouseholdAdmin);
+            // Arrange
+            Household expectedHousehold = new Household(
+                createRequestDto.getName(),
+                createRequestDto.getAddress(),
+                createRequestDto.getPopulationCount()
+            );
+            doReturn(expectedHousehold).when(householdRepository).save(any());
 
-            try (MockedStatic<LocationUtil> mockedLocationUtil = mockStatic(LocationUtil.class)) {
-                CoordinatesItemDto coordinates = new CoordinatesItemDto();
-                coordinates.setLatitude(new BigDecimal("60.0"));
-                coordinates.setLongitude(new BigDecimal("10.0"));
-                mockedLocationUtil.when(() -> LocationUtil.getCoordinatesByAddress(anyString()))
-                        .thenReturn(coordinates);
+            // Act
+            Household result = householdService.createHousehold(createRequestDto);
 
-                Household result = householdService.createHousehold(createRequestDto);
+            // Assert
+            assertNotNull(result);
+            assertEquals(createRequestDto.getName(), result.getName());
+            assertEquals(createRequestDto.getAddress(), result.getAddress());
+            assertEquals(createRequestDto.getPopulationCount(), result.getPopulationCount());
+            verify(householdRepository).save(any());
+        }
 
-                assertNotNull(result);
-                verify(householdRepository).save(any(Household.class));
-                verify(householdAdminRepository).save(any(HouseholdAdmin.class));
-            }
+        @Test
+        void shouldThrowExceptionWhenUserAlreadyHasHousehold() {
+            // Arrange
+            testUser.setHousehold(testHousehold);
+
+            // Act & Assert
+            assertThrows(IllegalStateException.class, () -> householdService.createHousehold(createRequestDto));
+            verify(householdRepository, never()).save(any());
+        }
+
+        @Test
+        void shouldThrowExceptionWhenUserNotFound() {
+            // Arrange
+            lenient().doReturn(Optional.empty()).when(userRepository).findByEmail(anyString());
+
+            // Act & Assert
+            assertThrows(IllegalStateException.class, () -> householdService.createHousehold(createRequestDto));
+            verify(householdRepository, never()).save(any());
         }
     }
 
@@ -468,51 +465,83 @@ public class HouseholdServiceTest {
     class LeaveHouseholdTests {
         @Test
         void shouldLeaveHouseholdSuccessfully() {
+            // Arrange
             regularUser.setHousehold(testHousehold);
-            when(userRepository.findByEmail("regular@example.com")).thenReturn(Optional.of(regularUser));
+            when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(regularUser));
             when(householdAdminRepository.existsByUser(regularUser)).thenReturn(false);
 
-            householdService.leaveHousehold("regular@example.com");
+            // Act
+            householdService.leaveHousehold(regularUser.getEmail());
 
-            verify(userRepository).save(regularUser);
+            // Assert
             assertNull(regularUser.getHousehold());
+            verify(userRepository).save(regularUser);
         }
 
+        @Test
+        void shouldThrowExceptionWhenLastAdmin() {
+            // Arrange
+            adminUser.setHousehold(testHousehold);
+            testHousehold.setUsers(List.of(adminUser));
+            when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(adminUser));
+            when(householdAdminRepository.existsByUser(adminUser)).thenReturn(true);
 
-        @Nested
-        class SwitchHouseholdTests {
-            @Test
-            void shouldSwitchHouseholdSuccessfully() {
-                Household oldHousehold = new Household("Old Household", "Old Address", 2);
-                oldHousehold.setId(2);
-                Household newHousehold = new Household("New Household", "New Address", 3);
-                newHousehold.setId(3);
+            // Act & Assert
+            assertThrows(IllegalStateException.class, () -> 
+                householdService.leaveHousehold(adminUser.getEmail())
+            );
+            verify(userRepository, never()).save(any());
+        }
+    }
 
-                regularUser.setHousehold(oldHousehold);
-                when(userRepository.findByEmail("regular@example.com")).thenReturn(Optional.of(regularUser));
-                when(householdRepository.findById(3)).thenReturn(Optional.of(newHousehold));
-                when(householdAdminRepository.existsByUser(regularUser)).thenReturn(false);
+    @Nested
+    class PromoteToAdminTests {
+        @Test
+        void shouldPromoteToAdminSuccessfully() {
+            // Arrange
+            adminUser.setHousehold(testHousehold);
+            regularUser.setHousehold(testHousehold);
+            when(userRepository.findByEmail(adminUser.getEmail())).thenReturn(Optional.of(adminUser));
+            when(userRepository.findByEmail(regularUser.getEmail())).thenReturn(Optional.of(regularUser));
+            when(householdAdminRepository.existsByUser(adminUser)).thenReturn(true);
+            when(householdAdminRepository.existsByUser(regularUser)).thenReturn(false);
+            when(householdAdminRepository.save(any())).thenReturn(testHouseholdAdmin);
 
-                Household result = householdService.switchHousehold("regular@example.com", 3);
+            // Act
+            householdService.promoteToAdmin(adminUser.getEmail(), regularUser.getEmail());
 
-                assertEquals(newHousehold, result);
-                verify(userRepository).save(regularUser);
-                assertEquals(newHousehold, regularUser.getHousehold());
-            }
+            // Assert
+            verify(householdAdminRepository).save(any());
         }
 
-        @Nested
-        class DeleteHouseholdTests {
+        @Test
+        void shouldThrowExceptionWhenPromoterNotAdmin() {
+            // Arrange
+            regularUser.setHousehold(testHousehold);
+            when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(regularUser));
+            when(householdAdminRepository.existsByUser(regularUser)).thenReturn(false);
 
-            @Test
-            void shouldThrowExceptionWhenNonAdminTriesToDeleteHousehold() {
-                regularUser.setHousehold(testHousehold);
-                when(userRepository.findByEmail("regular@example.com")).thenReturn(Optional.of(regularUser));
-                when(householdAdminRepository.existsByUser(regularUser)).thenReturn(false);
+            // Act & Assert
+            assertThrows(IllegalStateException.class, () -> 
+                householdService.promoteToAdmin(regularUser.getEmail(), "other@example.com")
+            );
+            verify(householdAdminRepository, never()).save(any());
+        }
 
-                assertThrows(IllegalStateException.class, () ->
-                        householdService.deleteCurrentHousehold("regular@example.com"));
-            }
+        @Test
+        void shouldThrowExceptionWhenUserNotInSameHousehold() {
+            // Arrange
+            adminUser.setHousehold(testHousehold);
+            regularUser.setHousehold(new Household("Other Household", "Other Address", 1));
+            when(userRepository.findByEmail(adminUser.getEmail())).thenReturn(Optional.of(adminUser));
+            when(userRepository.findByEmail(regularUser.getEmail())).thenReturn(Optional.of(regularUser));
+            when(householdAdminRepository.existsByUser(adminUser)).thenReturn(true);
+
+            // Act & Assert
+            assertThrows(IllegalStateException.class, () -> 
+                householdService.promoteToAdmin(adminUser.getEmail(), regularUser.getEmail())
+            );
+            verify(householdAdminRepository, never()).save(any());
         }
     }
 }

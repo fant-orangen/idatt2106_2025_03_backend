@@ -1,5 +1,6 @@
 package stud.ntnu.backend.dto.household;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,7 +11,7 @@ import lombok.Setter;
 @Getter
 public class HouseholdJoinRequestDto {
 
-  // Getters and setters
+  @NotBlank(message = "Token is required")
   private String token;
 
   // Default constructor

@@ -1,5 +1,6 @@
 package stud.ntnu.backend.dto.household;
 
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,7 +11,7 @@ import lombok.Setter;
 @Getter
 public class HouseholdInviteRequestDto {
 
-  // Getters and setters
+  @Email(message = "Invalid email format")
   private String email;
 
   // Default constructor
