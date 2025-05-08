@@ -89,4 +89,18 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
         @Param("householdId") Integer householdId, 
         @Param("now") LocalDateTime now,
         Pageable pageable);
+    /**
+     * Checks if there exists a non-expired, pending invitation for a household to join a group.
+     * An invitation is considered pending if it hasn't been accepted or declined,
+     * and non-expired if its expiration date is in the future.
+     *
+     * @param groupId The ID of the group
+     * @param householdId The ID of the household
+     * @param now The current timestamp to check against
+     * @return true if a valid pending invitation exists, false otherwise
+     */
+    @Query("SELECT CASE WHEN COUNT(i) > 0 THEN true ELSE false END FROM Invitation i " +
+           "WHERE i.group.id = :groupId AND i.household.id = :householdId " +
+           "AND i.expiresAt > :now AND i.acceptedAt IS NULL AND i.declinedAt IS NULL")
+    boolean existsByGroupIdAndHouseholdIdAndInvitationNotExpired(Integer groupId, Integer householdId, LocalDateTime now);
 }

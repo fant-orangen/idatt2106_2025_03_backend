@@ -11,9 +11,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+import stud.ntnu.backend.dto.group.GroupInviteRequestDto;
 import stud.ntnu.backend.dto.group.GroupSummaryDto;
 import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.service.group.GroupService;
@@ -123,4 +126,36 @@ public class GroupController {
     }
     return ResponseEntity.ok().build();
   }
+
+  /**
+   * Invites a household to join a group.
+   * Requires the requesting user to be a member of the group.
+   *
+   * @param requestDto the DTO containing the household name and group ID
+   * @param principal the authenticated user making the request
+   * @return ResponseEntity containing:
+   *         - 200 OK if invitation was sent successfully
+   *         - 403 Forbidden if user is not a member of the group
+   *         - 404 Not Found if household or group doesn't exist
+   */
+  @PostMapping("/user/groups/invite")
+  public ResponseEntity<?> inviteHouseholdToGroup(
+      @RequestBody @Valid GroupInviteRequestDto requestDto,
+      Principal principal) {
+    String email = principal.getName();
+    if (!groupService.isUserMemberOfGroup(requestDto.getGroupId(), email)) {
+      return ResponseEntity.status(403).build();
+    }
+    
+    try {
+      boolean invited = groupService.inviteHouseholdToGroup(
+          requestDto.getHouseholdName(),
+          requestDto.getGroupId(),
+          email);
+      return invited ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+    } catch (IllegalStateException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
 }
