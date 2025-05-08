@@ -249,100 +249,63 @@ public class EmailService {
   }
 
   /**
-   * Sends safety confirmation emails to all other members of a user's household.
-   * Each member receives their own unique token for confirmation.
+   * Sends a safety confirmation email to a specific household member.
    *
-   * @param user The User object representing the person requesting safety confirmation
-   * @throws IllegalArgumentException if the user data is invalid
-   * @throws IllegalStateException if the user has no household or is the only member
-   * @throws RuntimeException if there are email sending issues
+   * @param requestingUser The user requesting safety confirmation
+   * @param receivingUser The user receiving the safety confirmation request
+   * @param token The unique token for this safety confirmation
+   * @throws MessagingException if there are issues sending the email
+   * @throws RuntimeException for other unexpected errors
    */
-  @Transactional
-  public void sendSafetyConfirmationEmails(User user) {
-    if (user == null || user.getEmail() == null) {
-      log.error("Cannot send safety confirmation email. User is null or user email is null.");
-      throw new IllegalArgumentException("Invalid user data for safety confirmation.");
+  public void sendSafetyConfirmationEmail(User requestingUser, User receivingUser, String token) {
+    if (requestingUser == null || receivingUser == null || token == null) {
+      log.error("Cannot send safety confirmation email. Invalid parameters provided.");
+      throw new IllegalArgumentException("Invalid parameters for safety confirmation email.");
     }
 
-    Household household = user.getHousehold();
-    if (household == null) {
-      log.error("Cannot send safety confirmation email. User {} does not belong to a household.", user.getEmail());
-      throw new IllegalStateException("User does not belong to a household.");
-    }
+    try {
+      log.info("Preparing to send safety confirmation email to: {}", receivingUser.getEmail());
+      
+      String requestingUserName = (requestingUser.getName() != null ? requestingUser.getName() : "et husstandsmedlem");
+      String receivingUserName = (receivingUser.getName() != null ? receivingUser.getName() : "Bruker");
 
-    List<User> householdMembers = userRepository.findByHousehold(household);
-    if (householdMembers.isEmpty() || householdMembers.size() == 1) {
-      log.error("No other members found in household for user {}", user.getEmail());
-      throw new IllegalStateException("Ingen andre medlemmer i husstanden. / No other members in the household.");
-    }
-    
-    String requestingUserName = (user.getName() != null ? user.getName() : "et husstandsmedlem");
-    log.info("Sending safety confirmation emails for household {} requested by {}", household.getId(), user.getEmail());
+      MimeMessage mimeMessage = mailSender.createMimeMessage();
+      MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
 
-    for (User member : householdMembers) {
-      // Skip sending email to the requesting user
-      if (member.getEmail().equals(user.getEmail())) {
-        continue;
-      }
+      helper.setFrom(senderEmail);
+      helper.setTo(receivingUser.getEmail());
+      helper.setSubject("Krisefikser.no - Bekreft din sikkerhetsstatus");
 
-      try {
-        log.info("Preparing to send safety confirmation email to member: {}", member.getEmail());
-        
-        // Generate unique token for this member
-        String token = UUID.randomUUID().toString();
-        LocalDateTime expiresAt = LocalDateTime.now().plusHours(168); // 1 week
+      String emailBody = """
+          <html>
+          <body>
+              <p>Hei %s,</p>
+              
+              <p>%s fra din husstand har bedt om en bekreftelse på at du er trygg.</p>
+              
+              <p>For å bekrefte at du er i sikkerhet, vennligst klikk på denne lenken:</p>
+              
+              <p><a href="http://localhost:8080/api/user/confirm-safety?token=%s">Bekreft at jeg er trygg</a></p>
+              
+              <p>Hvis du ikke er i stand til å bekrefte din sikkerhet, vennligst kontakt nødetatene umiddelbart.</p>
+              
+              <p>Med vennlig hilsen,<br>
+              Krisefikser-teamet</p>
+          </body>
+          </html>
+          """.formatted(receivingUserName, requestingUserName, token);
 
-        // Create and save token
-        EmailToken safetyToken = new EmailToken(
-            member,
-            token,
-            TokenType.SAFETY_CONFIRMATION,
-            expiresAt
-        );
-        emailTokenRepository.save(safetyToken);
-        log.info("Created safety confirmation token for member: {}", member.getEmail());
+      helper.setText(emailBody, true); // Set 'true' to indicate HTML content
 
-        // Send email with the unique token
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+      mailSender.send(mimeMessage);
+      log.info("Safety confirmation email sent successfully to: {}", receivingUser.getEmail());
 
-        helper.setFrom(senderEmail);
-        helper.setTo(member.getEmail());
-        helper.setSubject("Krisefikser.no - Bekreft din sikkerhetsstatus");
-
-        String memberName = (member.getName() != null ? member.getName() : "Bruker");
-
-        String emailBody = """
-            <html>
-            <body>
-                <p>Hei %s,</p>
-                
-                <p>%s fra din husstand har bedt om en bekreftelse på at du er trygg.</p>
-                
-                <p>For å bekrefte at du er i sikkerhet, vennligst klikk på denne lenken:</p>
-                
-                <p><a href="http://localhost:8080/api/user/confirm-safety?token=%s">Bekreft at jeg er trygg</a></p>
-                
-                <p>Hvis du ikke er i stand til å bekrefte din sikkerhet, vennligst kontakt nødetatene umiddelbart.</p>
-                
-                <p>Med vennlig hilsen,<br>
-                Krisefikser-teamet</p>
-            </body>
-            </html>
-            """.formatted(memberName, requestingUserName, token);
-
-        helper.setText(emailBody, true); // Set 'true' to indicate HTML content
-
-        mailSender.send(mimeMessage);
-        log.info("Safety confirmation email sent successfully to: {}", member.getEmail());
-
-      } catch (MessagingException e) {
-        log.error("Mail sending error for safety confirmation email to {}: {}", member.getEmail(), e.getMessage());
-        throw new RuntimeException("Failed to send safety confirmation email", e);
-      } catch (Exception e) {
-        log.error("Unexpected error sending safety confirmation email to {}: {}", member.getEmail(), e.getMessage(), e);
-        throw new RuntimeException("Unexpected error during safety confirmation", e);
-      }
+    } catch (MessagingException e) {
+      log.error("Mail sending error for safety confirmation email to {}: {}", receivingUser.getEmail(), e.getMessage());
+      throw new RuntimeException("Failed to send safety confirmation email", e);
+    } catch (Exception e) {
+      log.error("Unexpected error sending safety confirmation email to {}: {}", receivingUser.getEmail(), e.getMessage(), e);
+      throw new RuntimeException("Unexpected error during safety confirmation", e);
     }
   }
 }

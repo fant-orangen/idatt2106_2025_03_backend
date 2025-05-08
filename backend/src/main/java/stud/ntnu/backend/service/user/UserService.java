@@ -7,6 +7,7 @@ import stud.ntnu.backend.repository.user.SafetyConfirmationRepository;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.model.user.EmailToken;
 import stud.ntnu.backend.model.user.SafetyConfirmation;
+import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.dto.user.UserProfileDto;
 import stud.ntnu.backend.dto.user.UserUpdateDto;
 import stud.ntnu.backend.dto.user.UserPreferencesDto;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Service for managing users. Handles retrieval, updating, and deletion of users. Note: User
@@ -36,6 +38,7 @@ public class UserService {
   private final EmailTokenRepository emailTokenRepository;
   private final SafetyConfirmationRepository safetyConfirmationRepository;
   private final EmailService emailService;
+  private final NotificationService notificationService;
 
   /**
    * Constructor for dependency injection.
@@ -44,15 +47,18 @@ public class UserService {
    * @param emailTokenRepository repository for email tokens
    * @param safetyConfirmationRepository repository for safety confirmations
    * @param emailService service for sending emails
+   * @param notificationService service for creating notifications
    */
   public UserService(UserRepository userRepository,
                     EmailTokenRepository emailTokenRepository,
                     SafetyConfirmationRepository safetyConfirmationRepository,
-                    EmailService emailService) {
+                    EmailService emailService,
+                    NotificationService notificationService) {
     this.userRepository = userRepository;
     this.emailTokenRepository = emailTokenRepository;
     this.safetyConfirmationRepository = safetyConfirmationRepository;
     this.emailService = emailService;
+    this.notificationService = notificationService;
   }
 
   /**
@@ -299,24 +305,56 @@ public class UserService {
   public void requestSafetyConfirmation(String email) {
     log.info("Requesting safety confirmation for user with email: {}", email);
     
-    User user = userRepository.findByEmail(email)
+    User requestingUser = userRepository.findByEmail(email)
         .orElseThrow(() -> {
           log.error("User not found with email: {}", email);
           return new IllegalStateException("Bruker ikke funnet. / User not found.");
         });
 
-    if (user.getHousehold() == null) {
+    if (requestingUser.getHousehold() == null) {
       log.error("User {} does not belong to any household", email);
       throw new IllegalStateException("Du må være medlem av en husstand for å be om sikkerhetsbekreftelser. / You must be a member of a household to request safety confirmations.");
     }
 
-    log.info("Found user {} in household {}", email, user.getHousehold().getId());
+    List<User> householdMembers = userRepository.findByHousehold(requestingUser.getHousehold());
+    if (householdMembers.isEmpty() || householdMembers.size() == 1) {
+      log.error("No other members found in household for user {}", email);
+      throw new IllegalStateException("Ingen andre medlemmer i husstanden. / No other members in the household.");
+    }
+
+    log.info("Found {} household members for user {}", householdMembers.size(), email);
     
     try {
-      emailService.sendSafetyConfirmationEmails(user);
-      log.info("Successfully sent safety confirmation emails for user {}", email);
+      for (User member : householdMembers) {
+        // Skip sending to the requesting user
+        if (member.getEmail().equals(email)) {
+          continue;
+        }
+
+        // Generate unique token for this member
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiresAt = LocalDateTime.now().plusHours(168); // 1 week
+
+        // Create and save token
+        EmailToken safetyToken = new EmailToken(
+            member,
+            token,
+            EmailToken.TokenType.SAFETY_CONFIRMATION,
+            expiresAt
+        );
+        emailTokenRepository.save(safetyToken);
+        log.info("Created safety confirmation token for member: {}", member.getEmail());
+
+        // Send email with the unique token
+        emailService.sendSafetyConfirmationEmail(requestingUser, member, token);
+
+        // Create notification for the safety request
+        String requestingUserName = requestingUser.getName() != null ? requestingUser.getName() : "et husstandsmedlem";
+        notificationService.createSafetyRequestNotification(member, requestingUserName);
+      }
+      log.info("Successfully sent safety confirmation requests for user {}", email);
     } catch (Exception e) {
-      log.error("Error sending safety confirmation emails for user {}: {}", email, e.getMessage(), e);
+      log.error("Error sending safety confirmation requests for user {}: {}", email, e.getMessage(), e);
       throw e;
     }
   }
