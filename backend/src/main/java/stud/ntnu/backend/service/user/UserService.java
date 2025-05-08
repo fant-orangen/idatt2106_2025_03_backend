@@ -358,4 +358,23 @@ public class UserService {
       throw e;
     }
   }
+
+  /**
+   * Checks if a user has confirmed their safety.
+   *
+   * @param userId The ID of the user to check
+   * @return true if the user has confirmed their safety, false otherwise
+   * @throws IllegalStateException if the user is not found
+   */
+  public boolean isSafe(Integer userId) {
+    // Verify user exists
+    userRepository.findById(userId)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    // Check if user has a safety confirmation where is_safe is true
+    Optional<SafetyConfirmation> safetyConfirmation = safetyConfirmationRepository.findByUser(
+        userRepository.getReferenceById(userId));
+    
+    return safetyConfirmation.isPresent() && safetyConfirmation.get().getIsSafe();
+  }
 }
