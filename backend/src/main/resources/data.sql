@@ -22,8 +22,8 @@ INSERT INTO users (email, password_hash, phone_number, role_id, household_id, fi
 VALUES ('mike@example.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', '+4745678901', 3, 3, 'Mike', 'Brown', '789 Pine St, Elsewhere', 63.4105, 10.3851, TRUE, FALSE);
 
 -- For testing emails
---INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled)
---VALUES ('havardjvd@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', '+4745678901', 1, 1, 'Haavard', 'Daleng', '789 Pine St, Elsewhere', 63.4105, 10.3851, TRUE, FALSE);
+INSERT INTO users (email, password_hash, phone_number, role_id, household_id, first_name, last_name, home_address, home_latitude, home_longitude, email_verified, location_sharing_enabled)
+VALUES ('havardjvd@gmail.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', '+4745678901', 1, 1, 'Haavard', 'Daleng', '789 Pine St, Elsewhere', 63.4105, 10.3851, TRUE, FALSE);
 
 -- HOUSEHOLD MEMBERS
 INSERT INTO household_member (household_id, name, description, type) VALUES (1, 'Emma Smith', 'Daughter', 'child');

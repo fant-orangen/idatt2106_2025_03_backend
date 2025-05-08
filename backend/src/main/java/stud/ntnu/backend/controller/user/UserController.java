@@ -141,4 +141,20 @@ public class UserController {
       return ResponseEntity.internalServerError().body("En feil oppstod. Vennligst prøv igjen senere. / An error occurred. Please try again later.");
     }
   }
+
+  /**
+   * Checks if a user is safe.
+   *
+   * @param userId the ID of the user to check
+   * @return ResponseEntity with status 200 OK if the user is safe, or an error message
+   */
+  @GetMapping("/confirm-safety/is-safe")
+  public ResponseEntity<?> isSafe(@RequestParam Integer userId) {
+    try {
+      boolean isSafe = userService.isSafe(userId);
+      return ResponseEntity.ok(isSafe);
+    } catch (IllegalArgumentException | IllegalStateException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
 }

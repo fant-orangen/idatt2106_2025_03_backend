@@ -278,20 +278,12 @@ public class UserService {
     User user = emailToken.getUser();
     LocalDateTime now = LocalDateTime.now();
 
-    // Find existing safety confirmation or create new one
-    Optional<SafetyConfirmation> existingConfirmation = safetyConfirmationRepository.findByUser(user);
-    
-    if (existingConfirmation.isPresent()) {
-      // Update existing confirmation
-      SafetyConfirmation confirmation = existingConfirmation.get();
-      confirmation.setIsSafe(true);
-      confirmation.setSafeAt(now);
-      safetyConfirmationRepository.save(confirmation);
-    } else {
-      // Create new confirmation
-      SafetyConfirmation confirmation = new SafetyConfirmation(user, true, now);
-      safetyConfirmationRepository.save(confirmation);
-    }
+    // Delete all existing safety confirmations for this user
+    safetyConfirmationRepository.deleteByUser(user);
+
+    // Create new confirmation
+    SafetyConfirmation confirmation = new SafetyConfirmation(user, true, now);
+    safetyConfirmationRepository.save(confirmation);
   }
 
   /**
@@ -357,5 +349,32 @@ public class UserService {
       log.error("Error sending safety confirmation requests for user {}: {}", email, e.getMessage(), e);
       throw e;
     }
+  }
+
+  /**
+   * Checks if a user has confirmed their safety within the last 24 hours.
+   *
+   * @param userId The ID of the user to check
+   * @return true if the user has confirmed their safety within the last 24 hours, false otherwise
+   * @throws IllegalStateException if the user is not found
+   */
+  public boolean isSafe(Integer userId) {
+    // Verify user exists
+    userRepository.findById(userId)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    // Check if user has a safety confirmation where is_safe is true
+    Optional<SafetyConfirmation> safetyConfirmation = safetyConfirmationRepository.findByUser(
+        userRepository.getReferenceById(userId));
+    
+    if (!safetyConfirmation.isPresent() || !safetyConfirmation.get().getIsSafe()) {
+      return false;
+    }
+
+    // Check if the confirmation is less than 24 hours old
+    LocalDateTime confirmationTime = safetyConfirmation.get().getSafeAt();
+    LocalDateTime oneDayAgo = LocalDateTime.now().minusHours(24);
+    
+    return confirmationTime.isAfter(oneDayAgo);
   }
 }
