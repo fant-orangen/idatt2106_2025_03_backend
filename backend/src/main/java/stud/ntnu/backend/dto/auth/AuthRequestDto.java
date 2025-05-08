@@ -21,6 +21,10 @@ public class AuthRequestDto {
 
   @Size(min = 8, max = 100, message = "Password must be at between 8 and 100 characters long")
   @Pattern(
+          //TODO Change this back to the one below when done with dev
+          //Regex for password validation during dev
+          // Regex for password validation during production:
+          //regexp = "^(?=.*[\\p{L}])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}$",
           regexp = "^[A-Za-z0-9\\p{L}\\p{M}\\p{P}\\p{S}]+$",
           message = "invalid password format"
   )
