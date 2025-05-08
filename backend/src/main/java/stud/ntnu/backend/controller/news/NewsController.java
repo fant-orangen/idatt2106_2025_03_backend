@@ -140,4 +140,21 @@ public class NewsController {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
+
+  /**
+   * Get the newest news articles, ordered by published date (newest first).
+   * This endpoint is publicly accessible and only returns published articles.
+   *
+   * @param pageable pagination information
+   * @return ResponseEntity with a page of news articles
+   */
+  @GetMapping("/public/news/latest")
+  public ResponseEntity<?> getLatestNews(Pageable pageable) {
+    try {
+      Page<NewsArticleResponseDTO> newsArticles = newsService.getNewestNewsArticles(pageable);
+      return ResponseEntity.ok(newsArticles);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
 }

@@ -148,4 +148,21 @@ public class NewsService {
 
     return newsArticleRepository.save(newsArticle);
   }
+
+  /**
+   * Get the newest news articles, ordered by published date (newest first).
+   * Only returns articles with status 'published'.
+   *
+   * @param pageable pagination information
+   * @return a page of news article DTOs
+   */
+  @Transactional(readOnly = true)
+  public Page<NewsArticleResponseDTO> getNewestNewsArticles(Pageable pageable) {
+    // Get published news articles ordered by published date (newest first)
+    Page<NewsArticle> newsArticles = newsArticleRepository.findByStatusOrderByPublishedAtDesc(
+        ArticleStatus.published, pageable);
+
+    // Convert to DTOs
+    return newsArticles.map(NewsArticleResponseDTO::fromEntity);
+  }
 }
