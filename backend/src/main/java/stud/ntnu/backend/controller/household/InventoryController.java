@@ -14,12 +14,7 @@ import java.util.NoSuchElementException;
 import stud.ntnu.backend.dto.inventory.*;
 import stud.ntnu.backend.service.inventory.InventoryService;
 
-/**
- * Handles inventory management at the household level. Includes listing, adding, editing, or
- * removing stock items, tracking expiration dates, and computing preparedness grade.
- * <p>
- * Based on Visjonsdokument 2025 for Krisefikser.no.
- */
+
 @RestController
 @RequestMapping("/api/user/inventory")
 public class InventoryController {
@@ -43,23 +38,6 @@ public class InventoryController {
       @PathVariable Integer productTypeId,
       Pageable pageable) {
     Page<ProductBatchDto> productBatches = inventoryService.getProductBatchesByProductType(
-        productTypeId, pageable);
-    return ResponseEntity.ok(productBatches);
-  }
-
-  // TODO: test this endpoint
-  /**
-   * Get all expiring product batches for a given product type.
-   *
-   * @param productTypeId the ID of the product type
-   * @param pageable      pagination information
-   * @return a paginated list of expiring product batches
-   */
-  @GetMapping("/product-types/{productTypeId}/batches/expiring")
-  public ResponseEntity<Page<ProductBatchDto>> getExpiringProductBatchesByProductType(
-      @PathVariable Integer productTypeId,
-      Pageable pageable) {
-    Page<ProductBatchDto> productBatches = inventoryService.getExpiringProductBatchesByProductType(
         productTypeId, pageable);
     return ResponseEntity.ok(productBatches);
   }

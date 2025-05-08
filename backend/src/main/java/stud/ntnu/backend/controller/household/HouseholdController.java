@@ -26,10 +26,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Handles household-level operations. Allows users to create or join households, modify population
- * count (including non-user members), switch households, and retrieve household-related data. Based
- * on Visjonsdokument 2025 for Krisefikser.no.
+ * REST controller for managing household operations.
+ * <p>
+ * Provides endpoints for:
+ * <ul>
+ *   <li>Creating new households</li>
+ *   <li>Managing household invitations</li>
+ *   <li>Joining households</li>
+ *   <li>Updating household information</li>
+ *   <li>Managing household members</li>
+ *   <li>Switching between households</li>
+ * </ul>
+ * <p>
  */
+
 @RestController
 @RequestMapping("/api/user/households")
 public class HouseholdController {

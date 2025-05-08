@@ -1,12 +1,20 @@
 package stud.ntnu.backend.controller.user;
 
-import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.security.Principal;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.validation.Valid;
 import stud.ntnu.backend.dto.user.CreateReflectionDto;
 import stud.ntnu.backend.dto.user.ReflectionResponseDto;
 import stud.ntnu.backend.dto.user.UpdateReflectionDto;
@@ -15,13 +23,14 @@ import stud.ntnu.backend.service.group.GroupService;
 import stud.ntnu.backend.service.user.ReflectionService;
 import stud.ntnu.backend.service.user.UserService;
 
-import java.security.Principal;
-
 /**
- * Handles user-generated crisis reflections. Users can write, store, view, and optionally share
- * their crisis experiences post-event as part of learning and adaptation.
+ * Controller for managing user-generated crisis reflections.
  * <p>
- * Based on Visjonsdokument 2025 for Krisefikser.no.
+ * This controller provides endpoints for users to create, read, update, and delete their crisis reflections.
+ * Reflections can be personal or shared with household members and groups. The controller handles
+ * authentication and authorization to ensure users can only access and modify their own reflections
+ * or those shared with them.
+ * <p>
  */
 @RestController
 @RequestMapping("/api/user/reflections")
@@ -30,8 +39,14 @@ public class ReflectionController {
   private final ReflectionService reflectionService;
   private final UserService userService;
   private final GroupService groupService;
-  private final Logger log = LoggerFactory.getLogger(ReflectionController.class);
 
+  /**
+   * Constructs a new ReflectionController with required services.
+   *
+   * @param reflectionService service for managing reflections
+   * @param userService service for user operations
+   * @param groupService service for group operations
+   */
   public ReflectionController(ReflectionService reflectionService, UserService userService, GroupService groupService) {
     this.reflectionService = reflectionService;
     this.userService = userService;
@@ -39,11 +54,11 @@ public class ReflectionController {
   }
 
   /**
-   * Get all reflections for the current user.
+   * Retrieves all personal reflections for the authenticated user.
    *
-   * @param principal the authenticated user
-   * @param pageable pagination information
-   * @return a page of reflections
+   * @param principal the authenticated user's principal
+   * @param pageable pagination parameters
+   * @return ResponseEntity containing a page of the user's reflections
    */
   @GetMapping("/my")
   public ResponseEntity<Page<ReflectionResponseDto>> getMyReflections(
@@ -55,17 +70,17 @@ public class ReflectionController {
       Page<ReflectionResponseDto> reflections = reflectionService.getReflectionsByUserId(user.getId(), pageable);
       return ResponseEntity.ok(reflections);
     } catch (Exception e) {
-      log.error("Error getting user reflections", e);
       return ResponseEntity.badRequest().build();
     }
   }
 
   /**
-   * Get all shared reflections visible to the current user (from their household and groups).
+   * Retrieves all shared reflections visible to the authenticated user.
+   * This includes reflections shared with the user's household and groups.
    *
-   * @param principal the authenticated user
-   * @param pageable pagination information
-   * @return a page of shared reflections
+   * @param principal the authenticated user's principal
+   * @param pageable pagination parameters
+   * @return ResponseEntity containing a page of shared reflections
    */
   @GetMapping("/shared")
   public ResponseEntity<Page<ReflectionResponseDto>> getSharedReflections(
@@ -77,18 +92,17 @@ public class ReflectionController {
       Page<ReflectionResponseDto> reflections = reflectionService.getSharedReflectionsVisibleToUser(user.getId(), pageable);
       return ResponseEntity.ok(reflections);
     } catch (Exception e) {
-      log.error("Error getting shared reflections", e);
       return ResponseEntity.badRequest().build();
     }
   }
 
   /**
-   * Get all shared reflections for the user's household.
-   * Automatically determines the user's household from their profile.
+   * Retrieves all shared reflections from the user's household.
+   * Requires the user to be a member of a household.
    *
-   * @param principal the authenticated user
-   * @param pageable pagination information
-   * @return a page of shared reflections
+   * @param principal the authenticated user's principal
+   * @param pageable pagination parameters
+   * @return ResponseEntity containing a page of household reflections or 400 if user has no household
    */
   @GetMapping("/household")
   public ResponseEntity<Page<ReflectionResponseDto>> getHouseholdReflections(
@@ -98,27 +112,24 @@ public class ReflectionController {
       User user = userService.getUserByEmail(principal.getName())
           .orElseThrow(() -> new IllegalStateException("User not found"));
 
-      // Check if the user has a household
       if (user.getHousehold() == null) {
-        return ResponseEntity.status(400).body(null); // Bad request if user has no household
+        return ResponseEntity.status(400).body(null);
       }
 
       Integer householdId = user.getHousehold().getId();
       Page<ReflectionResponseDto> reflections = reflectionService.getSharedReflectionsByHouseholdId(householdId, pageable);
       return ResponseEntity.ok(reflections);
     } catch (Exception e) {
-      log.error("Error getting household reflections", e);
       return ResponseEntity.badRequest().build();
     }
   }
 
   /**
-   * Get all shared reflections from all groups the user's household is a member of.
-   * No need to specify a group ID - automatically retrieves from all user's groups.
+   * Retrieves all shared reflections from all groups the user's household is a member of.
    *
-   * @param principal the authenticated user
-   * @param pageable pagination information
-   * @return a page of shared reflections from all groups
+   * @param principal the authenticated user's principal
+   * @param pageable pagination parameters
+   * @return ResponseEntity containing a page of group reflections
    */
   @GetMapping("/groups")
   public ResponseEntity<Page<ReflectionResponseDto>> getGroupReflections(
@@ -126,24 +137,22 @@ public class ReflectionController {
       Pageable pageable) {
     try {
       String email = principal.getName();
-      // Verify user exists
       userService.getUserByEmail(email)
           .orElseThrow(() -> new IllegalStateException("User not found"));
 
       Page<ReflectionResponseDto> reflections = reflectionService.getSharedReflectionsFromAllUserGroups(email, pageable);
       return ResponseEntity.ok(reflections);
     } catch (Exception e) {
-      log.error("Error getting reflections from all groups", e);
       return ResponseEntity.badRequest().build();
     }
   }
 
   /**
-   * Create a new reflection.
+   * Creates a new reflection for the authenticated user.
    *
-   * @param createReflectionDto the reflection data
-   * @param principal the authenticated user
-   * @return the created reflection
+   * @param createReflectionDto the reflection data to create
+   * @param principal the authenticated user's principal
+   * @return ResponseEntity containing the created reflection
    */
   @PostMapping
   public ResponseEntity<ReflectionResponseDto> createReflection(
@@ -155,19 +164,18 @@ public class ReflectionController {
       ReflectionResponseDto reflection = reflectionService.createReflection(user.getId(), createReflectionDto);
       return ResponseEntity.ok(reflection);
     } catch (Exception e) {
-      log.error("Error creating reflection", e);
       return ResponseEntity.badRequest().build();
     }
   }
 
   /**
-   * Update an existing reflection.
+   * Updates an existing reflection.
    * Only the owner of the reflection can update it.
    *
    * @param id the ID of the reflection to update
    * @param updateReflectionDto the updated reflection data
-   * @param principal the authenticated user
-   * @return the updated reflection
+   * @param principal the authenticated user's principal
+   * @return ResponseEntity containing the updated reflection, or 403 if not authorized
    */
   @PutMapping("/{id}")
   public ResponseEntity<ReflectionResponseDto> updateReflection(
@@ -180,21 +188,19 @@ public class ReflectionController {
       ReflectionResponseDto reflection = reflectionService.updateReflection(id, user.getId(), updateReflectionDto);
       return ResponseEntity.ok(reflection);
     } catch (IllegalArgumentException e) {
-      log.error("Error updating reflection", e);
       return ResponseEntity.status(403).build();
     } catch (Exception e) {
-      log.error("Error updating reflection", e);
       return ResponseEntity.badRequest().build();
     }
   }
 
   /**
-   * Soft delete a reflection (mark as deleted).
+   * Soft deletes a reflection by marking it as deleted.
    * Only the owner of the reflection can delete it.
    *
    * @param id the ID of the reflection to delete
-   * @param principal the authenticated user
-   * @return 200 OK if successful, 403 Forbidden if not authorized, 400 Bad Request if error
+   * @param principal the authenticated user's principal
+   * @return ResponseEntity with status 200 if successful, 403 if not authorized, 400 if error
    */
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteReflection(
@@ -206,10 +212,8 @@ public class ReflectionController {
       reflectionService.deleteReflection(id, user.getId());
       return ResponseEntity.ok().build();
     } catch (IllegalArgumentException e) {
-      log.error("Error deleting reflection", e);
       return ResponseEntity.status(403).build();
     } catch (Exception e) {
-      log.error("Error deleting reflection", e);
       return ResponseEntity.badRequest().build();
     }
   }
