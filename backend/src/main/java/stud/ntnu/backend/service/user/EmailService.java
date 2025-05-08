@@ -14,13 +14,6 @@ import org.springframework.stereotype.Service;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.repository.user.EmailTokenRepository;
-import stud.ntnu.backend.model.user.EmailToken;
-import stud.ntnu.backend.model.user.EmailToken.TokenType;
-import java.util.List;
-import java.util.UUID;
-import java.time.LocalDateTime;
-import stud.ntnu.backend.model.household.Household;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
