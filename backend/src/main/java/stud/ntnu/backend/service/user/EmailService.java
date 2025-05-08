@@ -2,20 +2,20 @@ package stud.ntnu.backend.service.user;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
 import stud.ntnu.backend.model.user.User;
-import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.repository.user.EmailTokenRepository;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
+import stud.ntnu.backend.repository.user.UserRepository;
 
 /**
  * Service responsible for handling email sending operations, such as verification emails. Uses
@@ -23,8 +23,6 @@ import org.springframework.context.i18n.LocaleContextHolder;
  */
 @Service
 public class EmailService {
-
-  private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
   private final JavaMailSender mailSender;
   private final String senderEmail;
@@ -57,16 +55,14 @@ public class EmailService {
 
   /**
    * Sends a verification email to the specified user. The email contains a unique token within a
-   * verification link. Includes content in both Norwegian and English. Logs success or errors
-   * during the sending process.
+   * verification link. Includes content in both Norwegian and English.
    *
    * @param user  The User object representing the recipient. Must have a valid email address.
    * @param token The unique verification token string to include in the link.
    */
   public void sendVerificationEmail(User user, String token) {
     if (user == null || user.getEmail() == null || token == null) {
-      log.error("Cannot send verification email. User or token is null or user email is null.");
-      return;
+      throw new IllegalArgumentException("Cannot send verification email. User or token is null or user email is null.");
     }
 
     try {
@@ -83,12 +79,9 @@ public class EmailService {
           LocaleContextHolder.getLocale()));
 
       mailSender.send(message);
-      log.info("Verification email sent successfully to: {}", user.getEmail());
 
-    } catch (MailException e) {
-      log.error("Mail sending error for verification email to {}", user.getEmail());
-    } catch (Exception e) {
-      log.error("Unexpected error sending verification email to {}: {}", user.getEmail(), e.getMessage());
+    } catch (RuntimeException e) {
+      throw new RuntimeException("Failed to send verification email", e);
     }
   }
 
@@ -100,8 +93,7 @@ public class EmailService {
    */
   public void send2FAEmail(String email, Integer code) {
     if (email == null || code == null) {
-      log.error("Cannot send 2FA email. User or token is null or user email is null.");
-      return;
+      throw new IllegalArgumentException("Cannot send 2FA email. Email or code is null.");
     }
 
     User user = userRepository.findByEmail(email)
@@ -120,12 +112,9 @@ public class EmailService {
           LocaleContextHolder.getLocale()));
 
       mailSender.send(message);
-      log.info("2FA email sent successfully to: {}", user.getEmail());
 
-    } catch (MailException e) {
-      log.error("Mail sending error for verification email to {}", user.getEmail());
-    } catch (Exception e) {
-      log.error("Unexpected error sending 2FA email to {}: {}", user.getEmail(), e.getMessage());
+    } catch (RuntimeException e) {
+      throw new RuntimeException("Failed to send 2FA email", e);
     }
   }
 
@@ -137,8 +126,7 @@ public class EmailService {
    */
   public void sendPasswordResetEmail(User user, String token) {
     if (user == null || user.getEmail() == null || token == null) {
-      log.error("Cannot send password reset email. User or token is null or user email is null.");
-      return;
+      throw new IllegalArgumentException("Cannot send password reset email. User or token is null or user email is null.");
     }
 
     try {
@@ -157,12 +145,9 @@ public class EmailService {
           LocaleContextHolder.getLocale()), true);
 
       mailSender.send(mimeMessage);
-      log.info("Password reset email sent successfully to: {}", user.getEmail());
 
-    } catch (MessagingException e) {
-      log.error("Mail sending error for password reset email to {}", user.getEmail());
-    } catch (Exception e) {
-      log.error("Unexpected error sending password reset email to {}: {}", user.getEmail(), e.getMessage());
+    } catch (MessagingException | RuntimeException e) {
+      throw new RuntimeException("Failed to send password reset email", e);
     }
   }
 
@@ -177,13 +162,10 @@ public class EmailService {
    */
   public void sendSafetyConfirmationEmail(User requestingUser, User receivingUser, String token) {
     if (requestingUser == null || receivingUser == null || token == null) {
-      log.error("Cannot send safety confirmation email. Invalid parameters provided.");
       throw new IllegalArgumentException("Invalid parameters for safety confirmation email.");
     }
 
     try {
-      log.info("Preparing to send safety confirmation email to: {}", receivingUser.getEmail());
-      
       String requestingUserName = (requestingUser.getName() != null ? requestingUser.getName() : "et husstandsmedlem");
       String receivingUserName = (receivingUser.getName() != null ? receivingUser.getName() : "Bruker");
 
@@ -203,14 +185,9 @@ public class EmailService {
       helper.setText(emailBody, true);
 
       mailSender.send(mimeMessage);
-      log.info("Safety confirmation email sent successfully to: {}", receivingUser.getEmail());
 
-    } catch (MessagingException e) {
-      log.error("Mail sending error for safety confirmation email to {}: {}", receivingUser.getEmail(), e.getMessage());
+    } catch (MessagingException | RuntimeException e) {
       throw new RuntimeException("Failed to send safety confirmation email", e);
-    } catch (Exception e) {
-      log.error("Unexpected error sending safety confirmation email to {}: {}", receivingUser.getEmail(), e.getMessage(), e);
-      throw new RuntimeException("Unexpected error during safety confirmation", e);
     }
   }
 }
