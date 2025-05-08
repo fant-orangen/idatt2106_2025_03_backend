@@ -171,18 +171,18 @@ public class InventoryController {
   }
 
   /**
-   * Reduce the number of units in an existing batch.
+   * Update the number of units in an existing batch.
    *
-   * @param batchId   the ID of the batch
-   * @param updateDto the DTO containing the update information
-   * @return 200 OK
+   * @param batchId the ID of the batch
+   * @param newNumberOfUnits the new number of units to set for the batch
+   * @return 200 OK if successful, 400 Bad Request with error message otherwise
    */
   @PutMapping("/product-batches/{batchId}")
   public ResponseEntity<?> updateProductBatch(
       @PathVariable Integer batchId,
-      @Valid @RequestBody ProductBatchUpdateDto updateDto) {
+      @RequestBody @Valid @Positive Integer newNumberOfUnits) {
     try {
-      inventoryService.updateProductBatch(batchId, updateDto);
+      inventoryService.updateProductBatch(batchId, newNumberOfUnits);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       log.error("Error updating product batch", e);

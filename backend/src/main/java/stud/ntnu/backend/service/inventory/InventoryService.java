@@ -304,25 +304,27 @@ public class InventoryService {
   }
 
   /**
-   * Update a product batch by reducing the number of units.
+   * Update a product batch by setting its number of units to a specific value.
    *
-   * @param batchId   the ID of the batch to update
-   * @param updateDto the DTO containing the update information
+   * @param batchId the ID of the batch to update
+   * @param newNumberOfUnits the new number of units to set for the batch
    * @return the updated product batch
+   * @throws NoSuchElementException if the batch is not found
+   * @throws IllegalArgumentException if newNumberOfUnits is negative
    */
   @Transactional
-  public ProductBatchDto updateProductBatch(Integer batchId, ProductBatchUpdateDto updateDto) {
+  public ProductBatchDto updateProductBatch(Integer batchId, Integer newNumberOfUnits) {
+    if (newNumberOfUnits < 0) {
+      throw new IllegalArgumentException("Number of units cannot be negative");
+    }
+
     ProductBatch batch = productBatchRepository.findById(batchId)
         .orElseThrow(
             () -> new NoSuchElementException("Product batch not found with ID: " + batchId));
 
     Integer householdId = batch.getProductType().getHousehold().getId();
-
-    if (batch.getNumber() < updateDto.getUnitsToRemove()) {
-      throw new IllegalArgumentException("Cannot remove more units than available in the batch");
-    }
-
-    batch.setNumber(batch.getNumber() - updateDto.getUnitsToRemove());
+    
+    batch.setNumber(newNumberOfUnits);
     ProductBatch updatedBatch = productBatchRepository.save(batch);
 
     // Publish event after update
