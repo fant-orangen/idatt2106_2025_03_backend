@@ -59,7 +59,8 @@ public class Notification {
     remaining_supply_alert,
     crisis_alert,
     location_request,
-    system
+    system,
+    safety_request
   }
 
   // Enum for target type
