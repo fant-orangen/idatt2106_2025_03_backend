@@ -1,23 +1,31 @@
 package stud.ntnu.backend.service.user;
 
+import java.util.Collections;
+
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.UserRepository;
 
-import java.util.Collections;
-
 /**
  * Custom implementation of UserDetailsService that loads user details from the database.
+ * This service is responsible for retrieving user information during authentication
+ * and converting it into Spring Security's UserDetails format.
  */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
   private final UserRepository userRepository;
 
+  /**
+   * Constructs a new CustomUserDetailsService with the required dependencies.
+   *
+   * @param userRepository the repository for accessing user data
+   */
   public CustomUserDetailsService(UserRepository userRepository) {
     this.userRepository = userRepository;
   }

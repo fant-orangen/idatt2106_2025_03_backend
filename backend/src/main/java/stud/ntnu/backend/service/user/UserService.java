@@ -7,7 +7,6 @@ import stud.ntnu.backend.repository.user.SafetyConfirmationRepository;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.model.user.EmailToken;
 import stud.ntnu.backend.model.user.SafetyConfirmation;
-import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.dto.user.UserProfileDto;
 import stud.ntnu.backend.dto.user.UserUpdateDto;
 import stud.ntnu.backend.dto.user.UserPreferencesDto;
@@ -17,8 +16,6 @@ import stud.ntnu.backend.dto.user.UserHistoryDto.ReflectionDto;
 import stud.ntnu.backend.dto.user.UserBasicInfoDto;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +28,6 @@ import java.util.UUID;
  */
 @Service
 public class UserService {
-
-  private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
   private final UserRepository userRepository;
   private final EmailTokenRepository emailTokenRepository;
@@ -295,26 +290,25 @@ public class UserService {
    */
   @Transactional
   public void requestSafetyConfirmation(String email) {
-    log.info("Requesting safety confirmation for user with email: {}", email);
-    
     User requestingUser = userRepository.findByEmail(email)
-        .orElseThrow(() -> {
-          log.error("User not found with email: {}", email);
-          return new IllegalStateException("Bruker ikke funnet. / User not found.");
-        });
+        .orElseThrow(() -> new IllegalStateException("Bruker ikke funnet. / User not found."));
 
     if (requestingUser.getHousehold() == null) {
-      log.error("User {} does not belong to any household", email);
       throw new IllegalStateException("Du må være medlem av en husstand for å be om sikkerhetsbekreftelser. / You must be a member of a household to request safety confirmations.");
     }
 
+    // Automatically mark the requesting user as safe
+    LocalDateTime now = LocalDateTime.now();
+    // Delete any existing safety confirmations for the requesting user
+    safetyConfirmationRepository.deleteByUser(requestingUser);
+    // Create new safety confirmation for the requesting user
+    SafetyConfirmation requestingUserConfirmation = new SafetyConfirmation(requestingUser, true, now);
+    safetyConfirmationRepository.save(requestingUserConfirmation);
+
     List<User> householdMembers = userRepository.findByHousehold(requestingUser.getHousehold());
     if (householdMembers.isEmpty() || householdMembers.size() == 1) {
-      log.error("No other members found in household for user {}", email);
       throw new IllegalStateException("Ingen andre medlemmer i husstanden. / No other members in the household.");
     }
-
-    log.info("Found {} household members for user {}", householdMembers.size(), email);
     
     try {
       for (User member : householdMembers) {
@@ -335,7 +329,6 @@ public class UserService {
             expiresAt
         );
         emailTokenRepository.save(safetyToken);
-        log.info("Created safety confirmation token for member: {}", member.getEmail());
 
         // Send email with the unique token
         emailService.sendSafetyConfirmationEmail(requestingUser, member, token);
@@ -344,9 +337,7 @@ public class UserService {
         String requestingUserName = requestingUser.getName() != null ? requestingUser.getName() : "et husstandsmedlem";
         notificationService.createSafetyRequestNotification(member, requestingUserName);
       }
-      log.info("Successfully sent safety confirmation requests for user {}", email);
     } catch (Exception e) {
-      log.error("Error sending safety confirmation requests for user {}: {}", email, e.getMessage(), e);
       throw e;
     }
   }

@@ -10,6 +10,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import stud.ntnu.backend.model.user.User;
 
+/**
+ * Represents a group entity in the system.
+ * Groups can be created by users and have different statuses (active/archived).
+ */
 @Entity
 @Table(name = "groups")
 @Getter
@@ -18,38 +22,67 @@ import stud.ntnu.backend.model.user.User;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Group {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+    /**
+     * Unique identifier for the group.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-  @Column(name = "name", nullable = false)
-  private String name;
+    /**
+     * Name of the group.
+     */
+    @Column(name = "name", nullable = false)
+    private String name;
 
-  @ManyToOne
-  @JoinColumn(name = "created_by_user_id", nullable = false)
-  @JsonBackReference
-  private User createdByUser;
+    /**
+     * User who created the group.
+     */
+    @ManyToOne
+    @JoinColumn(name = "created_by_user_id", nullable = false)
+    @JsonBackReference
+    private User createdByUser;
 
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private LocalDateTime createdAt;
+    /**
+     * Timestamp when the group was created.
+     */
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-  @Column(name = "status", nullable = false)
-  @Enumerated(EnumType.STRING)
-  private GroupStatus status = GroupStatus.active;
+    /**
+     * Current status of the group.
+     * Defaults to active when created.
+     */
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private GroupStatus status = GroupStatus.active;
 
-  // Set createdAt before persist
-  @PrePersist
-  protected void onCreate() {
-    createdAt = LocalDateTime.now();
-  }
+    /**
+     * Sets the creation timestamp before persisting the entity.
+     */
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
-  public Group(String name, User createdByUser) {
-    this.name = name;
-    this.createdByUser = createdByUser;
-  }
+    /**
+     * Creates a new group with the specified name and creator.
+     *
+     * @param name The name of the group
+     * @param createdByUser The user creating the group
+     */
+    public Group(String name, User createdByUser) {
+        this.name = name;
+        this.createdByUser = createdByUser;
+    }
 
-  public enum GroupStatus {
-    active,
-    archived
-  }
+    /**
+     * Represents the possible states a group can be in.
+     */
+    public enum GroupStatus {
+        /** Group is currently active and can be used */
+        active,
+        /** Group has been archived and is no longer active */
+        archived
+    }
 }

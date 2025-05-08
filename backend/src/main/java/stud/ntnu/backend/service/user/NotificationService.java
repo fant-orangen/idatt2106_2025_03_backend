@@ -1,32 +1,30 @@
 package stud.ntnu.backend.service.user;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import stud.ntnu.backend.dto.user.NotificationDto; //
-import stud.ntnu.backend.model.map.CrisisEvent; //
-import stud.ntnu.backend.model.user.Notification; //
-import stud.ntnu.backend.model.user.User; //
-import stud.ntnu.backend.repository.user.NotificationRepository; //
-import stud.ntnu.backend.repository.user.UserRepository; //
-import stud.ntnu.backend.util.LocationUtil; //
-import stud.ntnu.backend.model.household.Household; //
-import stud.ntnu.backend.model.user.NotificationPreference; //
-import stud.ntnu.backend.repository.user.NotificationPreferenceRepository; //
+import stud.ntnu.backend.dto.user.NotificationDto;
+import stud.ntnu.backend.model.map.CrisisEvent;
+import stud.ntnu.backend.model.user.Notification;
+import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.repository.user.NotificationRepository;
+import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.util.LocationUtil;
+import stud.ntnu.backend.model.household.Household;
+import stud.ntnu.backend.model.user.NotificationPreference;
+import stud.ntnu.backend.repository.user.NotificationPreferenceRepository;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
-import java.math.BigDecimal; //
-import java.time.LocalDateTime; //
-import java.time.format.DateTimeFormatter; //
-import java.util.List; //
-import java.util.Objects; //
-import java.util.stream.Collectors; //
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing notifications. Handles creation, retrieval, and sending of notifications.
@@ -34,12 +32,11 @@ import java.util.stream.Collectors; //
 @Service
 public class NotificationService {
 
-  private final NotificationRepository notificationRepository; //
+  private final NotificationRepository notificationRepository;
   private final NotificationPreferenceRepository notificationPreferenceRepository;
-  private final UserRepository userRepository; //
+  private final UserRepository userRepository;
   private final SimpMessagingTemplate messagingTemplate;
   private final MessageSource messageSource;
-  private final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
   /**
    * Constructs the NotificationService with necessary dependencies.
@@ -53,12 +50,12 @@ public class NotificationService {
   @Autowired
   public NotificationService(NotificationRepository notificationRepository,
       NotificationPreferenceRepository notificationPreferenceRepository,
-      UserRepository userRepository, //
+      UserRepository userRepository,
       SimpMessagingTemplate messagingTemplate,
-      MessageSource messageSource) { //
-    this.notificationRepository = notificationRepository; //
+      MessageSource messageSource) {
+    this.notificationRepository = notificationRepository;
     this.notificationPreferenceRepository = notificationPreferenceRepository;
-    this.userRepository = userRepository; //
+    this.userRepository = userRepository;
     this.messagingTemplate = messagingTemplate;
     this.messageSource = messageSource;
   }
@@ -74,20 +71,20 @@ public class NotificationService {
    * @return The saved Notification entity.
    */
   @Transactional
-  public Notification createNotification(User user, //
-      Notification.PreferenceType preferenceType, //
-      Notification.TargetType targetType, //
+  public Notification createNotification(User user,
+      Notification.PreferenceType preferenceType,
+      Notification.TargetType targetType,
       Integer targetId,
       String description) {
-    Notification notification = new Notification( //
-        user, //
-        preferenceType, //
-        targetType, //
+    Notification notification = new Notification(
+        user,
+        preferenceType,
+        targetType,
         targetId,
         description,
-        LocalDateTime.now() //
+        LocalDateTime.now()
     );
-    return notificationRepository.save(notification); //
+    return notificationRepository.save(notification);
   }
 
   /**
@@ -96,14 +93,12 @@ public class NotificationService {
    *
    * @param notification The Notification object to send.
    */
-  public void sendNotification(Notification notification) { //
-    notification.setSentAt(LocalDateTime.now()); //
-    notificationRepository.save(notification); //
-    NotificationDto notificationDto = NotificationDto.fromEntity(notification); //
-    String destination = "/topic/notifications/" + notification.getUser().getId(); //
-    log.info("Sending notification to user {}: {}", notification.getUser().getId(),
-        notificationDto.getDescription()); //
-    messagingTemplate.convertAndSend(destination, notificationDto); //
+  public void sendNotification(Notification notification) {
+    notification.setSentAt(LocalDateTime.now());
+    notificationRepository.save(notification);
+    NotificationDto notificationDto = NotificationDto.fromEntity(notification);
+    String destination = "/topic/notifications/" + notification.getUser().getId();
+    messagingTemplate.convertAndSend(destination, notificationDto);
   }
 
   /**
@@ -113,8 +108,8 @@ public class NotificationService {
    * @return A List of Notification entities for the user.
    */
   @Transactional(readOnly = true)
-  public List<Notification> getNotificationsForUser(Integer userId) { //
-    return notificationRepository.findByUserIdOrderByNotifyAtDesc(userId); //
+  public List<Notification> getNotificationsForUser(Integer userId) {
+    return notificationRepository.findByUserIdOrderByNotifyAtDesc(userId);
   }
 
   /**
@@ -125,8 +120,8 @@ public class NotificationService {
    * @return A Page containing Notification entities for the user.
    */
   @Transactional(readOnly = true)
-  public Page<Notification> getNotificationsForUser(Integer userId, Pageable pageable) { //
-    return notificationRepository.findByUserId(userId, pageable); //
+  public Page<Notification> getNotificationsForUser(Integer userId, Pageable pageable) {
+    return notificationRepository.findByUserId(userId, pageable);
   }
 
   /**
@@ -137,12 +132,12 @@ public class NotificationService {
    * @throws IllegalStateException if the notification with the given ID is not found.
    */
   @Transactional
-  public Notification markAsRead(Integer notificationId) { //
-    Notification notification = notificationRepository.findById(notificationId) //
+  public Notification markAsRead(Integer notificationId) {
+    Notification notification = notificationRepository.findById(notificationId)
         .orElseThrow(() -> new IllegalStateException(
-            "Notification not found with ID: " + notificationId)); //
-    notification.setReadAt(LocalDateTime.now()); //
-    return notificationRepository.save(notification); //
+            "Notification not found with ID: " + notificationId));
+    notification.setReadAt(LocalDateTime.now());
+    return notificationRepository.save(notification);
   }
 
   /**
@@ -164,8 +159,6 @@ public class NotificationService {
       LocalDateTime now = LocalDateTime.now();
       unreadNotifications.forEach(notification -> notification.setReadAt(now));
       notificationRepository.saveAll(unreadNotifications);
-      
-      log.info("Marked {} notifications as read for user {}", count, email);
     }
     
     return count;
@@ -196,19 +189,17 @@ public class NotificationService {
    */
   @Transactional
   public List<Notification> createSystemNotificationForAllUsers(String description,
-      User createdByUser) { //
-    List<User> allUsers = userRepository.findAll(); //
-    log.info("Creating system notification '{}' for {} users.", description, allUsers.size()); //
-    List<Notification> notifications = allUsers.stream() //
-        .map(user -> { //
+      User createdByUser) {
+    List<User> allUsers = userRepository.findAll();
+    List<Notification> notifications = allUsers.stream()
+        .map(user -> {
           Notification notification = new Notification(user, Notification.PreferenceType.system,
-              LocalDateTime.now()); //
-          notification.setDescription(description); //
-          return notificationRepository.save(notification); //
+              LocalDateTime.now());
+          notification.setDescription(description);
+          return notificationRepository.save(notification);
         })
-        .collect(Collectors.toList()); //
-    log.info("Created {} system notifications.", notifications.size()); //
-    return notifications; //
+        .collect(Collectors.toList());
+    return notifications;
   }
 
   /**
@@ -217,10 +208,9 @@ public class NotificationService {
    *
    * @param notifications The list of Notification entities to send.
    */
-  public void sendNotificationsToAllUsers(List<Notification> notifications) { //
-    log.info("Sending {} system notifications via WebSocket.", notifications.size()); //
-    for (Notification notification : notifications) { //
-      sendNotification(notification); //
+  public void sendNotificationsToAllUsers(List<Notification> notifications) {
+    for (Notification notification : notifications) {
+      sendNotification(notification);
     }
   }
 
@@ -231,11 +221,11 @@ public class NotificationService {
    * @param crisisEvent the newly created crisis event.
    */
   @Transactional
-  public void sendCrisisEventNotifications(CrisisEvent crisisEvent) { //
+  public void sendCrisisEventNotifications(CrisisEvent crisisEvent) {
     // Determine message template based on event type (new event)
-    String messageTemplate = createNewCrisisMessageTemplate(crisisEvent); //
+    String messageTemplate = createNewCrisisMessageTemplate(crisisEvent);
     // Send notifications using the template and specific reason calculation
-    sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true); //
+    sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true);
   }
 
   /**
@@ -248,27 +238,22 @@ public class NotificationService {
    */
   @Transactional
   public void sendCrisisEventUpdateNotifications(CrisisEvent updatedCrisisEvent,
-      CrisisEvent previousCrisisEvent) { //
-    if (updatedCrisisEvent == null || previousCrisisEvent == null) { //
-      log.warn("Cannot send crisis update notifications. Event data missing."); //
-      return; //
+      CrisisEvent previousCrisisEvent) {
+    if (updatedCrisisEvent == null || previousCrisisEvent == null) {
+      return;
     }
 
     // Determine message template based on event type (update)
     String messageTemplate = createUpdateCrisisMessageTemplate(updatedCrisisEvent,
-        previousCrisisEvent); //
+        previousCrisisEvent);
 
-    if (messageTemplate == null) { //
-      log.info("No significant changes detected for event ID {}. No update notifications sent.",
-          updatedCrisisEvent.getId()); //
+    if (messageTemplate == null) {
       return; // No message means no significant change detected
     }
 
-    log.info("Sending update notifications for event ID {}", updatedCrisisEvent.getId()); //
     // Send notifications using the update template and specific reason calculation
-    sendCrisisEventNotificationsInternal(updatedCrisisEvent, messageTemplate, false); //
+    sendCrisisEventNotificationsInternal(updatedCrisisEvent, messageTemplate, false);
   }
-
 
   /**
    * Internal helper method to find relevant users and send notifications with tailored messages
@@ -282,100 +267,86 @@ public class NotificationService {
    */
   @Transactional
   public void sendCrisisEventNotificationsInternal(CrisisEvent crisisEvent, String messageTemplate,
-      boolean isNewEvent) { //
+      boolean isNewEvent) {
     if (crisisEvent == null || crisisEvent.getRadius() == null
         || crisisEvent.getEpicenterLatitude() == null
-        || crisisEvent.getEpicenterLongitude() == null) { //
-      log.warn("Cannot send crisis notifications. Event data incomplete: {}", crisisEvent); //
-      return; //
+        || crisisEvent.getEpicenterLongitude() == null) {
+      return;
     }
 
-    BigDecimal eventLat = crisisEvent.getEpicenterLatitude(); //
-    BigDecimal eventLon = crisisEvent.getEpicenterLongitude(); //
+    BigDecimal eventLat = crisisEvent.getEpicenterLatitude();
+    BigDecimal eventLon = crisisEvent.getEpicenterLongitude();
     // Use radius directly in meters for calculations.
     double radiusMeters = crisisEvent.getRadius().doubleValue() * 1000; // MUST BE IN METERS
 
     // Fetch ALL users.
-    List<User> allUsers = userRepository.findAll(); //
-    log.info("Checking {} users against crisis event ID {}", allUsers.size(),
-        crisisEvent.getId()); //
+    List<User> allUsers = userRepository.findAll();
 
-    int sentCount = 0; //
-    for (User user : allUsers) { //
-      String notificationReason = null; //
-      boolean userHomeAffected = false; //
-      boolean householdAffected = false; //
+    int sentCount = 0;
+    for (User user : allUsers) {
+      String notificationReason = null;
+      boolean userHomeAffected = false;
+      boolean householdAffected = false;
 
       // 1. Check user's home location (if available)
-      if (user.getHomeLatitude() != null && user.getHomeLongitude() != null) { //
-        double distanceToUserHome = LocationUtil.calculateDistance( //
-            eventLat.doubleValue(), eventLon.doubleValue(), //
-            user.getHomeLatitude().doubleValue(), user.getHomeLongitude().doubleValue() //
+      if (user.getHomeLatitude() != null && user.getHomeLongitude() != null) {
+        double distanceToUserHome = LocationUtil.calculateDistance(
+            eventLat.doubleValue(), eventLon.doubleValue(),
+            user.getHomeLatitude().doubleValue(), user.getHomeLongitude().doubleValue()
         );
-        if (distanceToUserHome <= radiusMeters) { //
-          userHomeAffected = true; //
-          log.debug("User ID {}'s home location is within radius ({}m <= {}m).", user.getId(),
-              distanceToUserHome, radiusMeters); //
+        if (distanceToUserHome <= radiusMeters) {
+          userHomeAffected = true;
         }
       }
 
       // 2. Check household location (if available)
       Household household = user.getHousehold(); // Get household directly from user object
       if (household != null && household.getLatitude() != null
-          && household.getLongitude() != null) { //
-        double distanceToHousehold = LocationUtil.calculateDistance( //
-            eventLat.doubleValue(), eventLon.doubleValue(), //
-            household.getLatitude().doubleValue(), household.getLongitude().doubleValue() //
+          && household.getLongitude() != null) {
+        double distanceToHousehold = LocationUtil.calculateDistance(
+            eventLat.doubleValue(), eventLon.doubleValue(),
+            household.getLatitude().doubleValue(), household.getLongitude().doubleValue()
         );
-        if (distanceToHousehold <= radiusMeters) { //
-          householdAffected = true; //
-          log.debug("User ID {}'s household location is within radius ({}m <= {}m).", user.getId(),
-              distanceToHousehold, radiusMeters); //
+        if (distanceToHousehold <= radiusMeters) {
+          householdAffected = true;
         }
       }
 
       // 3. Determine the reason text based on checks
-      if (userHomeAffected && householdAffected) { //
+      if (userHomeAffected && householdAffected) {
         // Both user home and household are affected
         if (user.getHomeLatitude().equals(household.getLatitude()) && user.getHomeLongitude()
-            .equals(household.getLongitude())) { //
+            .equals(household.getLongitude())) {
           // If your position and household location are the same 
-          notificationReason = "din posisjon/husholdningsposisjon"; //
-        } else { //
-          notificationReason = "både din posisjon og din husholdnings posisjon"; //
+          notificationReason = "din posisjon/husholdningsposisjon";
+        } else {
+          notificationReason = "både din posisjon og din husholdnings posisjon";
         }
-      } else if (householdAffected) { //
+      } else if (householdAffected) {
         // ONLY household is affected
-        notificationReason = "din husholdnings posisjon"; //
-      } else if (userHomeAffected) { //
+        notificationReason = "din husholdnings posisjon";
+      } else if (userHomeAffected) {
         // ONLY your location is affected
-        notificationReason = "din posisjon"; //
+        notificationReason = "din posisjon";
       }
 
       // 4. Only proceed if a reason was determined
-      if (notificationReason != null) { //
+      if (notificationReason != null) {
         // Format the final message using the template and reason
-        String finalMessage = messageTemplate.replace("{reason}", notificationReason); //
+        String finalMessage = messageTemplate.replace("{reason}", notificationReason);
 
-        log.debug("Creating crisis_alert notification for user ID {} with reason: {}", user.getId(),
-            notificationReason); //
-        Notification notification = createNotification( //
-            user, //
-            Notification.PreferenceType.crisis_alert, //
-            Notification.TargetType.event, //
-            crisisEvent.getId(), //
+        Notification notification = createNotification(
+            user,
+            Notification.PreferenceType.crisis_alert,
+            Notification.TargetType.event,
+            crisisEvent.getId(),
             finalMessage // Use the specific message
         );
 
-        sendNotification(notification); // Send the notification via WebSocket
-        sentCount++; //
-      } else { //
-        log.trace("User ID {} is outside the radius based on stored home/household locations.",
-            user.getId()); //
+        sendNotification(notification);
+        sentCount++;
       }
     }
-    log.info("Sent {} notifications based on stored locations for event ID {}", sentCount,
-        crisisEvent.getId()); //
   }
 
   /**
@@ -385,26 +356,26 @@ public class NotificationService {
    * @param crisisEvent The newly created CrisisEvent.
    * @return A formatted string template for the notification message.
    */
-  private String createNewCrisisMessageTemplate(CrisisEvent crisisEvent) { //
-    StringBuilder message = new StringBuilder("🚨 Kriselarsel: "); //
-    message.append(String.format("'%s' (%s alvorlighetsgrad)", //
-        crisisEvent.getName(), //
-        translateSeverity(crisisEvent.getSeverity()))); //
+  private String createNewCrisisMessageTemplate(CrisisEvent crisisEvent) {
+    StringBuilder message = new StringBuilder("🚨 Kriselarsel: ");
+    message.append(String.format("'%s' (%s alvorlighetsgrad)",
+        crisisEvent.getName(),
+        translateSeverity(crisisEvent.getSeverity())));
 
     // Add the reason placeholder
     message.append(
-        ". Du varsles fordi {reason} er innenfor faresonen"); // Ensure placeholder is here
+        ". Du varsles fordi {reason} er innenfor faresonen");
 
-    if (crisisEvent.getDescription() != null && !crisisEvent.getDescription().trim().isEmpty()) { //
+    if (crisisEvent.getDescription() != null && !crisisEvent.getDescription().trim().isEmpty()) {
       message.append(". Beskrivelse: ")
-          .append(truncateDescription(crisisEvent.getDescription())); //
+          .append(truncateDescription(crisisEvent.getDescription()));
     }
-    String startTimeFormatted = crisisEvent.getStartTime() != null //
-        ? crisisEvent.getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")) //
-        : "ukjent tidspunkt"; //
-    message.append(String.format(". Startet %s.", startTimeFormatted)); //
+    String startTimeFormatted = crisisEvent.getStartTime() != null
+        ? crisisEvent.getStartTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
+        : "ukjent tidspunkt";
+    message.append(String.format(". Startet %s.", startTimeFormatted));
 
-    return message.toString(); //
+    return message.toString();
   }
 
   /**
@@ -418,50 +389,50 @@ public class NotificationService {
    * significant changes occurred.
    */
   private String createUpdateCrisisMessageTemplate(CrisisEvent updatedCrisisEvent,
-      CrisisEvent previousCrisisEvent) { //
-    StringBuilder changes = new StringBuilder(); //
-    boolean changed = false; //
+      CrisisEvent previousCrisisEvent) {
+    StringBuilder changes = new StringBuilder();
+    boolean changed = false;
     // Check for changes
-    if (!Objects.equals(updatedCrisisEvent.getName(), previousCrisisEvent.getName())) { //
-      changes.append(String.format("Navn endret til '%s'. ", updatedCrisisEvent.getName())); //
-      changed = true; //
+    if (!Objects.equals(updatedCrisisEvent.getName(), previousCrisisEvent.getName())) {
+      changes.append(String.format("Navn endret til '%s'. ", updatedCrisisEvent.getName()));
+      changed = true;
     }
     if (!Objects.equals(updatedCrisisEvent.getDescription(),
-        previousCrisisEvent.getDescription())) { //
-      changes.append("Beskrivelse oppdatert. "); //
-      changed = true; //
+        previousCrisisEvent.getDescription())) {
+      changes.append("Beskrivelse oppdatert. ");
+      changed = true;
     }
-    if (!Objects.equals(updatedCrisisEvent.getSeverity(), previousCrisisEvent.getSeverity())) { //
+    if (!Objects.equals(updatedCrisisEvent.getSeverity(), previousCrisisEvent.getSeverity())) {
       changes.append(String.format("Alvorlighetsgrad endret til %s. ",
-          translateSeverity(updatedCrisisEvent.getSeverity()))); //
-      changed = true; //
+          translateSeverity(updatedCrisisEvent.getSeverity())));
+      changed = true;
     }
     if (locationChanged(updatedCrisisEvent.getEpicenterLatitude(),
-        previousCrisisEvent.getEpicenterLatitude()) || //
+        previousCrisisEvent.getEpicenterLatitude()) ||
         locationChanged(updatedCrisisEvent.getEpicenterLongitude(),
-            previousCrisisEvent.getEpicenterLongitude())) { //
-      changes.append("Posisjon oppdatert. "); //
-      changed = true; //
+            previousCrisisEvent.getEpicenterLongitude())) {
+      changes.append("Posisjon oppdatert. ");
+      changed = true;
     }
-    if (!Objects.equals(updatedCrisisEvent.getRadius(), previousCrisisEvent.getRadius())) { //
+    if (!Objects.equals(updatedCrisisEvent.getRadius(), previousCrisisEvent.getRadius())) {
       changes.append(String.format("Radius endret til %s meter. ",
           updatedCrisisEvent.getRadius() != null ? updatedCrisisEvent.getRadius().toString()
               : "ukjent")); // Assuming radius is in meters now
-      changed = true; //
+      changed = true;
     }
-    if (!Objects.equals(updatedCrisisEvent.getActive(), previousCrisisEvent.getActive())) { //
+    if (!Objects.equals(updatedCrisisEvent.getActive(), previousCrisisEvent.getActive())) {
       changes.append(updatedCrisisEvent.getActive() ? "Hendelsen er nå aktiv igjen. "
-          : "Hendelsen er nå markert som inaktiv. "); //
-      changed = true; //
+          : "Hendelsen er nå markert som inaktiv. ");
+      changed = true;
     }
 
-    if (!changed) { //
+    if (!changed) {
       return null; // No significant changes detected
     }
 
     // Construct the template including the reason placeholder
     return String.format(
-        "🔄 Oppdatering for '%s': %s Du varsles fordi {reason} er innenfor det berørte området.", //
+        "🔄 Oppdatering for '%s': %s Du varsles fordi {reason} er innenfor det berørte området.",
         updatedCrisisEvent.getName(), changes.toString().trim()); // Ensure placeholder is here
   }
 
@@ -471,19 +442,19 @@ public class NotificationService {
    * @param severity The Severity enum value.
    * @return A Norwegian string representing the severity ("høy", "middels", "lav", "ukjent").
    */
-  private String translateSeverity(CrisisEvent.Severity severity) { //
+  private String translateSeverity(CrisisEvent.Severity severity) {
     if (severity == null) {
-      return "ukjent"; //
+      return "ukjent";
     }
-    switch (severity) { //
+    switch (severity) {
       case red:
-        return "høy"; //
+        return "høy";
       case yellow:
-        return "middels"; //
+        return "middels";
       case green:
-        return "lav"; //
+        return "lav";
       default:
-        return severity.name(); //
+        return severity.name();
     }
   }
 
@@ -494,14 +465,14 @@ public class NotificationService {
    * @return The truncated description, or the original if it's within the limit.
    */
   private String truncateDescription(String description) {
-    final int MAX_LENGTH = 100; //
+    final int MAX_LENGTH = 100;
     if (description == null) {
-      return ""; //
+      return "";
     }
-    if (description.length() <= MAX_LENGTH) { //
-      return description; //
+    if (description.length() <= MAX_LENGTH) {
+      return description;
     }
-    return description.substring(0, MAX_LENGTH) + "..."; //
+    return description.substring(0, MAX_LENGTH) + "...";
   }
 
   /**
@@ -512,15 +483,15 @@ public class NotificationService {
    * @param oldCoord The old coordinate value.
    * @return true if the coordinates are considered different, false otherwise.
    */
-  private boolean locationChanged(BigDecimal newCoord, BigDecimal oldCoord) { //
+  private boolean locationChanged(BigDecimal newCoord, BigDecimal oldCoord) {
     if (newCoord == null && oldCoord == null) {
-      return false; //
+      return false;
     }
     if (newCoord == null || oldCoord == null) {
-      return true; //
+      return true;
     }
     // Use a small tolerance for floating point comparison
-    return newCoord.subtract(oldCoord).abs().compareTo(new BigDecimal("0.00001")) > 0; //
+    return newCoord.subtract(oldCoord).abs().compareTo(new BigDecimal("0.00001")) > 0;
   }
 
   /**
@@ -549,8 +520,6 @@ public class NotificationService {
     }
     
     notificationPreferenceRepository.save(preference);
-    log.info("Updated notification preference '{}' to {} for user {}", 
-        preferenceType, enable, user.getEmail());
   }
 
   /**
@@ -576,5 +545,4 @@ public class NotificationService {
     
     sendNotification(notification);
   }
-
 }

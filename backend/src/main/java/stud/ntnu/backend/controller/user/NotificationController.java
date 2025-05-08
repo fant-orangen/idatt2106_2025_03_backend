@@ -1,11 +1,24 @@
 package stud.ntnu.backend.controller.user;
 
+import java.security.Principal;
+import java.util.List;
+
 import jakarta.validation.Valid;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import stud.ntnu.backend.dto.user.NotificationDto;
 import stud.ntnu.backend.dto.user.SystemNotificationCreateDto;
 import stud.ntnu.backend.model.user.Notification;
@@ -14,11 +27,17 @@ import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.user.NotificationService;
 import stud.ntnu.backend.service.user.UserService;
 
-import java.security.Principal;
-import java.util.List;
-
 /**
- * Controller for managing notifications.
+ * REST controller for managing user notifications.
+ * <p>
+ * This controller handles all notification-related operations including:
+ * - Retrieving paginated notifications for users
+ * - Marking notifications as read (single or all)
+ * - Checking for unread notifications
+ * - Managing system-wide notifications (admin only)
+ * - Configuring notification preferences
+ * <p>
+ * All endpoints require user authentication and operate on behalf of the authenticated user.
  */
 @RestController
 @RequestMapping("/api")
@@ -28,6 +47,13 @@ public class NotificationController {
   private final UserService userService;
   private final SimpMessagingTemplate messagingTemplate;
 
+  /**
+   * Constructs a new NotificationController with required dependencies.
+   *
+   * @param notificationService service for notification operations
+   * @param userService service for user operations
+   * @param messagingTemplate template for WebSocket messaging
+   */
   public NotificationController(NotificationService notificationService,
       UserService userService,
       SimpMessagingTemplate messagingTemplate) {
@@ -37,11 +63,11 @@ public class NotificationController {
   }
 
   /**
-   * Gets notifications for the current user in a paginated format.
+   * Retrieves paginated notifications for the current user.
    *
-   * @param principal the Principal object representing the current user
-   * @param pageable  pagination information
-   * @return ResponseEntity with a page of notifications
+   * @param principal the authenticated user's principal
+   * @param pageable pagination parameters (page number, size, sorting)
+   * @return ResponseEntity containing a page of NotificationDto objects, or 400 Bad Request if an error occurs
    */
   @GetMapping("/user/notifications")
   public ResponseEntity<?> getNotifications(Principal principal, Pageable pageable) {
@@ -61,12 +87,12 @@ public class NotificationController {
   }
 
   /**
-   * Marks a notification as read.
-   * TODO: Untested!
+   * Marks a specific notification as read for the current user.
    *
-   * @param id        the ID of the notification
-   * @param principal the Principal object representing the current user
-   * @return ResponseEntity with the updated notification
+   * @param id the ID of the notification to mark as read
+   * @param principal the authenticated user's principal
+   * @return ResponseEntity containing the updated NotificationDto, 403 Forbidden if unauthorized,
+   *         or 400 Bad Request if an error occurs
    */
   @PutMapping("/user/notifications/{id}/read")
   public ResponseEntity<?> markAsRead(@PathVariable Integer id, Principal principal) {
@@ -76,7 +102,6 @@ public class NotificationController {
 
       Notification notification = notificationService.markAsRead(id);
 
-      // Check if the notification belongs to the current user
       if (!notification.getUser().getId().equals(user.getId())) {
         return ResponseEntity.status(403)
             .body("You don't have permission to mark this notification as read");
@@ -91,7 +116,7 @@ public class NotificationController {
   /**
    * Marks all unread notifications as read for the current user.
    *
-   * @param principal the Principal object representing the current user
+   * @param principal the authenticated user's principal
    * @return ResponseEntity with status 200 OK if successful, or 400 Bad Request if an error occurs
    */
   @PatchMapping("/user/notifications/read-all") 
@@ -107,9 +132,9 @@ public class NotificationController {
 
   /**
    * Checks if the current user has any unread notifications.
-   * 
-   * @param principal the Principal object representing the current user
-   * @return ResponseEntity with status 200 OK if successful, or 400 Bad Request if an error occurs
+   *
+   * @param principal the authenticated user's principal
+   * @return ResponseEntity containing a boolean indicating unread status, or 400 Bad Request if an error occurs
    */
   @GetMapping("/user/notifications/any-unread")
   public ResponseEntity<?> anyUnread(Principal principal) {
@@ -123,45 +148,42 @@ public class NotificationController {
   }
 
   /**
-   * Sends a notification to a specific topic.
-   * TODO: Untested!
+   * Sends a notification to a specific WebSocket topic.
    *
-   * @param topic   the topic to send the notification to
-   * @param payload the notification payload
+   * @param topic the WebSocket topic to send the notification to
+   * @param payload the notification payload to send
    */
   public void sendNotification(String topic, Object payload) {
     messagingTemplate.convertAndSend(topic, payload);
   }
 
   /**
-   * Creates a system notification for all users. Only users with ADMIN or SUPERADMIN roles can
-   * create system notifications.
-   * TODO: Untested!
+   * Creates a system-wide notification visible to all users.
+   * <p>
+   * This endpoint is restricted to users with ADMIN or SUPERADMIN roles.
+   * The notification is created for all users and sent via WebSocket.
    *
    * @param createDto the DTO containing the notification description
-   * @param principal the Principal object representing the current user
-   * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
+   * @param principal the authenticated user's principal
+   * @return ResponseEntity with status 200 OK if successful, 403 Forbidden if unauthorized,
+   *         or 400 Bad Request if an error occurs
    */
   @PostMapping("/admin/notifications/system")
   public ResponseEntity<?> createSystemNotification(
       @Valid @RequestBody SystemNotificationCreateDto createDto,
       Principal principal) {
     try {
-      // Check if the current user is an admin
       if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
         return ResponseEntity.status(403)
             .body("Only administrators can create system notifications");
       }
 
-      // Get the current user
       User currentUser = userService.getUserByEmail(principal.getName())
           .orElseThrow(() -> new IllegalStateException("User not found"));
 
-      // Create system notifications for all users. TODO: make this more efficient. What if 100 000 users?
       List<Notification> notifications = notificationService.createSystemNotificationForAllUsers(
           createDto.getDescription(), currentUser);
 
-      // Send the notifications via WebSocket
       notificationService.sendNotificationsToAllUsers(notifications);
 
       return ResponseEntity.ok().build();
@@ -171,12 +193,12 @@ public class NotificationController {
   }
 
   /**
-   * Changes a user's notification preference for a specific type.
+   * Updates a user's notification preference for a specific notification type.
    *
-   * @param principal the Principal object representing the current user
-   * @param preferenceType the type of notification preference to change
+   * @param principal the authenticated user's principal
+   * @param preferenceType the type of notification preference to modify
    * @param enable whether to enable or disable the preference
-   * @return ResponseEntity with status 200 OK if successful, or 400 Bad Request if there's an error
+   * @return ResponseEntity with status 200 OK if successful, or 400 Bad Request if an error occurs
    */
   @PatchMapping("/user/notifications/preferences/{preferenceType}")
   public ResponseEntity<?> changeNotificationPreference(
@@ -194,5 +216,4 @@ public class NotificationController {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
-  
 }

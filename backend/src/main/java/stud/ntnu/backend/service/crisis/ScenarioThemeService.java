@@ -1,18 +1,19 @@
 package stud.ntnu.backend.service.crisis;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import stud.ntnu.backend.repository.map.ScenarioThemeRepository;
-import stud.ntnu.backend.model.map.ScenarioTheme;
+
 import stud.ntnu.backend.dto.map.CreateScenarioThemeDto;
-import stud.ntnu.backend.dto.map.UpdateScenarioThemeDto;
-import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.dto.map.ScenarioThemeDetailsDto;
 import stud.ntnu.backend.dto.map.ScenarioThemeNameDto;
-
-import java.util.List;
-import java.util.Optional;
+import stud.ntnu.backend.dto.map.UpdateScenarioThemeDto;
+import stud.ntnu.backend.model.map.ScenarioTheme;
+import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.repository.map.ScenarioThemeRepository;
 
 /**
  * Service for managing scenario themes. Handles creation, retrieval, updating, and deletion of

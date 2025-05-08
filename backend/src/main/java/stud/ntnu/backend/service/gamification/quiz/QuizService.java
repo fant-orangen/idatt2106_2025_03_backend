@@ -1,44 +1,47 @@
 package stud.ntnu.backend.service.gamification.quiz;
 
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import stud.ntnu.backend.dto.quiz.CreateQuizAnswerDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizDto;
+import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
 import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerDto;
+import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
 import stud.ntnu.backend.dto.quiz.QuizAttemptSummaryDto;
 import stud.ntnu.backend.dto.quiz.QuizPreviewDto;
 import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
-import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
-import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
-import stud.ntnu.backend.dto.quiz.CreateQuizAnswerDto;
 import stud.ntnu.backend.model.gamification.quiz.Quiz;
-import stud.ntnu.backend.model.gamification.quiz.UserQuizAttempt;
-import stud.ntnu.backend.model.gamification.quiz.UserQuizAnswer;
-import stud.ntnu.backend.model.gamification.quiz.QuizQuestion;
 import stud.ntnu.backend.model.gamification.quiz.QuizAnswer;
-import stud.ntnu.backend.repository.gamification.quiz.QuizRepository;
-import stud.ntnu.backend.repository.gamification.quiz.UserQuizAttemptRepository;
-import stud.ntnu.backend.repository.gamification.quiz.UserQuizAnswerRepository;
-import stud.ntnu.backend.repository.gamification.quiz.QuizQuestionRepository;
+import stud.ntnu.backend.model.gamification.quiz.QuizQuestion;
+import stud.ntnu.backend.model.gamification.quiz.UserQuizAnswer;
+import stud.ntnu.backend.model.gamification.quiz.UserQuizAttempt;
 import stud.ntnu.backend.repository.gamification.quiz.QuizAnswerRepository;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import stud.ntnu.backend.repository.gamification.quiz.QuizQuestionRepository;
+import stud.ntnu.backend.repository.gamification.quiz.QuizRepository;
+import stud.ntnu.backend.repository.gamification.quiz.UserQuizAnswerRepository;
+import stud.ntnu.backend.repository.gamification.quiz.UserQuizAttemptRepository;
 
 /**
  * Service class for managing quizzes, quiz questions, answers, and user attempts.
- * Provides business logic for quiz creation, retrieval, update, and deletion.
+ * Provides business logic for quiz-related operations including:
+ * - Quiz creation, retrieval, update, and deletion
+ * - Question and answer management
+ * - User quiz attempts tracking
+ * - Quiz statistics and reporting
  */
-@Slf4j
 @Service
 public class QuizService {
 
@@ -452,14 +455,12 @@ public class QuizService {
      *
      * @param quizId the ID of the quiz
      * @param userId the ID of the user
-     * @return the latest QuizAttemptSummaryDto object
+     * @return the latest QuizAttemptSummaryDto object, or null if no attempts exist
      */
     public QuizAttemptSummaryDto getLatestQuizAttempt(Long quizId, Integer userId) {
-        log.info("Fetching latest attempt for userId={} and quizId={}", userId, quizId);
-        UserQuizAttempt latestAttempt =
+        UserQuizAttempt latestAttempt = 
             userQuizAttemptRepository.findFirstByUserIdAndQuizIdOrderByIdDesc(userId, quizId);
         if (latestAttempt == null) {
-            log.warn("No attempts found for userId={} and quizId={}", userId, quizId);
             return null;
         }
         return new QuizAttemptSummaryDto(latestAttempt.getId(), latestAttempt.getCompletedAt());

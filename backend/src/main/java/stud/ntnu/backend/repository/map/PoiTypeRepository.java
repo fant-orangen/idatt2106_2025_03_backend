@@ -5,10 +5,12 @@ import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.map.PoiType;
 
 /**
- * Repository interface for PoiType entity operations.
+ * Repository interface for managing PoiType entities in the database.
+ * Provides basic CRUD operations through JpaRepository and allows for custom query methods.
+ * 
+ * @see PoiType
+ * @see JpaRepository
  */
 @Repository
 public interface PoiTypeRepository extends JpaRepository<PoiType, Integer> {
-    // Basic CRUD operations are provided by JpaRepository
-    // Custom query methods can be added as needed
 }

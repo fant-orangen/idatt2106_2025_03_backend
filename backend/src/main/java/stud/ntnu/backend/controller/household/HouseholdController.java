@@ -1,8 +1,6 @@
 package stud.ntnu.backend.controller.household;
 
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.household.HouseholdCreateRequestDto;
@@ -10,7 +8,6 @@ import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.dto.household.HouseholdInviteRequestDto;
 import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
 import stud.ntnu.backend.dto.household.HouseholdJoinRequestDto;
-import stud.ntnu.backend.dto.household.HouseholdSwitchRequestDto;
 import stud.ntnu.backend.dto.household.HouseholdUpdateRequestDto;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.household.Invitation;
@@ -26,10 +23,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Handles household-level operations. Allows users to create or join households, modify population
- * count (including non-user members), switch households, and retrieve household-related data. Based
- * on Visjonsdokument 2025 for Krisefikser.no.
+ * REST controller for managing household operations.
+ * <p>
+ * Provides endpoints for:
+ * <ul>
+ *   <li>Creating new households</li>
+ *   <li>Managing household invitations</li>
+ *   <li>Joining households</li>
+ *   <li>Updating household information</li>
+ *   <li>Managing household members</li>
+ *   <li>Switching between households</li>
+ * </ul>
+ * <p>
  */
+
 @RestController
 @RequestMapping("/api/user/households")
 public class HouseholdController {
@@ -37,7 +44,6 @@ public class HouseholdController {
   private final HouseholdService householdService;
   private final InvitationService invitationService;
   private final UserRepository userRepository;
-  private final Logger log = LoggerFactory.getLogger(HouseholdController.class);
 
   public HouseholdController(HouseholdService householdService, InvitationService invitationService, UserRepository userRepository) {
     this.householdService = householdService;
@@ -60,7 +66,6 @@ public class HouseholdController {
       Household household = householdService.createHousehold(requestDto);
       return ResponseEntity.ok(household);
     } catch (IllegalStateException e) {
-      log.info("Household creation failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -82,7 +87,6 @@ public class HouseholdController {
           requestDto.getEmail());
       return ResponseEntity.ok(response);
     } catch (IllegalStateException e) {
-      log.info("Household invitation failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -104,7 +108,6 @@ public class HouseholdController {
           requestDto.getToken());
       return ResponseEntity.ok(household);
     } catch (IllegalStateException e) {
-      log.info("Household join failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -121,7 +124,6 @@ public class HouseholdController {
       HouseholdDto household = householdService.getCurrentUserHousehold(principal.getName());
       return ResponseEntity.ok(household);
     } catch (IllegalStateException e) {
-      log.info("Get household failed: {}", e.getMessage());
       if (e.getMessage().equals("User doesn't have a household")) {
         return ResponseEntity.notFound().build();
       }
@@ -142,7 +144,6 @@ public class HouseholdController {
       householdService.leaveHousehold(principal.getName());
       return ResponseEntity.ok("Successfully left the household");
     } catch (IllegalStateException e) {
-      log.info("Leaving household failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -160,7 +161,6 @@ public class HouseholdController {
       List<HouseholdMemberDto> members = householdService.getHouseholdMembers(principal.getName());
       return ResponseEntity.ok(members);
     } catch (IllegalStateException e) {
-      log.info("Get household members failed: {}", e.getMessage());
       if (e.getMessage().equals("User doesn't have a household")) {
         return ResponseEntity.notFound().build();
       }
@@ -181,7 +181,6 @@ public class HouseholdController {
       List<HouseholdMemberDto> members = householdService.getNonAdminHouseholdMembers(principal.getName());
       return ResponseEntity.ok(members);
     } catch (IllegalStateException e) {
-      log.info("Get non-admin household members failed: {}", e.getMessage());
       if (e.getMessage().equals("User doesn't have a household")) {
         return ResponseEntity.notFound().build();
       }
@@ -203,7 +202,6 @@ public class HouseholdController {
           principal.getName());
       return ResponseEntity.ok(members);
     } catch (IllegalStateException e) {
-      log.info("Get empty household members failed: {}", e.getMessage());
       if (e.getMessage().equals("User doesn't have a household")) {
         return ResponseEntity.notFound().build();
       }
@@ -228,7 +226,6 @@ public class HouseholdController {
           requestDto);
       return ResponseEntity.ok(member);
     } catch (IllegalStateException e) {
-      log.info("Add empty household member failed: {}", e.getMessage());
       if (e.getMessage().equals("User doesn't have a household")) {
         return ResponseEntity.notFound().build();
       }
@@ -252,7 +249,6 @@ public class HouseholdController {
       householdService.removeEmptyHouseholdMember(principal.getName(), memberId);
       return ResponseEntity.ok("Successfully removed empty household member");
     } catch (IllegalStateException e) {
-      log.info("Remove empty household member failed: {}", e.getMessage());
       if (e.getMessage().equals("User doesn't have a household")) {
         return ResponseEntity.notFound().build();
       }
@@ -275,7 +271,6 @@ public class HouseholdController {
       List<Invitation> invitations = householdService.getPendingInvitationsForHousehold(household.getId());
       return ResponseEntity.ok(invitations);
     } catch (IllegalStateException e) {
-      log.info("Get pending invitations failed: {}", e.getMessage());
       if (e.getMessage().equals("User doesn't have a household")) {
         return ResponseEntity.notFound().build();
       }
@@ -297,14 +292,11 @@ public class HouseholdController {
       @PathVariable String token,
       Principal principal) {
     try {
-      log.info("Cancel invitation request for token: {}", token);
       householdService.cancelInvitationByToken(principal.getName(), token);
       return ResponseEntity.ok("Successfully canceled invitation");
     } catch (IllegalStateException e) {
-      log.error("Cancel invitation failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     } catch (Exception e) {
-      log.error("Unexpected error canceling invitation: {}", e.getMessage(), e);
       return ResponseEntity.status(500).body("An unexpected error occurred: " + e.getMessage());
     }
   }
@@ -325,7 +317,6 @@ public class HouseholdController {
       householdService.promoteToAdmin(principal.getName(), email);
       return ResponseEntity.ok("Successfully promoted user to admin");
     } catch (IllegalStateException e) {
-      log.info("Promote to admin failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -347,7 +338,6 @@ public class HouseholdController {
       householdService.removeMemberFromHousehold(principal.getName(), memberId);
       return ResponseEntity.ok("Successfully removed member from household");
     } catch (IllegalStateException e) {
-      log.info("Remove member from household failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -372,7 +362,6 @@ public class HouseholdController {
       // Return the result as a JSON object
       return ResponseEntity.ok(Map.of("isAdmin", isAdmin));
     } catch (Exception e) {
-      log.error("Error checking admin status: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -391,10 +380,8 @@ public class HouseholdController {
       householdService.deleteCurrentHousehold(principal.getName());
       return ResponseEntity.ok("Successfully deleted household");
     } catch (IllegalStateException e) {
-      log.error("Delete household failed due to validation error: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     } catch (Exception e) {
-      log.error("Unexpected error deleting household: {}", e.getMessage(), e);
       return ResponseEntity.status(500).body("An unexpected error occurred: " + e.getMessage());
     }
   }
@@ -412,7 +399,6 @@ public class HouseholdController {
       @Valid @RequestBody HouseholdUpdateRequestDto updateRequestDto,
       Principal principal) {
     try {
-      log.info("Update household request from user: {}", principal.getName());
       Household updatedHousehold = householdService.updateHousehold(
           principal.getName(),
           updateRequestDto.getName(),
@@ -429,10 +415,8 @@ public class HouseholdController {
 
       return ResponseEntity.ok(householdDto);
     } catch (IllegalStateException e) {
-      log.error("Update household failed due to validation error: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     } catch (Exception e) {
-      log.error("Unexpected error updating household: {}", e.getMessage(), e);
       return ResponseEntity.status(500).body("An unexpected error occurred: " + e.getMessage());
     }
   }

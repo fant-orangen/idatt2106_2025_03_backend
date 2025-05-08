@@ -1,17 +1,20 @@
 package stud.ntnu.backend.dto.household;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Min;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
 import java.math.BigDecimal;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
- * Data Transfer Object for household creation requests. Contains the name, address, and population
- * count for a new household.
+ * Data Transfer Object (DTO) for household creation requests.
+ * This class represents the data structure used when creating a new household,
+ * containing essential information such as name, address, population count,
+ * and optional geographical coordinates.
  */
 @Getter
 @Setter
@@ -19,16 +22,36 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class HouseholdCreateRequestDto {
 
-  @NotBlank(message = "Household name is required")
-  private String name;
+    /**
+     * The name of the household.
+     * This field is required and cannot be blank.
+     */
+    @NotBlank(message = "Household name is required")
+    private String name;
 
-  @NotBlank(message = "Address is required")
-  private String address;
+    /**
+     * The physical address of the household.
+     * This field is required and cannot be blank.
+     */
+    @NotBlank(message = "Address is required")
+    private String address;
 
-  @Min(value = 1, message = "Population count must be at least 1")
-  private Integer populationCount = 1;
+    /**
+     * The number of people living in the household.
+     * Must be at least 1, defaults to 1 if not specified.
+     */
+    @Min(value = 1, message = "Population count must be at least 1")
+    private Integer populationCount = 1;
 
-  // Optional latitude and longitude
-  private BigDecimal latitude;
-  private BigDecimal longitude;
+    /**
+     * The geographical latitude coordinate of the household.
+     * This field is optional.
+     */
+    private BigDecimal latitude;
+
+    /**
+     * The geographical longitude coordinate of the household.
+     * This field is optional.
+     */
+    private BigDecimal longitude;
 }

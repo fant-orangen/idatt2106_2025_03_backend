@@ -1,9 +1,21 @@
 package stud.ntnu.backend.controller.map;
 
-import jakarta.validation.Valid;
+import java.math.BigDecimal;
+import java.security.Principal;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.validation.Valid;
 import stud.ntnu.backend.dto.map.CreateMeetingPlaceDto;
 import stud.ntnu.backend.dto.map.MeetingPlaceDto;
 import stud.ntnu.backend.dto.map.MeetingPlacePreviewDto;
@@ -13,13 +25,18 @@ import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.map.MeetingPlaceService;
 import stud.ntnu.backend.service.user.UserService;
 
-import java.math.BigDecimal;
-import java.security.Principal;
-import java.util.List;
-
 /**
- * Manages meeting places. Supports CRUD operations for storing and retrieving
- * meeting places for crisis coordination.
+ * REST controller for managing meeting places in the crisis coordination system.
+ * <p>
+ * This controller provides endpoints for:
+ * <ul>
+ *   <li>Creating new meeting places (admin only)</li>
+ *   <li>Archiving and activating meeting places (admin only)</li>
+ *   <li>Retrieving meeting places by location, ID, or paginated lists</li>
+ *   <li>Managing meeting place previews</li>
+ * </ul>
+ * <p>
+ * All endpoints are secured and require appropriate authentication.
  */
 @RestController
 @RequestMapping("/api")
@@ -28,18 +45,28 @@ public class MeetingPlaceController {
     private final MeetingPlaceService meetingPlaceService;
     private final UserService userService;
 
+    /**
+     * Constructs a new MeetingPlaceController with the required services.
+     *
+     * @param meetingPlaceService service for managing meeting places
+     * @param userService service for user operations
+     */
     public MeetingPlaceController(MeetingPlaceService meetingPlaceService, UserService userService) {
         this.meetingPlaceService = meetingPlaceService;
         this.userService = userService;
     }
 
-    // TODO: this endpoint does not work yet because address -> coordinates is not implemented
     /**
-     * Creates a new meeting place. Only accessible by admins.
-     * TODO: test with postman
+     * Creates a new meeting place. Only accessible by administrators.
+     * <p>
+     * Note: Address to coordinates conversion is not yet implemented.
+     *
      * @param createDto the DTO containing meeting place information
-     * @param principal the authenticated user
-     * @return 200 OK on success
+     * @param principal the authenticated user making the request
+     * @return ResponseEntity containing:
+     *         - 200 OK with the created meeting place if successful
+     *         - 403 Forbidden if user is not an admin
+     *         - 400 Bad Request if creation fails
      */
     @PostMapping("/admin/meeting-places")
     public ResponseEntity<?> createMeetingPlace(
@@ -61,11 +88,14 @@ public class MeetingPlaceController {
     }
 
     /**
-     * Archives a meeting place. Only accessible by admins.
-     * 
+     * Archives a meeting place. Only accessible by administrators.
+     *
      * @param id the ID of the meeting place to archive
-     * @param principal the authenticated user
-     * @return the archived meeting place
+     * @param principal the authenticated user making the request
+     * @return ResponseEntity containing:
+     *         - 200 OK with the archived meeting place if successful
+     *         - 403 Forbidden if user is not an admin
+     *         - 400 Bad Request if archiving fails
      */
     @PatchMapping("/admin/meeting-places/{id}/archive")
     public ResponseEntity<?> archiveMeetingPlace(
@@ -84,11 +114,14 @@ public class MeetingPlaceController {
     }
 
     /**
-     * Activates a meeting place. Only accessible by admins.
-     * 
+     * Activates a meeting place. Only accessible by administrators.
+     *
      * @param id the ID of the meeting place to activate
-     * @param principal the authenticated user
-     * @return the activated meeting place
+     * @param principal the authenticated user making the request
+     * @return ResponseEntity containing:
+     *         - 200 OK with the activated meeting place if successful
+     *         - 403 Forbidden if user is not an admin
+     *         - 400 Bad Request if activation fails
      */
     @PatchMapping("/admin/meeting-places/{id}/activate")
     public ResponseEntity<?> activateMeetingPlace(
@@ -107,12 +140,14 @@ public class MeetingPlaceController {
     }
 
     /**
-     * Gets all active meeting places within the specified distance (defaults to 10km) of the location.
-     * 
-     * @param latitude the latitude of the location
-     * @param longitude the longitude of the location
-     * @param distance the distance in meters (optional, defaults to 10000)
-     * @return list of nearby meeting places
+     * Retrieves all active meeting places within a specified distance of a location.
+     *
+     * @param latitude the latitude of the center point
+     * @param longitude the longitude of the center point
+     * @param distanceKm the search radius in kilometers (defaults to 10.0)
+     * @return ResponseEntity containing:
+     *         - 200 OK with list of nearby meeting places if successful
+     *         - 400 Bad Request if retrieval fails
      */
     @GetMapping("/public/meeting-places/nearby")
     public ResponseEntity<List<MeetingPlaceDto>> getNearbyMeetingPlaces(
@@ -132,11 +167,13 @@ public class MeetingPlaceController {
     }
 
     /**
-     * Gets a paginated list of all meeting places.
+     * Retrieves a paginated list of all meeting places.
      *
      * @param page the page number (0-based, defaults to 0)
-     * @param size the size of each page (defaults to 10)
-     * @return paginated list of meeting places
+     * @param size the number of items per page (defaults to 10)
+     * @return ResponseEntity containing:
+     *         - 200 OK with paginated list of meeting places if successful
+     *         - 400 Bad Request if retrieval fails
      */
     @GetMapping("/public/meeting-places/all")
     public ResponseEntity<Page<MeetingPlaceDto>> getAllMeetingPlaces(
@@ -152,11 +189,13 @@ public class MeetingPlaceController {
     }
 
     /**
-     * Gets a paginated list of all meeting place previews.
+     * Retrieves a paginated list of meeting place previews.
      *
      * @param page the page number (0-based, defaults to 0)
-     * @param size the size of each page (defaults to 10)
-     * @return paginated list of meeting place previews
+     * @param size the number of items per page (defaults to 10)
+     * @return ResponseEntity containing:
+     *         - 200 OK with paginated list of meeting place previews if successful
+     *         - 400 Bad Request if retrieval fails
      */
     @GetMapping("/public/meeting-places/all/previews")
     public ResponseEntity<Page<MeetingPlacePreviewDto>> getAllMeetingPlacePreviews(
@@ -171,10 +210,13 @@ public class MeetingPlaceController {
     }
 
     /**
-     * Gets a meeting place by its ID.
+     * Retrieves a specific meeting place by its ID.
      *
-     * @param id the ID of the meeting place
-     * @return the meeting place if found, or 404 if not found
+     * @param id the ID of the meeting place to retrieve
+     * @return ResponseEntity containing:
+     *         - 200 OK with the meeting place if found
+     *         - 404 Not Found if the meeting place doesn't exist
+     *         - 400 Bad Request if retrieval fails
      */
     @GetMapping("/public/meeting-places/{id}")
     public ResponseEntity<MeetingPlaceDto> getMeetingPlaceById(@PathVariable Integer id) {
@@ -187,5 +229,4 @@ public class MeetingPlaceController {
             return ResponseEntity.badRequest().build();
         }
     }
-
 }

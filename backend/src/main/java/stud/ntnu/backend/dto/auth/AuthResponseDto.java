@@ -1,84 +1,86 @@
 package stud.ntnu.backend.dto.auth;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
- * Data Transfer Object for authentication responses. Contains the JWT token and user information
- * returned after successful authentication.
+ * Data Transfer Object (DTO) for authentication responses.
+ * <p>
+ * This DTO encapsulates the data returned after successful authentication, including:
+ * <ul>
+ *   <li>JWT token for subsequent authenticated requests</li>
+ *   <li>User identification information (ID, email)</li>
+ *   <li>User role and permissions</li>
+ *   <li>Household association</li>
+ *   <li>Two-factor authentication status</li>
+ * </ul>
  */
+@Getter
+@Setter
 public class AuthResponseDto {
 
-  private String token;
-  private Integer userId;
-  private String email;
-  private String role;
-  private Integer householdId;
-  private Boolean isUsing2FA;
+    /**
+     * The JWT token used for authentication.
+     */
+    private String token;
 
-  // Default constructor
-  public AuthResponseDto() {
-  }
+    /**
+     * The unique identifier of the authenticated user.
+     */
+    private Integer userId;
 
-  // Constructor with token only
-  public AuthResponseDto(String token) {
-    this.token = token;
-  }
+    /**
+     * The email address of the authenticated user.
+     */
+    private String email;
 
-  // Constructor with all fields
-  public AuthResponseDto(String token, Integer userId, String email, String role,
-      Integer householdId, Boolean isUsing2FA) {
-    this.token = token;
-    this.userId = userId;
-    this.email = email;
-    this.role = role;
-    this.householdId = householdId;
-    this.isUsing2FA = isUsing2FA;
-  }
+    /**
+     * The role of the authenticated user (e.g., "USER", "ADMIN").
+     */
+    private String role;
 
-  // Getters and setters
-  public String getToken() {
-    return token;
-  }
+    /**
+     * The identifier of the household associated with the user, if any.
+     */
+    private Integer householdId;
 
-  public void setToken(String token) {
-    this.token = token;
-  }
+    /**
+     * Indicates whether the user has two-factor authentication enabled.
+     */
+    private Boolean isUsing2FA;
 
-  public Integer getUserId() {
-    return userId;
-  }
+    /**
+     * Default constructor required for JSON deserialization.
+     */
+    public AuthResponseDto() {
+    }
 
-  public void setUserId(Integer userId) {
-    this.userId = userId;
-  }
+    /**
+     * Constructs a new AuthResponseDto with only the authentication token.
+     *
+     * @param token the JWT authentication token
+     */
+    public AuthResponseDto(String token) {
+        this.token = token;
+    }
 
-  public String getEmail() {
-    return email;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  public String getRole() {
-    return role;
-  }
-
-  public void setRole(String role) {
-    this.role = role;
-  }
-
-  public Integer getHouseholdId() {
-    return householdId;
-  }
-
-  public void setHouseholdId(Integer householdId) {
-    this.householdId = householdId;
-  }
-
-  public Boolean getIsUsing2FA() {
-    return isUsing2FA;
-  }
-
-  public void setIsUsing2FA(Boolean isUsing2FA) {
-    this.isUsing2FA = isUsing2FA;
-  }
+    /**
+     * Constructs a new AuthResponseDto with all user information.
+     *
+     * @param token the JWT authentication token
+     * @param userId the unique identifier of the user
+     * @param email the user's email address
+     * @param role the user's role in the system
+     * @param householdId the identifier of the user's household
+     * @param isUsing2FA whether the user has 2FA enabled
+     */
+    public AuthResponseDto(String token, Integer userId, String email, String role,
+            Integer householdId, Boolean isUsing2FA) {
+        this.token = token;
+        this.userId = userId;
+        this.email = email;
+        this.role = role;
+        this.householdId = householdId;
+        this.isUsing2FA = isUsing2FA;
+    }
 }
