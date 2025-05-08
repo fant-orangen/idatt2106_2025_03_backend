@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.mockito.MockedStatic;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -281,6 +283,94 @@ public class NotificationServiceTest {
     }
 
     @Nested
+    class MarkAllAsReadTests {
+        @Nested
+        class Positive {
+            @Test
+            void shouldMarkAllNotificationsAsReadSuccessfully() {
+                // Arrange
+                String email = "test@example.com";
+                User user = new User();
+                user.setId(1);
+                user.setEmail(email);
+
+                Notification notification1 = new Notification(
+                    user, PreferenceType.system, TargetType.event, 123, "Test notification 1", LocalDateTime.now()
+                );
+                notification1.setId(1);
+
+                Notification notification2 = new Notification(
+                    user, PreferenceType.crisis_alert, TargetType.event, 456, "Test notification 2", LocalDateTime.now()
+                );
+                notification2.setId(2);
+
+                List<Notification> unreadNotifications = Arrays.asList(notification1, notification2);
+
+                when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+                when(notificationRepository.findByUserIdAndReadAtIsNull(user.getId()))
+                    .thenReturn(unreadNotifications);
+                when(notificationRepository.saveAll(unreadNotifications))
+                    .thenReturn(unreadNotifications);
+
+                // Act
+                int result = notificationService.markAllNotificationsAsRead(email);
+
+                // Assert
+                assertEquals(2, result);
+                assertNotNull(notification1.getReadAt());
+                assertNotNull(notification2.getReadAt());
+                verify(userRepository).findByEmail(email);
+                verify(notificationRepository).findByUserIdAndReadAtIsNull(user.getId());
+                verify(notificationRepository).saveAll(unreadNotifications);
+            }
+
+            @Test
+            void shouldReturnZeroWhenNoUnreadNotifications() {
+                // Arrange
+                String email = "test@example.com";
+                User user = new User();
+                user.setId(1);
+                user.setEmail(email);
+
+                when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+                when(notificationRepository.findByUserIdAndReadAtIsNull(user.getId()))
+                    .thenReturn(Collections.emptyList());
+
+                // Act
+                int result = notificationService.markAllNotificationsAsRead(email);
+
+                // Assert
+                assertEquals(0, result);
+                verify(userRepository).findByEmail(email);
+                verify(notificationRepository).findByUserIdAndReadAtIsNull(user.getId());
+                verify(notificationRepository, never()).saveAll(anyList());
+            }
+        }
+
+        @Nested
+        class Negative {
+            @Test
+            void shouldThrowExceptionWhenUserNotFound() {
+                // Arrange
+                String email = "nonexistent@example.com";
+
+                when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+                // Act & Assert
+                IllegalStateException exception = assertThrows(
+                    IllegalStateException.class,
+                    () -> notificationService.markAllNotificationsAsRead(email)
+                );
+
+                assertEquals("User not found with email: " + email, exception.getMessage());
+                verify(userRepository).findByEmail(email);
+                verify(notificationRepository, never()).findByUserIdAndReadAtIsNull(anyInt());
+                verify(notificationRepository, never()).saveAll(anyList());
+            }
+        }
+    }
+
+    @Nested
     class CreateSystemNotificationForAllUsersTests {
         @Nested
         class Positive {
@@ -424,5 +514,55 @@ public class NotificationServiceTest {
                 verify(notificationPreferenceRepository).save(any(NotificationPreference.class));
             }
         }
+    }
+
+
+
+    @Nested
+    class SendNotificationsToAllUsersTests {
+        @Nested
+        class Positive {
+            @Test
+            void shouldSendNotificationsToAllUsersSuccessfully() {
+                // Arrange
+                User user1 = new User();
+                user1.setId(1);
+                user1.setEmail("user1@example.com");
+
+                User user2 = new User();
+                user2.setId(2);
+                user2.setEmail("user2@example.com");
+
+                Notification notification1 = new Notification(
+                    user1, PreferenceType.system, TargetType.event, 123, "Test notification 1", LocalDateTime.now()
+                );
+                notification1.setId(1);
+
+                Notification notification2 = new Notification(
+                    user2, PreferenceType.system, TargetType.event, 123, "Test notification 2", LocalDateTime.now()
+                );
+                notification2.setId(2);
+
+                List<Notification> notifications = Arrays.asList(notification1, notification2);
+
+                // Act
+                notificationService.sendNotificationsToAllUsers(notifications);
+
+                // Assert
+                assertNotNull(notification1.getSentAt());
+                assertNotNull(notification2.getSentAt());
+                verify(notificationRepository, times(2)).save(any(Notification.class));
+                verify(messagingTemplate).convertAndSend(
+                    eq("/topic/notifications/1"),
+                    any(NotificationDto.class)
+                );
+                verify(messagingTemplate).convertAndSend(
+                    eq("/topic/notifications/2"),
+                    any(NotificationDto.class)
+                );
+            }
+        }
+
+
     }
 }
