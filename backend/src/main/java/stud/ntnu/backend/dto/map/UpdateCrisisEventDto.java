@@ -9,9 +9,13 @@ import lombok.Setter;
 import stud.ntnu.backend.model.map.CrisisEvent.Severity;
 
 /**
- * DTO for updating an existing crisis event. All fields are optional - if a field is null, it will
- * not be updated. If scenarioThemeId is provided, the scenario theme will be updated if the id
- * exists; otherwise, a 404 will be returned.
+ * Data Transfer Object (DTO) for updating an existing crisis event.
+ * <p>
+ * This DTO contains optional fields for updating a crisis event. If a field is null,
+ * the corresponding field in the existing crisis event will not be updated.
+ * <p>
+ * When scenarioThemeId is provided, the system will attempt to update the scenario theme
+ * if the ID exists. If the ID does not exist, a 404 error will be returned.
  */
 @Getter
 @Setter
@@ -19,11 +23,42 @@ import stud.ntnu.backend.model.map.CrisisEvent.Severity;
 @AllArgsConstructor
 public class UpdateCrisisEventDto {
 
-  private String name;
-  private String description;
-  private Severity severity;
-  private BigDecimal latitude;
-  private BigDecimal longitude;
-  private BigDecimal radius; // TODO: add optional scenario theme id
-  private Integer scenarioThemeId;
+    /**
+     * The name or title of the crisis event.
+     */
+    private String name;
+
+    /**
+     * A detailed description of the crisis event.
+     */
+    private String description;
+
+    /**
+     * The severity level of the crisis event.
+     */
+    private Severity severity;
+
+    /**
+     * The latitude coordinate of the crisis event location.
+     * Represents the north-south position on Earth.
+     */
+    private BigDecimal latitude;
+
+    /**
+     * The longitude coordinate of the crisis event location.
+     * Represents the east-west position on Earth.
+     */
+    private BigDecimal longitude;
+
+    /**
+     * The radius of the affected area in meters.
+     */
+    private BigDecimal radius;
+
+    /**
+     * The unique identifier of the associated scenario theme.
+     * If provided, the system will attempt to update the scenario theme
+     * if the ID exists.
+     */
+    private Integer scenarioThemeId;
 }
