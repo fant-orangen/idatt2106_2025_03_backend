@@ -1,27 +1,27 @@
 package stud.ntnu.backend.service.crisis;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import stud.ntnu.backend.dto.news.NewsArticleDTO;
 import stud.ntnu.backend.dto.news.NewsArticleResponseDTO;
 import stud.ntnu.backend.dto.news.UpdateNewsArticleDTO;
+import stud.ntnu.backend.model.map.CrisisEvent;
 import stud.ntnu.backend.model.news.NewsArticle;
 import stud.ntnu.backend.model.news.NewsArticle.ArticleStatus;
 import stud.ntnu.backend.model.user.User;
-import stud.ntnu.backend.model.map.CrisisEvent;
+import stud.ntnu.backend.repository.map.CrisisEventRepository;
 import stud.ntnu.backend.repository.news.NewsArticleRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
-import stud.ntnu.backend.repository.map.CrisisEventRepository;
 import stud.ntnu.backend.util.LocationUtil;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
-// IllegalStateException is in java.lang package, no need to import
 
 @Service
 @Transactional
@@ -40,6 +40,14 @@ public class NewsService {
     this.crisisEventRepository = crisisEventRepository;
   }
 
+  /**
+   * Creates a new news article for a specific crisis event.
+   *
+   * @param newsArticleDTO the DTO containing the news article data
+   * @param userId the ID of the user creating the article
+   * @return the created news article
+   * @throws IllegalStateException if the user or crisis event is not found
+   */
   public NewsArticle createNewsArticle(NewsArticleDTO newsArticleDTO, Integer userId) {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new IllegalStateException("User not found with id: " + userId));
@@ -48,7 +56,6 @@ public class NewsService {
         .orElseThrow(() -> new IllegalStateException(
             "Crisis event not found with id: " + newsArticleDTO.getCrisisEventId()));
 
-    // TODO: implement logic to send notifications to users within some area / with some conditions
     NewsArticle newsArticle = new NewsArticle();
     newsArticle.setTitle(newsArticleDTO.getTitle());
     newsArticle.setContent(newsArticleDTO.getContent());
@@ -58,7 +65,6 @@ public class NewsService {
     newsArticle.setCreatedAt(LocalDateTime.now());
     newsArticle.setUpdatedAt(LocalDateTime.now());
 
-    // Set status to 'published' by default if not provided
     if (newsArticleDTO.getStatus() != null) {
       newsArticle.setStatus(newsArticleDTO.getStatus());
     } else {
@@ -72,67 +78,67 @@ public class NewsService {
    * Get paginated news articles for a specific crisis event.
    *
    * @param crisisEventId the crisis event ID
-   * @param pageable      pagination information
+   * @param pageable pagination information
    * @return a page of news article DTOs
    * @throws NoSuchElementException if the crisis event doesn't exist
    */
   @Transactional(readOnly = true)
   public Page<NewsArticleResponseDTO> getNewsArticlesByCrisisEvent(Integer crisisEventId,
       Pageable pageable) {
-    // Check if the crisis event exists
     if (!crisisEventRepository.existsById(crisisEventId)) {
       throw new NoSuchElementException("Crisis event not found with id: " + crisisEventId);
     }
 
-    // Get the news articles
-    Page<NewsArticle> newsArticles = newsArticleRepository.findByCrisisEventId(crisisEventId,
+    Page<NewsArticle> newsArticles = newsArticleRepository.findByCrisisEventIdOrderByPublishedAtDesc(crisisEventId,
         pageable);
 
-    // Convert to DTOs
     return newsArticles.map(NewsArticleResponseDTO::fromEntity);
   }
 
   /**
    * Get paginated news articles for crisis events that are within a specified distance of the
    * user's location. This includes both the user's home address and the user's household address.
+   * Articles are returned in order of newest to oldest.
    *
-   * @param user         the user
+   * @param user the user
    * @param distanceInKm the distance in kilometers
-   * @param pageable     pagination information
+   * @param pageable pagination information
    * @return a page of news article DTOs
    */
   @Transactional(readOnly = true)
   public Page<NewsArticleResponseDTO> getNewsDigestForUser(User user, double distanceInKm,
       Pageable pageable) {
-    // Get all crisis events
     List<CrisisEvent> allCrisisEvents = crisisEventRepository.findAll();
 
-    // Filter crisis events that are within the specified distance of the user's location
     List<Integer> nearbyCrisisEventIds = allCrisisEvents.stream()
         .filter(crisisEvent -> LocationUtil.isCrisisEventNearUser(user, crisisEvent, distanceInKm))
         .map(CrisisEvent::getId)
         .collect(Collectors.toList());
 
-    // If no nearby crisis events found, return an empty page
     if (nearbyCrisisEventIds.isEmpty()) {
       return Page.empty(pageable);
     }
 
-    // Get published news articles for the nearby crisis events
     Page<NewsArticle> newsArticles = newsArticleRepository.findByCrisisEventIdInAndStatusOrderByPublishedAtDesc(
         nearbyCrisisEventIds, ArticleStatus.published, pageable);
 
-    // Convert to DTOs
     return newsArticles.map(NewsArticleResponseDTO::fromEntity);
   }
 
+  /**
+   * Updates an existing news article with new information.
+   *
+   * @param newsArticleId the ID of the news article to update
+   * @param updateDto the DTO containing the updated information
+   * @return the updated news article
+   * @throws NoSuchElementException if the news article is not found
+   */
   @Transactional
   public NewsArticle updateNewsArticle(Long newsArticleId, UpdateNewsArticleDTO updateDto) {
     NewsArticle newsArticle = newsArticleRepository.findById(newsArticleId)
         .orElseThrow(
             () -> new NoSuchElementException("News article not found with id: " + newsArticleId));
 
-    // Update only the fields that are provided
     if (updateDto.getTitle() != null) {
       newsArticle.setTitle(updateDto.getTitle());
     }
@@ -143,12 +149,18 @@ public class NewsService {
       newsArticle.setStatus(updateDto.getStatus());
     }
 
-    // Update the timestamp
     newsArticle.setUpdatedAt(LocalDateTime.now());
 
     return newsArticleRepository.save(newsArticle);
   }
 
+  /**
+   * Retrieves a news article by its ID.
+   *
+   * @param newsArticleId the ID of the news article to retrieve
+   * @return the news article
+   * @throws NoSuchElementException if the news article is not found
+   */
   @Transactional(readOnly = true)
   public NewsArticle getNewsArticleById(Long newsArticleId) {
     return newsArticleRepository.findById(newsArticleId)
@@ -156,14 +168,29 @@ public class NewsService {
   }
 
   /**
-   * Get paginated draft news articles.
+   * Get paginated draft news articles ordered by creation date (newest first).
    *
    * @param pageable pagination information
    * @return a page of draft news article DTOs
    */
   @Transactional(readOnly = true)
   public Page<NewsArticleResponseDTO> getDraftNewsArticles(Pageable pageable) {
-    Page<NewsArticle> draftArticles = newsArticleRepository.findByStatus(ArticleStatus.draft, pageable);
+    Page<NewsArticle> draftArticles = newsArticleRepository.findByStatusOrderByCreatedAtDesc(ArticleStatus.draft, pageable);
     return draftArticles.map(NewsArticleResponseDTO::fromEntity);
+  }
+
+  /**
+   * Get the newest news articles, ordered by published date (newest first).
+   * Only returns articles with status 'published'.
+   *
+   * @param pageable pagination information
+   * @return a page of news article DTOs
+   */
+  @Transactional(readOnly = true)
+  public Page<NewsArticleResponseDTO> getNewestNewsArticles(Pageable pageable) {
+    Page<NewsArticle> newsArticles = newsArticleRepository.findByStatusOrderByPublishedAtDesc(
+        ArticleStatus.published, pageable);
+
+    return newsArticles.map(NewsArticleResponseDTO::fromEntity);
   }
 }

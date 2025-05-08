@@ -1,27 +1,27 @@
 package stud.ntnu.backend.service.user;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
-import stud.ntnu.backend.model.household.Household;
-import stud.ntnu.backend.model.user.Notification;
-import stud.ntnu.backend.model.user.User;
-import stud.ntnu.backend.repository.household.HouseholdRepository;
-import stud.ntnu.backend.repository.household.InvitationRepository;
-import stud.ntnu.backend.repository.user.UserRepository;
-import stud.ntnu.backend.model.household.Invitation;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
+import stud.ntnu.backend.model.household.Household;
+import stud.ntnu.backend.model.household.Invitation;
+import stud.ntnu.backend.model.user.Notification;
+import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.repository.household.HouseholdRepository;
+import stud.ntnu.backend.repository.household.InvitationRepository;
+import stud.ntnu.backend.repository.user.UserRepository;
+
 /**
- * Service for managing invitations. Handles creation, retrieval, updating, and deletion of
- * invitations.
+ * Service for managing household invitations. Handles creation, retrieval, updating, and deletion of
+ * invitations between users and households. Provides functionality for inviting users to households,
+ * accepting/declining invitations, and managing invitation states.
  */
 @Service
 public class InvitationService {
@@ -30,10 +30,9 @@ public class InvitationService {
   private final UserRepository userRepository;
   private final HouseholdRepository householdRepository;
   private final NotificationService notificationService;
-  private static final Logger log = LoggerFactory.getLogger(InvitationService.class);
 
   /**
-   * Constructor for dependency injection.
+   * Constructs a new InvitationService with required dependencies.
    *
    * @param invitationRepository repository for invitation operations
    * @param userRepository repository for user operations
@@ -51,7 +50,7 @@ public class InvitationService {
   }
 
   /**
-   * Retrieves all invitations.
+   * Retrieves all invitations in the system.
    *
    * @return list of all invitations
    */
@@ -60,40 +59,41 @@ public class InvitationService {
   }
 
   /**
-   * Retrieves an invitation by its ID.
+   * Retrieves a specific invitation by its unique identifier.
    *
-   * @param id the ID of the invitation
-   * @return an Optional containing the invitation if found
+   * @param id the unique identifier of the invitation
+   * @return an Optional containing the invitation if found, empty otherwise
    */
   public Optional<Invitation> getInvitationById(Integer id) {
     return invitationRepository.findById(id);
   }
 
   /**
-   * Saves an invitation.
+   * Persists an invitation to the database.
    *
-   * @param invitation the invitation to save
-   * @return the saved invitation
+   * @param invitation the invitation entity to save
+   * @return the saved invitation with generated ID
    */
   public Invitation saveInvitation(Invitation invitation) {
     return invitationRepository.save(invitation);
   }
 
   /**
-   * Deletes an invitation by its ID.
+   * Removes an invitation from the system by its ID.
    *
-   * @param id the ID of the invitation to delete
+   * @param id the unique identifier of the invitation to delete
    */
   public void deleteInvitation(Integer id) {
     invitationRepository.deleteById(id);
   }
 
   /**
-   * Creates a household invitation and sends a notification to the invitee.
+   * Creates a new household invitation and sends a notification to the invitee.
+   * Performs validation checks for both inviter and invitee.
    *
    * @param inviterEmail the email of the user sending the invitation
    * @param inviteeEmail the email of the user being invited
-   * @return the invitation response containing the token
+   * @return the invitation response containing the token and household details
    * @throws IllegalStateException if the inviter or invitee is not found, if the inviter doesn't
    *                               have a household, or if the household already has a pending invitation
    */
@@ -102,42 +102,32 @@ public class InvitationService {
     User inviter = userRepository.findByEmail(inviterEmail)
         .orElseThrow(() -> new IllegalStateException("Inviter not found"));
 
-    // Check if user is trying to invite themselves
     if (inviterEmail.equals(inviteeEmail)) {
         throw new IllegalStateException("You cannot invite yourself to your own household");
     }
 
-    // Check if invitee exists
     User invitee = userRepository.findByEmail(inviteeEmail)
         .orElseThrow(() -> new IllegalStateException("Invitee not found"));
 
-    // Check if invitee already has a household
     if (invitee.getHousehold() != null) {
         throw new IllegalStateException("User already belongs to a household and cannot be invited");
     }
 
-    // Check if inviter has a household
     Household household = inviter.getHousehold();
     if (household == null) {
       throw new IllegalStateException("Inviter doesn't have a household");
     }
 
-    // Check if there's already a pending invitation for this email from this household
     if (invitationRepository.hasPendingInvitationForEmail(household, inviteeEmail, LocalDateTime.now())) {
       throw new IllegalStateException("There is already a pending invitation for this user");
     }
 
-    // Generate a token
     String token = UUID.randomUUID().toString();
-
-    // Set expiration time (24 hours from now)
     LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
 
-    // Create and save the invitation
     Invitation invitation = new Invitation(inviter, inviteeEmail, household, token, expiresAt);
     invitation = invitationRepository.save(invitation);
 
-    // Send notification to invitee
     String notificationMessage = String.format(
         "You have been invited to join %s's household. Please check your invitations.",
         inviter.getName());
@@ -152,9 +142,6 @@ public class InvitationService {
 
     notificationService.sendNotification(notification);
 
-    log.info("Created household invitation from {} to {}", inviterEmail, inviteeEmail);
-
-    // Return the invitation response
     return new HouseholdInviteResponseDto(
         token,
         inviteeEmail,
@@ -165,48 +152,42 @@ public class InvitationService {
   }
 
   /**
-   * Accepts a household invitation.
+   * Processes the acceptance of a household invitation.
+   * Updates user's household association and sends notifications.
    *
    * @param email the email of the user accepting the invitation
-   * @param token the invitation token
+   * @param token the unique invitation token
    * @return the household that the user joined
-   * @throws IllegalStateException if the user is not found, the token is invalid or expired, or the
-   *                               household is not found
+   * @throws IllegalStateException if the user is not found, the token is invalid or expired,
+   *                               or if the user already belongs to a household
    */
   @Transactional
   public Household acceptInvitation(String email, String token) {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"));
 
-    // Check if the user already has a household
     if (user.getHousehold() != null) {
         throw new IllegalStateException("User already has a household. Leave your current household before accepting a new invitation.");
     }
 
-    // Find the invitation by token using the repository method
     Invitation invitation = invitationRepository.findByToken(token)
         .orElseThrow(() -> new IllegalStateException("Invalid token"));
 
-    // Check if the invitation is for the current user
     if (!invitation.getInviteeEmail().equals(email)) {
       throw new IllegalStateException("Token is not for this user");
     }
 
-    // Check if the invitation is pending
     if (!invitation.isPending()) {
       throw new IllegalStateException("Invitation is not pending");
     }
 
-    // Accept the invitation
     invitation.accept();
     invitationRepository.save(invitation);
 
-    // Update the user with the new household
     Household household = invitation.getHousehold();
     user.setHousehold(household);
     userRepository.save(user);
 
-    // Send notification to the inviter
     String notificationMessage = String.format(
         "%s has accepted your invitation to join your household.",
         user.getName());
@@ -221,42 +202,37 @@ public class InvitationService {
 
     notificationService.sendNotification(notification);
 
-    log.info("User {} accepted invitation to household {}", email, household.getId());
-
     return household;
   }
 
   /**
-   * Declines a household invitation.
+   * Processes the decline of a household invitation.
+   * Updates invitation status and sends notifications.
    *
    * @param email the email of the user declining the invitation
-   * @param token the invitation token
-   * @throws IllegalStateException if the user is not found, the token is invalid or expired
+   * @param token the unique invitation token
+   * @throws IllegalStateException if the user is not found, the token is invalid or expired,
+   *                               or if the invitation is not pending
    */
   @Transactional
   public void declineInvitation(String email, String token) {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"));
 
-    // Find the invitation by token using the repository method
     Invitation invitation = invitationRepository.findByToken(token)
         .orElseThrow(() -> new IllegalStateException("Invalid token"));
 
-    // Check if the invitation is for the current user
     if (!invitation.getInviteeEmail().equals(email)) {
       throw new IllegalStateException("Token is not for this user");
     }
 
-    // Check if the invitation is pending
     if (!invitation.isPending()) {
       throw new IllegalStateException("Invitation is not pending");
     }
 
-    // Decline the invitation
     invitation.decline();
     invitationRepository.save(invitation);
 
-    // Send notification to the inviter
     String notificationMessage = String.format(
         "%s has declined your invitation to join your household.",
         user.getName());
@@ -270,25 +246,23 @@ public class InvitationService {
     );
 
     notificationService.sendNotification(notification);
-
-    log.info("User {} declined invitation to household {}", email, invitation.getHousehold().getId());
   }
 
   /**
-   * Gets all pending invitations for a user.
+   * Retrieves all pending invitations for a specific user.
    *
    * @param email the email of the user
-   * @return a list of pending invitations
+   * @return a list of pending invitations for the user
    */
   public List<Invitation> getPendingInvitationsForUser(String email) {
     return invitationRepository.findPendingByInviteeEmail(email, LocalDateTime.now());
   }
 
   /**
-   * Gets all pending invitations for a household.
+   * Retrieves all pending invitations for a specific household.
    *
-   * @param householdId the ID of the household
-   * @return a list of pending invitations
+   * @param householdId the unique identifier of the household
+   * @return a list of pending invitations for the household
    * @throws IllegalStateException if the household is not found
    */
   public List<Invitation> getPendingInvitationsForHousehold(Integer householdId) {

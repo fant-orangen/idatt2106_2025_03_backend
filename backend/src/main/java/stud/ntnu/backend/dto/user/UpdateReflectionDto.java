@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * DTO for updating an existing reflection.
+ * Data Transfer Object (DTO) for updating an existing reflection.
+ * This class contains the necessary fields to update a reflection's content,
+ * sharing status, and optionally associate it with a crisis event.
  */
 @Getter
 @Setter
@@ -16,12 +18,23 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UpdateReflectionDto {
 
-  @NotBlank(message = "Content is required")
-  private String content;
+    /**
+     * The content of the reflection.
+     * Must not be blank.
+     */
+    @NotBlank(message = "Content is required")
+    private String content;
 
-  @NotNull(message = "Shared status is required")
-  private Boolean shared;
+    /**
+     * Indicates whether the reflection is shared or private.
+     * Must not be null.
+     */
+    @NotNull(message = "Shared status is required")
+    private Boolean shared;
 
-  // Optional crisis event ID
-  private Integer crisisEventId;
+    /**
+     * Optional reference to a crisis event ID.
+     * Can be null if the reflection is not associated with any crisis event.
+     */
+    private Integer crisisEventId;
 }

@@ -7,7 +7,7 @@ CREATE TABLE roles (
 -- HOUSEHOLDS
 CREATE TABLE households (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255),
+    name VARCHAR(255) NOT NULL UNIQUE,
     address TEXT NOT NULL,
     population_count INT DEFAULT 1,
     latitude DECIMAL(10,7),
@@ -60,21 +60,33 @@ CREATE TABLE groups (
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
 );
 
--- INVITATIONS (for both households & groups)
+-- GROUP INVITATIONS
+CREATE TABLE group_invitations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    group_id INT NOT NULL,
+    inviter_email VARCHAR(255) NOT NULL,
+    invited_household_id INT NOT NULL,
+    expires_at DATETIME NOT NULL,
+    accepted_at DATETIME,
+    declined_at DATETIME,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (invited_household_id) REFERENCES households(id) ON DELETE CASCADE
+);
+
+-- INVITATIONS (for households)
 CREATE TABLE invitations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     inviter_user_id INT NOT NULL,
     invitee_email VARCHAR(255) NOT NULL,
     household_id INT, -- Can be NULL if invitation is not for a household
-    group_id INT,
-    token VARCHAR(255) NOT NULL UNIQUE,
+    token VARCHAR(255) UNIQUE,
     expires_at DATETIME NOT NULL,
     accepted_at DATETIME,
     declined_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (inviter_user_id) REFERENCES users(id),
-    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE,
-    FOREIGN KEY (group_id) REFERENCES groups(id)
+    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE
 );
 
 -- GROUP MEMBERSHIPS (households join crisis‐supply groups)
@@ -251,11 +263,20 @@ CREATE TABLE email_tokens (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     token VARCHAR(255) NOT NULL UNIQUE,
-    type VARCHAR(15) NOT NULL CHECK (type IN ('VERIFICATION','RESET')),
+    type VARCHAR(20) NOT NULL CHECK (type IN ('VERIFICATION','RESET','SAFETY_CONFIRMATION')),
     expires_at DATETIME NOT NULL,
     used_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- SAFETY CONFIRMATIONS
+CREATE TABLE safety_confirmations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    is_safe BOOLEAN NOT NULL,
+    safe_at DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- HOUSEHOLD ADMINS
@@ -273,7 +294,7 @@ CREATE TABLE household_admins (
 CREATE TABLE notification_preferences (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    preference_type VARCHAR(50) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request', 'remaining_supply_alert', 'system')),
+    preference_type VARCHAR(50) NOT NULL CHECK (preference_type IN ('expiration_reminder','crisis_alert','location_request', 'remaining_supply_alert', 'system', 'safety_request')),
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -284,7 +305,7 @@ CREATE TABLE notification_preferences (
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    preference_type VARCHAR(25) NOT NULL CHECK (preference_type IN ('expiration_reminder', 'remaining_supply_alert', 'crisis_alert','location_request', 'system')),
+    preference_type VARCHAR(25) NOT NULL CHECK (preference_type IN ('expiration_reminder', 'remaining_supply_alert', 'crisis_alert','location_request', 'system', 'safety_request')),
     target_type VARCHAR(20) CHECK (target_type IN ('inventory','event','location_request','invitation')), -- If the notification is associated with another table, add a target type and target id pointing to the table
     target_id INT,
     description TEXT DEFAULT NULL,

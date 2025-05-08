@@ -1,12 +1,27 @@
 package stud.ntnu.backend.model.user;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import stud.ntnu.backend.model.map.CrisisEvent;
 
+/**
+ * Entity class representing a user's reflection in the system.
+ * Reflections can be associated with crisis events and can be shared or kept private.
+ */
 @Entity
 @Table(name = "reflections")
 @Getter
@@ -14,38 +29,67 @@ import stud.ntnu.backend.model.map.CrisisEvent;
 @NoArgsConstructor
 public class Reflection {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+    /**
+     * Unique identifier for the reflection.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-  @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false)
-  private User user;
+    /**
+     * The user who created this reflection.
+     */
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-  @ManyToOne
-  @JoinColumn(name = "crisis_event_id")
-  private CrisisEvent crisisEvent;
+    /**
+     * The associated crisis event, if any.
+     */
+    @ManyToOne
+    @JoinColumn(name = "crisis_event_id")
+    private CrisisEvent crisisEvent;
 
-  @Column(name = "content", nullable = false, columnDefinition = "TEXT")
-  private String content;
+    /**
+     * The content of the reflection.
+     */
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
+    private String content;
 
-  @Column(name = "shared", nullable = false)
-  private Boolean shared = false;
+    /**
+     * Indicates whether the reflection is shared with others.
+     */
+    @Column(name = "shared", nullable = false)
+    private Boolean shared = false;
 
-  @Column(name = "deleted", nullable = false)
-  private Boolean deleted = false;
+    /**
+     * Indicates whether the reflection has been deleted.
+     */
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted = false;
 
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private LocalDateTime createdAt;
+    /**
+     * Timestamp when the reflection was created.
+     */
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-  // Set createdAt before persist
-  @PrePersist
-  protected void onCreate() {
-    createdAt = LocalDateTime.now();
-  }
+    /**
+     * Sets the creation timestamp before persisting the entity.
+     */
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
-  public Reflection(User user, String content) {
-    this.user = user;
-    this.content = content;
-  }
+    /**
+     * Creates a new reflection with the specified user and content.
+     *
+     * @param user The user creating the reflection
+     * @param content The content of the reflection
+     */
+    public Reflection(User user, String content) {
+        this.user = user;
+        this.content = content;
+    }
 }

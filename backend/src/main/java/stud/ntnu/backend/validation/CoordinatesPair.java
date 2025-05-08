@@ -9,8 +9,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Validates that if one coordinate (latitude or longitude) is present, the other must also be
- * present. Both can be absent, but they cannot be present individually.
+ * Custom validation annotation that ensures coordinate pairs (latitude and longitude) are provided together.
+ * This annotation can be applied to classes that contain coordinate fields.
+ * 
+ * <p>The validation ensures that:
+ * <ul>
+ *   <li>If latitude is provided, longitude must also be provided</li>
+ *   <li>If longitude is provided, latitude must also be provided</li>
+ *   <li>Both coordinates can be absent</li>
+ *   <li>Neither coordinate can be present individually</li>
+ * </ul>
+ *
+ * @see CoordinatesPairValidator
  */
 @Documented
 @Constraint(validatedBy = CoordinatesPairValidator.class)
@@ -18,13 +28,38 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CoordinatesPair {
 
-  String message() default "Both latitude and longitude must be provided together";
+    /**
+     * The default error message to be displayed when validation fails.
+     *
+     * @return the error message
+     */
+    String message() default "Both latitude and longitude must be provided together";
 
-  Class<?>[] groups() default {};
+    /**
+     * Groups for validation.
+     *
+     * @return validation groups
+     */
+    Class<?>[] groups() default {};
 
-  Class<? extends Payload>[] payload() default {};
+    /**
+     * Payload for validation.
+     *
+     * @return validation payload
+     */
+    Class<? extends Payload>[] payload() default {};
 
-  String latitudeField();
+    /**
+     * The name of the field containing the latitude value.
+     *
+     * @return the latitude field name
+     */
+    String latitudeField();
 
-  String longitudeField();
+    /**
+     * The name of the field containing the longitude value.
+     *
+     * @return the longitude field name
+     */
+    String longitudeField();
 }

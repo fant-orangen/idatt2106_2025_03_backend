@@ -2,8 +2,6 @@ package stud.ntnu.backend.controller.household;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -14,18 +12,12 @@ import java.util.NoSuchElementException;
 import stud.ntnu.backend.dto.inventory.*;
 import stud.ntnu.backend.service.inventory.InventoryService;
 
-/**
- * Handles inventory management at the household level. Includes listing, adding, editing, or
- * removing stock items, tracking expiration dates, and computing preparedness grade.
- * <p>
- * Based on Visjonsdokument 2025 for Krisefikser.no.
- */
+
 @RestController
 @RequestMapping("/api/user/inventory")
 public class InventoryController {
 
   private final InventoryService inventoryService;
-  private final Logger log = LoggerFactory.getLogger(InventoryController.class);
 
   public InventoryController(InventoryService inventoryService) {
     this.inventoryService = inventoryService;
@@ -43,23 +35,6 @@ public class InventoryController {
       @PathVariable Integer productTypeId,
       Pageable pageable) {
     Page<ProductBatchDto> productBatches = inventoryService.getProductBatchesByProductType(
-        productTypeId, pageable);
-    return ResponseEntity.ok(productBatches);
-  }
-
-  // TODO: test this endpoint
-  /**
-   * Get all expiring product batches for a given product type.
-   *
-   * @param productTypeId the ID of the product type
-   * @param pageable      pagination information
-   * @return a paginated list of expiring product batches
-   */
-  @GetMapping("/product-types/{productTypeId}/batches/expiring")
-  public ResponseEntity<Page<ProductBatchDto>> getExpiringProductBatchesByProductType(
-      @PathVariable Integer productTypeId,
-      Pageable pageable) {
-    Page<ProductBatchDto> productBatches = inventoryService.getExpiringProductBatchesByProductType(
         productTypeId, pageable);
     return ResponseEntity.ok(productBatches);
   }
@@ -85,13 +60,10 @@ public class InventoryController {
       Integer totalUnits = inventoryService.getTotalUnitsForProductType(productTypeId, householdId);
       return ResponseEntity.ok(totalUnits);
     } catch (NoSuchElementException e) {
-      log.error("Error getting total units for product type", e);
       return ResponseEntity.notFound().build();
     } catch (IllegalArgumentException e) {
-      log.error("Error getting total units for product type", e);
       return ResponseEntity.status(403).body(e.getMessage()); // Forbidden
     } catch (Exception e) {
-      log.error("Error getting total units for product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -112,7 +84,6 @@ public class InventoryController {
           pageable);
       return ResponseEntity.ok(productTypes);
     } catch (Exception e) {
-      log.error("Error getting food product types", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -140,7 +111,6 @@ public class InventoryController {
       inventoryService.createProductType(createDto);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error creating food product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -165,27 +135,25 @@ public class InventoryController {
       inventoryService.createProductBatch(createDto, householdId);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error creating product batch", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
 
   /**
-   * Reduce the number of units in an existing batch.
+   * Update the number of units in an existing batch.
    *
-   * @param batchId   the ID of the batch
-   * @param updateDto the DTO containing the update information
-   * @return 200 OK
+   * @param batchId the ID of the batch
+   * @param newNumberOfUnits the new number of units to set for the batch
+   * @return 200 OK if successful, 400 Bad Request with error message otherwise
    */
   @PutMapping("/product-batches/{batchId}")
   public ResponseEntity<?> updateProductBatch(
       @PathVariable Integer batchId,
-      @Valid @RequestBody ProductBatchUpdateDto updateDto) {
+      @RequestBody @Valid @Positive Integer newNumberOfUnits) {
     try {
-      inventoryService.updateProductBatch(batchId, updateDto);
+      inventoryService.updateProductBatch(batchId, newNumberOfUnits);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error updating product batch", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -202,7 +170,6 @@ public class InventoryController {
       inventoryService.deleteProductBatch(batchId);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error deleting product batch", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -227,7 +194,6 @@ public class InventoryController {
       inventoryService.deleteProductType(productTypeId, householdId);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error deleting product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -246,7 +212,6 @@ public class InventoryController {
       Integer totalLitres = inventoryService.getTotalLitresOfWaterByHousehold(householdId);
       return ResponseEntity.ok(totalLitres);
     } catch (Exception e) {
-      log.error("Error getting total litres of water", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -268,7 +233,6 @@ public class InventoryController {
       Double daysRemaining = inventoryService.getWaterDaysRemaining(householdId);
       return ResponseEntity.ok(daysRemaining);
     } catch (Exception e) {
-      log.error("Error getting days of water remaining", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -289,7 +253,6 @@ public class InventoryController {
       Double daysRemaining = inventoryService.getFoodDaysRemaining(householdId);
       return ResponseEntity.ok(daysRemaining);
     } catch (Exception e) {
-      log.error("Error getting days of food remaining", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -312,7 +275,6 @@ public class InventoryController {
           householdId, pageable);
       return ResponseEntity.ok(productTypes);
     } catch (Exception e) {
-      log.error("Error getting water product types", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -333,7 +295,6 @@ public class InventoryController {
           householdId, pageable);
       return ResponseEntity.ok(productTypes);
     } catch (Exception e) {
-      log.error("Error getting medicine product types", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -360,7 +321,6 @@ public class InventoryController {
           householdId, category, expirationTimeInDays, pageable);
       return ResponseEntity.ok(productTypes);
     } catch (Exception e) {
-      log.error("Error getting expiring product types", e);
       return ResponseEntity.badRequest().build();
     }
   }
@@ -382,7 +342,6 @@ public class InventoryController {
       inventoryService.createWaterProductType(createDto);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error creating water product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -404,7 +363,6 @@ public class InventoryController {
       inventoryService.createMedicineProductType(createDto);
       return ResponseEntity.ok().build();
     } catch (Exception e) {
-      log.error("Error creating medicine product type", e);
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -432,7 +390,6 @@ public class InventoryController {
           householdId, category, search, pageable);
       return ResponseEntity.ok(result);
     } catch (Exception e) {
-      log.error("Error searching product types", e);
       return ResponseEntity.badRequest().build();
     }
   }

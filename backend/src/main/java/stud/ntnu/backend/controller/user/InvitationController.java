@@ -1,23 +1,31 @@
 package stud.ntnu.backend.controller.user;
 
-import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.security.Principal;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.validation.Valid;
 import stud.ntnu.backend.dto.household.HouseholdJoinRequestDto;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.household.Invitation;
 import stud.ntnu.backend.service.household.HouseholdService;
 import stud.ntnu.backend.service.user.InvitationService;
 
-import java.security.Principal;
-import java.util.List;
-
 /**
- * Handles invitation workflows for households and groups. Supports generating and accepting invite
- * tokens, validating token expiration, and tracking invite status.
+ * Controller for managing household and group invitations.
  * <p>
+ * This controller handles the complete invitation workflow including:
+ * - Retrieving pending invitations
+ * - Accepting invitations
+ * - Declining invitations
+ * <p>
+ * All endpoints require authentication and operate on behalf of the authenticated user.
  * Based on Visjonsdokument 2025 for Krisefikser.no.
  */
 @RestController
@@ -26,18 +34,24 @@ public class InvitationController {
 
   private final InvitationService invitationService;
   private final HouseholdService householdService;
-  private final Logger log = LoggerFactory.getLogger(InvitationController.class);
 
+  /**
+   * Constructs a new InvitationController with required services.
+   *
+   * @param invitationService service for managing invitations
+   * @param householdService service for managing households
+   */
   public InvitationController(InvitationService invitationService, HouseholdService householdService) {
     this.invitationService = invitationService;
     this.householdService = householdService;
   }
 
   /**
-   * Gets all pending invitations for the current user.
+   * Retrieves all pending invitations for the authenticated user.
    *
    * @param principal the Principal object representing the current user
-   * @return ResponseEntity with the list of pending invitations
+   * @return ResponseEntity containing a list of pending invitations if successful,
+   *         or an error message if the operation fails
    */
   @GetMapping("/pending")
   public ResponseEntity<?> getPendingInvitations(Principal principal) {
@@ -45,18 +59,18 @@ public class InvitationController {
       List<Invitation> invitations = invitationService.getPendingInvitationsForUser(principal.getName());
       return ResponseEntity.ok(invitations);
     } catch (IllegalStateException e) {
-      log.info("Get pending invitations failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
 
   /**
-   * Accepts a household invitation.
+   * Accepts a household invitation using the provided token.
    *
-   * @param requestDto the household join request (contains the token)
-   * @param principal  the Principal object representing the current user
-   * @return ResponseEntity with the joined household if successful, or an error message if the user
-   * is not found, the token is invalid or expired, or the household is not found
+   * @param requestDto the household join request containing the invitation token
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity containing the joined household if successful,
+   *         or an error message if the user is not found, token is invalid/expired,
+   *         or the household is not found
    */
   @PostMapping("/accept")
   public ResponseEntity<?> acceptInvitation(
@@ -66,18 +80,17 @@ public class InvitationController {
       Household household = householdService.joinHousehold(principal.getName(), requestDto.getToken());
       return ResponseEntity.ok(household);
     } catch (IllegalStateException e) {
-      log.info("Accept invitation failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
 
   /**
-   * Declines a household invitation.
+   * Declines a household invitation using the provided token.
    *
-   * @param requestDto the household join request (contains the token)
-   * @param principal  the Principal object representing the current user
-   * @return ResponseEntity with success message if successful, or an error message if the user is not
-   * found, the token is invalid or expired
+   * @param requestDto the household join request containing the invitation token
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity containing a success message if the invitation is declined,
+   *         or an error message if the user is not found or token is invalid/expired
    */
   @PostMapping("/decline")
   public ResponseEntity<?> declineInvitation(
@@ -87,7 +100,6 @@ public class InvitationController {
       invitationService.declineInvitation(principal.getName(), requestDto.getToken());
       return ResponseEntity.ok("Successfully declined the invitation");
     } catch (IllegalStateException e) {
-      log.info("Decline invitation failed: {}", e.getMessage());
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }

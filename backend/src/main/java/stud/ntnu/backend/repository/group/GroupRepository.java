@@ -7,13 +7,20 @@ import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.group.Group;
 
 /**
- * Repository interface for Group entity operations.
+ * Repository interface for managing Group entity operations.
+ * Provides basic CRUD operations through JpaRepository and custom query methods
+ * for specific group-related database operations.
  */
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Integer> {
-    // Basic CRUD operations are provided by JpaRepository
-    // Custom query methods can be added as needed
 
+    /**
+     * Checks if a household is currently an active member of a group.
+     *
+     * @param groupId The ID of the group to check
+     * @param householdId The ID of the household to check
+     * @return true if the household is an active member of the group, false otherwise
+     */
     @Query(value = """
             SELECT EXISTS (
                 SELECT 1 FROM group_memberships gm 

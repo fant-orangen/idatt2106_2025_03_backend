@@ -8,21 +8,32 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO for handling password reset requests. Contains the token received in the reset link and the
- * new password.
+ * Data Transfer Object (DTO) for handling password reset requests.
+ * This class encapsulates the data required to reset a user's password,
+ * including the reset token and the new password.
+ *
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResetPasswordRequestDto {
 
-  @NotBlank(message = "Token is required")
-  private String token;
+    /**
+     * The reset token received in the password reset link.
+     * This token is used to validate the password reset request.
+     */
+    @NotBlank(message = "Token is required")
+    private String token;
 
-  @Size(min = 8, max = 100, message = "Password must be at between 8 and 100 characters long")
-  @Pattern(
-          regexp = "^[A-Za-z0-9\\p{L}\\p{M}\\p{P}\\p{S}]+$",
-          message = "Invalid password format"
-  )
-  private String newPassword;
+    /**
+     * The new password to be set for the user.
+     * Must be between 8 and 100 characters long and contain only valid characters.
+     * Valid characters include letters, numbers, and special characters.
+     */
+    @Size(min = 8, max = 100, message = "Password must be at between 8 and 100 characters long")
+    @Pattern(
+            regexp = "^[A-Za-z0-9\\p{L}\\p{M}\\p{P}\\p{S}]+$",
+            message = "Invalid password format"
+    )
+    private String newPassword;
 }

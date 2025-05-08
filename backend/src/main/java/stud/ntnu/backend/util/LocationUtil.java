@@ -155,14 +155,12 @@ public class LocationUtil {
   }
 
   /**
-   * Checks if a crisis event is within a specified distance of a user's home or household
-   * location.
+   * Checks if a crisis event is within a specified distance of a user's household location.
    *
    * @param user         the user to check
    * @param crisisEvent  the crisis event
    * @param distanceInKm the distance in kilometers
-   * @return true if the crisis event is within the specified distance of the user's home or
-   * household location
+   * @return true if the crisis event is within the specified distance of the user's household location
    */
   public static boolean isCrisisEventNearUser(User user, CrisisEvent crisisEvent,
       double distanceInKm) {
@@ -171,26 +169,19 @@ public class LocationUtil {
       return false;
     }
 
+    // Return false if user has no household or household has no location
+    if (user.getHousehold() == null || user.getHousehold().getLatitude() == null
+        || user.getHousehold().getLongitude() == null) {
+      return false;
+    }
+
     double crisisLatitude = crisisEvent.getEpicenterLatitude().doubleValue();
     double crisisLongitude = crisisEvent.getEpicenterLongitude().doubleValue();
 
-    // Check if user's home coordinates are within distance
-    boolean userHomeNearby = user.getHomeLatitude() != null && user.getHomeLongitude() != null &&
-        isWithinDistance(crisisLatitude, crisisLongitude,
-            user.getHomeLatitude().doubleValue(),
-            user.getHomeLongitude().doubleValue(),
-            distanceInKm);
-
-    // Check if user's household coordinates are within distance
-    boolean householdNearby = user.getHousehold() != null &&
-        user.getHousehold().getLatitude() != null &&
-        user.getHousehold().getLongitude() != null &&
-        isWithinDistance(crisisLatitude, crisisLongitude,
-            user.getHousehold().getLatitude().doubleValue(),
-            user.getHousehold().getLongitude().doubleValue(),
-            distanceInKm);
-
-    return userHomeNearby || householdNearby;
+    return isWithinDistance(crisisLatitude, crisisLongitude,
+        user.getHousehold().getLatitude().doubleValue(),
+        user.getHousehold().getLongitude().doubleValue(),
+        distanceInKm);
   }
 
   /**

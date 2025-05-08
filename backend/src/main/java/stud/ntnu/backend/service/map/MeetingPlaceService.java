@@ -72,6 +72,15 @@ public class MeetingPlaceService {
     meetingPlaceRepository.deleteById(id);
   }
 
+  /**
+   * Creates a new meeting place with the provided details.
+   * If an address is provided but coordinates are not, the address will be geocoded to obtain coordinates.
+   * This operation is transactional to ensure data consistency.
+   *
+   * @param createDto the DTO containing the meeting place creation details
+   * @param currentUser the user creating the meeting place
+   * @return the newly created meeting place
+   */
   @Transactional
   public MeetingPlace createMeetingPlace(CreateMeetingPlaceDto createDto, User currentUser) {
     // If address is provided but not coordinates, convert address to coordinates
@@ -100,6 +109,14 @@ public class MeetingPlaceService {
     return meetingPlaceRepository.save(meetingPlace);
   }
 
+  /**
+   * Archives a meeting place by setting its status to "archived".
+   * This operation is transactional to ensure data consistency.
+   *
+   * @param id the ID of the meeting place to archive
+   * @return the archived meeting place
+   * @throws IllegalStateException if the meeting place is not found
+   */
   @Transactional
   public MeetingPlace archiveMeetingPlace(Integer id) {
     MeetingPlace meetingPlace = meetingPlaceRepository.findById(id)
@@ -108,6 +125,14 @@ public class MeetingPlaceService {
     return meetingPlaceRepository.save(meetingPlace);
   }
 
+  /**
+   * Activates a meeting place by setting its status to "active".
+   * This operation is transactional to ensure data consistency.
+   *
+   * @param id the ID of the meeting place to activate
+   * @return the activated meeting place
+   * @throws IllegalStateException if the meeting place is not found
+   */
   @Transactional
   public MeetingPlace activateMeetingPlace(Integer id) {
     MeetingPlace meetingPlace = meetingPlaceRepository.findById(id)
@@ -115,7 +140,16 @@ public class MeetingPlaceService {
     meetingPlace.setStatus("active");
     return meetingPlaceRepository.save(meetingPlace);
   }
-
+  /**
+   * Retrieves a list of active meeting places within a specified distance from given coordinates.
+   * The distance calculation is performed using the Haversine formula through LocationUtil.
+   * Only meeting places with "active" status are considered.
+   *
+   * @param latitude the latitude coordinate of the center point
+   * @param longitude the longitude coordinate of the center point
+   * @param maxDistanceKm the maximum distance in kilometers from the center point
+   * @return a list of meeting places within the specified distance
+   */
   public List<MeetingPlace> getNearbyMeetingPlaces(BigDecimal latitude, BigDecimal longitude, double maxDistanceKm) {
     List<MeetingPlace> allMeetingPlaces = meetingPlaceRepository.findByStatus("active");
     

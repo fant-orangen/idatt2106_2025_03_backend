@@ -1,15 +1,29 @@
 package stud.ntnu.backend.model.map;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import stud.ntnu.backend.model.user.User;
 
-import java.time.LocalDateTime;
-
 /**
- * Entity representing a change to a crisis event.
+ * Represents a change made to a crisis event in the system.
+ * This entity tracks modifications to crisis events including the type of change,
+ * old and new values, and metadata about who made the change and when.
  */
 @Entity
 @Table(name = "crisis_event_changes")
@@ -18,49 +32,82 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class CrisisEventChange {
 
+    /**
+     * Unique identifier for the crisis event change.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    /**
+     * The crisis event that was modified.
+     */
     @ManyToOne
     @JoinColumn(name = "crisis_event_id", nullable = false)
     private CrisisEvent crisisEvent;
 
+    /**
+     * The type of change made to the crisis event.
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "change_type", nullable = false)
     private ChangeType changeType;
 
+    /**
+     * The previous value before the change.
+     * Stored as TEXT in the database.
+     */
     @Column(name = "old_value", columnDefinition = "TEXT")
     private String oldValue;
 
+    /**
+     * The new value after the change.
+     * Stored as TEXT in the database.
+     */
     @Column(name = "new_value", columnDefinition = "TEXT")
     private String newValue;
 
+    /**
+     * The user who made this change.
+     */
     @ManyToOne
     @JoinColumn(name = "created_by_user_id", nullable = false)
     private User createdByUser;
 
+    /**
+     * The timestamp when this change was created.
+     */
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * The timestamp when this change was last updated.
+     */
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     /**
-     * Enum representing the type of change made to a crisis event.
+     * Enum representing the different types of changes that can be made to a crisis event.
      */
     public enum ChangeType {
-        creation, level_change, description_update, epicenter_moved
+        /** When a new crisis event is created */
+        creation,
+        /** When the severity level of a crisis event is changed */
+        level_change,
+        /** When the description of a crisis event is updated */
+        description_update,
+        /** When the epicenter location of a crisis event is moved */
+        epicenter_moved
     }
 
     /**
-     * Constructor for creating a new crisis event change.
+     * Creates a new crisis event change record.
      *
-     * @param crisisEvent   the crisis event that was changed
-     * @param changeType    the type of change
-     * @param oldValue      the old value
-     * @param newValue      the new value
-     * @param createdByUser the user who made the change
+     * @param crisisEvent The crisis event that was modified
+     * @param changeType The type of change made
+     * @param oldValue The value before the change
+     * @param newValue The value after the change
+     * @param createdByUser The user who made the change
      */
     public CrisisEventChange(CrisisEvent crisisEvent, ChangeType changeType, String oldValue, String newValue, User createdByUser) {
         this.crisisEvent = crisisEvent;
@@ -72,6 +119,9 @@ public class CrisisEventChange {
         this.updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Updates the last modified timestamp before any update operation.
+     */
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();

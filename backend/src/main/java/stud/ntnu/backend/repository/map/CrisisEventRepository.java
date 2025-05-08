@@ -17,33 +17,78 @@ import stud.ntnu.backend.model.map.ScenarioTheme;
 import stud.ntnu.backend.model.user.User;
 
 /**
- * Repository interface for CrisisEvent entity operations.
+ * Repository interface for managing CrisisEvent entities in the database.
+ * Provides methods for querying, updating, and managing crisis events.
  */
 @Repository
 public interface CrisisEventRepository extends JpaRepository<CrisisEvent, Integer> {
 
-  // Find active crisis events
+  /**
+   * Retrieves all active crisis events.
+   *
+   * @return List of active crisis events
+   */
   List<CrisisEvent> findByActiveTrue();
 
-  // Find inactive crisis events
+  /**
+   * Retrieves all inactive crisis events.
+   *
+   * @return List of inactive crisis events
+   */
   List<CrisisEvent> findByActiveFalse();
 
-  // Find crisis events by severity
+  /**
+   * Retrieves crisis events by their severity level.
+   *
+   * @param severity The severity level to filter by
+   * @return List of crisis events matching the severity
+   */
   List<CrisisEvent> findBySeverity(Severity severity);
 
-  // Find crisis events created by a specific user
+  /**
+   * Retrieves crisis events created by a specific user.
+   *
+   * @param user The user who created the crisis events
+   * @return List of crisis events created by the specified user
+   */
   List<CrisisEvent> findByCreatedByUser(User user);
 
-  // Find active crisis events by severity
+  /**
+   * Retrieves active crisis events filtered by severity.
+   *
+   * @param severity The severity level to filter by
+   * @return List of active crisis events matching the severity
+   */
   List<CrisisEvent> findByActiveTrueAndSeverity(Severity severity);
 
-  // Find crisis events by scenario theme
+  /**
+   * Retrieves crisis events by their scenario theme.
+   *
+   * @param scenarioTheme The scenario theme to filter by
+   * @return List of crisis events matching the scenario theme
+   */
   List<CrisisEvent> findByScenarioTheme(ScenarioTheme scenarioTheme);
 
-  // Find active crisis events by scenario theme
+  /**
+   * Retrieves active crisis events filtered by scenario theme.
+   *
+   * @param scenarioTheme The scenario theme to filter by
+   * @return List of active crisis events matching the scenario theme
+   */
   List<CrisisEvent> findByActiveTrueAndScenarioTheme(ScenarioTheme scenarioTheme);
 
-  // Update crisis event fields directly using a query (excluding start time)
+  /**
+   * Updates the fields of a crisis event.
+   * Updates include name, description, severity, location coordinates, radius, and timestamp.
+   *
+   * @param id The ID of the crisis event to update
+   * @param name The new name of the crisis event
+   * @param description The new description of the crisis event
+   * @param severity The new severity level
+   * @param latitude The new latitude coordinate
+   * @param longitude The new longitude coordinate
+   * @param radius The new radius value
+   */
   @Modifying
   @Query("UPDATE CrisisEvent c SET c.name = :name, c.description = :description, " +
       "c.severity = :severity, c.epicenterLatitude = :latitude, " +
@@ -58,24 +103,28 @@ public interface CrisisEventRepository extends JpaRepository<CrisisEvent, Intege
       @Param("radius") BigDecimal radius
   );
 
-  // Set a crisis event as inactive
+  /**
+   * Deactivates a crisis event by setting its active status to false.
+   *
+   * @param id The ID of the crisis event to deactivate
+   */
   @Modifying
   @Query("UPDATE CrisisEvent c SET c.active = false WHERE c.id = :id")
   void deactivateCrisisEvent(@Param("id") Integer id);
 
   /**
-   * Find all active crisis events with pagination.
+   * Retrieves a paginated list of active crisis events.
    *
-   * @param pageable pagination information
-   * @return page of active crisis events
+   * @param pageable Pagination information
+   * @return Page of active crisis events
    */
   Page<CrisisEvent> findByActiveTrue(Pageable pageable);
 
   /**
-   * Find all inactive crisis events with pagination.
+   * Retrieves a paginated list of inactive crisis events.
    *
-   * @param pageable pagination information
-   * @return page of inactive crisis events
+   * @param pageable Pagination information
+   * @return Page of inactive crisis events
    */
   Page<CrisisEvent> findByActiveFalse(Pageable pageable);
 }

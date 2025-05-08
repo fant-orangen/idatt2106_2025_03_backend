@@ -21,8 +21,6 @@ import stud.ntnu.backend.repository.user.EmailTokenRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.util.JwtUtil;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.NotificationPreference;
 import stud.ntnu.backend.repository.user.NotificationPreferenceRepository;
@@ -43,7 +41,6 @@ public class AuthService {
   private final EmailTokenRepository emailTokenRepository;
   private final TwoFactorCodeService twoFactorCodeService;
   private final NotificationPreferenceRepository notificationPreferenceRepository;
-  private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
   public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
       UserRepository userRepository, PasswordEncoder passwordEncoder,
@@ -202,8 +199,6 @@ public class AuthService {
     // 4. Mark token as used
     emailToken.setUsedAt(LocalDateTime.now());
     emailTokenRepository.save(emailToken);
-
-    log.info("Email verified successfully for user: {}", user.getEmail());
   }
 
   public AuthResponseDto verify2FA(String email, Integer code) {
@@ -263,8 +258,6 @@ public class AuthService {
 
     // Send the password reset email
     emailService.sendPasswordResetEmail(user, token);
-
-    log.info("Password reset initiated for user: {}", email);
   }
 
   /**
@@ -306,8 +299,6 @@ public class AuthService {
     // 4. Mark token as used
     emailToken.setUsedAt(LocalDateTime.now());
     emailTokenRepository.save(emailToken);
-
-    log.info("Password reset successfully for user: {}", user.getEmail());
   }
     /**
      * Changes the password for the currently authenticated user.
@@ -332,7 +323,5 @@ public class AuthService {
 
       user.setPasswordHash(passwordEncoder.encode(changePasswordDto.getNewPassword()));
       userRepository.save(user);
-
-      log.info("Password changed successfully for user: {}", email);
     }
 }

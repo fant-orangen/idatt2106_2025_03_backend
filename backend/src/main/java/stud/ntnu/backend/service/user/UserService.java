@@ -2,7 +2,11 @@ package stud.ntnu.backend.service.user;
 
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.repository.user.EmailTokenRepository;
+import stud.ntnu.backend.repository.user.SafetyConfirmationRepository;
 import stud.ntnu.backend.model.user.User;
+import stud.ntnu.backend.model.user.EmailToken;
+import stud.ntnu.backend.model.user.SafetyConfirmation;
 import stud.ntnu.backend.dto.user.UserProfileDto;
 import stud.ntnu.backend.dto.user.UserUpdateDto;
 import stud.ntnu.backend.dto.user.UserPreferencesDto;
@@ -10,10 +14,13 @@ import stud.ntnu.backend.dto.user.UserHistoryDto;
 import stud.ntnu.backend.dto.user.UserHistoryDto.GamificationActivityDto;
 import stud.ntnu.backend.dto.user.UserHistoryDto.ReflectionDto;
 import stud.ntnu.backend.dto.user.UserBasicInfoDto;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Service for managing users. Handles retrieval, updating, and deletion of users. Note: User
@@ -23,14 +30,30 @@ import java.util.Optional;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final EmailTokenRepository emailTokenRepository;
+  private final SafetyConfirmationRepository safetyConfirmationRepository;
+  private final EmailService emailService;
+  private final NotificationService notificationService;
 
   /**
    * Constructor for dependency injection.
    *
    * @param userRepository repository for user operations
+   * @param emailTokenRepository repository for email tokens
+   * @param safetyConfirmationRepository repository for safety confirmations
+   * @param emailService service for sending emails
+   * @param notificationService service for creating notifications
    */
-  public UserService(UserRepository userRepository) {
+  public UserService(UserRepository userRepository,
+                    EmailTokenRepository emailTokenRepository,
+                    SafetyConfirmationRepository safetyConfirmationRepository,
+                    EmailService emailService,
+                    NotificationService notificationService) {
     this.userRepository = userRepository;
+    this.emailTokenRepository = emailTokenRepository;
+    this.safetyConfirmationRepository = safetyConfirmationRepository;
+    this.emailService = emailService;
+    this.notificationService = notificationService;
   }
 
   /**
@@ -222,5 +245,127 @@ public class UserService {
         user.getHousehold() != null ? user.getHousehold().getId() : null,
         user.getHousehold() != null ? user.getHousehold().getName() : null
     );
+  }
+
+  /**
+   * Confirms a user's safety using a token received via email.
+   *
+   * @param token The safety confirmation token
+   * @throws IllegalArgumentException if the token is invalid
+   * @throws IllegalStateException if the token has expired
+   */
+  @Transactional
+  public void confirmSafety(String token) {
+    // Find and validate the token
+    EmailToken emailToken = emailTokenRepository.findByToken(token)
+        .orElseThrow(() -> new IllegalArgumentException("Ugyldig token. / Invalid token."));
+
+    // Check token type
+    if (emailToken.getType() != EmailToken.TokenType.SAFETY_CONFIRMATION) {
+      throw new IllegalArgumentException("Ugyldig token type. / Invalid token type.");
+    }
+
+    // Check if token has expired
+    if (emailToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+      throw new IllegalStateException("Token er utløpt. / Token has expired.");
+    }
+
+    User user = emailToken.getUser();
+    LocalDateTime now = LocalDateTime.now();
+
+    // Delete all existing safety confirmations for this user
+    safetyConfirmationRepository.deleteByUser(user);
+
+    // Create new confirmation
+    SafetyConfirmation confirmation = new SafetyConfirmation(user, true, now);
+    safetyConfirmationRepository.save(confirmation);
+  }
+
+  /**
+   * Requests safety confirmation from all other members of the user's household.
+   * Each member will receive an email with a unique token to confirm their safety.
+   *
+   * @param email The email of the user requesting safety confirmation
+   * @throws IllegalStateException if the user is not found or does not belong to a household
+   */
+  @Transactional
+  public void requestSafetyConfirmation(String email) {
+    User requestingUser = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("Bruker ikke funnet. / User not found."));
+
+    if (requestingUser.getHousehold() == null) {
+      throw new IllegalStateException("Du må være medlem av en husstand for å be om sikkerhetsbekreftelser. / You must be a member of a household to request safety confirmations.");
+    }
+
+    // Automatically mark the requesting user as safe
+    LocalDateTime now = LocalDateTime.now();
+    // Delete any existing safety confirmations for the requesting user
+    safetyConfirmationRepository.deleteByUser(requestingUser);
+    // Create new safety confirmation for the requesting user
+    SafetyConfirmation requestingUserConfirmation = new SafetyConfirmation(requestingUser, true, now);
+    safetyConfirmationRepository.save(requestingUserConfirmation);
+
+    List<User> householdMembers = userRepository.findByHousehold(requestingUser.getHousehold());
+    if (householdMembers.isEmpty() || householdMembers.size() == 1) {
+      throw new IllegalStateException("Ingen andre medlemmer i husstanden. / No other members in the household.");
+    }
+    
+    try {
+      for (User member : householdMembers) {
+        // Skip sending to the requesting user
+        if (member.getEmail().equals(email)) {
+          continue;
+        }
+
+        // Generate unique token for this member
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiresAt = LocalDateTime.now().plusHours(168); // 1 week
+
+        // Create and save token
+        EmailToken safetyToken = new EmailToken(
+            member,
+            token,
+            EmailToken.TokenType.SAFETY_CONFIRMATION,
+            expiresAt
+        );
+        emailTokenRepository.save(safetyToken);
+
+        // Send email with the unique token
+        emailService.sendSafetyConfirmationEmail(requestingUser, member, token);
+
+        // Create notification for the safety request
+        String requestingUserName = requestingUser.getName() != null ? requestingUser.getName() : "et husstandsmedlem";
+        notificationService.createSafetyRequestNotification(member, requestingUserName);
+      }
+    } catch (Exception e) {
+      throw e;
+    }
+  }
+
+  /**
+   * Checks if a user has confirmed their safety within the last 24 hours.
+   *
+   * @param userId The ID of the user to check
+   * @return true if the user has confirmed their safety within the last 24 hours, false otherwise
+   * @throws IllegalStateException if the user is not found
+   */
+  public boolean isSafe(Integer userId) {
+    // Verify user exists
+    userRepository.findById(userId)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    // Check if user has a safety confirmation where is_safe is true
+    Optional<SafetyConfirmation> safetyConfirmation = safetyConfirmationRepository.findByUser(
+        userRepository.getReferenceById(userId));
+    
+    if (!safetyConfirmation.isPresent() || !safetyConfirmation.get().getIsSafe()) {
+      return false;
+    }
+
+    // Check if the confirmation is less than 24 hours old
+    LocalDateTime confirmationTime = safetyConfirmation.get().getSafeAt();
+    LocalDateTime oneDayAgo = LocalDateTime.now().minusHours(24);
+    
+    return confirmationTime.isAfter(oneDayAgo);
   }
 }

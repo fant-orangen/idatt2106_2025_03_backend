@@ -1,5 +1,7 @@
 package stud.ntnu.backend.service.user;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -9,12 +11,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Map;
-
 /**
- * <h2>RecaptchaService</h2>
- *
- * <p>Service for verifying Google reCAPTCHA tokens.</p>
+ * Service responsible for verifying Google reCAPTCHA tokens.
+ * This service handles the communication with Google's reCAPTCHA API to validate
+ * tokens and determine if a user's interaction is legitimate based on a score threshold.
  */
 @Service
 public class RecaptchaService {
@@ -25,32 +25,32 @@ public class RecaptchaService {
   private static final String RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
 
   /**
-   * Verifies the reCAPTCHA token with Google's API.
+   * Verifies a reCAPTCHA token by sending it to Google's verification API.
+   * The verification process checks both the token's validity and the associated risk score.
+   * A score of 0.5 or higher is considered acceptable for most use cases.
    *
-   * @param recaptchaToken The reCAPTCHA token to verify.
-   * @return true if the token is valid and the score is above the threshold, false otherwise.
+   * @param recaptchaToken The reCAPTCHA token to verify, obtained from the client-side reCAPTCHA widget
+   * @return true if the token is valid and the risk score is 0.5 or higher, false otherwise
+   * @throws IllegalArgumentException if the recaptchaToken is null or empty
    */
   public boolean verifyRecaptcha(String recaptchaToken) {
+    if (recaptchaToken == null || recaptchaToken.trim().isEmpty()) {
+      throw new IllegalArgumentException("Recaptcha token cannot be null or empty");
+    }
+
     RestTemplate restTemplate = new RestTemplate();
 
-    // Prepare the request body
     MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
     requestBody.add("secret", recaptchaSecret);
     requestBody.add("response", recaptchaToken);
 
-    // Set headers
     HttpHeaders headers = new HttpHeaders();
     headers.add("Content-Type", "application/x-www-form-urlencoded");
 
-    // Create the HTTP entity
-    HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody,
-        headers);
+    HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
 
-    // Send the POST request to Google's reCAPTCHA API
-    ResponseEntity<Map> response = restTemplate.postForEntity(RECAPTCHA_VERIFY_URL, requestEntity,
-        Map.class);
+    ResponseEntity<Map> response = restTemplate.postForEntity(RECAPTCHA_VERIFY_URL, requestEntity, Map.class);
 
-    // Parse the response
     Map<String, Object> responseBody = response.getBody();
     if (responseBody == null) {
       return false;
@@ -59,8 +59,6 @@ public class RecaptchaService {
     Boolean success = (Boolean) responseBody.get("success");
     Double score = (Double) responseBody.get("score");
 
-    // Check if the reCAPTCHA is valid and the score is above the threshold
-    System.out.println("Score: " + score);
     return success != null && success && score != null && score >= 0.5;
   }
 }

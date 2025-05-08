@@ -1,9 +1,6 @@
 package stud.ntnu.backend.controller.crisis;
 
 import java.security.Principal;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import jakarta.validation.Valid;
 import stud.ntnu.backend.dto.map.CreateCrisisEventDto;
 import stud.ntnu.backend.dto.map.CrisisEventChangeDto;
@@ -27,14 +23,13 @@ import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.crisis.CrisisEventService;
 import stud.ntnu.backend.service.user.UserService;
-import java.util.List;
 import org.springframework.data.web.PageableDefault;
+
 /**
- * Manages crisis events and live updates. Admin functions include creating, editing, and deleting
- * events, setting severity levels, and defining epicenter locations. Also exposes current events
- * for users.
+ * REST controller for managing crisis events and live updates.
+ * Provides endpoints for administrators to create, edit, and deactivate crisis events,
+ * as well as endpoints for users to view crisis events affecting them.
  * <p>
- * Based on Visjonsdokument 2025 for Krisefikser.no.
  */
 @RestController
 @RequestMapping("/api")
@@ -42,8 +37,13 @@ public class CrisisEventController {
 
   private final CrisisEventService crisisEventService;
   private final UserService userService;
-  private final Logger log = LoggerFactory.getLogger(CrisisEventController.class);
 
+  /**
+   * Constructs a new CrisisEventController with required services.
+   *
+   * @param crisisEventService service for managing crisis events
+   * @param userService service for managing users
+   */
   public CrisisEventController(CrisisEventService crisisEventService, UserService userService) {
     this.crisisEventService = crisisEventService;
     this.userService = userService;
@@ -55,7 +55,7 @@ public class CrisisEventController {
    * creation.
    *
    * @param createCrisisEventDto the crisis event information including the required start time
-   * @param principal            the Principal object representing the current user
+   * @param principal the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
   @PostMapping(path = "/admin/crisis-events")
@@ -63,19 +63,15 @@ public class CrisisEventController {
       @Valid @RequestBody CreateCrisisEventDto createCrisisEventDto,
       Principal principal) {
     try {
-      // Check if the current user is an admin using AdminChecker with Principal
       if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
         return ResponseEntity.status(403).body("Only administrators can create crisis events");
       }
 
-      // Get the current authenticated user using Principal
       String email = principal.getName();
       User currentUser = userService.getUserByEmail(email)
           .orElseThrow(() -> new IllegalStateException("User not found"));
 
-      // Delegate to service for creating the crisis event
       crisisEventService.createCrisisEvent(createCrisisEventDto, currentUser);
-
       return ResponseEntity.ok().build();
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
@@ -84,14 +80,14 @@ public class CrisisEventController {
 
   /**
    * Updates an existing crisis event. Only users with ADMIN or SUPERADMIN roles are allowed to
-   * update crisis events. If a field is not provided in the request, it will not be updated. Note:
-   * The start time of a crisis event cannot be updated after creation.
+   * update crisis events. If a field is not provided in the request, it will not be updated.
+   * Note: The start time of a crisis event cannot be updated after creation.
    *
-   * @param id                   the ID of the crisis event to update
+   * @param id the ID of the crisis event to update
    * @param updateCrisisEventDto the crisis event information to update (excluding start time)
-   * @param principal            the Principal object representing the current user
-   * @return ResponseEntity with the updated crisis event if successful, or an error message if the
-   * crisis event is not found or the user is not authorized
+   * @param principal the Principal object representing the current user
+   * @return ResponseEntity with status 200 OK if successful, 403 Forbidden if unauthorized,
+   *         or 404 Not Found if the crisis event doesn't exist
    */
   @PutMapping(path = "/admin/crisis-events/{id}")
   public ResponseEntity<?> updateCrisisEvent(
@@ -99,15 +95,11 @@ public class CrisisEventController {
       @RequestBody UpdateCrisisEventDto updateCrisisEventDto,
       Principal principal) {
     try {
-      // Check if the current user is an admin using AdminChecker with Principal
       if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
         return ResponseEntity.status(403).body("Only administrators can update crisis events");
       }
 
-      // Delegate to service for updating the crisis event
-      CrisisEvent updatedCrisisEvent = crisisEventService.updateCrisisEvent(id,
-          updateCrisisEventDto);
-
+      CrisisEvent updatedCrisisEvent = crisisEventService.updateCrisisEvent(id, updateCrisisEventDto);
       if (updatedCrisisEvent == null) {
         return ResponseEntity.notFound().build();
       }
@@ -119,36 +111,37 @@ public class CrisisEventController {
   }
 
   /**
-   * Gets a preview of all ACTIVE crisis events with pagination (id, name, severity, startTime only).
+   * Gets a preview of all active crisis events with pagination.
+   * The preview includes only id, name, severity, and startTime.
    *
    * @param pageable the pagination information
-   * @return ResponseEntity with a page of crisis event previews
+   * @return ResponseEntity containing a page of crisis event previews
    */
   @GetMapping("/public/crisis-events/all/previews")
   public ResponseEntity<Page<CrisisEventPreviewDto>> getAllCrisisEventPreviews(Pageable pageable) {
-    Page<CrisisEventPreviewDto> crisisEventPreviews = crisisEventService.getAllCrisisEventPreviews(
-        pageable);
+    Page<CrisisEventPreviewDto> crisisEventPreviews = crisisEventService.getAllCrisisEventPreviews(pageable);
     return ResponseEntity.ok(crisisEventPreviews);
   }
 
   /**
-   * Gets a preview of all INACTIVE crisis events with pagination (id, name, severity, startTime only).
+   * Gets a preview of all inactive crisis events with pagination.
+   * The preview includes only id, name, severity, and startTime.
    *
    * @param pageable the pagination information
-   * @return ResponseEntity with a page of crisis event previews
+   * @return ResponseEntity containing a page of crisis event previews
    */
   @GetMapping("/public/crisis-events/inactive/previews")
   public ResponseEntity<Page<CrisisEventPreviewDto>> getInactiveCrisisEventPreviews(Pageable pageable) {
-    Page<CrisisEventPreviewDto> crisisEventPreviews = crisisEventService.getInactiveCrisisEventPreviews(
-        pageable);
+    Page<CrisisEventPreviewDto> crisisEventPreviews = crisisEventService.getInactiveCrisisEventPreviews(pageable);
     return ResponseEntity.ok(crisisEventPreviews);
   }
 
   /**
-   * Gets a page of all crisis events (full entity, not preview) with pagination.
+   * Gets a page of all crisis events with pagination.
+   * Returns the full entity, not just a preview.
    *
    * @param pageable the pagination information
-   * @return ResponseEntity with a page of crisis events
+   * @return ResponseEntity containing a page of crisis events
    */
   @GetMapping("/public/crisis-events/all")
   public ResponseEntity<Page<CrisisEvent>> getAllCrisisEvents(Pageable pageable) {
@@ -157,10 +150,10 @@ public class CrisisEventController {
   }
 
   /**
-   * Deletes a crisis event by its ID. Only users with ADMIN or SUPERADMIN roles are allowed to
-   * delete crisis events.
+   * Deactivates a crisis event by its ID. Only users with ADMIN or SUPERADMIN roles are allowed
+   * to deactivate crisis events.
    *
-   * @param id        the ID of the crisis event to delete
+   * @param id the ID of the crisis event to deactivate
    * @param principal the Principal object representing the current user
    * @return ResponseEntity with status 200 OK if successful, or 403 Forbidden if unauthorized
    */
@@ -169,14 +162,11 @@ public class CrisisEventController {
       @PathVariable Integer id,
       Principal principal) {
     try {
-      // Check if the current user is an admin using AdminChecker with Principal
       if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
         return ResponseEntity.status(403).body("Only administrators can deactivate crisis events");
       }
 
-      // Delegate to service for deleting the crisis event
       crisisEventService.deactivateCrisisEvent(id);
-
       return ResponseEntity.ok("Crisis event deactivated");
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
@@ -187,7 +177,7 @@ public class CrisisEventController {
    * Gets a specific crisis event by its ID.
    *
    * @param id the ID of the crisis event to retrieve
-   * @return ResponseEntity with the crisis event if found, or 404 Not Found if not found
+   * @return ResponseEntity containing the crisis event if found, or 404 Not Found if not found
    */
   @GetMapping("/public/crisis-events/{id}")
   public ResponseEntity<?> getCrisisEventById(@PathVariable Integer id) {
@@ -203,11 +193,11 @@ public class CrisisEventController {
   /**
    * Gets all changes for a specific crisis event with pagination.
    *
-   * @param id        the ID of the crisis event
-   * @param pageable  the pagination information
+   * @param id the ID of the crisis event
+   * @param pageable the pagination information
    * @param principal the Principal object representing the current user
-   * @return ResponseEntity with a page of crisis event changes if successful, or an error message
-   * if the crisis event is not found or the user is not authorized
+   * @return ResponseEntity containing a page of crisis event changes if successful,
+   *         or 404 Not Found if the crisis event doesn't exist
    */
   @GetMapping(path = "/public/crisis-events/{id}/changes")
   public ResponseEntity<?> getCrisisEventChanges(
@@ -215,10 +205,7 @@ public class CrisisEventController {
       Pageable pageable,
       Principal principal) {
     try {
-
-      // Get the crisis event changes
       Page<CrisisEventChangeDto> changes = crisisEventService.getCrisisEventChanges(id, pageable);
-
       return ResponseEntity.ok(changes);
     } catch (IllegalStateException e) {
       return ResponseEntity.notFound().build();
@@ -228,8 +215,9 @@ public class CrisisEventController {
   }
 
   /**
-   * Gets a paginated list of crisis events affecting the current user. A crisis event affects a
-   * user if the user's home or household location is within the event's radius.
+   * Gets a paginated list of crisis events affecting the current user.
+   * A crisis event affects a user if the user's home or household location
+   * is within the event's radius.
    *
    * @param principal the Principal object representing the current user
    * @param pageable  the pagination information
@@ -271,7 +259,6 @@ public class CrisisEventController {
           currentUser, pageable);
       return ResponseEntity.ok(page);
     } catch (Exception e) {
-      log.info("Error getting crisis event previews affecting user: {}", e.getMessage());
       return ResponseEntity.badRequest().build();
     }
   }
