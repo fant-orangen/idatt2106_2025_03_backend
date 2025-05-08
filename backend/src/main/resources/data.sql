@@ -853,6 +853,7 @@ INSERT INTO household_admins (user_id, household_id) VALUES (4, 3); -- Mike is a
 
 -- QUIZZES
 INSERT INTO quizzes (name, description, created_by_user_id) VALUES ('Emergency Preparedness Basics', 'A quiz to test your knowledge on basic emergency preparedness.', 1);
+INSERT INTO quizzes (id, name, description, created_by_user_id) VALUES (123, 'test', 'This is a test quiz.', 1);
 
 -- QUIZ QUESTIONS
 INSERT INTO quiz_questions (quiz_id, question_body, position) VALUES (1, 'What is the recommended amount of water to store per person per day?', 1);

@@ -1,5 +1,6 @@
 package stud.ntnu.backend.service.gamification.quiz;
 
+import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -87,7 +88,7 @@ public class UserQuizService {
     UserQuizAttempt attempt = new UserQuizAttempt();
     attempt.setUserId(userId);
     attempt.setQuizId(quizId);
-    attempt.setCompletedAt(null);
+    attempt.setCompletedAt(LocalDateTime.now());
     userQuizAttemptRepository.save(attempt);
   }
 
@@ -115,7 +116,7 @@ public class UserQuizService {
    */
   public Page<QuizAttemptSummaryDto> getQuizAttemptsByQuizId(Long quizId, Integer userId,
       Pageable pageable) {
-    return userQuizAttemptRepository.findByUserIdAndQuizId(userId, quizId, pageable)
+    return userQuizAttemptRepository.findByUserIdAndQuizIdOrderByIdDesc(userId, quizId, pageable)
         .map(a -> new QuizAttemptSummaryDto(a.getId(), a.getCompletedAt()));
   }
 
