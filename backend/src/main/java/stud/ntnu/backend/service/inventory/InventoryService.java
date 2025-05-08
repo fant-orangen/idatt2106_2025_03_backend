@@ -7,7 +7,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.ApplicationEventPublisher;
 import stud.ntnu.backend.dto.inventory.*;
-import stud.ntnu.backend.repository.household.HouseholdInventoryRepository;
 import stud.ntnu.backend.repository.inventory.ProductRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
@@ -15,7 +14,6 @@ import stud.ntnu.backend.repository.household.HouseholdMemberRepository;
 import stud.ntnu.backend.repository.inventory.ProductBatchRepository;
 import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
 import stud.ntnu.backend.model.household.Household;
-import stud.ntnu.backend.model.household.HouseholdInventory;
 import stud.ntnu.backend.model.inventory.Product;
 import stud.ntnu.backend.model.inventory.ProductBatch;
 import stud.ntnu.backend.model.inventory.ProductType;
@@ -34,7 +32,6 @@ import java.util.stream.Collectors;
 @Service
 public class InventoryService {
 
-  private final HouseholdInventoryRepository householdInventoryRepository;
   private final ProductRepository productRepository;
   private final UserRepository userRepository;
   private final ProductBatchRepository productBatchRepository;
@@ -47,7 +44,6 @@ public class InventoryService {
   /**
    * Constructor for dependency injection.
    *
-   * @param householdInventoryRepository repository for household inventory operations
    * @param productRepository            repository for product operations
    * @param userRepository               repository for user operations
    * @param productBatchRepository       repository for product batch operations
@@ -58,7 +54,6 @@ public class InventoryService {
    * @param householdMemberRepository  repository for household member operations
    */
   public InventoryService(
-      HouseholdInventoryRepository householdInventoryRepository,
       ProductRepository productRepository,
       UserRepository userRepository,
       ProductBatchRepository productBatchRepository,
@@ -67,7 +62,6 @@ public class InventoryService {
       SearchUtil searchUtil,
       ApplicationEventPublisher eventPublisher,
       HouseholdMemberRepository householdMemberRepository) {
-    this.householdInventoryRepository = householdInventoryRepository;
     this.productRepository = productRepository;
     this.userRepository = userRepository;
     this.productBatchRepository = productBatchRepository;
@@ -77,44 +71,7 @@ public class InventoryService {
     this.eventPublisher = eventPublisher;
     this.householdMemberRepository = householdMemberRepository;
   }
-
-  /**
-   * Retrieves all household inventory items.
-   *
-   * @return list of all household inventory items
-   */
-  public List<HouseholdInventory> getAllInventoryItems() {
-    return householdInventoryRepository.findAll();
-  }
-
-  /**
-   * Retrieves a household inventory item by its ID.
-   *
-   * @param id the ID of the household inventory item
-   * @return an Optional containing the household inventory item if found
-   */
-  public Optional<HouseholdInventory> getInventoryItemById(Integer id) {
-    return householdInventoryRepository.findById(id);
-  }
-
-  /**
-   * Saves a household inventory item.
-   *
-   * @param inventoryItem the household inventory item to save
-   * @return the saved household inventory item
-   */
-  public HouseholdInventory saveInventoryItem(HouseholdInventory inventoryItem) {
-    return householdInventoryRepository.save(inventoryItem);
-  }
-
-  /**
-   * Deletes a household inventory item by its ID.
-   *
-   * @param id the ID of the household inventory item to delete
-   */
-  public void deleteInventoryItem(Integer id) {
-    householdInventoryRepository.deleteById(id);
-  }
+ 
 
   /**
    * Retrieves all products.
@@ -173,36 +130,6 @@ public class InventoryService {
     return household.getId();
   }
 
-  /**
-   * Converts a HouseholdInventory entity to an InventoryItemDto.
-   *
-   * @param inventoryItem the inventory item entity
-   * @return the inventory item DTO
-   */
-  private InventoryItemDto convertToInventoryItemDto(HouseholdInventory inventoryItem) {
-    Integer productId = null;
-    String productName = null;
-    String productTypeName = null;
-
-    if (inventoryItem.getProduct() != null) {
-      productId = inventoryItem.getProduct().getId();
-      productName = inventoryItem.getProduct().getName();
-
-      if (inventoryItem.getProduct().getProductType() != null) {
-        productTypeName = inventoryItem.getProduct().getProductType().getName();
-      }
-    }
-
-    return new InventoryItemDto(
-        inventoryItem.getId(),
-        productId,
-        productName,
-        productTypeName,
-        inventoryItem.getCustomName(),
-        inventoryItem.getQuantity(),
-        inventoryItem.getExpirationDate()
-    );
-  }
 
   /**
    * Get all food product types for a specific household.
