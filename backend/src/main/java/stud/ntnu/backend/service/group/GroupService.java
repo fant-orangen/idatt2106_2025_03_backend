@@ -15,11 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.group.GroupSummaryDto;
 import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.model.group.Group;
+import stud.ntnu.backend.model.group.GroupInvitation;
 import stud.ntnu.backend.model.group.GroupMembership;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.user.User;
-import stud.ntnu.backend.model.household.Invitation;
 import stud.ntnu.backend.repository.group.GroupInventoryContributionRepository;
+import stud.ntnu.backend.repository.group.GroupInvitationRepository;
 import stud.ntnu.backend.repository.group.GroupMembershipRepository;
 import stud.ntnu.backend.repository.group.GroupRepository;
 import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
@@ -27,7 +28,6 @@ import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.inventory.ProductTypeRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.service.inventory.InventoryService;
-import stud.ntnu.backend.repository.household.InvitationRepository;
 
 /**
  * Service for managing groups. Handles creation, retrieval, updating, and deletion of groups.
@@ -44,7 +44,7 @@ public class GroupService {
   private final ProductTypeRepository productTypeRepository;
   private final GroupInventoryContributionRepository groupInventoryContributionRepository;
   private final HouseholdRepository householdRepository;
-  private final InvitationRepository invitationRepository;
+  private final GroupInvitationRepository groupInvitationRepository;
 
   /**
    * Constructor for dependency injection.
@@ -57,7 +57,7 @@ public class GroupService {
    * @param productTypeRepository                repository for product type operations
    * @param groupInventoryContributionRepository repository for group inventory contribution operations
    * @param householdRepository                  repository for household operations
-   * @param invitationRepository                 repository for invitation operations
+   * @param groupInvitationRepository            repository for group invitation operations
    */
   @Autowired
   public GroupService(GroupRepository groupRepository,
@@ -66,7 +66,7 @@ public class GroupService {
       ProductTypeRepository productTypeRepository,
       GroupInventoryContributionRepository groupInventoryContributionRepository,
       HouseholdRepository householdRepository,
-      InvitationRepository invitationRepository) {
+      GroupInvitationRepository groupInvitationRepository) {
     this.groupRepository = groupRepository;
     this.groupMembershipRepository = groupMembershipRepository;
     this.inventoryService = inventoryService;
@@ -75,7 +75,7 @@ public class GroupService {
     this.productTypeRepository = productTypeRepository;
     this.groupInventoryContributionRepository = groupInventoryContributionRepository;
     this.householdRepository = householdRepository;
-    this.invitationRepository = invitationRepository;
+    this.groupInvitationRepository = groupInvitationRepository;
   }
 
   /**
@@ -310,23 +310,23 @@ public class GroupService {
     }
 
     // Check if there's already a pending invitation
-    boolean hasPendingInvitation = groupMembershipRepository
-        .existsByGroupIdAndHouseholdIdAndInvitationNotExpired(groupId, targetHousehold.getId(), LocalDateTime.now());
+    boolean hasPendingInvitation = groupInvitationRepository
+        .existsPendingInvitation(groupId, targetHousehold.getId(), LocalDateTime.now());
     
     if (hasPendingInvitation) {
       throw new IllegalStateException("There is already a pending invitation for this household");
     }
 
     // Create the invitation
-    Invitation invitation = new Invitation(
-        inviter,
-        inviterEmail,
+    GroupInvitation invitation = new GroupInvitation(
         group,
+        inviterEmail,
+        targetHousehold,
         LocalDateTime.now().plus(1, ChronoUnit.MONTHS)
     );
 
     // Save the invitation
-    invitationRepository.save(invitation);
+    groupInvitationRepository.save(invitation);
 
     return true;
   }

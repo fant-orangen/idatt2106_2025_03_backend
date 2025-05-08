@@ -16,7 +16,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import stud.ntnu.backend.model.group.Group;
 import stud.ntnu.backend.model.user.User;
 
 /**
@@ -58,12 +57,6 @@ public class Invitation {
     @JoinColumn(name = "household_id")
     private Household household;
 
-    /**
-     * The group the invitation is for, if applicable.
-     */
-    @ManyToOne
-    @JoinColumn(name = "group_id")
-    private Group group;
 
     /**
      * Unique token used to identify and validate the invitation.
@@ -141,22 +134,7 @@ public class Invitation {
         this.household = household;
         this.token = token;
         this.expiresAt = expiresAt;
-    }
-
-    /**
-     * Creates a new group invitation.
-     *
-     * @param inviterUser The user sending the invitation
-     * @param inviteeEmail The email address of the invitee
-     * @param group The group being invited to
-     * @param expiresAt The expiration timestamp
-     */
-    public Invitation(User inviterUser, String inviteeEmail, Group group, LocalDateTime expiresAt) {
-        this.inviterUser = inviterUser;
-        this.inviteeEmail = inviteeEmail;
-        this.group = group;
-        this.expiresAt = expiresAt;
-    }
+    } 
 
     /**
      * Gets the current status of the invitation.
