@@ -1,5 +1,7 @@
 package stud.ntnu.backend.dto.quiz;
 
+import java.time.LocalDateTime;
+
 import lombok.Getter;
 import lombok.Setter;
 
