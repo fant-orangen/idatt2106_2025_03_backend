@@ -3,8 +3,10 @@ package stud.ntnu.backend.controller.gamification.quiz;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
-
 import java.util.Map;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,8 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
 import stud.ntnu.backend.dto.quiz.CreateQuizAnswerDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizDto;
 import stud.ntnu.backend.dto.quiz.CreateQuizQuestionDto;
@@ -23,14 +24,15 @@ import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerDto;
 import stud.ntnu.backend.dto.quiz.QuizAnswerResponseDto;
 import stud.ntnu.backend.dto.quiz.QuizAttemptSummaryDto;
-import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
 import stud.ntnu.backend.dto.quiz.QuizPreviewDto;
+import stud.ntnu.backend.dto.quiz.QuizQuestionResponseDto;
 import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.gamification.quiz.QuizService;
 import stud.ntnu.backend.service.user.UserService;
 
 /**
- * Admin controller for managing quizzes. Supports creation, archiving, and user attempts.
+ * Controller responsible for managing quiz-related operations including creation, modification,
+ * and user interactions with quizzes. Provides separate endpoints for admin and user operations.
  */
 @RestController
 @RequestMapping("/api")
@@ -39,6 +41,12 @@ public class QuizController {
     private final QuizService quizService;
     private final UserService userService;
 
+    /**
+     * Constructs a new QuizController with the required services.
+     *
+     * @param quizService service handling quiz-related operations
+     * @param userService service handling user-related operations
+     */
     public QuizController(QuizService quizService, UserService userService) {
         this.quizService = quizService;
         this.userService = userService;
@@ -47,13 +55,14 @@ public class QuizController {
     // -------------------- ADMIN ENDPOINTS --------------------
 
     /**
-     * Creates a new empty quiz. Only admins should be allowed (add check if needed).
+     * Creates a new empty quiz. This endpoint is restricted to admin users only.
+     * The quiz is created with the provided name, description, and initial status.
      *
-     * @param createQuizDto the quiz information (name, description, status)
-     * @param principal     the Principal object representing the current user
-     * @return ResponseEntity with 200 OK or error message
+     * @param createQuizDto DTO containing the quiz information (name, description, status)
+     * @param principal the authenticated user's principal
+     * @return ResponseEntity containing the created quiz ID if successful, or an error message
+     * @throws IllegalArgumentException if the quiz data is invalid
      */
-
     @PostMapping("/quizzes/admin")
     public ResponseEntity<?> createQuiz(@RequestBody CreateQuizDto createQuizDto,
                                         Principal principal) {
@@ -70,11 +79,13 @@ public class QuizController {
     }
 
     /**
-     * Deletes a quiz by its id.
+     * Deletes a quiz and all its associated questions and answers.
+     * This endpoint is restricted to admin users only.
      *
-     * @param quizId    the id of the quiz to delete
-     * @param principal the Principal object representing the current user
-     * @return ResponseEntity with 200 OK or error message
+     * @param quizId the ID of the quiz to delete
+     * @param principal the authenticated user's principal
+     * @return ResponseEntity with 200 OK if successful, or an error message
+     * @throws IllegalArgumentException if the quiz doesn't exist
      */
     @DeleteMapping("/quizzes/admin/{quiz_id}")
     public ResponseEntity<?> deleteQuiz(@PathVariable("quiz_id") Long quizId, Principal principal) {
@@ -91,13 +102,14 @@ public class QuizController {
         }
     }
 
-
     /**
-     * Archives a quiz by id.
+     * Archives a quiz, making it inaccessible to regular users but preserving its data.
+     * This endpoint is restricted to admin users only.
      *
-     * @param id        the quiz id
-     * @param principal the Principal object representing the current user
-     * @return ResponseEntity with 200 OK or error message
+     * @param id the ID of the quiz to archive
+     * @param principal the authenticated user's principal
+     * @return ResponseEntity with 200 OK if successful, or an error message
+     * @throws IllegalArgumentException if the quiz doesn't exist
      */
     @PatchMapping("/quizzes/admin/{id}/archive")
     public ResponseEntity<?> archiveQuiz(@PathVariable Long id, Principal principal) {
@@ -113,11 +125,13 @@ public class QuizController {
     }
 
     /**
-     * Unarchives a quiz by id.
+     * Unarchives a previously archived quiz, making it accessible to users again.
+     * This endpoint is restricted to admin users only.
      *
-     * @param id        the quiz id
-     * @param principal the Principal object representing the current user
-     * @return ResponseEntity with 200 OK or error message
+     * @param id the ID of the quiz to unarchive
+     * @param principal the authenticated user's principal
+     * @return ResponseEntity with 200 OK if successful, or an error message
+     * @throws IllegalArgumentException if the quiz doesn't exist
      */
     @PatchMapping("/quizzes/admin/{id}/unarchive")
     public ResponseEntity<?> unArchiveQuiz(@PathVariable Long id, Principal principal) {
@@ -133,11 +147,13 @@ public class QuizController {
     }
 
     /**
-     * Saves a quiz question.
+     * Creates a new quiz question for an existing quiz.
+     * This endpoint is restricted to admin users only.
      *
-     * @param dto       the CreateQuizQuestionDto containing question data
-     * @param principal the Principal object representing the current user
-     * @return ResponseEntity with 200 OK or error message
+     * @param dto DTO containing the question data (quiz ID, question text, type, etc.)
+     * @param principal the authenticated user's principal
+     * @return ResponseEntity containing the created question ID if successful, or an error message
+     * @throws IllegalArgumentException if the question data is invalid or the quiz doesn't exist
      */
     @PostMapping("/quizzes/admin/questions")
     public ResponseEntity<?> saveQuizQuestion(@RequestBody CreateQuizQuestionDto dto,
@@ -155,12 +171,14 @@ public class QuizController {
     }
 
     /**
-     * Partially updates an existing quiz question.
+     * Updates an existing quiz question.
+     * This endpoint is restricted to admin users only.
      *
-     * @param questionId the id of the quiz question to update
-     * @param dto        the CreateQuizQuestionDto containing updated question data
-     * @param principal  the Principal object representing the current user
-     * @return ResponseEntity with 200 OK or error message
+     * @param questionId the ID of the question to update
+     * @param dto DTO containing the updated question data
+     * @param principal the authenticated user's principal
+     * @return ResponseEntity with 200 OK if successful, or an error message
+     * @throws IllegalArgumentException if the question doesn't exist or the data is invalid
      */
     @PatchMapping("/quizzes/admin/questions/{question_id}")
     public ResponseEntity<?> updateQuizQuestion(
@@ -179,12 +197,14 @@ public class QuizController {
     }
 
     /**
-     * Partially updates an existing quiz answer.
+     * Updates an existing quiz answer.
+     * This endpoint is restricted to admin users only.
      *
-     * @param answerId  the id of the quiz answer to update
-     * @param dto       the CreateQuizAnswerDto containing updated answer data
-     * @param principal the Principal object representing the current user
-     * @return ResponseEntity with 200 OK or error message
+     * @param answerId the ID of the answer to update
+     * @param dto DTO containing the updated answer data
+     * @param principal the authenticated user's principal
+     * @return ResponseEntity with 200 OK if successful, or an error message
+     * @throws IllegalArgumentException if the answer doesn't exist or the data is invalid
      */
     @PatchMapping("/quizzes/admin/answers/{answer_id}")
     public ResponseEntity<?> updateQuizAnswer(
@@ -203,11 +223,13 @@ public class QuizController {
     }
 
     /**
-     * Saves a quiz answer.
+     * Creates a new answer option for a quiz question.
+     * This endpoint is restricted to admin users only.
      *
-     * @param dto       the CreateQuizAnswerDto containing answer data
-     * @param principal the Principal object representing the current user
-     * @return ResponseEntity with 200 OK or error message
+     * @param dto DTO containing the answer data (question ID, answer text, isCorrect flag)
+     * @param principal the authenticated user's principal
+     * @return ResponseEntity with 200 OK if successful, or an error message
+     * @throws IllegalArgumentException if the answer data is invalid or the question doesn't exist
      */
     @PostMapping("/quizzes/admin/answers")
     public ResponseEntity<?> saveQuizAnswer(@RequestBody CreateQuizAnswerDto dto,
@@ -224,10 +246,12 @@ public class QuizController {
     }
 
     /**
-     * Gets all correct answers for a quiz question by its id.
+     * Retrieves all correct answers for a specific quiz question.
+     * This endpoint is restricted to admin users only.
      *
-     * @param questionId the id of the quiz question
-     * @return ResponseEntity with a list of QuizAnswerDto
+     * @param questionId the ID of the question to get answers for
+     * @return ResponseEntity containing a list of correct answers if successful, or an error message
+     * @throws IllegalArgumentException if the question doesn't exist
      */
     @GetMapping("/quizzes/admin/{question_id}/answers/correct")
     public ResponseEntity<?> getCorrectQuizAnswersByQuestionId(
@@ -242,10 +266,13 @@ public class QuizController {
     }
 
     /**
-     * Deletes a quiz question by its id.
+     * Deletes a quiz question and all its associated answers.
+     * This endpoint is restricted to admin users only.
      *
-     * @param questionId the id of the quiz question to delete
-     * @return ResponseEntity with 200 OK or error message
+     * @param questionId the ID of the question to delete
+     * @param principal the authenticated user's principal
+     * @return ResponseEntity with 200 OK if successful, or an error message
+     * @throws IllegalArgumentException if the question doesn't exist
      */
     @DeleteMapping("/quizzes/admin/questions/{question_id}")
     public ResponseEntity<?> deleteQuizQuestion(@PathVariable("question_id") Long questionId,
@@ -262,11 +289,13 @@ public class QuizController {
     }
 
     /**
-     * Deletes a quiz answer by its id.
+     * Deletes a quiz answer option.
+     * This endpoint is restricted to admin users only.
      *
-     * @param answerId  the id of the quiz answer to delete
-     * @param principal the Principal object representing the current user
-     * @return ResponseEntity with 200 OK or error message
+     * @param answerId the ID of the answer to delete
+     * @param principal the authenticated user's principal
+     * @return ResponseEntity with 200 OK if successful, or an error message
+     * @throws IllegalArgumentException if the answer doesn't exist
      */
     @DeleteMapping("/quizzes/admin/answers/{answer_id}")
     public ResponseEntity<?> deleteQuizAnswer(@PathVariable("answer_id") Long answerId,
@@ -285,10 +314,12 @@ public class QuizController {
     // -------------------- USER ENDPOINTS --------------------
 
     /**
-     * Gets all questions for a quiz by quiz id.
+     * Retrieves all questions for a specific quiz.
+     * This endpoint is accessible to all authenticated users.
      *
-     * @param quizId the quiz id
-     * @return List of QuizQuestionResponseDto
+     * @param quizId the ID of the quiz to retrieve questions for
+     * @return ResponseEntity containing a list of quiz questions with their details
+     * @throws IllegalArgumentException if the quiz doesn't exist
      */
     @GetMapping("/quizzes/user/{quiz_id}/questions")
     public ResponseEntity<List<QuizQuestionResponseDto>> getQuizQuestionsByQuizId(
@@ -298,10 +329,12 @@ public class QuizController {
     }
 
     /**
-     * Gets all answers for a quiz question by question id.
+     * Retrieves all possible answers for a specific quiz question.
+     * This endpoint is accessible to all authenticated users.
      *
-     * @param questionId the quiz question id
-     * @return List of QuizAnswerResponseDto
+     * @param questionId the ID of the question to retrieve answers for
+     * @return ResponseEntity containing a list of possible answers for the question
+     * @throws IllegalArgumentException if the question doesn't exist
      */
     @GetMapping("/quizzes/user/questions/{question_id}/answers")
     public ResponseEntity<List<QuizAnswerResponseDto>> getAnswersByQuestionId(
@@ -311,10 +344,11 @@ public class QuizController {
     }
 
     /**
-     * Gets all active quizzes in paginated format.
+     * Retrieves a paginated list of all active quizzes.
+     * This endpoint is accessible to all authenticated users.
      *
-     * @param pageable the pagination information
-     * @return ResponseEntity with a page of QuizPreviewDto (id, name, description, createdAt)
+     * @param pageable pagination information including page number, size, and sorting
+     * @return ResponseEntity containing a page of active quiz previews
      */
     @GetMapping("/quizzes/user/all/previews/active")
     public ResponseEntity<Page<QuizPreviewDto>> getAllActiveQuizzes(Pageable pageable) {
@@ -326,10 +360,11 @@ public class QuizController {
     }
 
     /**
-     * Gets all archived quizzes in paginated format.
+     * Retrieves a paginated list of all archived quizzes.
+     * This endpoint is accessible to all authenticated users.
      *
-     * @param pageable the pagination information
-     * @return ResponseEntity with a page of QuizPreviewDto (id, name, description, createdAt)
+     * @param pageable pagination information including page number, size, and sorting
+     * @return ResponseEntity containing a page of archived quiz previews
      */
     @GetMapping("/quizzes/user/all/previews/archived")
     public ResponseEntity<Page<QuizPreviewDto>> getAllArchivedQuizzes(Pageable pageable) {
@@ -342,11 +377,13 @@ public class QuizController {
     }
 
     /**
-     * Creates a new quiz attempt for the user.
+     * Creates a new quiz attempt for the authenticated user.
+     * This represents the start of a user taking a quiz.
      *
-     * @param quizId    the quiz id
-     * @param principal the Principal object representing the current user
-     * @return ResponseEntity with 200 OK or error message
+     * @param quizId the ID of the quiz to attempt
+     * @param principal the authenticated user's principal
+     * @return ResponseEntity containing the created attempt ID if successful, or an error message
+     * @throws IllegalArgumentException if the quiz doesn't exist or user has exceeded attempt limits
      */
     @PostMapping("/quizzes/user/{quiz_id}/attempts")
     public ResponseEntity<?> createUserQuizAttempt(@PathVariable("quiz_id") Long quizId,
@@ -367,10 +404,11 @@ public class QuizController {
     }
 
     /**
-     * Creates a new quiz answer for the user.
+     * Records a user's answer to a quiz question during an attempt.
      *
-     * @param dto the CreateUserQuizAnswerDto containing answer data
-     * @return ResponseEntity with 200 OK or error message
+     * @param dto DTO containing the answer data (attempt ID, question ID, selected answers)
+     * @return ResponseEntity with 200 OK if successful, or an error message
+     * @throws IllegalArgumentException if the attempt or question doesn't exist
      */
     @PostMapping("/quizzes/user/attempts/answer")
     public ResponseEntity<?> createUserQuizAnswer(@RequestBody CreateUserQuizAnswerDto dto) {
@@ -386,6 +424,15 @@ public class QuizController {
         }
     }
 
+    /**
+     * Retrieves a paginated list of quiz attempts for a specific quiz by the authenticated user.
+     *
+     * @param quizId the ID of the quiz to get attempts for
+     * @param principal the authenticated user's principal
+     * @param pageable pagination information including page number, size, and sorting
+     * @return ResponseEntity containing a page of quiz attempt summaries
+     * @throws IllegalArgumentException if the quiz doesn't exist
+     */
     @GetMapping("/quizzes/user/attempts/{quiz_id}")
     public ResponseEntity<Page<QuizAttemptSummaryDto>> getQuizAttemptsByQuizId(
         @PathVariable("quiz_id") Long quizId,
@@ -406,10 +453,11 @@ public class QuizController {
     }
 
     /**
-     * Gets the total correct answers for a quiz attempt.
+     * Retrieves the total number of correct answers for a specific quiz attempt.
      *
-     * @param attemptId the quiz attempt id
-     * @return ResponseEntity with the total correct answers
+     * @param attemptId the ID of the quiz attempt to get results for
+     * @return ResponseEntity containing the count of correct answers if successful, or an error message
+     * @throws IllegalArgumentException if the attempt doesn't exist
      */
     @GetMapping("/quizzes/user/attempts/{attempt_id}/correct-count")
     public ResponseEntity<?> getTotalCorrectAnswers(@PathVariable("attempt_id") Long attemptId) {
@@ -425,11 +473,12 @@ public class QuizController {
     }
 
     /**
-     * Retrieves the latest quiz attempt for a user.
+     * Retrieves the most recent quiz attempt for the authenticated user.
      *
-     * @param quizId    the quiz id
-     * @param principal the Principal object representing the current user
-     * @return ResponseEntity with the latest quiz attempt summary or an error message
+     * @param quizId the ID of the quiz to get the latest attempt for
+     * @param principal the authenticated user's principal
+     * @return ResponseEntity containing the latest attempt summary if found, or an error message
+     * @throws IllegalArgumentException if the quiz doesn't exist or no attempts are found
      */
     @GetMapping("/quizzes/user/{quiz_id}/attempts/latest")
     public ResponseEntity<?> getLatestQuizAttempt(@PathVariable("quiz_id") Long quizId,
@@ -448,14 +497,13 @@ public class QuizController {
     /**
      * Retrieves the name of a quiz by its ID.
      *
-     * @param quizId the ID of the quiz
-     * @return ResponseEntity with the quiz name or an error message
+     * @param quizId the ID of the quiz to retrieve the name for
+     * @return ResponseEntity containing the quiz name if found, or an error message if not found
      */
     @GetMapping("/quizzes/{quiz_id}/name")
     public ResponseEntity<?> getQuizNameById(@PathVariable("quiz_id") Long quizId) {
         try {
             String quizName = quizService.getQuizNameById(quizId);
-            System.out.println("Quiz name: " + quizName);
             return ResponseEntity.ok(Collections.singletonMap("name", quizName));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
