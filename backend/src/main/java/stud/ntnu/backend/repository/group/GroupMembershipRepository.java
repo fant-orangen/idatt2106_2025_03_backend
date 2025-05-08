@@ -99,8 +99,8 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
      * @param now The current timestamp to check against
      * @return true if a valid pending invitation exists, false otherwise
      */
-    @Query("SELECT CASE WHEN COUNT(i) > 0 THEN true ELSE false END FROM Invitation i " +
-           "WHERE i.group.id = :groupId AND i.household.id = :householdId " +
-           "AND i.expiresAt > :now AND i.acceptedAt IS NULL AND i.declinedAt IS NULL")
+    @Query("SELECT CASE WHEN COUNT(gi) > 0 THEN true ELSE false END FROM GroupInvitation gi " +
+           "WHERE gi.group.id = :groupId AND gi.invitedHousehold.id = :householdId " +
+           "AND gi.expiresAt > :now AND gi.acceptedAt IS NULL AND gi.declinedAt IS NULL")
     boolean existsByGroupIdAndHouseholdIdAndInvitationNotExpired(Integer groupId, Integer householdId, LocalDateTime now);
 }

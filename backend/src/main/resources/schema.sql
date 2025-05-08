@@ -60,21 +60,33 @@ CREATE TABLE groups (
     FOREIGN KEY (created_by_user_id) REFERENCES users(id)
 );
 
--- INVITATIONS (for both households & groups)
+-- GROUP INVITATIONS
+CREATE TABLE group_invitations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    group_id INT NOT NULL,
+    inviter_email VARCHAR(255) NOT NULL,
+    invited_household_id INT NOT NULL,
+    expires_at DATETIME NOT NULL,
+    accepted_at DATETIME,
+    declined_at DATETIME,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (invited_household_id) REFERENCES households(id) ON DELETE CASCADE
+);
+
+-- INVITATIONS (for households)
 CREATE TABLE invitations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     inviter_user_id INT NOT NULL,
     invitee_email VARCHAR(255) NOT NULL,
     household_id INT, -- Can be NULL if invitation is not for a household
-    group_id INT,
     token VARCHAR(255) UNIQUE,
     expires_at DATETIME NOT NULL,
     accepted_at DATETIME,
     declined_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (inviter_user_id) REFERENCES users(id),
-    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE,
-    FOREIGN KEY (group_id) REFERENCES groups(id)
+    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE
 );
 
 -- GROUP MEMBERSHIPS (households join crisis‐supply groups)
