@@ -1,14 +1,25 @@
 package stud.ntnu.backend.dto.quiz;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
+/**
+ * Data Transfer Object (DTO) representing a quiz question response.
+ * This class is used to transfer quiz question data between layers of the application.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuizQuestionResponseDto {
 
-  private Long id;
-  private String questionBody;
-} 
+    /**
+     * The unique identifier of the quiz question.
+     */
+    private Long id;
+
+    /**
+     * The text content of the quiz question.
+     */
+    private String questionBody;
+}
