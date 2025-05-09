@@ -1,5 +1,11 @@
 package stud.ntnu.backend.controller.map;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 import java.util.List;
 
@@ -7,21 +13,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import stud.ntnu.backend.dto.poi.CreatePoiDto;
-import stud.ntnu.backend.dto.poi.PoiItemDto;
-import stud.ntnu.backend.dto.poi.UpdatePoiDto;
+import stud.ntnu.backend.dto.poi.*;
 import stud.ntnu.backend.model.map.PointOfInterest;
 import stud.ntnu.backend.model.map.PoiType;
 import stud.ntnu.backend.model.user.User;
@@ -38,6 +35,7 @@ import stud.ntnu.backend.util.LocationUtil;
  */
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Points of Interest", description = "Operations for managing Points of Interest (POIs) including emergency shelters, defibrillators, and food stations")
 public class PoiController {
 
   private final PoiService poiService;
@@ -59,6 +57,11 @@ public class PoiController {
    *
    * @return List of POIs converted to DTOs for public consumption
    */
+  @Operation(summary = "Get public POIs", description = "Retrieves all public points of interest. This endpoint is accessible without authentication.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved public POIs", 
+          content = @Content(schema = @Schema(implementation = PoiItemDto.class)))
+  })
   @GetMapping("/public/poi/public")
   public List<PoiItemDto> getPublicPointsOfInterest() {
     return poiService.getAllPointsOfInterest()
@@ -76,6 +79,11 @@ public class PoiController {
    * @param sort sorting criteria in format "property,direction" (default "id,asc")
    * @return ResponseEntity containing a page of POI previews
    */
+  @Operation(summary = "Get POI previews", description = "Retrieves a paginated and sorted list of POI previews. This endpoint is accessible without authentication.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved POI previews", 
+          content = @Content(schema = @Schema(implementation = PoiItemDto.class)))
+  })
   @GetMapping("public/poi/previews")
   public ResponseEntity<?> getPoiPreviews(
       @RequestParam(defaultValue = "0") int page,
@@ -95,6 +103,13 @@ public class PoiController {
    * @return List of POIs of the specified type
    * @throws IllegalArgumentException if the type ID is invalid
    */
+  @Operation(summary = "Get POIs by type", description = "Retrieves all POIs of a specific type. This endpoint is accessible without authentication.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved POIs by type", 
+          content = @Content(schema = @Schema(implementation = PoiItemDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid type ID", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @GetMapping("/public/poi/type/{id}")
   public List<PoiItemDto> getPointsOfInterestByTypeId(@PathVariable int id) {
     return poiService.getPointsOfInterestByTypeId(id)
@@ -109,6 +124,12 @@ public class PoiController {
    * @param id the ID of the POI to retrieve
    * @return the POI if found, null otherwise
    */
+  @Operation(summary = "Get POI by ID", description = "Retrieves a specific POI by its ID. This endpoint is accessible without authentication.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved POI", 
+          content = @Content(schema = @Schema(implementation = PoiItemDto.class))),
+      @ApiResponse(responseCode = "404", description = "POI not found")
+  })
   @GetMapping("/public/poi/{id}")
   public PoiItemDto getPointOfInterestById(@PathVariable int id) {
     return poiService.getPointOfInterestById(id)
@@ -126,6 +147,12 @@ public class PoiController {
    * @param distance  maximum distance in meters from the center point
    * @return List of POIs within the specified distance
    */
+  @Operation(summary = "Get nearby POIs", description = "Finds POIs within a specified distance from a given location. Optionally filters by POI type.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved nearby POIs", 
+          content = @Content(schema = @Schema(implementation = PoiItemDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid coordinates or distance")
+  })
   @GetMapping("/public/poi/type/nearby")
   public List<PoiItemDto> getPointsOfInterestByTypeIdAndDistance(
       @RequestParam(required = false) Integer id,
@@ -151,6 +178,13 @@ public class PoiController {
    * @return the nearest POI of the specified type, or null if none found
    * @throws IllegalArgumentException if the type ID is invalid
    */
+  @Operation(summary = "Get nearest POI", description = "Finds the nearest POI of a specific type from a given location.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved nearest POI", 
+          content = @Content(schema = @Schema(implementation = PoiItemDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid type ID or coordinates", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @GetMapping("/public/poi/type/nearest/{id}")
   public PoiItemDto getNearestPointOfInterestByType(
       @PathVariable int id,
@@ -170,6 +204,15 @@ public class PoiController {
    * @throws IllegalArgumentException if the POI data is invalid
    * @throws IllegalStateException    if the user is not found
    */
+  @Operation(summary = "Create POI", description = "Creates a new POI. This endpoint is restricted to admin users only.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully created POI", 
+          content = @Content(schema = @Schema(implementation = PoiItemDto.class))),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user is not an admin", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid POI data", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PostMapping("/admin/poi")
   public ResponseEntity<?> createPointOfInterest(
       @Valid @RequestBody CreatePoiDto createPoiDto,
@@ -199,6 +242,15 @@ public class PoiController {
    * @return ResponseEntity containing the updated POI if successful, or an error message
    * @throws IllegalArgumentException if the POI doesn't exist or the data is invalid
    */
+  @Operation(summary = "Update POI", description = "Updates an existing POI. This endpoint is restricted to admin users only.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully updated POI", 
+          content = @Content(schema = @Schema(implementation = PoiItemDto.class))),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user is not an admin", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid POI data", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PutMapping("/admin/poi/{id}")
   public ResponseEntity<?> updatePointOfInterest(
       @PathVariable Integer id,
@@ -224,6 +276,15 @@ public class PoiController {
    * @return ResponseEntity with success message if successful, or an error message
    * @throws IllegalArgumentException if the POI doesn't exist
    */
+  @Operation(summary = "Delete POI", description = "Deletes a POI. This endpoint is restricted to admin users only.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully deleted POI", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user is not an admin", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid POI ID", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @DeleteMapping("/admin/poi/{id}")
   public ResponseEntity<?> deletePointOfInterest(
       @PathVariable Integer id,
@@ -245,6 +306,11 @@ public class PoiController {
    *
    * @return List of all POI types in the system
    */
+  @Operation(summary = "Get POI types", description = "Retrieves all available POI types. This endpoint is accessible without authentication.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved POI types", 
+          content = @Content(schema = @Schema(implementation = PoiType.class)))
+  })
   @GetMapping("/public/poi/types")
   public List<PoiType> getAllPoiTypes() {
     return poiService.getAllPoiTypes();
@@ -260,6 +326,11 @@ public class PoiController {
    * @param sort sorting criteria in format "property,direction" (default "id,desc")
    * @return Page of POIs matching the search criteria
    */
+  @Operation(summary = "Search POIs", description = "Searches for POIs by name using case-insensitive substring matching. Results are paginated and sorted.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved matching POIs", 
+          content = @Content(schema = @Schema(implementation = PoiItemDto.class)))
+  })
   @GetMapping("/public/poi/search")
   public Page<PoiItemDto> searchPois(
       @RequestParam("q") String q,

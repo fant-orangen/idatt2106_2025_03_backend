@@ -1,5 +1,12 @@
 package stud.ntnu.backend.controller.admin;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import stud.ntnu.backend.dto.user.UserInfoDto;
@@ -17,6 +24,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/super-admin")
+@Tag(name = "Super Administrator", description = "Operations related to super administrator management")
 public class SuperAdminController {
 
   private final SuperAdminService superAdminService;
@@ -46,6 +54,15 @@ public class SuperAdminController {
    * - 403 Forbidden response if unauthorized - 400 Bad Request with error message if operation
    * fails
    */
+  @Operation(summary = "Get all administrators", description = "Retrieves a list of all administrators in the system. Only accessible by super administrators.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved all administrators", 
+          content = @Content(schema = @Schema(implementation = UserInfoDto.class))),
+      @ApiResponse(responseCode = "403", description = "Access forbidden - only super administrators can access this resource", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - operation failed", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @GetMapping("/all")
   public ResponseEntity<?> getAdmins(Principal principal) {
     try {
@@ -68,6 +85,15 @@ public class SuperAdminController {
    * @return ResponseEntity containing either: - UserInfoDto with user's email and ID - 403
    * Forbidden response if unauthorized - 400 Bad Request with error message if user not found
    */
+  @Operation(summary = "Get user information by email", description = "Retrieves user information by email address. Only accessible by super administrators.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved user information", 
+          content = @Content(schema = @Schema(implementation = UserInfoDto.class))),
+      @ApiResponse(responseCode = "403", description = "Access forbidden - only super administrators can access this resource", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - user not found", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @GetMapping("/user-info/{email}")
   public ResponseEntity<?> getIdByEmail(Principal principal, @PathVariable String email) {
     try {
@@ -93,6 +119,15 @@ public class SuperAdminController {
    * Forbidden response if unauthorized - 400 Bad Request with error message if user not found or
    * not an admin
    */
+  @Operation(summary = "Revoke admin privileges", description = "Revokes administrator privileges from a user. Only accessible by super administrators.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully revoked admin privileges", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "403", description = "Access forbidden - only super administrators can access this resource", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - user not found or not an admin", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PutMapping("/revoke/{id}")
   public ResponseEntity<?> revokeAdminAccess(Principal principal, @PathVariable Integer id) {
     try {
@@ -122,6 +157,15 @@ public class SuperAdminController {
    * Forbidden response if unauthorized - 400 Bad Request with error message if user not found or
    * already an admin
    */
+  @Operation(summary = "Grant admin privileges", description = "Grants administrator privileges to a user. Only accessible by super administrators.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully granted admin privileges", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "403", description = "Access forbidden - only super administrators can access this resource", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - user not found or already an admin", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PutMapping("/add/{id}")
   public ResponseEntity<?> addAdminAccess(Principal principal, @PathVariable Integer id) {
     try {
