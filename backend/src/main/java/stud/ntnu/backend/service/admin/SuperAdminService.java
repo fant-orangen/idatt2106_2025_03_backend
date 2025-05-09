@@ -53,8 +53,7 @@ public class SuperAdminService {
   }
 
   /**
-   * Grants admin access to a user by changing their role to admin. Note: 2FA activation logic needs
-   * to be implemented.
+   * Grants admin access to a user by changing their role to admin.
    *
    * @param id the ID of the user to grant admin access to
    * @throws RuntimeException if the user or ADMIN role is not found
@@ -67,6 +66,7 @@ public class SuperAdminService {
         .orElseThrow(() -> new RuntimeException("Role 'ADMIN' not found"));
 
     user.setRole(adminRole);
+    user.setIsUsing2FA(true);
     userService.saveUser(user);
   }
 }

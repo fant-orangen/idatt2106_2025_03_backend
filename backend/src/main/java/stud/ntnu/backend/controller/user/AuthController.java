@@ -50,23 +50,38 @@ public class AuthController {
   }
 
   /**
-   * Authenticates a user and generates a JWT token.
+   * Authenticate a user and generate a JWT token.
    *
    * @param authRequest the authentication request containing email and password
    * @return ResponseEntity containing the JWT token and user information
    */
-  @Operation(summary = "Login", description = "Authenticates a user and generates a JWT token.")
+  @Operation(summary = "Login", description = "Authenticate a user and generate a JWT token. Requires reCAPTCHA validation.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Successfully authenticated", 
           content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
       @ApiResponse(responseCode = "202", description = "2FA required", 
           content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
-      @ApiResponse(responseCode = "400", description = "Bad request - invalid credentials", 
-          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid credentials or reCAPTCHA", 
+          content = @Content(schema = @Schema(implementation = AuthResponseDto.class)))
   })
   @PostMapping("/login")
   public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
+    // Verify the reCAPTCHA token
+    if (!recaptchaService.verifyRecaptcha(authRequest.getRecaptchaToken())) {
+      // Return a response with an error message in the AuthResponseDto
+      AuthResponseDto errorResponse = new AuthResponseDto();
+      errorResponse.setToken(null);
+      errorResponse.setEmail(null);
+      errorResponse.setUserId(null);
+      errorResponse.setRole(null);
+      errorResponse.setHouseholdId(null);
+      errorResponse.setIsUsing2FA(false);
+      return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    // Proceed with login if reCAPTCHA is valid
     AuthResponseDto authResponse = authService.login(authRequest);
+
     return authResponse.getIsUsing2FA()
         ? ResponseEntity.status(202).body(authResponse)
         : ResponseEntity.ok(authResponse);
@@ -81,7 +96,7 @@ public class AuthController {
   @Operation(summary = "Register", description = "Registers a new user with the USER role.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Successfully registered"),
-      @ApiResponse(responseCode = "400", description = "Bad request - invalid registration data", 
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid registration data",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
   })
   @PostMapping("/register")
@@ -102,11 +117,11 @@ public class AuthController {
    */
   @Operation(summary = "Verify email", description = "Handles email verification using a token sent via email.")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Email successfully verified", 
+      @ApiResponse(responseCode = "200", description = "Email successfully verified",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
-      @ApiResponse(responseCode = "400", description = "Bad request - invalid token", 
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid token",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
-      @ApiResponse(responseCode = "500", description = "Internal server error", 
+      @ApiResponse(responseCode = "500", description = "Internal server error",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
   })
   @GetMapping("/verify")
@@ -131,9 +146,9 @@ public class AuthController {
    */
   @Operation(summary = "Send 2FA code", description = "Initiates the 2FA process by sending a verification code to the user's email.")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "2FA code sent successfully", 
+      @ApiResponse(responseCode = "200", description = "2FA code sent successfully",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
-      @ApiResponse(responseCode = "500", description = "Failed to send 2FA code", 
+      @ApiResponse(responseCode = "500", description = "Failed to send 2FA code",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
   })
   @PostMapping("/send-2fa")
@@ -154,11 +169,11 @@ public class AuthController {
    */
   @Operation(summary = "Verify 2FA", description = "Completes the 2FA process by verifying the code sent to the user's email.")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Successfully verified 2FA", 
+      @ApiResponse(responseCode = "200", description = "Successfully verified 2FA",
           content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
-      @ApiResponse(responseCode = "400", description = "Bad request - invalid code", 
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid code",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
-      @ApiResponse(responseCode = "500", description = "Failed to verify 2FA code", 
+      @ApiResponse(responseCode = "500", description = "Failed to verify 2FA code",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
   })
   @PostMapping("/verify-2fa")
@@ -181,9 +196,9 @@ public class AuthController {
    */
   @Operation(summary = "Forgot password", description = "Initiates the password reset process by sending a reset link to the user's email.")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Reset link sent if email exists", 
+      @ApiResponse(responseCode = "200", description = "Reset link sent if email exists",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
-      @ApiResponse(responseCode = "500", description = "Failed to process forgot password request", 
+      @ApiResponse(responseCode = "500", description = "Failed to process forgot password request",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
   })
   @PostMapping("/forgot-password")
@@ -208,11 +223,11 @@ public class AuthController {
    */
   @Operation(summary = "Reset password", description = "Resets a user's password using a valid reset token.")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Password reset successfully", 
+      @ApiResponse(responseCode = "200", description = "Password reset successfully",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
-      @ApiResponse(responseCode = "400", description = "Bad request - invalid token", 
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid token",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
-      @ApiResponse(responseCode = "500", description = "Failed to reset password", 
+      @ApiResponse(responseCode = "500", description = "Failed to reset password",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
   })
   @PostMapping("/reset-password")
@@ -236,11 +251,11 @@ public class AuthController {
    */
   @Operation(summary = "Change password", description = "Changes the password for the currently authenticated user.")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Password changed successfully", 
+      @ApiResponse(responseCode = "200", description = "Password changed successfully",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
-      @ApiResponse(responseCode = "400", description = "Bad request - invalid password", 
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid password",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
-      @ApiResponse(responseCode = "500", description = "Failed to change password", 
+      @ApiResponse(responseCode = "500", description = "Failed to change password",
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
   })
   @PatchMapping("/change-password")
