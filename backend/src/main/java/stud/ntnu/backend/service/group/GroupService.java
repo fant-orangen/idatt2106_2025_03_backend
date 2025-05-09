@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import stud.ntnu.backend.dto.group.GroupSummaryDto;
 import stud.ntnu.backend.dto.household.HouseholdDto;
+import stud.ntnu.backend.dto.group.GroupInvitationSummaryDto;
 import stud.ntnu.backend.model.group.Group;
 import stud.ntnu.backend.model.group.GroupInvitation;
 import stud.ntnu.backend.model.group.GroupMembership;
@@ -339,20 +340,27 @@ public class GroupService {
    * - Has not expired (expires_at is in the future)
    *
    * @param userEmail the email of the user
-   * @return List of pending GroupInvitation objects
+   * @return List of pending GroupInvitationSummaryDto objects
    */
-  public List<GroupInvitation> getPendingInvitations(String userEmail) {
-    // Get the user's household ID
+  public List<GroupInvitationSummaryDto> getPendingInvitations(String userEmail) {
     Integer householdId = getHouseholdIdByUserEmail(userEmail);
     if (householdId == null) {
-      return List.of(); // Return empty list if user has no household
+      return List.of();
     }
-
     LocalDateTime now = LocalDateTime.now();
-    return groupInvitationRepository.findPendingInvitationsForHousehold(
-        householdId,
-        now
-    );
+    return groupInvitationRepository.findPendingInvitationsForHousehold(householdId, now)
+        .stream()
+        .map(invitation -> {
+            GroupInvitationSummaryDto dto = new GroupInvitationSummaryDto();
+            dto.setId(invitation.getId());
+            GroupSummaryDto groupDto = new GroupSummaryDto();
+            groupDto.setId(invitation.getGroup().getId());
+            groupDto.setName(invitation.getGroup().getName());
+            groupDto.setCreatedAt(invitation.getGroup().getCreatedAt());
+            dto.setGroup(groupDto);
+            return dto;
+        })
+        .toList();
   }
 
   /**

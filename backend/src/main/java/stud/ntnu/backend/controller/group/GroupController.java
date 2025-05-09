@@ -21,6 +21,7 @@ import stud.ntnu.backend.dto.group.GroupSummaryDto;
 import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.service.group.GroupService;
 import stud.ntnu.backend.model.group.GroupInvitation;
+import stud.ntnu.backend.dto.group.GroupInvitationSummaryDto;
 
 /**
  * REST controller for managing crisis-supply groups.
@@ -159,13 +160,13 @@ public class GroupController {
    * Retrieves all pending invitations for the current user.
    *
    * @param principal the authenticated user making the request
-   * @return ResponseEntity containing: - 200 OK with list of GroupInvitation if successful - 404
+   * @return ResponseEntity containing: - 200 OK with list of GroupInvitationSummaryDto if successful - 404
    * Not Found if no pending invitations exist
    */
   @GetMapping("/user/groups/invitations")
   public ResponseEntity<?> getPendingInvitations(Principal principal) {
     String email = principal.getName();
-    List<GroupInvitation> invitations = groupService.getPendingInvitations(email);
+    List<GroupInvitationSummaryDto> invitations = groupService.getPendingInvitations(email);
     return ResponseEntity.ok(invitations);
   }
 
