@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
+
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.UserRepository;
 
@@ -17,18 +19,10 @@ import stud.ntnu.backend.repository.user.UserRepository;
  * into Spring Security's UserDetails format.
  */
 @Service
+@RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
   private final UserRepository userRepository;
-
-  /**
-   * Constructs a new CustomUserDetailsService with the required dependencies.
-   *
-   * @param userRepository the repository for accessing user data
-   */
-  public CustomUserDetailsService(UserRepository userRepository) {
-    this.userRepository = userRepository;
-  }
 
   /**
    * Load a user by username (email in our case).

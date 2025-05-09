@@ -1,5 +1,6 @@
 package stud.ntnu.backend.service.map;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -21,18 +22,10 @@ import java.util.Optional;
  * meeting places.
  */
 @Service
+@RequiredArgsConstructor
 public class MeetingPlaceService {
 
   private final MeetingPlaceRepository meetingPlaceRepository;
-
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param meetingPlaceRepository repository for meeting place operations
-   */
-  public MeetingPlaceService(MeetingPlaceRepository meetingPlaceRepository) {
-    this.meetingPlaceRepository = meetingPlaceRepository;
-  }
 
   /**
    * Retrieves all meeting places.

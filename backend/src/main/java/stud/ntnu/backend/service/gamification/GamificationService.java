@@ -1,5 +1,6 @@
 package stud.ntnu.backend.service.gamification;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import stud.ntnu.backend.repository.user.GamificationActivityRepository;
 import stud.ntnu.backend.repository.user.UserGamificationActivityRepository;
@@ -14,22 +15,11 @@ import java.util.Optional;
  * updating, and deletion of gamification activities and user gamification activities.
  */
 @Service
+@RequiredArgsConstructor
 public class GamificationService {
 
   private final GamificationActivityRepository gamificationActivityRepository;
   private final UserGamificationActivityRepository userGamificationActivityRepository;
-
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param gamificationActivityRepository     repository for gamification activity operations
-   * @param userGamificationActivityRepository repository for user gamification activity operations
-   */
-  public GamificationService(GamificationActivityRepository gamificationActivityRepository,
-      UserGamificationActivityRepository userGamificationActivityRepository) {
-    this.gamificationActivityRepository = gamificationActivityRepository;
-    this.userGamificationActivityRepository = userGamificationActivityRepository;
-  }
 
   /**
    * Retrieves all gamification activities.

@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Lazy;
 
 import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
 import stud.ntnu.backend.model.household.Household;
@@ -17,6 +18,7 @@ import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.household.InvitationRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.service.household.HouseholdService;
 
 /**
  * Service for managing household invitations. Handles creation, retrieval, updating, and deletion
@@ -30,6 +32,7 @@ public class InvitationService {
   private final UserRepository userRepository;
   private final HouseholdRepository householdRepository;
   private final NotificationService notificationService;
+  private final @Lazy HouseholdService householdService;
 
   /**
    * Constructs a new InvitationService with required dependencies.
@@ -38,15 +41,18 @@ public class InvitationService {
    * @param userRepository       repository for user operations
    * @param householdRepository  repository for household operations
    * @param notificationService  service for notification operations
+   * @param householdService     service for household operations
    */
   public InvitationService(InvitationRepository invitationRepository,
       UserRepository userRepository,
       HouseholdRepository householdRepository,
-      NotificationService notificationService) {
+      NotificationService notificationService,
+      @Lazy HouseholdService householdService) {
     this.invitationRepository = invitationRepository;
     this.userRepository = userRepository;
     this.householdRepository = householdRepository;
     this.notificationService = notificationService;
+    this.householdService = householdService;
   }
 
   /**
@@ -191,6 +197,8 @@ public class InvitationService {
     Household household = invitation.getHousehold();
     user.setHousehold(household);
     userRepository.save(user);
+
+    householdService.updatePopulationCount(household);
 
     String notificationMessage = String.format(
         "%s has accepted your invitation to join your household.",

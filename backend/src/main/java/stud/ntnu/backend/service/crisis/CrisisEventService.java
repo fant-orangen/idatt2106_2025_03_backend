@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import stud.ntnu.backend.dto.map.CreateCrisisEventDto;
 import stud.ntnu.backend.dto.map.CrisisEventChangeDto;
@@ -36,6 +37,7 @@ import stud.ntnu.backend.util.SearchUtil;
  * for affected users. Supports various filtering and sorting options for crisis event retrieval.
  */
 @Service
+@RequiredArgsConstructor
 public class CrisisEventService {
 
   private final CrisisEventRepository crisisEventRepository;
@@ -47,31 +49,6 @@ public class CrisisEventService {
 
   @Autowired
   private SearchUtil searchUtil;
-
-  /**
-   * Constructs a new CrisisEventService with the required dependencies.
-   *
-   * @param crisisEventRepository       repository for crisis event operations
-   * @param crisisEventChangeRepository repository for tracking crisis event changes
-   * @param notificationService         service for managing notifications
-   * @param userService                 service for user operations
-   * @param scenarioThemeRepository     repository for scenario theme operations
-   * @param messageSource               source for internationalized messages
-   */
-  public CrisisEventService(
-      CrisisEventRepository crisisEventRepository,
-      CrisisEventChangeRepository crisisEventChangeRepository,
-      NotificationService notificationService,
-      UserService userService,
-      ScenarioThemeRepository scenarioThemeRepository,
-      MessageSource messageSource) {
-    this.crisisEventRepository = crisisEventRepository;
-    this.crisisEventChangeRepository = crisisEventChangeRepository;
-    this.notificationService = notificationService;
-    this.userService = userService;
-    this.scenarioThemeRepository = scenarioThemeRepository;
-    this.messageSource = messageSource;
-  }
 
   /**
    * Retrieves all crisis events with pagination support.
