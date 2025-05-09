@@ -26,34 +26,34 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProductBatchDto {
 
-    /**
-     * The unique identifier of this product batch.
-     */
-    private Integer id;
+  /**
+   * The unique identifier of this product batch.
+   */
+  private Integer id;
 
-    /**
-     * The unique identifier of the product type associated with this batch.
-     */
-    private Integer productTypeId;
+  /**
+   * The unique identifier of the product type associated with this batch.
+   */
+  private Integer productTypeId;
 
-    /**
-     * The name of the product type associated with this batch.
-     */
-    private String productTypeName;
+  /**
+   * The name of the product type associated with this batch.
+   */
+  private String productTypeName;
 
-    /**
-     * The date and time when this batch was added to the inventory.
-     */
-    private LocalDateTime dateAdded;
+  /**
+   * The date and time when this batch was added to the inventory.
+   */
+  private LocalDateTime dateAdded;
 
-    /**
-     * The date and time when this batch expires.
-     * This may be null if the products in this batch do not expire.
-     */
-    private LocalDateTime expirationTime;
+  /**
+   * The date and time when this batch expires. This may be null if the products in this batch do
+   * not expire.
+   */
+  private LocalDateTime expirationTime;
 
-    /**
-     * The number of units in this batch.
-     */
-    private Integer number;
+  /**
+   * The number of units in this batch.
+   */
+  private Integer number;
 }

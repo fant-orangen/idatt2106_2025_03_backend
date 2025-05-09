@@ -66,15 +66,15 @@ public class RegisterRequestDto extends AuthRequestDto {
   /**
    * Constructor with all fields.
    *
-   * @param email User's email address
-   * @param password User's password
-   * @param recaptchaToken reCAPTCHA verification token
-   * @param firstName User's first name
-   * @param lastName User's last name
-   * @param phoneNumber User's phone number
-   * @param homeAddress User's home address
-   * @param homeLatitude User's home location latitude
-   * @param homeLongitude User's home location longitude
+   * @param email                 User's email address
+   * @param password              User's password
+   * @param recaptchaToken        reCAPTCHA verification token
+   * @param firstName             User's first name
+   * @param lastName              User's last name
+   * @param phoneNumber           User's phone number
+   * @param homeAddress           User's home address
+   * @param homeLatitude          User's home location latitude
+   * @param homeLongitude         User's home location longitude
    * @param privacyPolicyAccepted Whether user accepted privacy policy
    */
   public RegisterRequestDto(String email, String password, String recaptchaToken,
@@ -92,17 +92,17 @@ public class RegisterRequestDto extends AuthRequestDto {
   }
 
   /**
-   * Constructor with combined name for backward compatibility.
-   * Splits the provided name into first and last name components.
+   * Constructor with combined name for backward compatibility. Splits the provided name into first
+   * and last name components.
    *
-   * @param email User's email address
-   * @param password User's password
-   * @param recaptchaToken reCAPTCHA verification token
-   * @param name Combined first and last name
-   * @param phoneNumber User's phone number
-   * @param homeAddress User's home address
-   * @param homeLatitude User's home location latitude
-   * @param homeLongitude User's home location longitude
+   * @param email                 User's email address
+   * @param password              User's password
+   * @param recaptchaToken        reCAPTCHA verification token
+   * @param name                  Combined first and last name
+   * @param phoneNumber           User's phone number
+   * @param homeAddress           User's home address
+   * @param homeLatitude          User's home location latitude
+   * @param homeLongitude         User's home location longitude
    * @param privacyPolicyAccepted Whether user accepted privacy policy
    */
   public RegisterRequestDto(String email, String password, String recaptchaToken,
@@ -123,8 +123,8 @@ public class RegisterRequestDto extends AuthRequestDto {
   }
 
   /**
-   * Sets the user's name by splitting the provided name into first and last name components.
-   * For backward compatibility.
+   * Sets the user's name by splitting the provided name into first and last name components. For
+   * backward compatibility.
    *
    * @param name Combined first and last name
    */
@@ -137,8 +137,7 @@ public class RegisterRequestDto extends AuthRequestDto {
   }
 
   /**
-   * Gets the user's full name by combining first and last name.
-   * For backward compatibility.
+   * Gets the user's full name by combining first and last name. For backward compatibility.
    *
    * @return Combined first and last name, or null if neither is set
    */

@@ -1,5 +1,6 @@
 package stud.ntnu.backend.service.map;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,24 +25,12 @@ import static stud.ntnu.backend.util.LocationUtil.calculateDistance;
  * deletion of POIs and POI types.
  */
 @Service
+@RequiredArgsConstructor
 public class PoiService {
 
   private final PointOfInterestRepository pointOfInterestRepository;
   private final PoiTypeRepository poiTypeRepository;
   private final SearchUtil searchUtil;
-
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param pointOfInterestRepository repository for point of interest operations
-   * @param poiTypeRepository         repository for POI type operations
-   */
-  public PoiService(PointOfInterestRepository pointOfInterestRepository,
-      PoiTypeRepository poiTypeRepository, SearchUtil searchUtil) {
-    this.pointOfInterestRepository = pointOfInterestRepository;
-    this.poiTypeRepository = poiTypeRepository;
-    this.searchUtil                = searchUtil;
-  }
 
   //Constants
   String poiNotFound = "POI type not found";
@@ -55,12 +44,12 @@ public class PoiService {
     return pointOfInterestRepository.findAll();
   }
 
-    /**
-     * Retrieves a preview of all points of interest with pagination.
-     *
-     * @param pageable the pagination information
-     * @return a paginated list of points of interest previews
-     */
+  /**
+   * Retrieves a preview of all points of interest with pagination.
+   *
+   * @param pageable the pagination information
+   * @return a paginated list of points of interest previews
+   */
   @Transactional(readOnly = true)
   public Page<PoiPreviewDto> getPoiPreviews(Pageable pageable) {
     // Fetch paginated POIs
@@ -68,11 +57,12 @@ public class PoiService {
 
     // Map entities to PoiPreviewDto
     return poiPage.map(poi -> new PoiPreviewDto(
-            poi.getId(),
-            poi.getName(),
-            poi.getPoiType().getName()
+        poi.getId(),
+        poi.getName(),
+        poi.getPoiType().getName()
     ));
   }
+
   /**
    * Retrieves a point of interest by its ID.
    *
@@ -274,22 +264,23 @@ public class PoiService {
     // Save directly using the repository
     return pointOfInterestRepository.save(poi);
   }
-    /**
-      * Perform a case‐insensitive, paged search for POIs by their name.
-      * Delegates to SearchUtil for safe JPQL construction and execution.
-      *
-      * @param nameQuery substring to match in PointOfInterest.name; blank or null ⇒ empty page
-      * @param pageable  page index, size, and sort criteria
-      * @return a Page of matching PointOfInterest entities
-      * @throws IllegalArgumentException if the entity or field is invalid (developer error)
-      */
-        @Transactional(readOnly = true)
-        public Page<PointOfInterest> searchPoisByName(String nameQuery, Pageable pageable) {
-              return searchUtil.searchByDescription(
-                    PointOfInterest.class,
-                    "name",
-                    nameQuery,
-                    pageable
-                      );
-            }
+
+  /**
+   * Perform a case‐insensitive, paged search for POIs by their name. Delegates to SearchUtil for
+   * safe JPQL construction and execution.
+   *
+   * @param nameQuery substring to match in PointOfInterest.name; blank or null ⇒ empty page
+   * @param pageable  page index, size, and sort criteria
+   * @return a Page of matching PointOfInterest entities
+   * @throws IllegalArgumentException if the entity or field is invalid (developer error)
+   */
+  @Transactional(readOnly = true)
+  public Page<PointOfInterest> searchPoisByName(String nameQuery, Pageable pageable) {
+    return searchUtil.searchByDescription(
+        PointOfInterest.class,
+        "name",
+        nameQuery,
+        pageable
+    );
+  }
 }

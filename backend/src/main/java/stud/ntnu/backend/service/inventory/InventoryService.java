@@ -24,12 +24,14 @@ import stud.ntnu.backend.util.SearchUtil;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Service for managing household inventory and products. Handles creation, retrieval, updating, and
  * deletion of inventory items and products.
  */
 @Service
+@RequiredArgsConstructor
 public class InventoryService {
 
   private final ProductRepository productRepository;
@@ -41,37 +43,6 @@ public class InventoryService {
   private final ApplicationEventPublisher eventPublisher;
   private final HouseholdMemberRepository householdMemberRepository;
 
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param productRepository            repository for product operations
-   * @param userRepository               repository for user operations
-   * @param productBatchRepository       repository for product batch operations
-   * @param productTypeRepository        repository for product type operations
-   * @param householdRepository          repository for household operations
-   * @param searchUtil                 utility for search operations
-   * @param eventPublisher             publisher for inventory change events
-   * @param householdMemberRepository  repository for household member operations
-   */
-  public InventoryService(
-      ProductRepository productRepository,
-      UserRepository userRepository,
-      ProductBatchRepository productBatchRepository,
-      ProductTypeRepository productTypeRepository,
-      HouseholdRepository householdRepository,
-      SearchUtil searchUtil,
-      ApplicationEventPublisher eventPublisher,
-      HouseholdMemberRepository householdMemberRepository) {
-    this.productRepository = productRepository;
-    this.userRepository = userRepository;
-    this.productBatchRepository = productBatchRepository;
-    this.productTypeRepository = productTypeRepository;
-    this.householdRepository = householdRepository;
-    this.searchUtil = searchUtil;
-    this.eventPublisher = eventPublisher;
-    this.householdMemberRepository = householdMemberRepository;
-  }
- 
 
   /**
    * Retrieves all products.
@@ -233,10 +204,10 @@ public class InventoryService {
   /**
    * Update a product batch by setting its number of units to a specific value.
    *
-   * @param batchId the ID of the batch to update
+   * @param batchId          the ID of the batch to update
    * @param newNumberOfUnits the new number of units to set for the batch
    * @return the updated product batch
-   * @throws NoSuchElementException if the batch is not found
+   * @throws NoSuchElementException   if the batch is not found
    * @throws IllegalArgumentException if newNumberOfUnits is negative
    */
   @Transactional
@@ -250,7 +221,7 @@ public class InventoryService {
             () -> new NoSuchElementException("Product batch not found with ID: " + batchId));
 
     Integer householdId = batch.getProductType().getHousehold().getId();
-    
+
     batch.setNumber(newNumberOfUnits);
     ProductBatch updatedBatch = productBatchRepository.save(batch);
 
@@ -533,8 +504,8 @@ public class InventoryService {
   }
 
   /**
-   * Calculate the number of days of water remaining in the household based on
-   * the recommended daily water consumption per person.
+   * Calculate the number of days of water remaining in the household based on the recommended daily
+   * water consumption per person.
    *
    * @param householdId the ID of the household
    * @return the number of days of water remaining
@@ -542,22 +513,22 @@ public class InventoryService {
   public Double getWaterDaysRemaining(Integer householdId) {
     // Get total water in the household
     Integer totalLitres = getTotalLitresOfWaterByHousehold(householdId);
-    
+
     // Get the daily water requirement for the household
     Integer dailyRequirement = getHouseholdWaterRequirement(householdId);
-    
+
     // Avoid division by zero
     if (dailyRequirement == 0) {
       return 0.0;
     }
-    
+
     // Calculate days remaining
     return totalLitres.doubleValue() / dailyRequirement.doubleValue();
   }
 
   /**
-   * Calculate the number of days of food remaining in the household based on
-   * the recommended daily food consumption per person.
+   * Calculate the number of days of food remaining in the household based on the recommended daily
+   * food consumption per person.
    *
    * @param householdId the ID of the household
    * @return the number of days of food remaining
@@ -565,26 +536,27 @@ public class InventoryService {
   public Double getFoodDaysRemaining(Integer householdId) {
     // Get total calories available in the household
     Integer totalCalories = getTotalCaloriesByHousehold(householdId);
-    
+
     // Get the daily calorie requirement for the household
     Integer dailyRequirement = getHouseholdCalorieRequirement(householdId);
-    
+
     // Avoid division by zero
     if (dailyRequirement == 0) {
       return 0.0;
     }
-    
+
     // Calculate days remaining
     return totalCalories.doubleValue() / dailyRequirement.doubleValue();
   }
 
   /**
-   * Get all expiring product types for a specific household, filtered by category and expiration time.
+   * Get all expiring product types for a specific household, filtered by category and expiration
+   * time.
    *
-   * @param householdId the ID of the household
-   * @param category the category to filter by (food, water, medicine)
+   * @param householdId          the ID of the household
+   * @param category             the category to filter by (food, water, medicine)
    * @param expirationTimeInDays the number of days within which products should expire
-   * @param pageable pagination information
+   * @param pageable             pagination information
    * @return a page of product types that have batches expiring within the specified time
    */
   public Page<ProductTypeDto> getExpiringProductTypes(
@@ -592,7 +564,7 @@ public class InventoryService {
       String category,
       Integer expirationTimeInDays,
       Pageable pageable) {
-    
+
     // Calculate the expiration cutoff date
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime cutoffDate = now.plusDays(expirationTimeInDays);
@@ -604,21 +576,22 @@ public class InventoryService {
     // Filter product types to only include those with batches expiring within the time period
     List<ProductType> filteredTypes = productTypes.getContent().stream()
         .filter(type -> {
-            List<ProductBatch> batches = productBatchRepository.findByProductTypeId(type.getId(), Pageable.unpaged()).getContent();
-            return batches.stream()
-                .anyMatch(batch -> {
-                    LocalDateTime expirationTime = batch.getExpirationTime();
-                    return expirationTime != null && 
-                           expirationTime.isAfter(now) && 
-                           expirationTime.isBefore(cutoffDate);
-                });
+          List<ProductBatch> batches = productBatchRepository.findByProductTypeId(type.getId(),
+              Pageable.unpaged()).getContent();
+          return batches.stream()
+              .anyMatch(batch -> {
+                LocalDateTime expirationTime = batch.getExpirationTime();
+                return expirationTime != null &&
+                    expirationTime.isAfter(now) &&
+                    expirationTime.isBefore(cutoffDate);
+              });
         })
         .toList();
 
     // Create a new page with the filtered results
     int start = (int) pageable.getOffset();
     int end = Math.min((start + pageable.getPageSize()), filteredTypes.size());
-    
+
     return new PageImpl<>(
         filteredTypes.subList(start, end),
         pageable,
@@ -630,13 +603,13 @@ public class InventoryService {
    * Get all expiring product batches for a given product type.
    *
    * @param productTypeId the ID of the product type
-   * @param pageable pagination information
+   * @param pageable      pagination information
    * @return a page of expiring product batches
    */
   public Page<ProductBatchDto> getExpiringProductBatchesByProductType(
       Integer productTypeId,
       Pageable pageable) {
-    
+
     if (!productTypeRepository.existsById(productTypeId)) {
       throw new NoSuchElementException("Product type not found with ID: " + productTypeId);
     }
@@ -646,7 +619,7 @@ public class InventoryService {
 
     Page<ProductBatch> productBatches = productBatchRepository.findByProductTypeIdAndExpirationTimeBetween(
         productTypeId, now, cutoffDate, pageable);
-        
+
     return productBatches.map(this::convertToDto);
   }
 }

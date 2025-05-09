@@ -21,6 +21,7 @@ import stud.ntnu.backend.dto.group.GroupSummaryDto;
 import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.service.group.GroupService;
 import stud.ntnu.backend.model.group.GroupInvitation;
+import stud.ntnu.backend.dto.group.GroupInvitationSummaryDto;
 
 /**
  * REST controller for managing crisis-supply groups.
@@ -49,14 +50,13 @@ public class GroupController {
   }
 
   /**
-   * Retrieves all groups associated with the current user's household.
-   * Results are paginated and include basic group information.
+   * Retrieves all groups associated with the current user's household. Results are paginated and
+   * include basic group information.
    *
    * @param principal the authenticated user making the request
-   * @param pageable pagination parameters (page number, size, sorting)
-   * @return ResponseEntity containing:
-   *         - 200 OK with paginated list of GroupSummaryDto if groups exist
-   *         - 404 Not Found if no groups exist
+   * @param pageable  pagination parameters (page number, size, sorting)
+   * @return ResponseEntity containing: - 200 OK with paginated list of GroupSummaryDto if groups
+   * exist - 404 Not Found if no groups exist
    */
   @GetMapping("/user/groups/current")
   public ResponseEntity<Page<GroupSummaryDto>> getCurrentUserGroups(Principal principal,
@@ -70,14 +70,13 @@ public class GroupController {
   }
 
   /**
-   * Removes the current user's household from a specified group.
-   * This is a soft delete that sets the left_at timestamp.
+   * Removes the current user's household from a specified group. This is a soft delete that sets
+   * the left_at timestamp.
    *
-   * @param groupId the ID of the group to leave
+   * @param groupId   the ID of the group to leave
    * @param principal the authenticated user making the request
-   * @return ResponseEntity containing:
-   *         - 200 OK if removal was successful
-   *         - 404 Not Found if group doesn't exist or user is not a member
+   * @return ResponseEntity containing: - 200 OK if removal was successful - 404 Not Found if group
+   * doesn't exist or user is not a member
    */
   @PatchMapping(path = "/user/groups/leave/{groupid}")
   public ResponseEntity<?> removeHouseholdFromGroup(@PathVariable("groupid") Integer groupId,
@@ -91,14 +90,13 @@ public class GroupController {
   }
 
   /**
-   * Retrieves all households currently active in a specified group.
-   * Requires the requesting user to be a member of the group.
+   * Retrieves all households currently active in a specified group. Requires the requesting user to
+   * be a member of the group.
    *
-   * @param groupId the ID of the group to get households for
+   * @param groupId   the ID of the group to get households for
    * @param principal the authenticated user making the request
-   * @return ResponseEntity containing:
-   *         - 200 OK with list of HouseholdDto if successful
-   *         - 403 Forbidden if user is not a member of the group
+   * @return ResponseEntity containing: - 200 OK with list of HouseholdDto if successful - 403
+   * Forbidden if user is not a member of the group
    */
   @GetMapping(path = "/user/groups/{groupId}/households")
   public ResponseEntity<List<HouseholdDto>> getCurrentHouseholdsInGroup(
@@ -110,16 +108,15 @@ public class GroupController {
     List<HouseholdDto> households = groupService.getCurrentHouseholdsInGroup(groupId);
     return ResponseEntity.ok(households);
   }
- 
+
   /**
-   * Creates a new group with the specified name.
-   * Requires the requesting user to have household admin privileges.
+   * Creates a new group with the specified name. Requires the requesting user to have household
+   * admin privileges.
    *
-   * @param name the name to give the new group
+   * @param name      the name to give the new group
    * @param principal the authenticated user making the request
-   * @return ResponseEntity containing:
-   *         - 200 OK if group creation was successful
-   *         - 403 Forbidden if user lacks household admin privileges
+   * @return ResponseEntity containing: - 200 OK if group creation was successful - 403 Forbidden if
+   * user lacks household admin privileges
    */
   @PostMapping(path = "/user/groups/{name}")
   public ResponseEntity<?> createGroup(@PathVariable("name") String name, Principal principal) {
@@ -132,15 +129,12 @@ public class GroupController {
   }
 
   /**
-   * Invites a household to join a group.
-   * Requires the requesting user to be a member of the group.
+   * Invites a household to join a group. Requires the requesting user to be a member of the group.
    *
    * @param requestDto the DTO containing the household name and group ID
-   * @param principal the authenticated user making the request
-   * @return ResponseEntity containing:
-   *         - 200 OK if invitation was sent successfully
-   *         - 403 Forbidden if user is not a member of the group
-   *         - 404 Not Found if household or group doesn't exist
+   * @param principal  the authenticated user making the request
+   * @return ResponseEntity containing: - 200 OK if invitation was sent successfully - 403 Forbidden
+   * if user is not a member of the group - 404 Not Found if household or group doesn't exist
    */
   @PostMapping("/user/groups/invite")
   public ResponseEntity<?> inviteHouseholdToGroup(
@@ -150,7 +144,7 @@ public class GroupController {
     if (!groupService.isUserMemberOfGroup(requestDto.getGroupId(), email)) {
       return ResponseEntity.status(403).build();
     }
-    
+
     try {
       boolean invited = groupService.inviteHouseholdToGroup(
           requestDto.getHouseholdName(),
@@ -164,28 +158,26 @@ public class GroupController {
 
   /**
    * Retrieves all pending invitations for the current user.
+   *
    * @param principal the authenticated user making the request
-   * @return ResponseEntity containing:
-   *         - 200 OK with list of GroupInvitation if successful
-   *         - 404 Not Found if no pending invitations exist
+   * @return ResponseEntity containing: - 200 OK with list of GroupInvitationSummaryDto if successful - 404
+   * Not Found if no pending invitations exist
    */
   @GetMapping("/user/groups/invitations")
   public ResponseEntity<?> getPendingInvitations(Principal principal) {
     String email = principal.getName();
-    List<GroupInvitation> invitations = groupService.getPendingInvitations(email);
+    List<GroupInvitationSummaryDto> invitations = groupService.getPendingInvitations(email);
     return ResponseEntity.ok(invitations);
   }
 
   /**
-   * Accepts a group invitation.
-   * Requires the user to be a member of the invited household.
+   * Accepts a group invitation. Requires the user to be a member of the invited household.
    *
    * @param invitationId the ID of the invitation to accept
-   * @param principal the authenticated user making the request
-   * @return ResponseEntity containing:
-   *         - 200 OK if invitation was accepted successfully
-   *         - 403 Forbidden if user is not a member of the invited household
-   *         - 404 Not Found if invitation doesn't exist or is not pending
+   * @param principal    the authenticated user making the request
+   * @return ResponseEntity containing: - 200 OK if invitation was accepted successfully - 403
+   * Forbidden if user is not a member of the invited household - 404 Not Found if invitation
+   * doesn't exist or is not pending
    */
   @PatchMapping("/user/groups/invitations/{invitationId}/accept")
   public ResponseEntity<?> acceptInvitation(
@@ -201,15 +193,13 @@ public class GroupController {
   }
 
   /**
-   * Rejects a group invitation.
-   * Requires the user to be a member of the invited household.
+   * Rejects a group invitation. Requires the user to be a member of the invited household.
    *
    * @param invitationId the ID of the invitation to reject
-   * @param principal the authenticated user making the request
-   * @return ResponseEntity containing:
-   *         - 200 OK if invitation was rejected successfully
-   *         - 403 Forbidden if user is not a member of the invited household
-   *         - 404 Not Found if invitation doesn't exist or is not pending
+   * @param principal    the authenticated user making the request
+   * @return ResponseEntity containing: - 200 OK if invitation was rejected successfully - 403
+   * Forbidden if user is not a member of the invited household - 404 Not Found if invitation
+   * doesn't exist or is not pending
    */
   @PatchMapping("/user/groups/invitations/{invitationId}/reject")
   public ResponseEntity<?> rejectInvitation(

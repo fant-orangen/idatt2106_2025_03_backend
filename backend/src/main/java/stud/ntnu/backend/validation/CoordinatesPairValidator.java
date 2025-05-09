@@ -8,8 +8,8 @@ import java.math.BigDecimal;
 /**
  * Validator implementation for the {@link CoordinatesPair} annotation.
  * <p>
- * This validator ensures that coordinate pairs (latitude and longitude) are provided together.
- * The validation rules are:
+ * This validator ensures that coordinate pairs (latitude and longitude) are provided together. The
+ * validation rules are:
  * <ul>
  *   <li>If latitude is provided, longitude must also be provided</li>
  *   <li>If longitude is provided, latitude must also be provided</li>
@@ -18,7 +18,7 @@ import java.math.BigDecimal;
  * </ul>
  *
  * @param <CoordinatesPair> the annotation type
- * @param <Object> the type of object being validated
+ * @param <Object>          the type of object being validated
  */
 public class CoordinatesPairValidator implements ConstraintValidator<CoordinatesPair, Object> {
 
@@ -39,7 +39,7 @@ public class CoordinatesPairValidator implements ConstraintValidator<Coordinates
   /**
    * Validates that the coordinate fields are either both present or both absent.
    *
-   * @param value the object to validate
+   * @param value   the object to validate
    * @param context the validation context
    * @return true if the validation passes, false otherwise
    */

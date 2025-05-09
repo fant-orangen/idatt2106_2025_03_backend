@@ -1,5 +1,6 @@
 package stud.ntnu.backend.service.user;
 
+import jakarta.mail.MessagingException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,12 +26,14 @@ import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.NotificationPreference;
 import stud.ntnu.backend.repository.user.NotificationPreferenceRepository;
 import stud.ntnu.backend.validation.PasswordValidator;
+import lombok.RequiredArgsConstructor;
 
 
 /**
  * Service for handling authentication-related operations.
  */
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
   private final AuthenticationManager authenticationManager;
@@ -41,22 +44,6 @@ public class AuthService {
   private final EmailTokenRepository emailTokenRepository;
   private final TwoFactorCodeService twoFactorCodeService;
   private final NotificationPreferenceRepository notificationPreferenceRepository;
-
-  public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
-      UserRepository userRepository, PasswordEncoder passwordEncoder,
-      EmailService emailService,
-      EmailTokenRepository emailTokenRepository,
-      TwoFactorCodeService twoFactorCodeService,
-      NotificationPreferenceRepository notificationPreferenceRepository) {
-    this.authenticationManager = authenticationManager;
-    this.jwtUtil = jwtUtil;
-    this.userRepository = userRepository;
-    this.passwordEncoder = passwordEncoder;
-    this.emailService = emailService;
-    this.emailTokenRepository = emailTokenRepository;
-    this.twoFactorCodeService = twoFactorCodeService;
-    this.notificationPreferenceRepository = notificationPreferenceRepository;
-  }
 
   /**
    * Authenticate a user and generate a JWT token.
@@ -140,8 +127,8 @@ public class AuthService {
 
     // Create notification preferences for all types
     for (Notification.PreferenceType preferenceType : Notification.PreferenceType.values()) {
-        NotificationPreference preference = new NotificationPreference(savedUser, preferenceType);
-        notificationPreferenceRepository.save(preference);
+      NotificationPreference preference = new NotificationPreference(savedUser, preferenceType);
+      notificationPreferenceRepository.save(preference);
     }
 
     // Generate verification token
@@ -226,7 +213,7 @@ public class AuthService {
   }
 
 
-  public void send2FACode(String email) {
+  public void send2FACode(String email) throws MessagingException {
     twoFactorCodeService.sendVerificationCode(email);
   }
 
@@ -300,28 +287,30 @@ public class AuthService {
     emailToken.setUsedAt(LocalDateTime.now());
     emailTokenRepository.save(emailToken);
   }
-    /**
-     * Changes the password for the currently authenticated user.
-     *
-     * @param changePasswordDto DTO containing the old and new passwords
-     * @throws IllegalArgumentException if the old password does not match
-     */
-    @Transactional
-    public void changePassword(ChangePasswordDto changePasswordDto) {
-      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-      String email = authentication.getName();
 
-      User user = userRepository.findByEmail(email)
-              .orElseThrow(() -> new IllegalArgumentException("No user found with email: " + email));
+  /**
+   * Changes the password for the currently authenticated user.
+   *
+   * @param changePasswordDto DTO containing the old and new passwords
+   * @throws IllegalArgumentException if the old password does not match
+   */
+  @Transactional
+  public void changePassword(ChangePasswordDto changePasswordDto) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
 
-      if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), user.getPasswordHash())) {
-        throw new IllegalArgumentException("Failed to authenticate user");
-      }
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("No user found with email: " + email));
 
-      PasswordValidator.validate(changePasswordDto.getOldPassword(), changePasswordDto.getNewPassword(),
-              changePasswordDto.getConfirmNewPassword());
-
-      user.setPasswordHash(passwordEncoder.encode(changePasswordDto.getNewPassword()));
-      userRepository.save(user);
+    if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), user.getPasswordHash())) {
+      throw new IllegalArgumentException("Failed to authenticate user");
     }
+
+    PasswordValidator.validate(changePasswordDto.getOldPassword(),
+        changePasswordDto.getNewPassword(),
+        changePasswordDto.getConfirmNewPassword());
+
+    user.setPasswordHash(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+    userRepository.save(user);
+  }
 }

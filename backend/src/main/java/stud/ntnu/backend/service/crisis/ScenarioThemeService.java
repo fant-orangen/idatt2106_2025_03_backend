@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
 import stud.ntnu.backend.dto.map.CreateScenarioThemeDto;
 import stud.ntnu.backend.dto.map.ScenarioThemeDetailsDto;
 import stud.ntnu.backend.dto.map.ScenarioThemeNameDto;
@@ -20,18 +21,10 @@ import stud.ntnu.backend.repository.map.ScenarioThemeRepository;
  * scenario themes.
  */
 @Service
+@RequiredArgsConstructor
 public class ScenarioThemeService {
 
   private final ScenarioThemeRepository scenarioThemeRepository;
-
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param scenarioThemeRepository repository for scenario theme operations
-   */
-  public ScenarioThemeService(ScenarioThemeRepository scenarioThemeRepository) {
-    this.scenarioThemeRepository = scenarioThemeRepository;
-  }
 
   /**
    * Retrieves all scenario themes.
@@ -159,8 +152,8 @@ public class ScenarioThemeService {
   }
 
   /**
-   * Gets a list of all scenario themes with just their IDs and names.
-   * This is a lightweight endpoint for UI components that only need basic theme information.
+   * Gets a list of all scenario themes with just their IDs and names. This is a lightweight
+   * endpoint for UI components that only need basic theme information.
    *
    * @return List of ScenarioThemeNameDto containing only IDs and names
    */

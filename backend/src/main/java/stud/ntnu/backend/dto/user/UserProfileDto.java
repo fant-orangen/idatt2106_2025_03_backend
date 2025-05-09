@@ -5,75 +5,79 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Data Transfer Object (DTO) representing a user's complete profile information.
- * This class encapsulates all essential user details including personal information,
- * location data, and household association.
+ * Data Transfer Object (DTO) representing a user's complete profile information. This class
+ * encapsulates all essential user details including personal information, location data, and
+ * household association.
  */
 @Setter
 @Getter
 public class UserProfileDto {
 
-    /**
-     * Unique identifier for the user.
-     */
-    private Integer id;
+  /**
+   * Unique identifier for the user.
+   */
+  private Integer id;
+
+  /**
+   * The user's email address.
+   */
+  private String email;
+
+  /**
+   * The user's first name.
+   */
+  private String firstName;
+
+  /**
+   * The user's last name.
+   */
+  private String lastName;
+
+  /**
+   * The user's home address.
+   */
+  private String homeAddress;
+
+  /**
+   * The latitude coordinate of the user's home location.
+   */
+  private BigDecimal homeLatitude;
+
+  /**
+   * The longitude coordinate of the user's home location.
+   */
+  private BigDecimal homeLongitude;
+
+  /**
+   * Flag indicating whether the user has enabled location sharing.
+   */
+  private Boolean locationSharingEnabled;
+
+  /**
+   * Flag indicating whether the user's email has been verified.
+   */
+  private Boolean emailVerified;
+
+  /**
+   * Unique identifier for the household the user belongs to.
+   */
+  private Integer householdId;
+
+  /**
+   * The name of the household the user belongs to.
+   */
+  private String householdName;
+
+  /**
+   * Boolean indicating whether the user has 2fa enabled.
+   */
+  private Boolean isUsing2FA;
 
     /**
-     * The user's email address.
-     */
-    private String email;
-
-    /**
-     * The user's first name.
-     */
-    private String firstName;
-
-    /**
-     * The user's last name.
-     */
-    private String lastName;
-
-    /**
-     * The user's home address.
-     */
-    private String homeAddress;
-
-    /**
-     * The latitude coordinate of the user's home location.
-     */
-    private BigDecimal homeLatitude;
-
-    /**
-     * The longitude coordinate of the user's home location.
-     */
-    private BigDecimal homeLongitude;
-
-    /**
-     * Flag indicating whether the user has enabled location sharing.
-     */
-    private Boolean locationSharingEnabled;
-
-    /**
-     * Flag indicating whether the user's email has been verified.
-     */
-    private Boolean emailVerified;
-
-    /**
-     * Unique identifier for the household the user belongs to.
-     */
-    private Integer householdId;
-
-    /**
-     * The name of the household the user belongs to.
-     */
-    private String householdName;
-
-    /**
-     * Default constructor for UserProfileDto.
-     * Creates a new instance with default values.
-     */
-    public UserProfileDto() {
-    }
+   * Default constructor for UserProfileDto. Creates a new instance with default values.
+   */
+  public UserProfileDto() {
+  }
 
     /**
      * Constructor for UserProfileDto with all fields.
@@ -89,21 +93,23 @@ public class UserProfileDto {
      * @param emailVerified        Whether the user's email is verified
      * @param householdId          The unique identifier of the user's household
      * @param householdName        The name of the user's household
+     * @param isUsing2FA           Whether 2fa is enabled.
      */
-    public UserProfileDto(Integer id, String email, String firstName, String lastName,
-            String homeAddress, BigDecimal homeLatitude, BigDecimal homeLongitude,
-            Boolean locationSharingEnabled, Boolean emailVerified,
-            Integer householdId, String householdName) {
-        this.id = id;
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.homeAddress = homeAddress;
-        this.homeLatitude = homeLatitude;
-        this.homeLongitude = homeLongitude;
-        this.locationSharingEnabled = locationSharingEnabled;
-        this.emailVerified = emailVerified;
-        this.householdId = householdId;
-        this.householdName = householdName;
+  public UserProfileDto(Integer id, String email, String firstName, String lastName,
+      String homeAddress, BigDecimal homeLatitude, BigDecimal homeLongitude,
+      Boolean locationSharingEnabled, Boolean emailVerified,
+      Integer householdId, String householdName, Boolean isUsing2FA) {
+    this.id = id;
+    this.email = email;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.homeAddress = homeAddress;
+    this.homeLatitude = homeLatitude;
+    this.homeLongitude = homeLongitude;
+    this.locationSharingEnabled = locationSharingEnabled;
+    this.emailVerified = emailVerified;
+    this.householdId = householdId;
+    this.householdName = householdName;
+    this.isUsing2FA = isUsing2FA;
     }
 }

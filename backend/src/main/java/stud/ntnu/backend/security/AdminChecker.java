@@ -19,7 +19,7 @@ public class AdminChecker {
   private static boolean isAdminRole(String roleName) {
     return "ADMIN".equals(roleName) || "SUPERADMIN".equals(roleName);
   }
-  
+
   /**
    * Checks if a role name represents a super admin role.
    *
@@ -33,7 +33,7 @@ public class AdminChecker {
   /**
    * Gets a user by email.
    *
-   * @param email the user's email
+   * @param email       the user's email
    * @param userService the user service to retrieve user information
    * @return the user
    * @throws IllegalStateException if the user is not found
@@ -42,11 +42,11 @@ public class AdminChecker {
     return userService.getUserByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"));
   }
-  
+
   /**
    * Gets the current user from the principal.
    *
-   * @param principal the principal containing user information
+   * @param principal   the principal containing user information
    * @param userService the user service to retrieve user information
    * @return the current user
    * @throws IllegalStateException if the user is not found
@@ -58,7 +58,7 @@ public class AdminChecker {
   /**
    * Checks if the user identified by the Principal has admin or super admin privileges.
    *
-   * @param principal the Principal object representing the current user
+   * @param principal   the Principal object representing the current user
    * @param userService the user service to retrieve user information
    * @return true if the user is an admin or super admin, false otherwise
    * @throws IllegalStateException if the user is not found
@@ -83,7 +83,7 @@ public class AdminChecker {
   /**
    * Checks if the user identified by the Principal has super admin privileges.
    *
-   * @param principal the Principal object representing the current user
+   * @param principal   the Principal object representing the current user
    * @param userService the user service to retrieve user information
    * @return true if the user is a super admin, false otherwise
    * @throws IllegalStateException if the user is not found

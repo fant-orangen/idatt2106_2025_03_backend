@@ -1,5 +1,6 @@
 package stud.ntnu.backend.service.user;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,28 +27,13 @@ import java.util.stream.Collectors;
  * reflections.
  */
 @Service
+@RequiredArgsConstructor
 public class ReflectionService {
 
   private final ReflectionRepository reflectionRepository;
   private final UserRepository userRepository;
   private final CrisisEventRepository crisisEventRepository;
   private final GroupService groupService;
-
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param reflectionRepository repository for reflection operations
-   * @param userRepository repository for user operations
-   * @param crisisEventRepository repository for crisis event operations
-   * @param groupService service for group operations
-   */
-  public ReflectionService(ReflectionRepository reflectionRepository, UserRepository userRepository,
-                          CrisisEventRepository crisisEventRepository, GroupService groupService) {
-    this.reflectionRepository = reflectionRepository;
-    this.userRepository = userRepository;
-    this.crisisEventRepository = crisisEventRepository;
-    this.groupService = groupService;
-  }
 
   /**
    * Retrieves all reflections.
@@ -71,7 +57,7 @@ public class ReflectionService {
   /**
    * Retrieves all reflections for a specific user.
    *
-   * @param userId the ID of the user
+   * @param userId   the ID of the user
    * @param pageable pagination information
    * @return a page of reflections
    */
@@ -84,10 +70,11 @@ public class ReflectionService {
    * Retrieves all shared reflections for users in a specific household.
    *
    * @param householdId the ID of the household
-   * @param pageable pagination information
+   * @param pageable    pagination information
    * @return a page of shared reflections
    */
-  public Page<ReflectionResponseDto> getSharedReflectionsByHouseholdId(Integer householdId, Pageable pageable) {
+  public Page<ReflectionResponseDto> getSharedReflectionsByHouseholdId(Integer householdId,
+      Pageable pageable) {
     return reflectionRepository.findSharedByHouseholdId(householdId, pageable)
         .map(ReflectionResponseDto::fromEntity);
   }
@@ -95,11 +82,12 @@ public class ReflectionService {
   /**
    * Retrieves all shared reflections for users in households that are members of a specific group.
    *
-   * @param groupId the ID of the group
+   * @param groupId  the ID of the group
    * @param pageable pagination information
    * @return a page of shared reflections
    */
-  public Page<ReflectionResponseDto> getSharedReflectionsByGroupId(Integer groupId, Pageable pageable) {
+  public Page<ReflectionResponseDto> getSharedReflectionsByGroupId(Integer groupId,
+      Pageable pageable) {
     return reflectionRepository.findSharedByGroupId(groupId, pageable)
         .map(ReflectionResponseDto::fromEntity);
   }
@@ -107,11 +95,12 @@ public class ReflectionService {
   /**
    * Retrieves all shared reflections from all groups the user's household is a member of.
    *
-   * @param email the email of the user
+   * @param email    the email of the user
    * @param pageable pagination information
    * @return a page of shared reflections from all groups
    */
-  public Page<ReflectionResponseDto> getSharedReflectionsFromAllUserGroups(String email, Pageable pageable) {
+  public Page<ReflectionResponseDto> getSharedReflectionsFromAllUserGroups(String email,
+      Pageable pageable) {
     // Get all groups the user's household is a member of
     Page<GroupSummaryDto> userGroups = groupService.getCurrentUserGroups(email, pageable);
 
@@ -122,11 +111,13 @@ public class ReflectionService {
 
     // Get reflections from all groups and combine them
     List<ReflectionResponseDto> allReflections = userGroups.getContent().stream()
-        .flatMap(group -> reflectionRepository.findSharedByGroupId(group.getId(), Pageable.unpaged())
-            .map(ReflectionResponseDto::fromEntity)
-            .getContent().stream())
+        .flatMap(
+            group -> reflectionRepository.findSharedByGroupId(group.getId(), Pageable.unpaged())
+                .map(ReflectionResponseDto::fromEntity)
+                .getContent().stream())
         .distinct() // Remove duplicates
-        .sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt())) // Sort by createdAt DESC
+        .sorted(
+            (r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt())) // Sort by createdAt DESC
         .collect(Collectors.toList());
 
     // Convert to Page
@@ -142,13 +133,15 @@ public class ReflectionService {
   }
 
   /**
-   * Retrieves all shared reflections that are visible to a specific user (from their household and groups).
+   * Retrieves all shared reflections that are visible to a specific user (from their household and
+   * groups).
    *
-   * @param userId the ID of the user
+   * @param userId   the ID of the user
    * @param pageable pagination information
    * @return a page of shared reflections
    */
-  public Page<ReflectionResponseDto> getSharedReflectionsVisibleToUser(Integer userId, Pageable pageable) {
+  public Page<ReflectionResponseDto> getSharedReflectionsVisibleToUser(Integer userId,
+      Pageable pageable) {
     return reflectionRepository.findSharedVisibleToUser(userId, pageable)
         .map(ReflectionResponseDto::fromEntity);
   }
@@ -156,7 +149,7 @@ public class ReflectionService {
   /**
    * Creates a new reflection for a user.
    *
-   * @param userId the ID of the user
+   * @param userId    the ID of the user
    * @param createDto the DTO containing reflection information
    * @return the created reflection
    * @throws IllegalArgumentException if the user is not found
@@ -174,7 +167,8 @@ public class ReflectionService {
     // Set crisis event if provided
     if (createDto.getCrisisEventId() != null) {
       CrisisEvent crisisEvent = crisisEventRepository.findById(createDto.getCrisisEventId())
-          .orElseThrow(() -> new IllegalArgumentException("Crisis event not found with ID: " + createDto.getCrisisEventId()));
+          .orElseThrow(() -> new IllegalArgumentException(
+              "Crisis event not found with ID: " + createDto.getCrisisEventId()));
       reflection.setCrisisEvent(crisisEvent);
     }
 
@@ -185,14 +179,15 @@ public class ReflectionService {
   /**
    * Updates an existing reflection.
    *
-   * @param id the ID of the reflection to update
-   * @param userId the ID of the user who owns the reflection
+   * @param id        the ID of the reflection to update
+   * @param userId    the ID of the user who owns the reflection
    * @param updateDto the DTO containing updated reflection information
    * @return the updated reflection
    * @throws IllegalArgumentException if the reflection is not found or does not belong to the user
    */
   @Transactional
-  public ReflectionResponseDto updateReflection(Integer id, Integer userId, UpdateReflectionDto updateDto) {
+  public ReflectionResponseDto updateReflection(Integer id, Integer userId,
+      UpdateReflectionDto updateDto) {
     Reflection reflection = reflectionRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Reflection not found with ID: " + id));
 
@@ -207,7 +202,8 @@ public class ReflectionService {
     // Update crisis event if provided
     if (updateDto.getCrisisEventId() != null) {
       CrisisEvent crisisEvent = crisisEventRepository.findById(updateDto.getCrisisEventId())
-          .orElseThrow(() -> new IllegalArgumentException("Crisis event not found with ID: " + updateDto.getCrisisEventId()));
+          .orElseThrow(() -> new IllegalArgumentException(
+              "Crisis event not found with ID: " + updateDto.getCrisisEventId()));
       reflection.setCrisisEvent(crisisEvent);
     } else if (updateDto.getCrisisEventId() == null && reflection.getCrisisEvent() != null) {
       // If crisis event ID is explicitly set to null, remove the association
@@ -221,7 +217,7 @@ public class ReflectionService {
   /**
    * Soft deletes a reflection by its ID if it belongs to the specified user.
    *
-   * @param id the ID of the reflection to delete
+   * @param id     the ID of the reflection to delete
    * @param userId the ID of the user who owns the reflection
    * @throws IllegalArgumentException if the reflection is not found or does not belong to the user
    */

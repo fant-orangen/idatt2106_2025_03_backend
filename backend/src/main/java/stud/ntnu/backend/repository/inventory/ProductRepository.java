@@ -9,6 +9,6 @@ import stud.ntnu.backend.model.inventory.Product;
  */
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
-    // Basic CRUD operations are provided by JpaRepository
-    // Custom query methods can be added as needed
+  // Basic CRUD operations are provided by JpaRepository
+  // Custom query methods can be added as needed
 }

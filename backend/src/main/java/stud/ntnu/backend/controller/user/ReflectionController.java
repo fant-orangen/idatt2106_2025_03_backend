@@ -26,10 +26,10 @@ import stud.ntnu.backend.service.user.UserService;
 /**
  * Controller for managing user-generated crisis reflections.
  * <p>
- * This controller provides endpoints for users to create, read, update, and delete their crisis reflections.
- * Reflections can be personal or shared with household members and groups. The controller handles
- * authentication and authorization to ensure users can only access and modify their own reflections
- * or those shared with them.
+ * This controller provides endpoints for users to create, read, update, and delete their crisis
+ * reflections. Reflections can be personal or shared with household members and groups. The
+ * controller handles authentication and authorization to ensure users can only access and modify
+ * their own reflections or those shared with them.
  * <p>
  */
 @RestController
@@ -44,10 +44,11 @@ public class ReflectionController {
    * Constructs a new ReflectionController with required services.
    *
    * @param reflectionService service for managing reflections
-   * @param userService service for user operations
-   * @param groupService service for group operations
+   * @param userService       service for user operations
+   * @param groupService      service for group operations
    */
-  public ReflectionController(ReflectionService reflectionService, UserService userService, GroupService groupService) {
+  public ReflectionController(ReflectionService reflectionService, UserService userService,
+      GroupService groupService) {
     this.reflectionService = reflectionService;
     this.userService = userService;
     this.groupService = groupService;
@@ -57,7 +58,7 @@ public class ReflectionController {
    * Retrieves all personal reflections for the authenticated user.
    *
    * @param principal the authenticated user's principal
-   * @param pageable pagination parameters
+   * @param pageable  pagination parameters
    * @return ResponseEntity containing a page of the user's reflections
    */
   @GetMapping("/my")
@@ -67,7 +68,8 @@ public class ReflectionController {
     try {
       User user = userService.getUserByEmail(principal.getName())
           .orElseThrow(() -> new IllegalStateException("User not found"));
-      Page<ReflectionResponseDto> reflections = reflectionService.getReflectionsByUserId(user.getId(), pageable);
+      Page<ReflectionResponseDto> reflections = reflectionService.getReflectionsByUserId(
+          user.getId(), pageable);
       return ResponseEntity.ok(reflections);
     } catch (Exception e) {
       return ResponseEntity.badRequest().build();
@@ -75,11 +77,11 @@ public class ReflectionController {
   }
 
   /**
-   * Retrieves all shared reflections visible to the authenticated user.
-   * This includes reflections shared with the user's household and groups.
+   * Retrieves all shared reflections visible to the authenticated user. This includes reflections
+   * shared with the user's household and groups.
    *
    * @param principal the authenticated user's principal
-   * @param pageable pagination parameters
+   * @param pageable  pagination parameters
    * @return ResponseEntity containing a page of shared reflections
    */
   @GetMapping("/shared")
@@ -89,7 +91,8 @@ public class ReflectionController {
     try {
       User user = userService.getUserByEmail(principal.getName())
           .orElseThrow(() -> new IllegalStateException("User not found"));
-      Page<ReflectionResponseDto> reflections = reflectionService.getSharedReflectionsVisibleToUser(user.getId(), pageable);
+      Page<ReflectionResponseDto> reflections = reflectionService.getSharedReflectionsVisibleToUser(
+          user.getId(), pageable);
       return ResponseEntity.ok(reflections);
     } catch (Exception e) {
       return ResponseEntity.badRequest().build();
@@ -97,12 +100,13 @@ public class ReflectionController {
   }
 
   /**
-   * Retrieves all shared reflections from the user's household.
-   * Requires the user to be a member of a household.
+   * Retrieves all shared reflections from the user's household. Requires the user to be a member of
+   * a household.
    *
    * @param principal the authenticated user's principal
-   * @param pageable pagination parameters
-   * @return ResponseEntity containing a page of household reflections or 400 if user has no household
+   * @param pageable  pagination parameters
+   * @return ResponseEntity containing a page of household reflections or 400 if user has no
+   * household
    */
   @GetMapping("/household")
   public ResponseEntity<Page<ReflectionResponseDto>> getHouseholdReflections(
@@ -117,7 +121,8 @@ public class ReflectionController {
       }
 
       Integer householdId = user.getHousehold().getId();
-      Page<ReflectionResponseDto> reflections = reflectionService.getSharedReflectionsByHouseholdId(householdId, pageable);
+      Page<ReflectionResponseDto> reflections = reflectionService.getSharedReflectionsByHouseholdId(
+          householdId, pageable);
       return ResponseEntity.ok(reflections);
     } catch (Exception e) {
       return ResponseEntity.badRequest().build();
@@ -128,7 +133,7 @@ public class ReflectionController {
    * Retrieves all shared reflections from all groups the user's household is a member of.
    *
    * @param principal the authenticated user's principal
-   * @param pageable pagination parameters
+   * @param pageable  pagination parameters
    * @return ResponseEntity containing a page of group reflections
    */
   @GetMapping("/groups")
@@ -140,7 +145,8 @@ public class ReflectionController {
       userService.getUserByEmail(email)
           .orElseThrow(() -> new IllegalStateException("User not found"));
 
-      Page<ReflectionResponseDto> reflections = reflectionService.getSharedReflectionsFromAllUserGroups(email, pageable);
+      Page<ReflectionResponseDto> reflections = reflectionService.getSharedReflectionsFromAllUserGroups(
+          email, pageable);
       return ResponseEntity.ok(reflections);
     } catch (Exception e) {
       return ResponseEntity.badRequest().build();
@@ -151,7 +157,7 @@ public class ReflectionController {
    * Creates a new reflection for the authenticated user.
    *
    * @param createReflectionDto the reflection data to create
-   * @param principal the authenticated user's principal
+   * @param principal           the authenticated user's principal
    * @return ResponseEntity containing the created reflection
    */
   @PostMapping
@@ -161,7 +167,8 @@ public class ReflectionController {
     try {
       User user = userService.getUserByEmail(principal.getName())
           .orElseThrow(() -> new IllegalStateException("User not found"));
-      ReflectionResponseDto reflection = reflectionService.createReflection(user.getId(), createReflectionDto);
+      ReflectionResponseDto reflection = reflectionService.createReflection(user.getId(),
+          createReflectionDto);
       return ResponseEntity.ok(reflection);
     } catch (Exception e) {
       return ResponseEntity.badRequest().build();
@@ -169,12 +176,11 @@ public class ReflectionController {
   }
 
   /**
-   * Updates an existing reflection.
-   * Only the owner of the reflection can update it.
+   * Updates an existing reflection. Only the owner of the reflection can update it.
    *
-   * @param id the ID of the reflection to update
+   * @param id                  the ID of the reflection to update
    * @param updateReflectionDto the updated reflection data
-   * @param principal the authenticated user's principal
+   * @param principal           the authenticated user's principal
    * @return ResponseEntity containing the updated reflection, or 403 if not authorized
    */
   @PutMapping("/{id}")
@@ -185,7 +191,8 @@ public class ReflectionController {
     try {
       User user = userService.getUserByEmail(principal.getName())
           .orElseThrow(() -> new IllegalStateException("User not found"));
-      ReflectionResponseDto reflection = reflectionService.updateReflection(id, user.getId(), updateReflectionDto);
+      ReflectionResponseDto reflection = reflectionService.updateReflection(id, user.getId(),
+          updateReflectionDto);
       return ResponseEntity.ok(reflection);
     } catch (IllegalArgumentException e) {
       return ResponseEntity.status(403).build();
@@ -195,10 +202,10 @@ public class ReflectionController {
   }
 
   /**
-   * Soft deletes a reflection by marking it as deleted.
-   * Only the owner of the reflection can delete it.
+   * Soft deletes a reflection by marking it as deleted. Only the owner of the reflection can delete
+   * it.
    *
-   * @param id the ID of the reflection to delete
+   * @param id        the ID of the reflection to delete
    * @param principal the authenticated user's principal
    * @return ResponseEntity with status 200 if successful, 403 if not authorized, 400 if error
    */

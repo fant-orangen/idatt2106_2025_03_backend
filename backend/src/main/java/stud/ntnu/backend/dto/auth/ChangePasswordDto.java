@@ -28,36 +28,36 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChangePasswordDto {
 
-    /**
-     * The user's current password.
-     * Must be between 8 and 100 characters and contain only allowed characters.
-     */
-    @Size(min = 8, max = 100, message = "Password must be at between 8 and 100 characters long")
-    @Pattern(
-            regexp = "^[A-Za-z0-9\\p{L}\\p{M}\\p{P}\\p{S}]+$",
-            message = "Invalid password format"
-    )
-    private String oldPassword;
+  /**
+   * The user's current password. Must be between 8 and 100 characters and contain only allowed
+   * characters.
+   */
+  @Size(min = 8, max = 100, message = "Password must be at between 8 and 100 characters long")
+  @Pattern(
+      regexp = "^[A-Za-z0-9\\p{L}\\p{M}\\p{P}\\p{S}]+$",
+      message = "Invalid password format"
+  )
+  private String oldPassword;
 
-    /**
-     * The new password to be set.
-     * Must be between 8 and 100 characters and contain only allowed characters.
-     */
-    @Size(min = 8, max = 100, message = "Password must be at between 8 and 100 characters long")
-    @Pattern(
-            regexp = "^[A-Za-z0-9\\p{L}\\p{M}\\p{P}\\p{S}]+$",
-            message = "Invalid password format"
-    )
-    private String newPassword;
+  /**
+   * The new password to be set. Must be between 8 and 100 characters and contain only allowed
+   * characters.
+   */
+  @Size(min = 8, max = 100, message = "Password must be at between 8 and 100 characters long")
+  @Pattern(
+      regexp = "^[A-Za-z0-9\\p{L}\\p{M}\\p{P}\\p{S}]+$",
+      message = "Invalid password format"
+  )
+  private String newPassword;
 
-    /**
-     * Confirmation of the new password.
-     * Must match the new password and meet the same validation requirements.
-     */
-    @Size(min = 8, max = 100, message = "Password must be at between 8 and 100 characters long")
-    @Pattern(
-            regexp = "^[A-Za-z0-9\\p{L}\\p{M}\\p{P}\\p{S}]+$",
-            message = "Invalid password format"
-    )
-    private String confirmNewPassword;
+  /**
+   * Confirmation of the new password. Must match the new password and meet the same validation
+   * requirements.
+   */
+  @Size(min = 8, max = 100, message = "Password must be at between 8 and 100 characters long")
+  @Pattern(
+      regexp = "^[A-Za-z0-9\\p{L}\\p{M}\\p{P}\\p{S}]+$",
+      message = "Invalid password format"
+  )
+  private String confirmNewPassword;
 }

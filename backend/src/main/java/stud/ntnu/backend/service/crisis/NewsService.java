@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import stud.ntnu.backend.dto.news.NewsArticleDTO;
 import stud.ntnu.backend.dto.news.NewsArticleResponseDTO;
@@ -25,26 +26,18 @@ import stud.ntnu.backend.util.LocationUtil;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class NewsService {
 
   private final NewsArticleRepository newsArticleRepository;
   private final UserRepository userRepository;
   private final CrisisEventRepository crisisEventRepository;
 
-  @Autowired
-  public NewsService(NewsArticleRepository newsArticleRepository,
-      UserRepository userRepository,
-      CrisisEventRepository crisisEventRepository) {
-    this.newsArticleRepository = newsArticleRepository;
-    this.userRepository = userRepository;
-    this.crisisEventRepository = crisisEventRepository;
-  }
-
   /**
    * Creates a new news article for a specific crisis event.
    *
    * @param newsArticleDTO the DTO containing the news article data
-   * @param userId the ID of the user creating the article
+   * @param userId         the ID of the user creating the article
    * @return the created news article
    * @throws IllegalStateException if the user or crisis event is not found
    */
@@ -78,7 +71,7 @@ public class NewsService {
    * Get paginated news articles for a specific crisis event.
    *
    * @param crisisEventId the crisis event ID
-   * @param pageable pagination information
+   * @param pageable      pagination information
    * @return a page of news article DTOs
    * @throws NoSuchElementException if the crisis event doesn't exist
    */
@@ -89,7 +82,8 @@ public class NewsService {
       throw new NoSuchElementException("Crisis event not found with id: " + crisisEventId);
     }
 
-    Page<NewsArticle> newsArticles = newsArticleRepository.findByCrisisEventIdOrderByPublishedAtDesc(crisisEventId,
+    Page<NewsArticle> newsArticles = newsArticleRepository.findByCrisisEventIdOrderByPublishedAtDesc(
+        crisisEventId,
         pageable);
 
     return newsArticles.map(NewsArticleResponseDTO::fromEntity);
@@ -100,9 +94,9 @@ public class NewsService {
    * user's location. This includes both the user's home address and the user's household address.
    * Articles are returned in order of newest to oldest.
    *
-   * @param user the user
+   * @param user         the user
    * @param distanceInKm the distance in kilometers
-   * @param pageable pagination information
+   * @param pageable     pagination information
    * @return a page of news article DTOs
    */
   @Transactional(readOnly = true)
@@ -129,7 +123,7 @@ public class NewsService {
    * Updates an existing news article with new information.
    *
    * @param newsArticleId the ID of the news article to update
-   * @param updateDto the DTO containing the updated information
+   * @param updateDto     the DTO containing the updated information
    * @return the updated news article
    * @throws NoSuchElementException if the news article is not found
    */
@@ -164,7 +158,8 @@ public class NewsService {
   @Transactional(readOnly = true)
   public NewsArticle getNewsArticleById(Long newsArticleId) {
     return newsArticleRepository.findById(newsArticleId)
-        .orElseThrow(() -> new NoSuchElementException("News article not found with id: " + newsArticleId));
+        .orElseThrow(
+            () -> new NoSuchElementException("News article not found with id: " + newsArticleId));
   }
 
   /**
@@ -175,13 +170,14 @@ public class NewsService {
    */
   @Transactional(readOnly = true)
   public Page<NewsArticleResponseDTO> getDraftNewsArticles(Pageable pageable) {
-    Page<NewsArticle> draftArticles = newsArticleRepository.findByStatusOrderByCreatedAtDesc(ArticleStatus.draft, pageable);
+    Page<NewsArticle> draftArticles = newsArticleRepository.findByStatusOrderByCreatedAtDesc(
+        ArticleStatus.draft, pageable);
     return draftArticles.map(NewsArticleResponseDTO::fromEntity);
   }
 
   /**
-   * Get the newest news articles, ordered by published date (newest first).
-   * Only returns articles with status 'published'.
+   * Get the newest news articles, ordered by published date (newest first). Only returns articles
+   * with status 'published'.
    *
    * @param pageable pagination information
    * @return a page of news article DTOs

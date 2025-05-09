@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -44,13 +41,10 @@ import stud.ntnu.backend.service.user.InvitationService;
 import stud.ntnu.backend.util.LocationUtil;
 
 /**
- * Service for managing households and their members.
- * Handles all household-related operations including:
- * - Household creation, update, and deletion
- * - Member management (adding, removing, promoting to admin)
- * - Invitation handling
- * - Empty member management
- * - Household data retrieval and search
+ * Service for managing households and their members. Handles all household-related operations
+ * including: - Household creation, update, and deletion - Member management (adding, removing,
+ * promoting to admin) - Invitation handling - Empty member management - Household data retrieval
+ * and search
  */
 @Service
 @RequiredArgsConstructor
@@ -71,8 +65,8 @@ public class HouseholdService {
   private EntityManager entityManager;
 
   /**
-   * Retrieves all households in the system.
-   * This method should be used with caution as it returns all households without pagination.
+   * Retrieves all households in the system. This method should be used with caution as it returns
+   * all households without pagination.
    *
    * @return a list of all households
    */
@@ -91,8 +85,7 @@ public class HouseholdService {
   }
 
   /**
-   * Saves a household entity.
-   * This is a low-level method used internally by other service methods.
+   * Saves a household entity. This is a low-level method used internally by other service methods.
    *
    * @param household the household entity to save
    * @return the saved household with updated information (e.g., generated ID)
@@ -102,15 +95,15 @@ public class HouseholdService {
   }
 
   /**
-   * Updates a household's name and address.
-   * Only household admins can perform this operation.
-   * If a new address is provided, attempts to geocode it to update coordinates.
+   * Updates a household's name and address. Only household admins can perform this operation. If a
+   * new address is provided, attempts to geocode it to update coordinates.
    *
    * @param email   the email of the user attempting the update
    * @param name    the new name for the household
    * @param address the new address for the household
    * @return the updated household
-   * @throws IllegalStateException if the user is not found, doesn't have a household, or is not an admin
+   * @throws IllegalStateException if the user is not found, doesn't have a household, or is not an
+   *                               admin
    */
   @Transactional
   public Household updateHousehold(String email, String name, String address) {
@@ -127,6 +120,11 @@ public class HouseholdService {
     // Check if the user is an admin
     if (!isUserHouseholdAdmin(user)) {
       throw new IllegalStateException("Only household admins can update households");
+    }
+
+    // Check if the new name is different from current name and if it already exists
+    if (!name.equals(household.getName()) && householdRepository.existsByName(name)) {
+      throw new IllegalStateException("A household with this name already exists");
     }
 
     // Update the household
@@ -152,15 +150,10 @@ public class HouseholdService {
   }
 
   /**
-   * Hard deletes a household and all its related data.
-   * This operation:
-   * - Unlinks all users from the household
-   * - Removes all admin records
-   * - Deletes all invitations
-   * - Removes empty household members
-   * - Deletes product types and batches
-   * - Removes group memberships
-   * - Finally deletes the household itself
+   * Hard deletes a household and all its related data. This operation: - Unlinks all users from the
+   * household - Removes all admin records - Deletes all invitations - Removes empty household
+   * members - Deletes product types and batches - Removes group memberships - Finally deletes the
+   * household itself
    *
    * @param id the ID of the household to delete
    * @throws IllegalStateException if the household is not found
@@ -181,29 +174,32 @@ public class HouseholdService {
 
       invitationRepository.deleteAll(invitationRepository.findByHousehold(household));
 
-      emptyHouseholdMemberRepository.deleteAll(emptyHouseholdMemberRepository.findByHousehold(household));
+      emptyHouseholdMemberRepository.deleteAll(
+          emptyHouseholdMemberRepository.findByHousehold(household));
 
       List<ProductType> productTypes = entityManager.createQuery(
-          "SELECT pt FROM ProductType pt WHERE pt.household.id = :householdId", ProductType.class)
+              "SELECT pt FROM ProductType pt WHERE pt.household.id = :householdId", ProductType.class)
           .setParameter("householdId", household.getId())
           .getResultList();
 
       for (ProductType productType : productTypes) {
         productBatchRepository.deleteAll(
-          entityManager.createQuery(
-            "SELECT pb FROM ProductBatch pb WHERE pb.productType.id = :productTypeId", ProductBatch.class)
-            .setParameter("productTypeId", productType.getId())
-            .getResultList()
+            entityManager.createQuery(
+                    "SELECT pb FROM ProductBatch pb WHERE pb.productType.id = :productTypeId",
+                    ProductBatch.class)
+                .setParameter("productTypeId", productType.getId())
+                .getResultList()
         );
       }
 
       productTypeRepository.deleteAll(productTypes);
 
       groupMembershipRepository.deleteAll(
-        entityManager.createQuery(
-          "SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId", GroupMembership.class)
-          .setParameter("householdId", household.getId())
-          .getResultList()
+          entityManager.createQuery(
+                  "SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId",
+                  GroupMembership.class)
+              .setParameter("householdId", household.getId())
+              .getResultList()
       );
 
       householdRepository.delete(household);
@@ -213,12 +209,12 @@ public class HouseholdService {
   }
 
   /**
-   * Hard deletes the current user's household.
-   * Only household admins can perform this operation.
+   * Hard deletes the current user's household. Only household admins can perform this operation.
    * This is a convenience method that delegates to {@link #deleteHousehold(Integer)}.
    *
    * @param email the email of the user attempting to delete their household
-   * @throws IllegalStateException if the user is not found, doesn't have a household, or is not an admin
+   * @throws IllegalStateException if the user is not found, doesn't have a household, or is not an
+   *                               admin
    */
   @Transactional
   public void deleteCurrentHousehold(String email) {
@@ -242,9 +238,8 @@ public class HouseholdService {
   }
 
   /**
-   * Creates a new household for a user.
-   * The creating user automatically becomes an admin of the new household.
-   * If an address is provided, attempts to geocode it to set coordinates.
+   * Creates a new household for a user. The creating user automatically becomes an admin of the new
+   * household. If an address is provided, attempts to geocode it to set coordinates.
    *
    * @param requestDto the DTO containing the household creation details
    * @return the newly created household
@@ -316,58 +311,11 @@ public class HouseholdService {
     householdAdminRepository.save(admin);
 
     return household;
-  }
+  } 
 
   /**
-   * Switches a user to a different household.
-   * If the user is an admin of their current household and is the last admin,
-   * they cannot switch households.
-   *
-   * @param email       the email of the user
-   * @param householdId the ID of the target household
-   * @return the target household
-   * @throws IllegalStateException if the user or target household is not found,
-   *                              or if the user is the last admin of their current household
-   */
-  @Transactional
-  public Household switchHousehold(String email, Integer householdId) {
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new IllegalStateException("User not found"));
-
-    Household currentHousehold = user.getHousehold();
-    Household targetHousehold = householdRepository.findById(householdId)
-        .orElseThrow(() -> new IllegalStateException("Household not found"));
-
-    // Check if user is an admin and if they are the last admin
-    boolean isAdmin = householdAdminRepository.existsByUser(user);
-    if (isAdmin && currentHousehold != null) {
-      // Count the number of admins in the current household
-      long adminCount = currentHousehold.getUsers().stream()
-          .filter(householdAdminRepository::existsByUser)
-          .count();
-
-      // If this is the last admin, prevent switching
-      if (adminCount <= 1) {
-        throw new IllegalStateException("The last household admin cannot switch households");
-      }
-
-      // Remove admin status before switching
-      HouseholdAdmin admin = householdAdminRepository.findByUser(user)
-          .orElseThrow(() -> new IllegalStateException("Admin record not found"));
-      householdAdminRepository.delete(admin);
-    }
-
-    // Update the user with the new household
-    user.setHousehold(targetHousehold);
-    userRepository.save(user);
-
-    return targetHousehold;
-  }
-
-  /**
-   * Invites a user to join a household.
-   * Only household admins can send invitations.
-   * The invitation includes a token that the invitee can use to accept or decline.
+   * Invites a user to join a household. Only household admins can send invitations. The invitation
+   * includes a token that the invitee can use to accept or decline.
    *
    * @param inviterEmail the email of the admin sending the invitation
    * @param inviteeEmail the email of the user being invited
@@ -388,11 +336,8 @@ public class HouseholdService {
   }
 
   /**
-   * Accepts a household invitation using the provided token.
-   * This operation:
-   * - Validates the token
-   * - Checks if the invitation is still pending
-   * - Moves the user to the new household
+   * Accepts a household invitation using the provided token. This operation: - Validates the token
+   * - Checks if the invitation is still pending - Moves the user to the new household
    *
    * @param email the email of the user accepting the invitation
    * @param token the invitation token
@@ -405,11 +350,9 @@ public class HouseholdService {
   }
 
   /**
-   * Retrieves the current user's household information.
-   * The returned DTO includes:
-   * - Basic household information (name, address, etc.)
-   * - List of all household members with their roles
-   * - Household coordinates if available
+   * Retrieves the current user's household information. The returned DTO includes: - Basic
+   * household information (name, address, etc.) - List of all household members with their roles -
+   * Household coordinates if available
    *
    * @param email the email of the user
    * @return a DTO containing the household information
@@ -429,13 +372,12 @@ public class HouseholdService {
   }
 
   /**
-   * Leaves the current household.
-   * Users cannot leave if they are the last admin of the household.
+   * Leaves the current household. Users cannot leave if they are the last admin of the household.
    * If the user is an admin but not the last one, their admin status is removed before leaving.
    *
    * @param email the email of the user leaving the household
-   * @throws IllegalStateException if the user is not found, doesn't have a household,
-   *                              or is the last admin of the household
+   * @throws IllegalStateException if the user is not found, doesn't have a household, or is the
+   *                               last admin of the household
    */
   @Transactional
   public void leaveHousehold(String email) {
@@ -470,12 +412,12 @@ public class HouseholdService {
     // Remove user from household
     user.setHousehold(null);
     userRepository.save(user);
+    updatePopulationCount(household);
   }
 
   /**
-   * Gets all members of the current user's household.
-   * The returned list includes both regular members and admins,
-   * with a flag indicating their admin status.
+   * Gets all members of the current user's household. The returned list includes both regular
+   * members and admins, with a flag indicating their admin status.
    *
    * @param email the email of the user
    * @return list of household member DTOs
@@ -505,8 +447,8 @@ public class HouseholdService {
   }
 
   /**
-   * Gets only non-admin members of the current user's household.
-   * This is useful for admin operations that should only target regular members.
+   * Gets only non-admin members of the current user's household. This is useful for admin
+   * operations that should only target regular members.
    *
    * @param email the email of the user
    * @return list of non-admin household member DTOs
@@ -537,9 +479,8 @@ public class HouseholdService {
   }
 
   /**
-   * Gets all empty members (non-user entities) of the current user's household.
-   * Empty members represent household members that don't have user accounts,
-   * such as children or pets.
+   * Gets all empty members (non-user entities) of the current user's household. Empty members
+   * represent household members that don't have user accounts, such as children or pets.
    *
    * @param email the email of the user
    * @return list of empty household member DTOs
@@ -568,15 +509,14 @@ public class HouseholdService {
   }
 
   /**
-   * Adds an empty household member to the current user's household.
-   * Only household admins can add empty members.
-   * Empty members are used to represent household members without user accounts.
+   * Adds an empty household member to the current user's household. Only household admins can add
+   * empty members. Empty members are used to represent household members without user accounts.
    *
    * @param email     the email of the admin adding the member
    * @param createDto the DTO containing the empty member's information
    * @return the created empty member DTO
-   * @throws IllegalStateException if the user is not found, doesn't have a household,
-   *                              or is not an admin
+   * @throws IllegalStateException if the user is not found, doesn't have a household, or is not an
+   *                               admin
    */
   @Transactional
   public EmptyHouseholdMemberDto addEmptyHouseholdMember(String email,
@@ -607,6 +547,7 @@ public class HouseholdService {
     member = emptyHouseholdMemberRepository.save(member);
 
     // Return the DTO
+    updatePopulationCount(household);
     return new EmptyHouseholdMemberDto(
         member.getId(),
         member.getName(),
@@ -617,14 +558,13 @@ public class HouseholdService {
   }
 
   /**
-   * Removes an empty household member.
-   * Only household admins can remove empty members.
-   * The empty member must belong to the admin's household.
+   * Removes an empty household member. Only household admins can remove empty members. The empty
+   * member must belong to the admin's household.
    *
    * @param email    the email of the admin removing the member
    * @param memberId the ID of the empty member to remove
-   * @throws IllegalStateException if the user is not found, is not an admin,
-   *                              or the member doesn't belong to their household
+   * @throws IllegalStateException if the user is not found, is not an admin, or the member doesn't
+   *                               belong to their household
    */
   @Transactional
   public void removeEmptyHouseholdMember(String email, Integer memberId) {
@@ -647,11 +587,13 @@ public class HouseholdService {
 
     // Check if the member belongs to the user's household
     if (member.getHousehold() == null || !member.getHousehold().getId().equals(household.getId())) {
-      throw new IllegalStateException("Empty household member does not belong to the user's household");
+      throw new IllegalStateException(
+          "Empty household member does not belong to the user's household");
     }
 
     // Delete the member
     emptyHouseholdMemberRepository.delete(member);
+    updatePopulationCount(household);
   }
 
   /**
@@ -665,8 +607,8 @@ public class HouseholdService {
   }
 
   /**
-   * Declines a household invitation.
-   * This operation marks the invitation as declined and prevents it from being used.
+   * Declines a household invitation. This operation marks the invitation as declined and prevents
+   * it from being used.
    *
    * @param email the email of the user declining the invitation
    * @param token the invitation token
@@ -677,8 +619,8 @@ public class HouseholdService {
   }
 
   /**
-   * Gets all pending invitations for a household.
-   * This includes invitations that haven't been accepted or declined yet.
+   * Gets all pending invitations for a household. This includes invitations that haven't been
+   * accepted or declined yet.
    *
    * @param householdId the ID of the household
    * @return list of pending invitations
@@ -689,14 +631,13 @@ public class HouseholdService {
   }
 
   /**
-   * Cancels a pending invitation.
-   * Only household admins can cancel invitations for their household.
+   * Cancels a pending invitation. Only household admins can cancel invitations for their household.
    * The invitation must belong to the admin's household.
    *
    * @param adminEmail the email of the admin canceling the invitation
-   * @param token     the token of the invitation to cancel
-   * @throws IllegalStateException if the admin is not found, is not an admin,
-   *                              or the invitation doesn't belong to their household
+   * @param token      the token of the invitation to cancel
+   * @throws IllegalStateException if the admin is not found, is not an admin, or the invitation
+   *                               doesn't belong to their household
    */
   @Transactional
   public void cancelInvitationByToken(String adminEmail, String token) {
@@ -720,7 +661,8 @@ public class HouseholdService {
         .orElseThrow(() -> new IllegalStateException("Invitation not found"));
 
     // Check if the invitation belongs to the admin's household
-    if (invitation.getHousehold() == null || !invitation.getHousehold().getId().equals(household.getId())) {
+    if (invitation.getHousehold() == null || !invitation.getHousehold().getId()
+        .equals(household.getId())) {
       throw new IllegalStateException("Invitation does not belong to the admin's household");
     }
 
@@ -735,14 +677,13 @@ public class HouseholdService {
   }
 
   /**
-   * Promotes a household member to admin status.
-   * Only existing admins can promote other members.
+   * Promotes a household member to admin status. Only existing admins can promote other members.
    * The member must be in the same household as the admin.
    *
    * @param adminEmail the email of the current admin
    * @param userEmail  the email of the user to promote
-   * @throws IllegalStateException if either user is not found, the admin is not an admin,
-   *                              or the users are not in the same household
+   * @throws IllegalStateException if either user is not found, the admin is not an admin, or the
+   *                               users are not in the same household
    */
   @Transactional
   public void promoteToAdmin(String adminEmail, String userEmail) {
@@ -759,7 +700,8 @@ public class HouseholdService {
     Household adminHousehold = admin.getHousehold();
     Household userHousehold = user.getHousehold();
 
-    if (adminHousehold == null || userHousehold == null || !adminHousehold.getId().equals(userHousehold.getId())) {
+    if (adminHousehold == null || userHousehold == null || !adminHousehold.getId()
+        .equals(userHousehold.getId())) {
       throw new IllegalStateException("User is not in the same household");
     }
 
@@ -774,14 +716,13 @@ public class HouseholdService {
   }
 
   /**
-   * Removes a member from the household.
-   * Only household admins can remove members.
-   * Cannot remove the last admin of a household.
+   * Removes a member from the household. Only household admins can remove members. Cannot remove
+   * the last admin of a household.
    *
    * @param adminEmail the email of the admin removing the member
-   * @param memberId  the ID of the member to remove
-   * @throws IllegalStateException if the admin is not found, is not an admin,
-   *                              the member is not found, or is the last admin
+   * @param memberId   the ID of the member to remove
+   * @throws IllegalStateException if the admin is not found, is not an admin, the member is not
+   *                               found, or is the last admin
    */
   @Transactional
   public void removeMemberFromHousehold(String adminEmail, Integer memberId) {
@@ -830,11 +771,12 @@ public class HouseholdService {
     // Remove the member from the household
     member.setHousehold(null);
     userRepository.save(member);
+    updatePopulationCount(household);
   }
 
   /**
-   * Converts a Household entity to a HouseholdDto.
-   * This is a helper method used internally to transform entities to DTOs.
+   * Converts a Household entity to a HouseholdDto. This is a helper method used internally to
+   * transform entities to DTOs.
    *
    * @param household the household entity to convert
    * @return the household DTO with member information
@@ -862,5 +804,23 @@ public class HouseholdService {
         household.getLongitude(),
         members
     );
+  }
+
+  /**
+   * Updates the population count for a household by calculating the total number of members.
+   * This includes both registered users and empty household members (excluding pets).
+   * The count is persisted to the database.
+   *
+   * @param household the household entity to update the population count for
+   * @throws IllegalArgumentException if the household parameter is null
+   */
+  public void updatePopulationCount(Household household) {
+    int userCount = userRepository.findByHousehold(household).size();
+    int emptyCount = (int) emptyHouseholdMemberRepository.findByHousehold(household)
+        .stream()
+        .filter(member -> member.getType() != null && !member.getType().equalsIgnoreCase("pet"))
+        .count();
+    household.setPopulationCount(userCount + emptyCount);
+    householdRepository.save(household);
   }
 }

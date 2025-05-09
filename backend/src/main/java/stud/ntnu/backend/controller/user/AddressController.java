@@ -17,8 +17,8 @@ import stud.ntnu.backend.util.LocationUtil;
 public class AddressController {
 
   /**
-   * Retrieves coordinates based on the provided address.
-   * User endpoint: /api/user/coordinates-by-address
+   * Retrieves coordinates based on the provided address. User endpoint:
+   * /api/user/coordinates-by-address
    *
    * @param address the address to get coordinates for
    * @return ResponseEntity containing the coordinates or an error message
@@ -36,8 +36,8 @@ public class AddressController {
   }
 
   /**
-   * Retrieves the address based on the provided coordinates.
-   * User endpoint: /api/user/address-by-coordinates
+   * Retrieves the address based on the provided coordinates. User endpoint:
+   * /api/user/address-by-coordinates
    *
    * @param latitude  the latitude of the coordinates
    * @param longitude the longitude of the coordinates

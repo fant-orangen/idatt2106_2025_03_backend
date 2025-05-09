@@ -12,27 +12,27 @@ import org.springframework.stereotype.Repository;
 import stud.ntnu.backend.model.gamification.quiz.Quiz;
 
 /**
- * Repository interface for managing Quiz entities.
- * Provides methods for retrieving quizzes and quiz-related data.
+ * Repository interface for managing Quiz entities. Provides methods for retrieving quizzes and
+ * quiz-related data.
  */
 @Repository
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
-    
-    /**
-     * Retrieves a paginated list of quizzes filtered by status.
-     *
-     * @param status The status to filter quizzes by
-     * @param pageable The pagination information
-     * @return A page of quizzes matching the status
-     */
-    Page<Quiz> findAllByStatus(String status, Pageable pageable);
 
-    /**
-     * Retrieves the name of a quiz by its ID.
-     *
-     * @param id The ID of the quiz
-     * @return An Optional containing the quiz name if found, empty otherwise
-     */
-    @Query("SELECT q.name FROM Quiz q WHERE q.id = :id")
-    Optional<String> findNameById(@Param("id") Long id);
+  /**
+   * Retrieves a paginated list of quizzes filtered by status.
+   *
+   * @param status   The status to filter quizzes by
+   * @param pageable The pagination information
+   * @return A page of quizzes matching the status
+   */
+  Page<Quiz> findAllByStatus(String status, Pageable pageable);
+
+  /**
+   * Retrieves the name of a quiz by its ID.
+   *
+   * @param id The ID of the quiz
+   * @return An Optional containing the quiz name if found, empty otherwise
+   */
+  @Query("SELECT q.name FROM Quiz q WHERE q.id = :id")
+  Optional<String> findNameById(@Param("id") Long id);
 }
