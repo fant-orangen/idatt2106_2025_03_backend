@@ -1,18 +1,19 @@
 package stud.ntnu.backend.controller.crisis;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import stud.ntnu.backend.dto.map.CreateScenarioThemeDto;
@@ -35,6 +36,7 @@ import stud.ntnu.backend.service.user.UserService;
  */
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Scenario Themes", description = "Operations related to crisis scenario theme management")
 public class ScenarioThemeController {
 
   private final ScenarioThemeService scenarioThemeService;
@@ -61,6 +63,15 @@ public class ScenarioThemeController {
    * @return ResponseEntity with: - 200 OK and the created scenario theme if successful - 403
    * Forbidden if unauthorized - 400 Bad Request with error message if creation fails
    */
+  @Operation(summary = "Create scenario theme", description = "Creates a new scenario theme. Only users with ADMIN or SUPERADMIN roles are allowed.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Scenario theme created successfully", 
+          content = @Content(schema = @Schema(implementation = ScenarioTheme.class))),
+      @ApiResponse(responseCode = "403", description = "Access forbidden - only administrators can create scenario themes", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid scenario theme data", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PostMapping(path = "/admin/scenario-themes")
   public ResponseEntity<?> createScenarioTheme(
       @Valid @RequestBody CreateScenarioThemeDto createScenarioThemeDto,
@@ -89,6 +100,15 @@ public class ScenarioThemeController {
    * @return ResponseEntity with: - 200 OK and the updated scenario theme if successful - 403
    * Forbidden if unauthorized - 400 Bad Request with error message if update fails
    */
+  @Operation(summary = "Update scenario theme", description = "Updates an existing scenario theme. Only users with ADMIN or SUPERADMIN roles are allowed.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Scenario theme updated successfully", 
+          content = @Content(schema = @Schema(implementation = ScenarioTheme.class))),
+      @ApiResponse(responseCode = "403", description = "Access forbidden - only administrators can update scenario themes", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid update data", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PatchMapping(path = "/admin/scenario-themes")
   public ResponseEntity<?> updateScenarioTheme(
       @Valid @RequestBody UpdateScenarioThemeDto updateScenarioThemeDto,
@@ -111,6 +131,9 @@ public class ScenarioThemeController {
    * @param pageable the pagination information including page number, size, and sorting
    * @return ResponseEntity with a page of scenario themes
    */
+  @Operation(summary = "Get all scenario themes", description = "Gets a paginated list of all scenario themes.")
+  @ApiResponse(responseCode = "200", description = "Successfully retrieved scenario themes", 
+      content = @Content(schema = @Schema(implementation = ScenarioTheme.class)))
   @GetMapping("/public/scenario-themes/all")
   public ResponseEntity<Page<ScenarioTheme>> getAllScenarioThemes(Pageable pageable) {
     Page<ScenarioTheme> scenarioThemes = scenarioThemeService.getAllScenarioThemes(pageable);
@@ -123,6 +146,9 @@ public class ScenarioThemeController {
    *
    * @return ResponseEntity containing a list of ScenarioThemeNameDto objects
    */
+  @Operation(summary = "Get all scenario theme previews", description = "Gets a list of all scenario themes with just their names and IDs. This is a lightweight endpoint for UI components that only need basic theme information.")
+  @ApiResponse(responseCode = "200", description = "Successfully retrieved scenario theme previews", 
+      content = @Content(schema = @Schema(implementation = ScenarioThemeNameDto.class)))
   @GetMapping("/public/scenario-themes/previews/all")
   public ResponseEntity<List<ScenarioThemeNameDto>> getAllScenarioThemePreviews() {
     List<ScenarioThemeNameDto> previews = scenarioThemeService.getAllScenarioThemePreviews();
@@ -136,6 +162,12 @@ public class ScenarioThemeController {
    * @return ResponseEntity with: - 200 OK and ScenarioThemeDetailsDto if found - 404 Not Found if
    * the theme doesn't exist
    */
+  @Operation(summary = "Get scenario theme by ID", description = "Gets detailed information about a specific scenario theme by its ID.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved scenario theme details", 
+          content = @Content(schema = @Schema(implementation = ScenarioThemeDetailsDto.class))),
+      @ApiResponse(responseCode = "404", description = "Scenario theme not found")
+  })
   @GetMapping("/public/scenario-themes/{id}")
   public ResponseEntity<ScenarioThemeDetailsDto> getScenarioTheme(@PathVariable Integer id) {
     return scenarioThemeService.getScenarioThemeDetailsById(id)
@@ -150,6 +182,12 @@ public class ScenarioThemeController {
    * @return ResponseEntity with: - 200 OK and ScenarioThemeNameDto if found - 404 Not Found if the
    * theme doesn't exist
    */
+  @Operation(summary = "Get scenario theme name", description = "Gets just the name of a specific scenario theme by its ID.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved scenario theme name", 
+          content = @Content(schema = @Schema(implementation = ScenarioThemeNameDto.class))),
+      @ApiResponse(responseCode = "404", description = "Scenario theme not found")
+  })
   @GetMapping("/public/scenario-themes/{id}/name")
   public ResponseEntity<ScenarioThemeNameDto> getScenarioThemeName(@PathVariable Integer id) {
     return scenarioThemeService.getScenarioThemeNameById(id)
