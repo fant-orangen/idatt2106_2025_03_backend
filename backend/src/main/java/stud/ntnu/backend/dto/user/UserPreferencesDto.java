@@ -17,6 +17,7 @@ public class UserPreferencesDto {
    * shared with other users. When false, location sharing is disabled.
    */
   private Boolean locationSharingEnabled;
+  private Boolean twoFactorAuthenticationEnabled;
 
   /**
    * Default constructor for UserPreferencesDto. Creates a new instance with default values.
@@ -29,7 +30,8 @@ public class UserPreferencesDto {
    *
    * @param locationSharingEnabled The user's location sharing preference
    */
-  public UserPreferencesDto(Boolean locationSharingEnabled) {
+  public UserPreferencesDto(Boolean locationSharingEnabled, Boolean twoFactorAuthenticationEnabled) {
     this.locationSharingEnabled = locationSharingEnabled;
-  }
+  this.twoFactorAuthenticationEnabled = twoFactorAuthenticationEnabled;
+    }
 }

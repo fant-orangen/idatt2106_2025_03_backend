@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import stud.ntnu.backend.security.AdminChecker;
 
 /**
  * Service for managing users. Handles retrieval, updating, and deletion of users. Note: User
@@ -42,7 +43,8 @@ public class UserService {
    *
    * @return list of all users
    */
-  public List<User> getAllUsers() {
+  public List<User> getAllUsers()
+  {
     return userRepository.findAll();
   }
 
@@ -52,7 +54,8 @@ public class UserService {
    * @param id the ID of the user
    * @return an Optional containing the user if found
    */
-  public Optional<User> getUserById(Integer id) {
+  public Optional<User> getUserById(Integer id)
+  {
     return userRepository.findById(id);
   }
 
@@ -62,11 +65,13 @@ public class UserService {
    * @param email the email of the user
    * @return an Optional containing the user if found
    */
-  public Optional<User> getUserByEmail(String email) {
+  public Optional<User> getUserByEmail(String email)
+  {
     return userRepository.findByEmail(email);
   }
 
-  public Integer getUserIdByEmail(String email) {
+  public Integer getUserIdByEmail(String email)
+  {
     return userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"))
         .getId();
@@ -78,7 +83,8 @@ public class UserService {
    * @param user the user to save
    * @return the saved user
    */
-  public User saveUser(User user) {
+  public User saveUser(User user)
+  {
     return userRepository.save(user);
   }
 
@@ -87,7 +93,8 @@ public class UserService {
    *
    * @param id the ID of the user to delete
    */
-  public void deleteUser(Integer id) {
+  public void deleteUser(Integer id)
+  {
     userRepository.deleteById(id);
   }
 
@@ -98,7 +105,8 @@ public class UserService {
    * @return the user's profile
    * @throws IllegalStateException if the user is not found
    */
-  public UserProfileDto getUserProfile(String email) {
+  public UserProfileDto getUserProfile(String email)
+  {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"));
 
@@ -113,28 +121,34 @@ public class UserService {
    * @return the updated user profile
    * @throws IllegalStateException if the user is not found
    */
-  public UserProfileDto updateUserProfile(String email, UserUpdateDto userUpdateDto) {
+  public UserProfileDto updateUserProfile(String email, UserUpdateDto userUpdateDto)
+  {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"));
 
     // Update user fields if provided
-    if (userUpdateDto.getFirstName() != null) {
+    if (userUpdateDto.getFirstName() != null)
+    {
       user.setFirstName(userUpdateDto.getFirstName());
     }
 
-    if (userUpdateDto.getLastName() != null) {
+    if (userUpdateDto.getLastName() != null)
+    {
       user.setLastName(userUpdateDto.getLastName());
     }
 
-    if (userUpdateDto.getHomeAddress() != null) {
+    if (userUpdateDto.getHomeAddress() != null)
+    {
       user.setHomeAddress(userUpdateDto.getHomeAddress());
     }
 
-    if (userUpdateDto.getHomeLatitude() != null) {
+    if (userUpdateDto.getHomeLatitude() != null)
+    {
       user.setHomeLatitude(userUpdateDto.getHomeLatitude());
     }
 
-    if (userUpdateDto.getHomeLongitude() != null) {
+    if (userUpdateDto.getHomeLongitude() != null)
+    {
       user.setHomeLongitude(userUpdateDto.getHomeLongitude());
     }
 
@@ -152,19 +166,53 @@ public class UserService {
    * @return the updated user profile
    * @throws IllegalStateException if the user is not found
    */
-  public UserProfileDto updateUserPreferences(String email, UserPreferencesDto preferencesDto) {
+  @Transactional
+  public UserProfileDto updateUserPreferences(String email, UserPreferencesDto preferencesDto)
+  {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"));
 
     // Update user preferences if provided
-    if (preferencesDto.getLocationSharingEnabled() != null) {
+    if (preferencesDto.getLocationSharingEnabled() != null)
+    {
       user.setLocationSharingEnabled(preferencesDto.getLocationSharingEnabled());
     }
+
+    if (preferencesDto.getTwoFactorAuthenticationEnabled() != null)
+    {
+      if (AdminChecker.isUserAdmin(user))
+      {
+        user.setIsUsing2FA(true);
+      } else
+      {
+        user.setIsUsing2FA(preferencesDto.getTwoFactorAuthenticationEnabled());
+
+      }
+    }
+
 
     // Save the updated user
     user = userRepository.save(user);
 
-    return convertToUserProfileDto(user);
+    return
+
+        convertToUserProfileDto(user);
+  }
+
+  /**
+   * Get the user's preferences.
+   */
+  @Transactional(readOnly = true)
+  public UserPreferencesDto getUserPreferences(String email)
+  {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    UserPreferencesDto preferencesDto = new UserPreferencesDto();
+    preferencesDto.setLocationSharingEnabled(user.getLocationSharingEnabled());
+    preferencesDto.setTwoFactorAuthenticationEnabled(user.getIsUsing2FA());
+
+    return preferencesDto;
   }
 
   /**
@@ -174,7 +222,8 @@ public class UserService {
    * @return the user's history
    * @throws IllegalStateException if the user is not found
    */
-  public UserHistoryDto getUserHistory(String email) {
+  public UserHistoryDto getUserHistory(String email)
+  {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"));
 
@@ -193,7 +242,8 @@ public class UserService {
    * @return the user's basic information
    * @throws IllegalStateException if the user is not found
    */
-  public UserBasicInfoDto getUserBasicInfo(Integer id) {
+  public UserBasicInfoDto getUserBasicInfo(Integer id)
+  {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new IllegalStateException("User not found"));
 
@@ -212,7 +262,8 @@ public class UserService {
    * @param user the user entity
    * @return the user profile DTO
    */
-  private UserProfileDto convertToUserProfileDto(User user) {
+  private UserProfileDto convertToUserProfileDto(User user)
+  {
     return new UserProfileDto(
         user.getId(),
         user.getEmail(),
@@ -224,7 +275,8 @@ public class UserService {
         user.getLocationSharingEnabled(),
         user.getEmailVerified(),
         user.getHousehold() != null ? user.getHousehold().getId() : null,
-        user.getHousehold() != null ? user.getHousehold().getName() : null
+        user.getHousehold() != null ? user.getHousehold().getName() : null,
+        user.getIsUsing2FA()
     );
   }
 
@@ -236,18 +288,21 @@ public class UserService {
    * @throws IllegalStateException    if the token has expired
    */
   @Transactional
-  public void confirmSafety(String token) {
+  public void confirmSafety(String token)
+  {
     // Find and validate the token
     EmailToken emailToken = emailTokenRepository.findByToken(token)
         .orElseThrow(() -> new IllegalArgumentException("Ugyldig token. / Invalid token."));
 
     // Check token type
-    if (emailToken.getType() != EmailToken.TokenType.SAFETY_CONFIRMATION) {
+    if (emailToken.getType() != EmailToken.TokenType.SAFETY_CONFIRMATION)
+    {
       throw new IllegalArgumentException("Ugyldig token type. / Invalid token type.");
     }
 
     // Check if token has expired
-    if (emailToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+    if (emailToken.getExpiresAt().isBefore(LocalDateTime.now()))
+    {
       throw new IllegalStateException("Token er utløpt. / Token has expired.");
     }
 
@@ -270,11 +325,13 @@ public class UserService {
    * @throws IllegalStateException if the user is not found or does not belong to a household
    */
   @Transactional
-  public void requestSafetyConfirmation(String email) {
+  public void requestSafetyConfirmation(String email)
+  {
     User requestingUser = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("Bruker ikke funnet. / User not found."));
 
-    if (requestingUser.getHousehold() == null) {
+    if (requestingUser.getHousehold() == null)
+    {
       throw new IllegalStateException(
           "Du må være medlem av en husstand for å be om sikkerhetsbekreftelser. / You must be a member of a household to request safety confirmations.");
     }
@@ -289,15 +346,19 @@ public class UserService {
     safetyConfirmationRepository.save(requestingUserConfirmation);
 
     List<User> householdMembers = userRepository.findByHousehold(requestingUser.getHousehold());
-    if (householdMembers.isEmpty() || householdMembers.size() == 1) {
+    if (householdMembers.isEmpty() || householdMembers.size() == 1)
+    {
       throw new IllegalStateException(
           "Ingen andre medlemmer i husstanden. / No other members in the household.");
     }
 
-    try {
-      for (User member : householdMembers) {
+    try
+    {
+      for (User member : householdMembers)
+      {
         // Skip sending to the requesting user
-        if (member.getEmail().equals(email)) {
+        if (member.getEmail().equals(email))
+        {
           continue;
         }
 
@@ -322,7 +383,8 @@ public class UserService {
             requestingUser.getName() != null ? requestingUser.getName() : "et husstandsmedlem";
         notificationService.createSafetyRequestNotification(member, requestingUserName);
       }
-    } catch (Exception e) {
+    } catch (Exception e)
+    {
       throw e;
     }
   }
@@ -334,7 +396,8 @@ public class UserService {
    * @return true if the user has confirmed their safety within the last 24 hours, false otherwise
    * @throws IllegalStateException if the user is not found
    */
-  public boolean isSafe(Integer userId) {
+  public boolean isSafe(Integer userId)
+  {
     // Verify user exists
     userRepository.findById(userId)
         .orElseThrow(() -> new IllegalStateException("User not found"));
@@ -343,7 +406,8 @@ public class UserService {
     Optional<SafetyConfirmation> safetyConfirmation = safetyConfirmationRepository.findByUser(
         userRepository.getReferenceById(userId));
 
-    if (!safetyConfirmation.isPresent() || !safetyConfirmation.get().getIsSafe()) {
+    if (!safetyConfirmation.isPresent() || !safetyConfirmation.get().getIsSafe())
+    {
       return false;
     }
 

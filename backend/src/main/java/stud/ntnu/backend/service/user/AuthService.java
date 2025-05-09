@@ -1,5 +1,6 @@
 package stud.ntnu.backend.service.user;
 
+import jakarta.mail.MessagingException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -212,7 +213,7 @@ public class AuthService {
   }
 
 
-  public void send2FACode(String email) {
+  public void send2FACode(String email) throws MessagingException {
     twoFactorCodeService.sendVerificationCode(email);
   }
 

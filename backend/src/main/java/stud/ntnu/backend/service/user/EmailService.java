@@ -93,7 +93,7 @@ public class EmailService {
    * @param email The email address of the user to send the 2FA code to.
    * @param code  The unique 2FA token string to include in the email.
    */
-  public void send2FAEmail(String email, Integer code) {
+  public void send2FAEmail(String email, Integer code) throws MessagingException {
     if (email == null || code == null) {
       throw new IllegalArgumentException("Cannot send 2FA email. Email or code is null.");
     }
@@ -102,22 +102,26 @@ public class EmailService {
         .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
 
     try {
-      SimpleMailMessage message = new SimpleMailMessage();
-      message.setTo(user.getEmail());
-      message.setFrom(senderEmail);
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
 
-      String userName = (user.getName() != null ? user.getName() : "Bruker/User");
+        helper.setTo(user.getEmail());
+        helper.setFrom(senderEmail);
 
-      message.setSubject(
-          messageSource.getMessage("twofa.email.subject", null, LocaleContextHolder.getLocale()));
-      message.setText(messageSource.getMessage("twofa.email.body",
-          new Object[]{userName, code},
-          LocaleContextHolder.getLocale()));
+        String userName = (user.getName() != null ? user.getName() : "Bruker/User");
 
-      mailSender.send(message);
+        helper.setSubject(messageSource.getMessage("twofa.email.subject", null, LocaleContextHolder.getLocale()));
+        String emailBody = messageSource.getMessage("twofa.email.body",
+            new Object[]{userName, String.format("%06d", code)},
+            LocaleContextHolder.getLocale());
+        helper.setText(emailBody, true); // Set 'true' to indicate HTML content
+
+      mailSender.send(mimeMessage);
 
     } catch (RuntimeException e) {
       throw new RuntimeException("Failed to send 2FA email", e);
+    } catch (MessagingException e) {
+        throw new MessagingException("Mail sending error for 2fa", e);
     }
   }
 
@@ -143,10 +147,9 @@ public class EmailService {
       String userName = (user.getName() != null ? user.getName() : "Bruker/User");
       String resetPasswordUrl = "http://localhost:5173/reset-password/" + token;
 
-      helper.setSubject(messageSource.getMessage("password.reset.subject", null,
-          LocaleContextHolder.getLocale()));
+      helper.setSubject(messageSource.getMessage("password.reset.subject", null, LocaleContextHolder.getLocale()));
       helper.setText(messageSource.getMessage("password.reset.body",
-          new Object[]{userName, token, resetPasswordUrl},
+          new Object[]{userName, resetPasswordUrl},
           LocaleContextHolder.getLocale()), true);
 
       mailSender.send(mimeMessage);

@@ -36,19 +36,35 @@ public class AuthController {
     return ResponseEntity.ok().build();
   }
 
-  /**
-   * Authenticates a user and generates a JWT token.
-   *
-   * @param authRequest the authentication request containing email and password
-   * @return ResponseEntity containing the JWT token and user information
-   */
-  @PostMapping("/login")
-  public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
-    AuthResponseDto authResponse = authService.login(authRequest);
-    return authResponse.getIsUsing2FA()
-        ? ResponseEntity.status(202).body(authResponse)
-        : ResponseEntity.ok(authResponse);
-  }
+    /**
+     * Authenticate a user and generate a JWT token.
+     *
+     * @param authRequest the authentication request containing email and password
+     * @return ResponseEntity containing the JWT token and user information
+     */
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
+        // Verify the reCAPTCHA token
+        if (!recaptchaService.verifyRecaptcha(authRequest.getRecaptchaToken())) {
+            // Return a response with an error message in the AuthResponseDto
+            AuthResponseDto errorResponse = new AuthResponseDto();
+            errorResponse.setToken(null);
+            errorResponse.setEmail(null);
+            errorResponse.setUserId(null);
+            errorResponse.setRole(null);
+            errorResponse.setHouseholdId(null);
+            errorResponse.setIsUsing2FA(false);
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+
+        // Proceed with login if reCAPTCHA is valid
+        AuthResponseDto authResponse = authService.login(authRequest);
+
+      return authResponse.getIsUsing2FA()
+          ? ResponseEntity.status(202).body(authResponse)
+          : ResponseEntity.ok(authResponse);
+    }
+
 
   /**
    * Registers a new user with the USER role.
