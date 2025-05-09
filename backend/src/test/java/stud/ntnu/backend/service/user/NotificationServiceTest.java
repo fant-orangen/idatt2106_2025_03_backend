@@ -860,4 +860,222 @@ public class NotificationServiceTest {
             }
         }
     }
+
+    @Nested
+    class CrisisEventUpdateMessageTests {
+        private CrisisEvent previousEvent;
+        private CrisisEvent updatedEvent;
+        private User testUser;
+        private User affectedUser;
+
+        @BeforeEach
+        void setUp() {
+            testUser = new User();
+            testUser.setId(1);
+            testUser.setEmail("test@example.com");
+
+            previousEvent = new CrisisEvent(
+                "Test Crisis",
+                new BigDecimal("63.4305"),
+                new BigDecimal("10.3951"),
+                new BigDecimal("5"),
+                LocalDateTime.now(),
+                testUser
+            );
+            previousEvent.setId(1);
+            previousEvent.setDescription("Original description");
+            previousEvent.setSeverity(CrisisEvent.Severity.yellow);
+            previousEvent.setActive(true);
+
+            updatedEvent = new CrisisEvent(
+                "Test Crisis",
+                new BigDecimal("63.4305"),
+                new BigDecimal("10.3951"),
+                new BigDecimal("5"),
+                LocalDateTime.now(),
+                testUser
+            );
+            updatedEvent.setId(1);
+            updatedEvent.setDescription("Original description");
+            updatedEvent.setSeverity(CrisisEvent.Severity.yellow);
+            updatedEvent.setActive(true);
+
+            // Setup affected user
+            affectedUser = new User();
+            affectedUser.setId(2);
+            affectedUser.setEmail("affected@example.com");
+            affectedUser.setHomeLatitude(new BigDecimal("63.4305"));
+            affectedUser.setHomeLongitude(new BigDecimal("10.3951"));
+
+            // Mock user repository to return affected user
+            when(userRepository.findAll()).thenReturn(Collections.singletonList(affectedUser));
+
+            // Mock createNotification to return a valid notification
+            Notification mockNotification = new Notification(
+                affectedUser,
+                Notification.PreferenceType.crisis_alert,
+                Notification.TargetType.event,
+                updatedEvent.getId(),
+                "Test notification",
+                LocalDateTime.now()
+            );
+            mockNotification.setId(2);
+            doReturn(mockNotification).when(notificationService).createNotification(
+                eq(affectedUser),
+                eq(Notification.PreferenceType.crisis_alert),
+                eq(Notification.TargetType.event),
+                eq(updatedEvent.getId()),
+                anyString()
+            );
+
+            // Mock the repository save to return the same notification
+            when(notificationRepository.save(any(Notification.class))).thenAnswer(invocation -> {
+                Notification savedNotification = invocation.getArgument(0);
+                savedNotification.setId(2);
+                return savedNotification;
+            });
+        }
+
+        @Test
+        void shouldNotSendNotificationsWhenNoChanges() {
+            // Act
+            notificationService.sendCrisisEventUpdateNotifications(updatedEvent, previousEvent);
+
+            // Assert
+            verify(notificationRepository, never()).save(any());
+            verify(messagingTemplate, never()).convertAndSend(eq("/topic/notifications/2"), any(NotificationDto.class));
+        }
+
+        @Test
+        void shouldSendNotificationForNameChange() {
+            // Arrange
+            updatedEvent.setName("Updated Crisis Name");
+
+            // Act
+            notificationService.sendCrisisEventUpdateNotifications(updatedEvent, previousEvent);
+
+            // Assert
+            verify(notificationRepository).save(any(Notification.class));
+            verify(messagingTemplate).convertAndSend(
+                eq("/topic/notifications/2"),
+                any(NotificationDto.class)
+            );
+        }
+
+        @Test
+        void shouldSendNotificationForDescriptionChange() {
+            // Arrange
+            updatedEvent.setDescription("Updated description");
+
+            // Act
+            notificationService.sendCrisisEventUpdateNotifications(updatedEvent, previousEvent);
+
+            // Assert
+            verify(notificationRepository).save(any(Notification.class));
+            verify(messagingTemplate).convertAndSend(
+                eq("/topic/notifications/2"),
+                any(NotificationDto.class)
+            );
+        }
+
+        @Test
+        void shouldSendNotificationForSeverityChange() {
+            // Arrange
+            updatedEvent.setSeverity(CrisisEvent.Severity.red);
+
+            // Act
+            notificationService.sendCrisisEventUpdateNotifications(updatedEvent, previousEvent);
+
+            // Assert
+            verify(notificationRepository).save(any(Notification.class));
+            verify(messagingTemplate).convertAndSend(
+                eq("/topic/notifications/2"),
+                any(NotificationDto.class)
+            );
+        }
+
+        @Test
+        void shouldSendNotificationForLocationChange() {
+            // Arrange
+            updatedEvent.setEpicenterLatitude(new BigDecimal("63.4306"));
+            updatedEvent.setEpicenterLongitude(new BigDecimal("10.3952"));
+
+            // Act
+            notificationService.sendCrisisEventUpdateNotifications(updatedEvent, previousEvent);
+
+            // Assert
+            verify(notificationRepository).save(any(Notification.class));
+            verify(messagingTemplate).convertAndSend(
+                eq("/topic/notifications/2"),
+                any(NotificationDto.class)
+            );
+        }
+
+        @Test
+        void shouldSendNotificationForRadiusChange() {
+            // Arrange
+            updatedEvent.setRadius(new BigDecimal("10"));
+
+            // Act
+            notificationService.sendCrisisEventUpdateNotifications(updatedEvent, previousEvent);
+
+            // Assert
+            verify(notificationRepository).save(any(Notification.class));
+            verify(messagingTemplate).convertAndSend(
+                eq("/topic/notifications/2"),
+                any(NotificationDto.class)
+            );
+        }
+
+        @Test
+        void shouldSendNotificationForActiveStatusChange() {
+            // Arrange
+            updatedEvent.setActive(false);
+
+            // Act
+            notificationService.sendCrisisEventUpdateNotifications(updatedEvent, previousEvent);
+
+            // Assert
+            verify(notificationRepository).save(any(Notification.class));
+            verify(messagingTemplate).convertAndSend(
+                eq("/topic/notifications/2"),
+                any(NotificationDto.class)
+            );
+        }
+
+        @Test
+        void shouldSendNotificationForMultipleChanges() {
+            // Arrange
+            updatedEvent.setName("Updated Crisis Name");
+            updatedEvent.setSeverity(CrisisEvent.Severity.red);
+            updatedEvent.setRadius(new BigDecimal("10"));
+
+            // Act
+            notificationService.sendCrisisEventUpdateNotifications(updatedEvent, previousEvent);
+
+            // Assert
+            verify(notificationRepository).save(any(Notification.class));
+            verify(messagingTemplate).convertAndSend(
+                eq("/topic/notifications/2"),
+                any(NotificationDto.class)
+            );
+        }
+
+        @Test
+        void shouldHandleNullValues() {
+            // Arrange
+            previousEvent.setDescription(null);
+            updatedEvent.setDescription("New description");
+
+            // Act
+            notificationService.sendCrisisEventUpdateNotifications(updatedEvent, previousEvent);
+
+            // Assert
+            verify(notificationRepository).save(any(Notification.class));
+            verify(messagingTemplate).convertAndSend(
+                eq("/topic/notifications/2"),
+                any(NotificationDto.class)
+            );
+        }
+    }
 }
