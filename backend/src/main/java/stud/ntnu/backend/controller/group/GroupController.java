@@ -1,26 +1,26 @@
 package stud.ntnu.backend.controller.group;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import stud.ntnu.backend.dto.group.GroupInviteRequestDto;
 import stud.ntnu.backend.dto.group.GroupSummaryDto;
 import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.service.group.GroupService;
-import stud.ntnu.backend.model.group.GroupInvitation;
 import stud.ntnu.backend.dto.group.GroupInvitationSummaryDto;
 
 /**
@@ -40,6 +40,7 @@ import stud.ntnu.backend.dto.group.GroupInvitationSummaryDto;
  */
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Crisis Supply Groups", description = "Operations for managing crisis-supply groups, including creation, membership, and invitations")
 public class GroupController {
 
   private final GroupService groupService;
@@ -58,6 +59,12 @@ public class GroupController {
    * @return ResponseEntity containing: - 200 OK with paginated list of GroupSummaryDto if groups
    * exist - 404 Not Found if no groups exist
    */
+  @Operation(summary = "Get current user's groups", description = "Retrieves all groups associated with the current user's household. Results are paginated and include basic group information.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved user's groups", 
+          content = @Content(schema = @Schema(implementation = GroupSummaryDto.class))),
+      @ApiResponse(responseCode = "404", description = "No groups found")
+  })
   @GetMapping("/user/groups/current")
   public ResponseEntity<Page<GroupSummaryDto>> getCurrentUserGroups(Principal principal,
       Pageable pageable) {
@@ -78,6 +85,11 @@ public class GroupController {
    * @return ResponseEntity containing: - 200 OK if removal was successful - 404 Not Found if group
    * doesn't exist or user is not a member
    */
+  @Operation(summary = "Leave group", description = "Removes the current user's household from a specified group. This is a soft delete that sets the left_at timestamp.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully left the group"),
+      @ApiResponse(responseCode = "404", description = "Group not found or user is not a member")
+  })
   @PatchMapping(path = "/user/groups/leave/{groupid}")
   public ResponseEntity<?> removeHouseholdFromGroup(@PathVariable("groupid") Integer groupId,
       Principal principal) {
@@ -98,6 +110,12 @@ public class GroupController {
    * @return ResponseEntity containing: - 200 OK with list of HouseholdDto if successful - 403
    * Forbidden if user is not a member of the group
    */
+  @Operation(summary = "Get group households", description = "Retrieves all households currently active in a specified group. Requires the requesting user to be a member of the group.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved group households", 
+          content = @Content(schema = @Schema(implementation = HouseholdDto.class))),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user is not a member of the group")
+  })
   @GetMapping(path = "/user/groups/{groupId}/households")
   public ResponseEntity<List<HouseholdDto>> getCurrentHouseholdsInGroup(
       @PathVariable("groupId") Integer groupId, Principal principal) {
@@ -118,6 +136,11 @@ public class GroupController {
    * @return ResponseEntity containing: - 200 OK if group creation was successful - 403 Forbidden if
    * user lacks household admin privileges
    */
+  @Operation(summary = "Create group", description = "Creates a new group with the specified name. Requires the requesting user to have household admin privileges.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Group created successfully"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user lacks household admin privileges")
+  })
   @PostMapping(path = "/user/groups/{name}")
   public ResponseEntity<?> createGroup(@PathVariable("name") String name, Principal principal) {
     String email = principal.getName();
@@ -136,6 +159,14 @@ public class GroupController {
    * @return ResponseEntity containing: - 200 OK if invitation was sent successfully - 403 Forbidden
    * if user is not a member of the group - 404 Not Found if household or group doesn't exist
    */
+  @Operation(summary = "Invite household to group", description = "Invites a household to join a group. Requires the requesting user to be a member of the group.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Invitation sent successfully"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user is not a member of the group"),
+      @ApiResponse(responseCode = "404", description = "Household or group not found"),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid invitation data", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PostMapping("/user/groups/invite")
   public ResponseEntity<?> inviteHouseholdToGroup(
       @RequestBody @Valid GroupInviteRequestDto requestDto,
@@ -163,6 +194,12 @@ public class GroupController {
    * @return ResponseEntity containing: - 200 OK with list of GroupInvitationSummaryDto if successful - 404
    * Not Found if no pending invitations exist
    */
+  @Operation(summary = "Get pending invitations", description = "Retrieves all pending invitations for the current user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved pending invitations", 
+          content = @Content(schema = @Schema(implementation = GroupInvitationSummaryDto.class))),
+      @ApiResponse(responseCode = "404", description = "No pending invitations found")
+  })
   @GetMapping("/user/groups/invitations")
   public ResponseEntity<?> getPendingInvitations(Principal principal) {
     String email = principal.getName();
@@ -179,6 +216,13 @@ public class GroupController {
    * Forbidden if user is not a member of the invited household - 404 Not Found if invitation
    * doesn't exist or is not pending
    */
+  @Operation(summary = "Accept invitation", description = "Accepts a group invitation. Requires the user to be a member of the invited household.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Invitation accepted successfully"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user is not a member of the invited household", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "404", description = "Invitation not found or not pending")
+  })
   @PatchMapping("/user/groups/invitations/{invitationId}/accept")
   public ResponseEntity<?> acceptInvitation(
       @PathVariable("invitationId") Integer invitationId,
@@ -201,6 +245,13 @@ public class GroupController {
    * Forbidden if user is not a member of the invited household - 404 Not Found if invitation
    * doesn't exist or is not pending
    */
+  @Operation(summary = "Reject invitation", description = "Rejects a group invitation. Requires the user to be a member of the invited household.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Invitation rejected successfully"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user is not a member of the invited household", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "404", description = "Invitation not found or not pending")
+  })
   @PatchMapping("/user/groups/invitations/{invitationId}/reject")
   public ResponseEntity<?> rejectInvitation(
       @PathVariable("invitationId") Integer invitationId,
