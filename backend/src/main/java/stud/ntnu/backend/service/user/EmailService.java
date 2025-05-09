@@ -60,30 +60,35 @@ public class EmailService {
    * @param user  The User object representing the recipient. Must have a valid email address.
    * @param token The unique verification token string to include in the link.
    */
-  public void sendVerificationEmail(User user, String token) {
+  public void sendVerificationEmail(User user, String token) throws MessagingException
+  {
     if (user == null || user.getEmail() == null || token == null) {
       throw new IllegalArgumentException(
           "Cannot send verification email. User or token is null or user email is null.");
     }
 
     try {
-      SimpleMailMessage message = new SimpleMailMessage();
-      message.setFrom(senderEmail);
-      message.setTo(user.getEmail());
+      MimeMessage mimeMessage = mailSender.createMimeMessage();
+      MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+
+      helper.setFrom(senderEmail);
+      helper.setTo(user.getEmail());
 
       String userName = (user.getName() != null ? user.getName() : "Bruker/User");
       String verificationUrl = "http://localhost:8080/api/auth/verify?token=" + token;
 
-      message.setSubject(messageSource.getMessage("verification.email.subject", null,
-          LocaleContextHolder.getLocale()));
-      message.setText(messageSource.getMessage("verification.email.body",
+      helper.setSubject(messageSource.getMessage("verification.email.subject", null, LocaleContextHolder.getLocale()));
+      String emailBody = messageSource.getMessage("verification.email.body",
           new Object[]{userName, verificationUrl},
-          LocaleContextHolder.getLocale()));
+          LocaleContextHolder.getLocale());
+      helper.setText(emailBody, true); // Set 'true' to indicate HTML content
 
-      mailSender.send(message);
+      mailSender.send(mimeMessage);
 
     } catch (RuntimeException e) {
       throw new RuntimeException("Failed to send verification email", e);
+    } catch (MessagingException e) {
+      throw new MessagingException("Mail sending error for verification email", e);
     }
   }
 

@@ -96,7 +96,8 @@ public class AuthService {
    * @throws IllegalArgumentException if a user with the given email already exists
    */
   @Transactional
-  public void register(RegisterRequestDto registrationRequest) {
+  public void register(RegisterRequestDto registrationRequest) throws MessagingException
+  {
     // Check if user already exists
     if (userRepository.existsByEmail(registrationRequest.getEmail())) {
       throw new IllegalArgumentException("User with this email already exists");
