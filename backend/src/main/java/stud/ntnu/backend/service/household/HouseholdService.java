@@ -314,52 +314,7 @@ public class HouseholdService {
     householdAdminRepository.save(admin);
 
     return household;
-  }
-
-  /**
-   * Switches a user to a different household. If the user is an admin of their current household
-   * and is the last admin, they cannot switch households.
-   *
-   * @param email       the email of the user
-   * @param householdId the ID of the target household
-   * @return the target household
-   * @throws IllegalStateException if the user or target household is not found, or if the user is
-   *                               the last admin of their current household
-   */
-  @Transactional
-  public Household switchHousehold(String email, Integer householdId) {
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new IllegalStateException("User not found"));
-
-    Household currentHousehold = user.getHousehold();
-    Household targetHousehold = householdRepository.findById(householdId)
-        .orElseThrow(() -> new IllegalStateException("Household not found"));
-
-    // Check if user is an admin and if they are the last admin
-    boolean isAdmin = householdAdminRepository.existsByUser(user);
-    if (isAdmin && currentHousehold != null) {
-      // Count the number of admins in the current household
-      long adminCount = currentHousehold.getUsers().stream()
-          .filter(householdAdminRepository::existsByUser)
-          .count();
-
-      // If this is the last admin, prevent switching
-      if (adminCount <= 1) {
-        throw new IllegalStateException("The last household admin cannot switch households");
-      }
-
-      // Remove admin status before switching
-      HouseholdAdmin admin = householdAdminRepository.findByUser(user)
-          .orElseThrow(() -> new IllegalStateException("Admin record not found"));
-      householdAdminRepository.delete(admin);
-    }
-
-    // Update the user with the new household
-    user.setHousehold(targetHousehold);
-    userRepository.save(user);
-
-    return targetHousehold;
-  }
+  } 
 
   /**
    * Invites a user to join a household. Only household admins can send invitations. The invitation
@@ -460,6 +415,7 @@ public class HouseholdService {
     // Remove user from household
     user.setHousehold(null);
     userRepository.save(user);
+    updatePopulationCount(household);
   }
 
   /**
@@ -594,6 +550,7 @@ public class HouseholdService {
     member = emptyHouseholdMemberRepository.save(member);
 
     // Return the DTO
+    updatePopulationCount(household);
     return new EmptyHouseholdMemberDto(
         member.getId(),
         member.getName(),
@@ -639,6 +596,7 @@ public class HouseholdService {
 
     // Delete the member
     emptyHouseholdMemberRepository.delete(member);
+    updatePopulationCount(household);
   }
 
   /**
@@ -816,6 +774,7 @@ public class HouseholdService {
     // Remove the member from the household
     member.setHousehold(null);
     userRepository.save(member);
+    updatePopulationCount(household);
   }
 
   /**
@@ -848,5 +807,23 @@ public class HouseholdService {
         household.getLongitude(),
         members
     );
+  }
+
+  /**
+   * Updates the population count for a household by calculating the total number of members.
+   * This includes both registered users and empty household members (excluding pets).
+   * The count is persisted to the database.
+   *
+   * @param household the household entity to update the population count for
+   * @throws IllegalArgumentException if the household parameter is null
+   */
+  public void updatePopulationCount(Household household) {
+    int userCount = userRepository.findByHousehold(household).size();
+    int emptyCount = (int) emptyHouseholdMemberRepository.findByHousehold(household)
+        .stream()
+        .filter(member -> member.getType() != null && !member.getType().equalsIgnoreCase("pet"))
+        .count();
+    household.setPopulationCount(userCount + emptyCount);
+    householdRepository.save(household);
   }
 }
