@@ -107,46 +107,35 @@ public class HouseholdService {
    */
   @Transactional
   public Household updateHousehold(String email, String name, String address) {
-    // Check if the user exists
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"));
 
-    // Check if the user has a household
     Household household = user.getHousehold();
     if (household == null) {
       throw new IllegalStateException("User doesn't have a household");
     }
 
-    // Check if the user is an admin
     if (!isUserHouseholdAdmin(user)) {
       throw new IllegalStateException("Only household admins can update households");
     }
 
-    // Check if the new name is different from current name and if it already exists
     if (!name.equals(household.getName()) && householdRepository.existsByName(name)) {
       throw new IllegalStateException("A household with this name already exists");
     }
 
-    // Update the household
-    household.setName(name);
-    household.setAddress(address);
-
-    // If the address changed, try to update the coordinates
-    if (!address.equals(household.getAddress())) {
-      try {
-        CoordinatesItemDto coordinates = LocationUtil.getCoordinatesByAddress(address);
-        if (coordinates != null) {
-          household.setLatitude(coordinates.getLatitude());
-          household.setLongitude(coordinates.getLongitude());
-        }
-      } catch (Exception e) {
-        // Continue without updating coordinates
-      }
+    // Validate address before making any changes
+    CoordinatesItemDto coordinates = LocationUtil.getCoordinatesByAddress(address);
+    if (coordinates == null || coordinates.getLatitude() == null || coordinates.getLongitude() == null) {
+      throw new IllegalStateException("Invalid address: Could not find coordinates");
     }
 
-    Household updatedHousehold = householdRepository.save(household);
+    // Only update if validation passes
+    household.setName(name);
+    household.setAddress(address);
+    household.setLatitude(coordinates.getLatitude());
+    household.setLongitude(coordinates.getLongitude());
 
-    return updatedHousehold;
+    return householdRepository.save(household);
   }
 
   /**
@@ -247,71 +236,48 @@ public class HouseholdService {
    */
   @Transactional
   public Household createHousehold(HouseholdCreateRequestDto requestDto) {
-    // Get the current authenticated user
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String email = authentication.getName();
 
-    // Find the user by email
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found"));
 
-    // Check if the user already has a household
     if (user.getHousehold() != null) {
       throw new IllegalStateException("User already has a household");
     }
 
-    // Check if a household with this name already exists
     if (householdRepository.existsByName(requestDto.getName())) {
       throw new IllegalStateException("A household with this name already exists");
     }
 
-    // Create a new household
     Household household = new Household(requestDto.getName(), requestDto.getAddress(),
         requestDto.getPopulationCount());
 
     if (requestDto.getAddress() != null && !requestDto.getAddress().trim().isEmpty()) {
-      try {
-        // Call the LocationUtil to get coordinates from the address
-        CoordinatesItemDto coordinates = LocationUtil.getCoordinatesByAddress(
-            requestDto.getAddress());
-
-        if (coordinates != null && coordinates.getLatitude() != null
-            && coordinates.getLongitude() != null) {
-          // Set the latitude and longitude on the household object
-          household.setLatitude(coordinates.getLatitude());
-          household.setLongitude(coordinates.getLongitude());
-        } else {
-          // Keep household.latitude and household.longitude as null
-        }
-      } catch (IllegalArgumentException e) {
-      } catch (Exception e) {
-        // Keep household.latitude and household.longitude as null
+      CoordinatesItemDto coordinates = LocationUtil.getCoordinatesByAddress(requestDto.getAddress());
+      if (coordinates == null || coordinates.getLatitude() == null || coordinates.getLongitude() == null) {
+        throw new IllegalStateException("Invalid address: Could not find coordinates");
       }
+      household.setLatitude(coordinates.getLatitude());
+      household.setLongitude(coordinates.getLongitude());
     } else {
-      // Set optional coordinates from DTO if they were manually provided (though the goal is to calculate)
-      // This part is less relevant now as we prioritize calculation, but keep it for flexibility
       household.setLatitude(requestDto.getLatitude());
       household.setLongitude(requestDto.getLongitude());
     }
 
-    // Save the household first
     household = householdRepository.save(household);
-
-    // Update the user with the new household
     user.setHousehold(household);
     user = userRepository.save(user);
 
-    // Check if user is already an admin
     if (householdAdminRepository.existsByUser(user)) {
       throw new IllegalStateException("User is already a household admin");
     }
 
-    // Create and save the household admin
     HouseholdAdmin admin = new HouseholdAdmin(user, household);
     householdAdminRepository.save(admin);
 
     return household;
-  } 
+  }
 
   /**
    * Invites a user to join a household. Only household admins can send invitations. The invitation
