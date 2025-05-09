@@ -22,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import jakarta.mail.MessagingException;
 
 import stud.ntnu.backend.dto.auth.AuthRequestDto;
 import stud.ntnu.backend.dto.auth.AuthResponseDto;
@@ -354,7 +355,7 @@ class AuthServiceTest {
 
         @Test
         @DisplayName("Send 2FA code should call service")
-        void send2FACodeShouldCallService() {
+        void send2FACodeShouldCallService() throws MessagingException {
             // Given
             String email = "2fa@example.com";
 

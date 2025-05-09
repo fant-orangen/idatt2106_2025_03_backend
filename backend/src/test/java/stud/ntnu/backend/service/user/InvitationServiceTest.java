@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import stud.ntnu.backend.dto.household.HouseholdInviteResponseDto;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.household.Invitation;
@@ -17,6 +19,7 @@ import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.household.HouseholdRepository;
 import stud.ntnu.backend.repository.household.InvitationRepository;
 import stud.ntnu.backend.repository.user.UserRepository;
+import stud.ntnu.backend.service.household.HouseholdService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,6 +33,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class InvitationServiceTest {
 
     @Mock
@@ -43,6 +47,9 @@ class InvitationServiceTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private HouseholdService householdService;
 
     @InjectMocks
     private InvitationService invitationService;
@@ -259,6 +266,7 @@ class InvitationServiceTest {
                         eq(invitation.getId()),
                         anyString()
                 )).thenReturn(new Notification());
+                doNothing().when(householdService).updatePopulationCount(any(Household.class));
 
                 // Act
                 Household result = invitationService.acceptInvitation(invitee.getEmail(), token);
@@ -281,6 +289,7 @@ class InvitationServiceTest {
                         anyString()
                 );
                 verify(notificationService).sendNotification(any(Notification.class));
+                verify(householdService).updatePopulationCount(any(Household.class));
             }
         }
 
