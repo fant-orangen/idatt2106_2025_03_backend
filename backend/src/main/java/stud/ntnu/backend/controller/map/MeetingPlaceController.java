@@ -1,19 +1,19 @@
 package stud.ntnu.backend.controller.map;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import stud.ntnu.backend.dto.map.CreateMeetingPlaceDto;
@@ -40,6 +40,7 @@ import stud.ntnu.backend.service.user.UserService;
  */
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Meeting Places", description = "Operations for managing meeting places in the crisis coordination system")
 public class MeetingPlaceController {
 
   private final MeetingPlaceService meetingPlaceService;
@@ -66,6 +67,15 @@ public class MeetingPlaceController {
    * @return ResponseEntity containing: - 200 OK with the created meeting place if successful - 403
    * Forbidden if user is not an admin - 400 Bad Request if creation fails
    */
+  @Operation(summary = "Create meeting place", description = "Creates a new meeting place. Only accessible by administrators.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully created meeting place", 
+          content = @Content(schema = @Schema(implementation = MeetingPlaceDto.class))),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user is not an admin", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid data", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PostMapping("/admin/meeting-places")
   public ResponseEntity<?> createMeetingPlace(
       @Valid @RequestBody CreateMeetingPlaceDto createDto,
@@ -93,6 +103,15 @@ public class MeetingPlaceController {
    * @return ResponseEntity containing: - 200 OK with the archived meeting place if successful - 403
    * Forbidden if user is not an admin - 400 Bad Request if archiving fails
    */
+  @Operation(summary = "Archive meeting place", description = "Archives a meeting place. Only accessible by administrators.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully archived meeting place", 
+          content = @Content(schema = @Schema(implementation = MeetingPlaceDto.class))),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user is not an admin", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid meeting place ID", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PatchMapping("/admin/meeting-places/{id}/archive")
   public ResponseEntity<?> archiveMeetingPlace(
       @PathVariable Integer id,
@@ -117,6 +136,15 @@ public class MeetingPlaceController {
    * @return ResponseEntity containing: - 200 OK with the activated meeting place if successful -
    * 403 Forbidden if user is not an admin - 400 Bad Request if activation fails
    */
+  @Operation(summary = "Activate meeting place", description = "Activates a meeting place. Only accessible by administrators.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully activated meeting place", 
+          content = @Content(schema = @Schema(implementation = MeetingPlaceDto.class))),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user is not an admin", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid meeting place ID", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PatchMapping("/admin/meeting-places/{id}/activate")
   public ResponseEntity<?> activateMeetingPlace(
       @PathVariable Integer id,
@@ -142,6 +170,12 @@ public class MeetingPlaceController {
    * @return ResponseEntity containing: - 200 OK with list of nearby meeting places if successful -
    * 400 Bad Request if retrieval fails
    */
+  @Operation(summary = "Get nearby meeting places", description = "Retrieves all active meeting places within a specified distance of a location.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved nearby meeting places", 
+          content = @Content(schema = @Schema(implementation = MeetingPlaceDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid coordinates")
+  })
   @GetMapping("/public/meeting-places/nearby")
   public ResponseEntity<List<MeetingPlaceDto>> getNearbyMeetingPlaces(
       @RequestParam BigDecimal latitude,
@@ -167,6 +201,12 @@ public class MeetingPlaceController {
    * @return ResponseEntity containing: - 200 OK with paginated list of meeting places if successful
    * - 400 Bad Request if retrieval fails
    */
+  @Operation(summary = "Get all meeting places", description = "Retrieves a paginated list of all meeting places.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved meeting places", 
+          content = @Content(schema = @Schema(implementation = MeetingPlaceDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid pagination parameters")
+  })
   @GetMapping("/public/meeting-places/all")
   public ResponseEntity<Page<MeetingPlaceDto>> getAllMeetingPlaces(
       @RequestParam(defaultValue = "0") int page,
@@ -189,6 +229,12 @@ public class MeetingPlaceController {
    * @return ResponseEntity containing: - 200 OK with paginated list of meeting place previews if
    * successful - 400 Bad Request if retrieval fails
    */
+  @Operation(summary = "Get meeting place previews", description = "Retrieves a paginated list of meeting place previews.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved meeting place previews", 
+          content = @Content(schema = @Schema(implementation = MeetingPlacePreviewDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid pagination parameters")
+  })
   @GetMapping("/public/meeting-places/all/previews")
   public ResponseEntity<Page<MeetingPlacePreviewDto>> getAllMeetingPlacePreviews(
       @RequestParam(defaultValue = "0") int page,
@@ -209,6 +255,13 @@ public class MeetingPlaceController {
    * @return ResponseEntity containing: - 200 OK with the meeting place if found - 404 Not Found if
    * the meeting place doesn't exist - 400 Bad Request if retrieval fails
    */
+  @Operation(summary = "Get meeting place by ID", description = "Retrieves a specific meeting place by its ID.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved meeting place", 
+          content = @Content(schema = @Schema(implementation = MeetingPlaceDto.class))),
+      @ApiResponse(responseCode = "404", description = "Meeting place not found"),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid meeting place ID")
+  })
   @GetMapping("/public/meeting-places/{id}")
   public ResponseEntity<MeetingPlaceDto> getMeetingPlaceById(@PathVariable Integer id) {
     try {

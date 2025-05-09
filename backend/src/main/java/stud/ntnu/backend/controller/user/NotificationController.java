@@ -1,5 +1,11 @@
 package stud.ntnu.backend.controller.user;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 import java.util.List;
 
@@ -7,6 +13,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,6 +46,7 @@ import stud.ntnu.backend.service.user.UserService;
  */
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Notifications", description = "Operations for managing user notifications and preferences")
 public class NotificationController {
 
   private final NotificationService notificationService;
@@ -68,6 +76,13 @@ public class NotificationController {
    * @return ResponseEntity containing a page of NotificationDto objects, or 400 Bad Request if an
    * error occurs
    */
+  @Operation(summary = "Get notifications", description = "Retrieves paginated notifications for the current user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved notifications", 
+          content = @Content(schema = @Schema(implementation = NotificationDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - user not found or other error", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @GetMapping("/user/notifications")
   public ResponseEntity<?> getNotifications(Principal principal, Pageable pageable) {
     try {
@@ -93,6 +108,15 @@ public class NotificationController {
    * @return ResponseEntity containing the updated NotificationDto, 403 Forbidden if unauthorized,
    * or 400 Bad Request if an error occurs
    */
+  @Operation(summary = "Mark notification as read", description = "Marks a specific notification as read for the current user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully marked notification as read", 
+          content = @Content(schema = @Schema(implementation = NotificationDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - notification not found or other error", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user not authorized to mark this notification", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PutMapping("/user/notifications/{id}/read")
   public ResponseEntity<?> markAsRead(@PathVariable Integer id, Principal principal) {
     try {
@@ -118,6 +142,12 @@ public class NotificationController {
    * @param principal the authenticated user's principal
    * @return ResponseEntity with status 200 OK if successful, or 400 Bad Request if an error occurs
    */
+  @Operation(summary = "Mark all notifications as read", description = "Marks all unread notifications as read for the current user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully marked all notifications as read"),
+      @ApiResponse(responseCode = "400", description = "Bad request - user not found or other error", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PatchMapping("/user/notifications/read-all")
   public ResponseEntity<?> markAllAsRead(Principal principal) {
     try {
@@ -136,6 +166,13 @@ public class NotificationController {
    * @return ResponseEntity containing a boolean indicating unread status, or 400 Bad Request if an
    * error occurs
    */
+  @Operation(summary = "Check for unread notifications", description = "Checks if the current user has any unread notifications.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully checked unread status", 
+          content = @Content(schema = @Schema(type = "boolean"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - user not found or other error", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @GetMapping("/user/notifications/any-unread")
   public ResponseEntity<?> anyUnread(Principal principal) {
     try {
@@ -168,6 +205,14 @@ public class NotificationController {
    * @return ResponseEntity with status 200 OK if successful, 403 Forbidden if unauthorized, or 400
    * Bad Request if an error occurs
    */
+  @Operation(summary = "Create system notification", description = "Creates a system-wide notification visible to all users. Admin only.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully created system notification"),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid notification data", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user not authorized as admin", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PostMapping("/admin/notifications/system")
   public ResponseEntity<?> createSystemNotification(
       @Valid @RequestBody SystemNotificationCreateDto createDto,
@@ -200,6 +245,12 @@ public class NotificationController {
    * @param enable         whether to enable or disable the preference
    * @return ResponseEntity with status 200 OK if successful, or 400 Bad Request if an error occurs
    */
+  @Operation(summary = "Update notification preference", description = "Updates a user's notification preference for a specific notification type.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully updated notification preference"),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid preference type or user not found", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PatchMapping("/user/notifications/preferences/{preferenceType}")
   public ResponseEntity<?> changeNotificationPreference(
       Principal principal,
