@@ -68,6 +68,11 @@ public class UserProfileDto {
      */
     private String householdName;
 
+  /**
+   * Boolean indicating whether the user has 2fa enabled.
+   */
+  private Boolean isUsing2FA;
+
     /**
      * Default constructor for UserProfileDto.
      * Creates a new instance with default values.
@@ -89,11 +94,12 @@ public class UserProfileDto {
      * @param emailVerified        Whether the user's email is verified
      * @param householdId          The unique identifier of the user's household
      * @param householdName        The name of the user's household
+     * @param isUsing2FA           Whether 2fa is enabled.
      */
     public UserProfileDto(Integer id, String email, String firstName, String lastName,
             String homeAddress, BigDecimal homeLatitude, BigDecimal homeLongitude,
             Boolean locationSharingEnabled, Boolean emailVerified,
-            Integer householdId, String householdName) {
+            Integer householdId, String householdName, Boolean isUsing2FA) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
@@ -105,5 +111,6 @@ public class UserProfileDto {
         this.emailVerified = emailVerified;
         this.householdId = householdId;
         this.householdName = householdName;
+    this.isUsing2FA = isUsing2FA;
     }
 }
