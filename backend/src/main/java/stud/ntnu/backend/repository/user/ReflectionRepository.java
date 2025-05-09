@@ -71,19 +71,28 @@ public interface ReflectionRepository extends JpaRepository<Reflection, Integer>
    * @param pageable pagination information
    * @return a page of shared reflections
    */
-  @Query("SELECT DISTINCT r FROM Reflection r " +
-      "WHERE r.shared = true AND r.deleted = false AND (" +
-      "  (r.user.household.id = (SELECT u.household.id FROM User u WHERE u.id = :userId)) OR " +
-      "  (r.user.household.id IN (" +
-      "    SELECT gm.household.id FROM GroupMembership gm " +
-      "    WHERE gm.group.id IN (" +
-      "      SELECT gm2.group.id FROM GroupMembership gm2 " +
-      "      WHERE gm2.household.id = (SELECT u.household.id FROM User u WHERE u.id = :userId) " +
-      "      AND (gm2.leftAt IS NULL OR gm2.leftAt > CURRENT_TIMESTAMP)" +
-      "    ) " +
-      "    AND (gm.leftAt IS NULL OR gm.leftAt > CURRENT_TIMESTAMP)" +
-      "  ))" +
-      ") AND r.user.id != :userId " +
-      "ORDER BY r.createdAt DESC")
+  @Query(value = """
+    SELECT DISTINCT r.* FROM reflection r
+    WHERE r.shared = true AND r.deleted = false AND (
+      r.user_id = (
+        SELECT u.household_id FROM user u WHERE u.id = :userId
+      )
+      OR r.user_id IN (
+        SELECT gm.household_id FROM group_membership gm
+        WHERE gm.group_id IN (
+          SELECT gm2.group_id FROM group_membership gm2
+          WHERE gm2.household_id = (
+            SELECT u.household_id FROM user u WHERE u.id = :userId
+          )
+          AND (gm2.left_at IS NULL OR gm2.left_at > CURRENT_TIMESTAMP)
+        )
+        AND (gm.left_at IS NULL OR gm.left_at > CURRENT_TIMESTAMP)
+      )
+    )
+    AND r.user_id != :userId
+    ORDER BY r.created_at DESC
+    """,
+    countQuery = "SELECT COUNT(DISTINCT r.id) FROM reflection r WHERE r.shared = true AND r.deleted = false",
+    nativeQuery = true)
   Page<Reflection> findSharedVisibleToUser(@Param("userId") Integer userId, Pageable pageable);
 }
