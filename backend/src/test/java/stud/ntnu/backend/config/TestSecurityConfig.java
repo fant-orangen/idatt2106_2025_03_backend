@@ -18,13 +18,20 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import stud.ntnu.backend.config.JwtAuthenticationFilter;
+import stud.ntnu.backend.service.user.CustomUserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
+import stud.ntnu.backend.util.JwtUtil;
 
 @Configuration
 @EnableWebSecurity
 public class TestSecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtUtil jwtUtil, CustomUserDetailsService customUserDetailsService) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
@@ -63,6 +70,7 @@ public class TestSecurityConfig {
             .exceptionHandling(exception -> exception.accessDeniedHandler(customAccessDeniedHandler()));
         http.headers(headers ->
             headers.frameOptions(frameOptions -> frameOptions.disable()));
+        http.addFilterBefore(jwtAuthenticationFilter(jwtUtil, userDetailsService(customUserDetailsService)), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -98,5 +106,23 @@ public class TestSecurityConfig {
                 response.getWriter().write(accessDeniedException.getMessage());
             }
         };
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(CustomUserDetailsService customUserDetailsService) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService(customUserDetailsService));
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(CustomUserDetailsService customUserDetailsService) {
+        return customUserDetailsService;
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
+        return new JwtAuthenticationFilter(jwtUtil, userDetailsService);
     }
 }
