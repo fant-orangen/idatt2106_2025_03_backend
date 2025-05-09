@@ -1,5 +1,6 @@
 package stud.ntnu.backend.service.map;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,24 +25,12 @@ import static stud.ntnu.backend.util.LocationUtil.calculateDistance;
  * deletion of POIs and POI types.
  */
 @Service
+@RequiredArgsConstructor
 public class PoiService {
 
   private final PointOfInterestRepository pointOfInterestRepository;
   private final PoiTypeRepository poiTypeRepository;
   private final SearchUtil searchUtil;
-
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param pointOfInterestRepository repository for point of interest operations
-   * @param poiTypeRepository         repository for POI type operations
-   */
-  public PoiService(PointOfInterestRepository pointOfInterestRepository,
-      PoiTypeRepository poiTypeRepository, SearchUtil searchUtil) {
-    this.pointOfInterestRepository = pointOfInterestRepository;
-    this.poiTypeRepository = poiTypeRepository;
-    this.searchUtil = searchUtil;
-  }
 
   //Constants
   String poiNotFound = "POI type not found";

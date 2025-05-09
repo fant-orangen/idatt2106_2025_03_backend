@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
 import stud.ntnu.backend.dto.inventory.ProductBatchDto;
 import stud.ntnu.backend.dto.inventory.ProductTypeDto;
 import stud.ntnu.backend.model.group.Group;
@@ -32,6 +33,7 @@ import stud.ntnu.backend.util.SearchUtil;
  * resources
  */
 @Service
+@RequiredArgsConstructor
 public class GroupInventoryService {
 
   private final GroupInventoryContributionRepository groupInventoryContributionRepository;
@@ -41,36 +43,6 @@ public class GroupInventoryService {
   private final HouseholdRepository householdRepository;
   private final UserRepository userRepository;
   private final SearchUtil searchUtil;
-
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param groupInventoryContributionRepository repository for group inventory contribution
-   *                                             operations
-   * @param productTypeRepository                repository for product type operations
-   * @param groupRepository                      repository for group operations
-   * @param productBatchRepository               repository for product batch operations
-   * @param householdRepository                  repository for household operations
-   * @param userRepository                       repository for user operations
-   * @param searchUtil                           utility for search operations
-   */
-  @Autowired
-  public GroupInventoryService(
-      GroupInventoryContributionRepository groupInventoryContributionRepository,
-      ProductTypeRepository productTypeRepository,
-      GroupRepository groupRepository,
-      ProductBatchRepository productBatchRepository,
-      HouseholdRepository householdRepository,
-      UserRepository userRepository,
-      SearchUtil searchUtil) {
-    this.groupInventoryContributionRepository = groupInventoryContributionRepository;
-    this.productTypeRepository = productTypeRepository;
-    this.groupRepository = groupRepository;
-    this.productBatchRepository = productBatchRepository;
-    this.householdRepository = householdRepository;
-    this.userRepository = userRepository;
-    this.searchUtil = searchUtil;
-  }
 
   /**
    * Retrieves all group inventory contributions.

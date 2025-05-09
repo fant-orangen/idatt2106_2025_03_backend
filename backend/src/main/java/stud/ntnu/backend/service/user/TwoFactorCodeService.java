@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.model.user.TwoFactorCode;
 import stud.ntnu.backend.repository.user.TwoFactorCodeRepository;
 import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 
 /**
  * <h2>TwoFactorCodeService</h2>
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
  * codes.</p>
  */
 @Service
+@RequiredArgsConstructor
 public class TwoFactorCodeService {
 
     @Value("${twofactor.code.expiration.minutes}")
@@ -43,6 +45,9 @@ public class TwoFactorCodeService {
      * @return A random 6-digit integer.
      */
     public Integer generateVerificationCode() {
+      return 100000 + new Random().nextInt(900000); // Ensures a 6-digit integer
+    }
+
 
         int code = 100000 + new Random().nextInt(900000);
         System.out.println("Generated verification code: " + code);

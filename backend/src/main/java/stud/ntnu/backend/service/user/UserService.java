@@ -1,6 +1,7 @@
 package stud.ntnu.backend.service.user;
 
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.repository.user.EmailTokenRepository;
 import stud.ntnu.backend.repository.user.SafetyConfirmationRepository;
@@ -28,8 +29,8 @@ import stud.ntnu.backend.security.AdminChecker;
  * creation is handled by AuthService.
  */
 @Service
-public class UserService
-{
+@RequiredArgsConstructor
+public class UserService {
 
   private final UserRepository userRepository;
   private final EmailTokenRepository emailTokenRepository;

@@ -4,7 +4,7 @@ INSERT INTO roles (name) VALUES ('ADMIN');
 INSERT INTO roles (name) VALUES ('SUPERADMIN');
 
 -- HOUSEHOLDS
-INSERT INTO households (name, address, population_count, latitude, longitude) VALUES ('Smith Family', '123 Main St, Anytown', 4, 63.4305, 10.3951);
+INSERT INTO households (name, address, population_count, latitude, longitude) VALUES ('Smith Family', '123 Main St, Anytown', 5, 63.4305, 10.3951);
 INSERT INTO households (name, address, population_count, latitude, longitude) VALUES ('Johnson Household', '456 Oak Ave, Somewhere', 3, 63.4305, 10.3951);
 INSERT INTO households (name, address, population_count, latitude, longitude) VALUES ('Brown Residence', '789 Pine St, Elsewhere', 2, 63.4305, 10.3951);
 

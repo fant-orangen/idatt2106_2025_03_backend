@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import stud.ntnu.backend.dto.news.NewsArticleDTO;
 import stud.ntnu.backend.dto.news.NewsArticleResponseDTO;
@@ -25,20 +26,12 @@ import stud.ntnu.backend.util.LocationUtil;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class NewsService {
 
   private final NewsArticleRepository newsArticleRepository;
   private final UserRepository userRepository;
   private final CrisisEventRepository crisisEventRepository;
-
-  @Autowired
-  public NewsService(NewsArticleRepository newsArticleRepository,
-      UserRepository userRepository,
-      CrisisEventRepository crisisEventRepository) {
-    this.newsArticleRepository = newsArticleRepository;
-    this.userRepository = userRepository;
-    this.crisisEventRepository = crisisEventRepository;
-  }
 
   /**
    * Creates a new news article for a specific crisis event.

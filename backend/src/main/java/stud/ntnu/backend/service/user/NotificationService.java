@@ -1,6 +1,6 @@
 package stud.ntnu.backend.service.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
  * Service for managing notifications. Handles creation, retrieval, and sending of notifications.
  */
 @Service
+@RequiredArgsConstructor
 public class NotificationService {
 
   private final NotificationRepository notificationRepository;
@@ -37,28 +38,6 @@ public class NotificationService {
   private final UserRepository userRepository;
   private final SimpMessagingTemplate messagingTemplate;
   private final MessageSource messageSource;
-
-  /**
-   * Constructs the NotificationService with necessary dependencies.
-   *
-   * @param notificationRepository           Repository for notification data access.
-   * @param notificationPreferenceRepository Repository for notification preference data access.
-   * @param userRepository                   Repository for user data access.
-   * @param messagingTemplate                Template for sending messages via WebSocket.
-   * @param messageSource                    MessageSource for internationalization.
-   */
-  @Autowired
-  public NotificationService(NotificationRepository notificationRepository,
-      NotificationPreferenceRepository notificationPreferenceRepository,
-      UserRepository userRepository,
-      SimpMessagingTemplate messagingTemplate,
-      MessageSource messageSource) {
-    this.notificationRepository = notificationRepository;
-    this.notificationPreferenceRepository = notificationPreferenceRepository;
-    this.userRepository = userRepository;
-    this.messagingTemplate = messagingTemplate;
-    this.messageSource = messageSource;
-  }
 
   /**
    * Creates a new notification for a user.
