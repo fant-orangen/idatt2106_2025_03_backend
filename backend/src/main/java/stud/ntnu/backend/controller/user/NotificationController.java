@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import stud.ntnu.backend.dto.user.NotificationDto;
 import stud.ntnu.backend.dto.user.SystemNotificationCreateDto;
 import stud.ntnu.backend.model.user.Notification;
+import stud.ntnu.backend.model.user.NotificationPreference;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.security.AdminChecker;
 import stud.ntnu.backend.service.user.NotificationService;
@@ -267,4 +268,24 @@ public class NotificationController {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
+
+  /**
+   * Retrieves the notification preferences for the current user.
+   *
+   * @param principal the authenticated user's principal
+   */
+  @GetMapping("/user/notifications/preferences")
+    public ResponseEntity<?> getNotificationPreferences(Principal principal) {
+        try {
+        String email = principal.getName();
+        User currentUser = userService.getUserByEmail(email)
+            .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        List<NotificationPreference> preferences = notificationService
+            .getUserNotificationPreferences(currentUser);
+        return ResponseEntity.ok(preferences);
+        } catch (Exception e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
