@@ -29,7 +29,7 @@ public class ResetPasswordRequestDto {
    */
   @Size(min = 8, max = 100, message = "Password must be at between 8 and 100 characters long")
   @Pattern(
-      regexp = "^[A-Za-z0-9\\p{L}\\p{M}\\p{P}\\p{S}]+$",
+      regexp = "^(?=.*[\\p{L}])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}$",
       message = "Invalid password format"
   )
   private String newPassword;
