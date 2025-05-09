@@ -92,6 +92,19 @@ public class UserController {
     return ResponseEntity.ok(updatedProfile);
   }
 
+    /**
+     * Retrieves the preferences of the currently authenticated user.
+     *
+     * @return ResponseEntity containing the user's preferences
+     */
+    @GetMapping("/me/preferences")
+    public ResponseEntity<UserPreferencesDto> getUserPreferences() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        UserPreferencesDto userPreferences = userService.getUserPreferences(email);
+        return ResponseEntity.ok(userPreferences);
+    }
+
   /**
    * Retrieves the complete history of the currently authenticated user, including completed
    * activities and reflections.
