@@ -28,18 +28,6 @@ public class TwoFactorCodeService {
     private final TwoFactorCodeRepository twoFactorCodeRepository;
 
     /**
-     * Constructor for dependency injection.
-     *
-     * @param twoFactorCodeRepository repository for two-factor codes
-     * @param emailService            service for sending emails
-     */
-    public TwoFactorCodeService(TwoFactorCodeRepository twoFactorCodeRepository,
-                                EmailService emailService) {
-        this.twoFactorCodeRepository = twoFactorCodeRepository;
-        this.emailService = emailService;
-    }
-
-    /**
      * Generates a random 6-digit verification code.
      *
      * @return A random 6-digit integer.

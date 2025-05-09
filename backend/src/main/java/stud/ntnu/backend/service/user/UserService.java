@@ -39,28 +39,6 @@ public class UserService {
   private final NotificationService notificationService;
 
   /**
-   * Constructor for dependency injection.
-   *
-   * @param userRepository               repository for user operations
-   * @param emailTokenRepository         repository for email tokens
-   * @param safetyConfirmationRepository repository for safety confirmations
-   * @param emailService                 service for sending emails
-   * @param notificationService          service for creating notifications
-   */
-  public UserService(UserRepository userRepository,
-                     EmailTokenRepository emailTokenRepository,
-                     SafetyConfirmationRepository safetyConfirmationRepository,
-                     EmailService emailService,
-                     NotificationService notificationService)
-  {
-    this.userRepository = userRepository;
-    this.emailTokenRepository = emailTokenRepository;
-    this.safetyConfirmationRepository = safetyConfirmationRepository;
-    this.emailService = emailService;
-    this.notificationService = notificationService;
-  }
-
-  /**
    * Retrieves all users.
    *
    * @return list of all users
