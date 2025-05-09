@@ -1,15 +1,17 @@
 package stud.ntnu.backend.controller.gamification.quiz;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
 import stud.ntnu.backend.service.gamification.quiz.UserQuizService;
@@ -22,6 +24,7 @@ import stud.ntnu.backend.service.user.UserService;
  */
 @RestController
 @RequestMapping("/api/user/quizzes")
+@Tag(name = "User Quiz Interactions", description = "Operations related to user quiz interactions and history")
 public class UserQuizController {
 
   private final UserQuizService userQuizService;
@@ -46,6 +49,12 @@ public class UserQuizController {
    * @return ResponseEntity with: - 200 OK if attempt creation is successful - 400 Bad Request with
    * error message if creation fails
    */
+  @Operation(summary = "Create quiz attempt", description = "Creates a new quiz attempt for the authenticated user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Quiz attempt created successfully"),
+      @ApiResponse(responseCode = "400", description = "Bad request - attempt creation failed", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PostMapping("/attempts/{quiz_id}")
   public ResponseEntity<?> createUserQuizAttempt(@PathVariable("quiz_id") Long quizId,
       Principal principal) {
@@ -65,6 +74,12 @@ public class UserQuizController {
    * @return ResponseEntity with: - 200 OK if answer recording is successful - 400 Bad Request with
    * error message if recording fails
    */
+  @Operation(summary = "Submit quiz answer", description = "Records a user's answer for a specific quiz question during an attempt.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Answer recorded successfully"),
+      @ApiResponse(responseCode = "400", description = "Bad request - answer recording failed", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PostMapping("/attempts/answer")
   public ResponseEntity<?> createUserQuizAnswer(@RequestBody CreateUserQuizAnswerDto dto) {
     try {
@@ -85,6 +100,13 @@ public class UserQuizController {
    * @return ResponseEntity with: - 200 OK and a page of attempt summaries if successful - 400 Bad
    * Request with error message if retrieval fails
    */
+  @Operation(summary = "Get quiz attempts", description = "Retrieves a paginated list of all attempts made by the current user for a specific quiz. Each attempt record includes only the attempt ID and completion timestamp.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved quiz attempts", 
+          content = @Content(schema = @Schema(implementation = Object.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - retrieval failed", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @GetMapping("/attempts/{quiz_id}")
   public ResponseEntity<?> getQuizAttemptsByQuizId(@PathVariable("quiz_id") Long quizId,
       Principal principal, Pageable pageable) {
@@ -106,6 +128,13 @@ public class UserQuizController {
    * @return ResponseEntity with: - 200 OK and a page of QuizPreviewDto objects if successful - 400
    * Bad Request with error message if retrieval fails
    */
+  @Operation(summary = "Get attempted quiz history", description = "Retrieves a paginated list of all quizzes that the current user has attempted at least once. For each quiz, returns basic information including ID, name, description, status, question count, and creation timestamp.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved attempted quiz history", 
+          content = @Content(schema = @Schema(implementation = Object.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - retrieval failed", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @GetMapping("/attempted")
   public ResponseEntity<?> getAttemptedQuizHistory(Principal principal, Pageable pageable) {
     try {
@@ -123,6 +152,13 @@ public class UserQuizController {
    * @return ResponseEntity with: - 200 OK and the number of correct answers if successful - 400 Bad
    * Request with error message if retrieval fails
    */
+  @Operation(summary = "Get correct answers count", description = "Retrieves the total number of correct answers for a specific quiz attempt.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved correct answers count", 
+          content = @Content(schema = @Schema(type = "integer"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - retrieval failed", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @GetMapping("/attempts/{attempt_id}/correct-count")
   public ResponseEntity<?> getTotalCorrectAnswersForAttempt(
       @PathVariable("attempt_id") Long attemptId) {

@@ -1,20 +1,20 @@
 package stud.ntnu.backend.controller.group;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import stud.ntnu.backend.dto.inventory.AddBatchToGroupRequestDto;
 import stud.ntnu.backend.dto.inventory.ProductBatchDto;
@@ -34,6 +34,7 @@ import stud.ntnu.backend.service.group.GroupService;
  */
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Group Inventory", description = "Operations for managing group inventory, including contributing batches, viewing products, and calculating totals")
 public class GroupInventoryController {
 
   private final GroupService groupService;
@@ -56,6 +57,12 @@ public class GroupInventoryController {
    * @return ResponseEntity containing a page of ProductTypeDto objects, or 400 Bad Request if
    * groupId is null
    */
+  @Operation(summary = "Get contributed product types", description = "Retrieves a paginated list of all product types that have batches contributed to the specified group.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved product types", 
+          content = @Content(schema = @Schema(implementation = ProductTypeDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - groupId is null")
+  })
   @GetMapping("/user/groups/inventory/product-types")
   public ResponseEntity<Page<ProductTypeDto>> getContributedProductTypes(
       @RequestParam Integer groupId,
@@ -81,6 +88,12 @@ public class GroupInventoryController {
    * @return ResponseEntity containing a page of ProductBatchDto objects, or 400 Bad Request if
    * parameters are invalid
    */
+  @Operation(summary = "Get contributed product batches", description = "Retrieves all product batches of a specific type that are currently contributed to the specified group.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved product batches", 
+          content = @Content(schema = @Schema(implementation = ProductBatchDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid parameters")
+  })
   @GetMapping("/user/groups/inventory/product-types/batches")
   public ResponseEntity<Page<ProductBatchDto>> getContributedProductBatchesByType(
       @RequestParam Integer groupId,
@@ -104,6 +117,15 @@ public class GroupInventoryController {
    * productBatchId is null - 403 Forbidden if user is not authorized - 404 Not Found if batch
    * doesn't exist
    */
+  @Operation(summary = "Remove contributed batch", description = "Removes a contributed product batch from a group. Only allowed if the batch was contributed by the user's household.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully removed batch"),
+      @ApiResponse(responseCode = "400", description = "Bad request - productBatchId is null", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user is not authorized", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "404", description = "Batch not found")
+  })
   @PatchMapping("/user/groups/inventory/product-batches/{productBatchId}")
   public ResponseEntity<?> removeContributedBatch(
       @PathVariable Integer productBatchId,
@@ -135,6 +157,15 @@ public class GroupInventoryController {
    * group member - 404 Not Found if request parameters are null - 409 Conflict if batch cannot be
    * added
    */
+  @Operation(summary = "Add batch to group", description = "Adds a product batch to a group's inventory. Only allowed if the user's household is a member of the group.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully added batch to group"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user is not a group member", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "404", description = "Request parameters are null"),
+      @ApiResponse(responseCode = "409", description = "Conflict - batch cannot be added", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PostMapping("/user/groups/inventory")
   public ResponseEntity<?> addBatchToGroup(@RequestBody AddBatchToGroupRequestDto request,
       Principal principal) {
@@ -165,6 +196,12 @@ public class GroupInventoryController {
    * @return ResponseEntity containing a page of matching ProductTypeDto objects, or 400 Bad Request
    * if parameters are invalid
    */
+  @Operation(summary = "Search contributed product types", description = "Searches for product types that have batches contributed to the specified group by the current user's household.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved matching product types", 
+          content = @Content(schema = @Schema(implementation = ProductTypeDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid parameters")
+  })
   @GetMapping("/user/groups/inventory/product-types/search")
   public ResponseEntity<Page<ProductTypeDto>> searchContributedProductTypes(
       @RequestParam Integer groupId,
@@ -193,6 +230,13 @@ public class GroupInventoryController {
    * contributed or if an error occurs - 400 Bad Request if productBatchId is null - 403 Forbidden
    * if an error occurs during the check
    */
+  @Operation(summary = "Check batch contribution status", description = "Checks if a specific product batch is currently contributed to any group by the user's household.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully checked contribution status", 
+          content = @Content(schema = @Schema(type = "boolean"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - productBatchId is null"),
+      @ApiResponse(responseCode = "403", description = "Forbidden - error during check")
+  })
   @GetMapping("user/groups/inventory/{productBatchId}/contributed")
   public ResponseEntity<Boolean> isContributedToGroup(@PathVariable Integer productBatchId,
       Principal principal) {
@@ -217,6 +261,12 @@ public class GroupInventoryController {
    * @return ResponseEntity containing: - The total number of units if successful - 0 if an error
    * occurs - 400 Bad Request if parameters are invalid
    */
+  @Operation(summary = "Get total units for product type", description = "Calculates the total number of units of a specific product type contributed to a group across all households.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully calculated total units", 
+          content = @Content(schema = @Schema(type = "integer"))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid parameters")
+  })
   @GetMapping("user/groups/inventory/product-types/sum")
   public ResponseEntity<Integer> getTotalUnitsForProductType(
       @RequestParam Integer productTypeId,
