@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,12 +25,14 @@ import stud.ntnu.backend.service.user.RecaptchaService;
 @RestController
 @RequestMapping("/api/auth")
 @Tag(name = "Authentication", description = "Operations for user authentication, registration, and account management")
-public class AuthController {
+public class AuthController
+{
 
   private final AuthService authService;
   private final RecaptchaService recaptchaService;
 
-  public AuthController(AuthService authService, RecaptchaService recaptchaService) {
+  public AuthController(AuthService authService, RecaptchaService recaptchaService)
+  {
     this.authService = authService;
     this.recaptchaService = recaptchaService;
   }
@@ -45,7 +48,8 @@ public class AuthController {
       @ApiResponse(responseCode = "401", description = "Unauthorized - invalid token")
   })
   @GetMapping("/validate")
-  public ResponseEntity<?> validateToken() {
+  public ResponseEntity<?> validateToken()
+  {
     return ResponseEntity.ok().build();
   }
 
@@ -57,17 +61,19 @@ public class AuthController {
    */
   @Operation(summary = "Login", description = "Authenticate a user and generate a JWT token. Requires reCAPTCHA validation.")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Successfully authenticated", 
+      @ApiResponse(responseCode = "200", description = "Successfully authenticated",
           content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
-      @ApiResponse(responseCode = "202", description = "2FA required", 
+      @ApiResponse(responseCode = "202", description = "2FA required",
           content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
-      @ApiResponse(responseCode = "400", description = "Bad request - invalid credentials or reCAPTCHA", 
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid credentials or reCAPTCHA",
           content = @Content(schema = @Schema(implementation = AuthResponseDto.class)))
   })
   @PostMapping("/login")
-  public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
+  public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest)
+  {
     // Verify the reCAPTCHA token
-    if (!recaptchaService.verifyRecaptcha(authRequest.getRecaptchaToken())) {
+    if (!recaptchaService.verifyRecaptcha(authRequest.getRecaptchaToken()))
+    {
       // Return a response with an error message in the AuthResponseDto
       AuthResponseDto errorResponse = new AuthResponseDto();
       errorResponse.setToken(null);
@@ -101,13 +107,20 @@ public class AuthController {
   })
   @PostMapping("/register")
   public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDto registrationRequest) {
-    try {
+    try
+    {
       authService.register(registrationRequest);
       return ResponseEntity.ok().build();
-    } catch (IllegalArgumentException e) {
+    } catch (IllegalArgumentException e)
+    {
       return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (MessagingException e)
+    {
+      return ResponseEntity.status(500)
+          .body("Failed to send verification email. Please try again later.");
     }
   }
+
 
   /**
    * Handles email verification using a token sent via email.
@@ -125,13 +138,17 @@ public class AuthController {
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
   })
   @GetMapping("/verify")
-  public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
-    try {
+  public ResponseEntity<?> verifyEmail(@RequestParam("token") String token)
+  {
+    try
+    {
       authService.verifyEmail(token);
       return ResponseEntity.ok().body("Email successfully verified.");
-    } catch (IllegalArgumentException | IllegalStateException e) {
+    } catch (IllegalArgumentException | IllegalStateException e)
+    {
       return ResponseEntity.badRequest().body(e.getMessage());
-    } catch (Exception e) {
+    } catch (Exception e)
+    {
       return ResponseEntity.status(500)
           .body("An unexpected error occurred during email verification.");
     }
@@ -152,11 +169,14 @@ public class AuthController {
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
   })
   @PostMapping("/send-2fa")
-  public ResponseEntity<?> send2FACode(@RequestBody @Valid Send2FACodeRequestDto request) {
-    try {
+  public ResponseEntity<?> send2FACode(@RequestBody @Valid Send2FACodeRequestDto request)
+  {
+    try
+    {
       authService.send2FACode(request.getEmail());
       return ResponseEntity.ok("2FA code sent successfully.");
-    } catch (Exception e) {
+    } catch (Exception e)
+    {
       return ResponseEntity.status(500).body("Failed to send 2FA code.");
     }
   }
@@ -177,13 +197,17 @@ public class AuthController {
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
   })
   @PostMapping("/verify-2fa")
-  public ResponseEntity<?> verify2FA(@RequestBody @Valid TwoFactorRequestDto request) {
-    try {
+  public ResponseEntity<?> verify2FA(@RequestBody @Valid TwoFactorRequestDto request)
+  {
+    try
+    {
       AuthResponseDto response = authService.verify2FA(request.getEmail(), request.getCode());
       return ResponseEntity.ok(response);
-    } catch (IllegalArgumentException e) {
+    } catch (IllegalArgumentException e)
+    {
       return ResponseEntity.badRequest().body(e.getMessage());
-    } catch (Exception e) {
+    } catch (Exception e)
+    {
       return ResponseEntity.status(500).body("Failed to verify 2FA code.");
     }
   }
@@ -202,15 +226,19 @@ public class AuthController {
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
   })
   @PostMapping("/forgot-password")
-  public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDto request) {
-    try {
+  public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDto request)
+  {
+    try
+    {
       authService.forgotPassword(request.getEmail());
       return ResponseEntity.ok(
           "If your email exists in our system, you will receive a password reset link.");
-    } catch (IllegalArgumentException e) {
+    } catch (IllegalArgumentException e)
+    {
       return ResponseEntity.ok(
           "If your email exists in our system, you will receive a password reset link.");
-    } catch (Exception e) {
+    } catch (Exception e)
+    {
       return ResponseEntity.status(500).body("Failed to process forgot password request.");
     }
   }
@@ -231,13 +259,17 @@ public class AuthController {
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
   })
   @PostMapping("/reset-password")
-  public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequestDto request) {
-    try {
+  public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequestDto request)
+  {
+    try
+    {
       authService.resetPassword(request.getToken(), request.getNewPassword());
       return ResponseEntity.ok("Password reset successfully.");
-    } catch (IllegalArgumentException | IllegalStateException e) {
+    } catch (IllegalArgumentException | IllegalStateException e)
+    {
       return ResponseEntity.badRequest().body(e.getMessage());
-    } catch (Exception e) {
+    } catch (Exception e)
+    {
       return ResponseEntity.status(500).body("Failed to reset password.");
     }
   }
@@ -259,13 +291,17 @@ public class AuthController {
           content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
   })
   @PatchMapping("/change-password")
-  public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordDto request) {
-    try {
+  public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordDto request)
+  {
+    try
+    {
       authService.changePassword(request);
       return ResponseEntity.ok("Password changed successfully.");
-    } catch (IllegalArgumentException | IllegalStateException e) {
+    } catch (IllegalArgumentException | IllegalStateException e)
+    {
       return ResponseEntity.badRequest().body(e.getMessage());
-    } catch (Exception e) {
+    } catch (Exception e)
+    {
       return ResponseEntity.status(500).body("Failed to change password - " + e.getMessage());
     }
   }
