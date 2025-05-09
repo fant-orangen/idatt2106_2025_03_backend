@@ -223,7 +223,7 @@ INSERT INTO meeting_places (name, latitude, longitude, address, created_by_user_
 VALUES ('Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
 
 -- SCENARIO THEMES
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 1
 VALUES (
     'Strømbrudd',
     'En veiledning for å forberede og håndtere lengre strømbrudd. Strømbrudd kan skyldes ekstremvær, teknisk feil eller planlagt vedlikehold. God forberedelse er viktig for sikkerhet og komfort.',
@@ -276,7 +276,7 @@ VALUES (
     1
 );
 
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 2
 VALUES (
     'Storm',
     'Veiledning for forberedelse og håndtering av kraftig storm med sterk vind og nedbør. Storm kan forårsake store materielle skader, spesielt i kystnære strøk.',
@@ -323,7 +323,7 @@ VALUES (
     1
 );
 
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 3
 VALUES (
     'Jordskjelv',
     'Informasjon og råd for forberedelse og håndtering av jordskjelv. Selv om store jordskjelv er sjeldne i Norge, kan de forekomme og forårsake betydelige skader, spesielt på Vestlandet og i Oslofjordområdet.',
@@ -377,7 +377,7 @@ VALUES (
     1
 );
 
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 4
 VALUES (
     'Flom',
     'Veiledning for å forberede seg på og håndtere flom forårsaket av kraftig regn, snøsmelting eller stormflo. Flom kan føre til store skader på eiendom og infrastruktur.',
@@ -435,7 +435,7 @@ VALUES (
     1
 );
 
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 5
 VALUES (
     'Skogbrann',
     'Veiledning for å forberede og håndtere skogbrann. Skogbranner kan spre seg raskt, spesielt i tørre perioder med vind, og utgjør en trussel mot liv, eiendom og natur.',
@@ -495,7 +495,7 @@ VALUES (
     1
 );
 
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 6
 VALUES (
     'Krig og Væpnet Konflikt',
     'Råd for sivilbefolkningens beredskap og håndtering ved krig eller væpnet konflikt. Slike situasjoner kan medføre omfattende samfunnsforstyrrelser, direkte trusler og behov for sivil støtte til totalforsvaret.',
@@ -551,7 +551,7 @@ VALUES (
     1
 );
 
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 7
 VALUES (
     'Atomulykke',
     'Råd for beredskap ved atomulykker, som kan føre til utslipp av radioaktive stoffer. Dette inkluderer råd om jodtabletter og hvordan man beskytter seg mot radioaktivt nedfall.',
