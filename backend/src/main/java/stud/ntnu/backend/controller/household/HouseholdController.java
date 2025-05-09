@@ -83,6 +83,8 @@ public class HouseholdController {
       return ResponseEntity.ok(household);
     } catch (IllegalStateException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
 
@@ -536,7 +538,6 @@ public class HouseholdController {
           updateRequestDto.getName(),
           updateRequestDto.getAddress());
 
-      // Convert to DTO for response
       HouseholdDto householdDto = new HouseholdDto(
           updatedHousehold.getId(),
           updatedHousehold.getName(),
@@ -547,6 +548,8 @@ public class HouseholdController {
 
       return ResponseEntity.ok(householdDto);
     } catch (IllegalStateException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     } catch (Exception e) {
       return ResponseEntity.status(500).body("An unexpected error occurred: " + e.getMessage());

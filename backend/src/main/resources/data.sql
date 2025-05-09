@@ -226,7 +226,7 @@ INSERT INTO meeting_places (name, latitude, longitude, address, created_by_user_
 VALUES ('Shopping Mall', 63.4320, 10.3970, 'Downtown Mall', 4);
 
 -- SCENARIO THEMES
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 1
 VALUES (
     'Strømbrudd',
     'En veiledning for å forberede og håndtere lengre strømbrudd. Strømbrudd kan skyldes ekstremvær, teknisk feil eller planlagt vedlikehold. God forberedelse er viktig for sikkerhet og komfort.',
@@ -279,7 +279,7 @@ VALUES (
     1
 );
 
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 2
 VALUES (
     'Storm',
     'Veiledning for forberedelse og håndtering av kraftig storm med sterk vind og nedbør. Storm kan forårsake store materielle skader, spesielt i kystnære strøk.',
@@ -326,7 +326,7 @@ VALUES (
     1
 );
 
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 3
 VALUES (
     'Jordskjelv',
     'Informasjon og råd for forberedelse og håndtering av jordskjelv. Selv om store jordskjelv er sjeldne i Norge, kan de forekomme og forårsake betydelige skader, spesielt på Vestlandet og i Oslofjordområdet.',
@@ -380,7 +380,7 @@ VALUES (
     1
 );
 
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 4
 VALUES (
     'Flom',
     'Veiledning for å forberede seg på og håndtere flom forårsaket av kraftig regn, snøsmelting eller stormflo. Flom kan føre til store skader på eiendom og infrastruktur.',
@@ -438,7 +438,7 @@ VALUES (
     1
 );
 
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 5
 VALUES (
     'Skogbrann',
     'Veiledning for å forberede og håndtere skogbrann. Skogbranner kan spre seg raskt, spesielt i tørre perioder med vind, og utgjør en trussel mot liv, eiendom og natur.',
@@ -498,7 +498,7 @@ VALUES (
     1
 );
 
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 6
 VALUES (
     'Krig og Væpnet Konflikt',
     'Råd for sivilbefolkningens beredskap og håndtering ved krig eller væpnet konflikt. Slike situasjoner kan medføre omfattende samfunnsforstyrrelser, direkte trusler og behov for sivil støtte til totalforsvaret.',
@@ -554,7 +554,7 @@ VALUES (
     1
 );
 
-INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id)
+INSERT INTO scenario_themes (name, description, before, under, after, status, created_by_user_id) -- ID = 7
 VALUES (
     'Atomulykke',
     'Råd for beredskap ved atomulykker, som kan føre til utslipp av radioaktive stoffer. Dette inkluderer råd om jodtabletter og hvordan man beskytter seg mot radioaktivt nedfall.',
@@ -609,246 +609,102 @@ VALUES (
 
 -- CRISIS EVENTS
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
-VALUES ('Flood Warning', 'Potential flooding in downtown area', 'yellow', 60.4300, 10.3950, 1.0, CURRENT_TIMESTAMP, 1, TRUE, 4);
+VALUES ('Flomvarsel', 'Potensiell flom i sentrumsområdet', 'yellow', 60.4300, 10.3950, 1.0, CURRENT_TIMESTAMP, 1, TRUE, 4); -- id: 1
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
-VALUES ('Storm Alert', 'Heavy storm expected tonight', 'green', 60.4250, 11.3900, 5.0, DATEADD('DAY', 1, CURRENT_TIMESTAMP), 1, TRUE, 2);
+VALUES ('Stormvarsel', 'Kraftig storm forventes i kveld', 'green', 60.4250, 11.3900, 5.0, DATEADD('DAY', 1, CURRENT_TIMESTAMP), 1, TRUE, 2); -- id: 2
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
-VALUES ('lightning storm', 'Potential flooding in downtown area', 'red', 59.4300, 10.3950, 1.0, TIMESTAMP '2025-05-01 12:00:00', 1, TRUE, 2);
--- Inactive crisis event
+VALUES ('Lynstorm', 'Potensiell flom i sentrumsområdet', 'red', 59.4300, 10.3950, 1.0, TIMESTAMP '2025-05-01 12:00:00', 1, TRUE, 2); -- id: 3
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
-VALUES ('Past Earthquake', 'Earthquake event that has ended', 'red', 63.4200, 12.4000, 20, DATEADD('DAY', -10, CURRENT_TIMESTAMP), 1, FALSE, 3);
-
+VALUES ('Tidligere Jordskjelv', 'Jordskjelvhendelse som har endt', 'red', 63.4200, 12.4000, 20, DATEADD('DAY', -10, CURRENT_TIMESTAMP), 1, FALSE, 3); -- id: 4
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
-VALUES ('Severe Storm Warning', 'Heavy storm with potential flooding in central Trondheim', 'red', 63.4300, 10.3950, 2.0, CURRENT_TIMESTAMP, 1, TRUE, 2);
-
+VALUES ('Kraftig Stormvarsel', 'Kraftig storm med potensiell flom i sentrale Trondheim', 'red', 63.4300, 10.3950, 2.0, CURRENT_TIMESTAMP, 1, TRUE, 2); -- id: 5
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
-VALUES ('Power Outage Alert', 'Planned maintenance causing temporary power disruption', 'yellow', 63.4280, 10.3940, 1.5, CURRENT_TIMESTAMP, 1, TRUE, 1);
-
+VALUES ('Strømbruddvarsel', 'Planlagt vedlikehold som forårsaker midlertidig strømbrudd', 'yellow', 63.4280, 10.3940, 1.5, CURRENT_TIMESTAMP, 1, TRUE, 1); -- id: 6
 INSERT INTO crisis_events (name, description, severity, epicenter_latitude, epicenter_longitude, radius, start_time, created_by_user_id, active, scenario_theme_id)
-VALUES ('Minor Traffic Incident', 'Road closure due to minor accident', 'green', 63.4290, 10.3960, 0.5, CURRENT_TIMESTAMP, 1, TRUE, 2);
-
+VALUES ('Mindre Trafikkulykke', 'Veistengning på grunn av mindre ulykke', 'green', 63.4290, 10.3960, 0.5, CURRENT_TIMESTAMP, 1, TRUE, 2); -- id: 7
 
 -- CRISIS EVENTS CHANGES
-
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
-VALUES (1, 'creation', NULL, 'Initial creation of crisis event.', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES (1, 'creation', NULL, 'Opprettelse av krisehendelse.', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
-VALUES (1, 'level_change', 'Level 2', 'Level 3', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES (1, 'level_change', 'Nivå 2', 'Nivå 3', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
-VALUES (1, 'description_update', 'Flooding in lower region', 'Flooding spreading to midtown area', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
-VALUES (1, 'creation', NULL, 'Initial creation of crisis event.', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
-VALUES (1, 'level_change', 'Level 2', 'Level 3', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
-VALUES (1, 'description_update', 'Flooding in lower region', 'Flooding spreading to midtown area', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
-VALUES (1, 'creation', NULL, 'Initial creation of crisis event.', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
-VALUES (1, 'level_change', 'Level 2', 'Level 3', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
-VALUES (1, 'description_update', 'Flooding in lower region', 'Flooding spreading to midtown area', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES (1, 'description_update', 'Flom i nedre region', 'Flom sprer seg til midtre område', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
 VALUES (2, 'epicenter_moved', '40.7128,-74.0060', '40.7306,-73.9352', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO crisis_event_changes (crisis_event_id, change_type, old_value, new_value, created_by_user_id, created_at, updated_at)
-VALUES (2, 'level_change', 'Level 1', 'Level 2', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES (2, 'level_change', 'Nivå 1', 'Nivå 2', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- NEWS ARTICLES
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('New Emergency Response Guidelines', 'The city has updated its emergency response guidelines. Key changes include...', DATEADD('DAY', -2, CURRENT_TIMESTAMP), 1, 2, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Draft Article', 'This is a draft article that is not yet published...', CURRENT_TIMESTAMP, 1, 1, 'draft');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Archived Article', 'This is an old article that has been archived...', DATEADD('DAY', -30, CURRENT_TIMESTAMP), 1, 2, 'archived');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('New Emergency Response Guidelines', 'The city has updated its emergency response guidelines. Key changes include...', DATEADD('DAY', -2, CURRENT_TIMESTAMP), 1, 2, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Draft Article', 'This is a draft article that is not yet published...', CURRENT_TIMESTAMP, 1, 1, 'draft');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Archived Article', 'This is an old article that has been archived...', DATEADD('DAY', -30, CURRENT_TIMESTAMP), 1, 2, 'archived');
+VALUES (
+    'Kraftig regn forventes - Varsel om flom i sentrum',
+    'Meteorologer varsler om kraftig regn de neste 24 timene som kan føre til flom i sentrumsområdet. Kommunen har satt i gang forberedelser for å håndtere eventuelle oversvømmelser. Det anbefales at innbyggere i området tar forholdsregler og følger med på oppdateringer. Lokale myndigheter har allerede plassert sandsekker ved kritiske punkter og er forberedt på å evakuere om nødvendig. Det er spesielt viktig å være oppmerksom på kjellere og underetasjer i bygninger.',
+    CURRENT_TIMESTAMP,
+    1,
+    1,
+    'published'
+);
 
--- Winter storms
 INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', DATEADD('DAY', -2, CURRENT_TIMESTAMP), 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
-INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
-VALUES ('Preparing for Winter Storms', 'Here are some tips to prepare your household for the upcoming winter storm season...', CURRENT_TIMESTAMP, 1, 1, 'published');
+VALUES (
+    'Stormvarsel for Trøndelag - Forbered dere',
+    'Meteorologisk institutt har utstedt stormvarsel for Trøndelag med forventet vindstyrke opptil 25 m/s. Stormen forventes å nå kysten i kveld og kan vare i opptil 12 timer. Kommunen anbefaler at innbyggere sikrer løse gjenstander utendørs og holder seg oppdatert på situasjonen. Det er også viktig å ha nødvendige forsyninger klare i tilfelle strømbrudd. Lokale myndigheter har satt i gang beredskapsplaner og er forberedt på å håndtere eventuelle skader.',
+    DATEADD('DAY', -2, CURRENT_TIMESTAMP),
+    1,
+    2,
+    'published'
+);
 
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES (
+    'Kraftig lynstorm truer sentrale strøk',
+    'En kraftig lynstorm har truffet sentrale deler av byen, med rapporter om flere lynnedslag og lokale branner. Brannvesenet er i full sving med å håndtere situasjonen. Det anbefales at innbyggere holder seg innendørs og unngår å bruke elektroniske enheter koblet til strømnettet. Kommunen har satt i gang kriseteam for å koordinere hjelpetiltak. Det er også rapportert om mindre oversvømmelser på grunn av kraftig regn som følger stormen.',
+    CURRENT_TIMESTAMP,
+    1,
+    3,
+    'published'
+);
+
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES (
+    'Ettervirkninger av jordskjelv - Statusoppdatering',
+    'Etter jordskjelvet som rammet regionen for 10 dager siden, har myndighetene fullført den første runden med skadevurderinger. Flere bygninger har fått strukturelle skader, men ingen alvorlige personskader er rapportert. Kommunen jobber med å gjenopprette normale forhold og har satt i gang reparasjoner av infrastruktur. Det anbefales fortsatt forsiktighet ved besøk i skadede områder. Myndighetene oppdaterer kontinuerlig informasjonen om trygge områder.',
+    DATEADD('DAY', -30, CURRENT_TIMESTAMP),
+    1,
+    4,
+    'archived'
+);
+
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES (
+    'Kraftig storm truer sentrale Trondheim',
+    'En ekstremt kraftig storm er på vei mot sentrale Trondheim, med forventet vindstyrke opptil 30 m/s. Kommunen har utstedt varsel om potensielle oversvømmelser i lavtliggende områder. Det anbefales at innbyggere sikrer båter, campingvogner og andre løse gjenstander. Lokale myndigheter har satt i gang omfattende beredskapsplaner og er forberedt på å evakuere om nødvendig. Det er også viktig å ha nødvendige forsyninger klare i tilfelle strømbrudd.',
+    CURRENT_TIMESTAMP,
+    1,
+    5,
+    'published'
+);
+
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES (
+    'Planlagt strømbrudd - Forberedelser',
+    'Strømselskapet varsler om planlagt vedlikehold som vil føre til midlertidig strømbrudd i deler av byen. Vedlikeholdet er nødvendig for å forbedre nettets pålitelighet og vil vare i opptil 4 timer. Kommunen anbefaler at innbyggere tar forholdsregler ved å ha lommelykter og alternative varmekilder klare. Det er også viktig å sikre at elektroniske enheter er ladet opp på forhånd. Lokale myndigheter har satt i gang informasjonskampanje for å nå alle berørte.',
+    CURRENT_TIMESTAMP,
+    1,
+    6,
+    'published'
+);
+
+INSERT INTO news_articles (title, content, published_at, created_by_user_id, crisis_event_id, status)
+VALUES (
+    'Veistengning etter trafikkulykke',
+    'En mindre trafikkulykke har ført til midlertidig veistengning i sentrumsområdet. Politiet arbeider med å rydde opp i situasjonen og forventer at veien vil være åpen igjen innen kort tid. Det anbefales at bilister unngår området og bruker alternative ruter. Lokale myndigheter har satt i gang trafikkavledning for å minimere forstyrrelser. Det er ingen rapportert personskade, men det er viktig å være forsiktig i området.',
+    CURRENT_TIMESTAMP,
+    1,
+    7,
+    'published'
+);
 
 -- HOUSEHOLD ADMINS
 INSERT INTO household_admins (user_id, household_id) VALUES (2, 1); -- Alice is admin of Smith Family
