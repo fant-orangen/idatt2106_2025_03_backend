@@ -1,7 +1,9 @@
 package stud.ntnu.backend.startup;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import stud.ntnu.backend.service.map.PoiImportService;
@@ -12,6 +14,7 @@ import stud.ntnu.backend.service.map.PoiImportService;
  * are available for use immediately after startup.
  */
 @Component
+@ConditionalOnProperty(name = "poi.startup.enabled", havingValue = "true", matchIfMissing = false)
 @RequiredArgsConstructor
 public class PoiStartupLoader {
 
@@ -26,7 +29,6 @@ public class PoiStartupLoader {
    */
   @EventListener(ApplicationReadyEvent.class)
   public void onApplicationReady() {
-    if (Boolean.getBoolean("poi.startup.enabled")) {
       poiImportService.importGasStationsFromOverpass();
       poiImportService.importHospitalsFromOverpass();
       poiImportService.importSheltersFromOverpass();
@@ -34,6 +36,5 @@ public class PoiStartupLoader {
       poiImportService.importPoliceStationsFromOverpass();
       poiImportService.importPharmaciesFromOverpass();
       poiImportService.importFireStationsFromOverpass();
-    }
   }
 }
