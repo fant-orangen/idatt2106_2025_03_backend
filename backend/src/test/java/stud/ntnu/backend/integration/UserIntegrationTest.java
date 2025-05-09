@@ -77,7 +77,7 @@ public class UserIntegrationTest {
         // Create test user
         testUser = new User();
         testUser.setEmail("test@example.com");
-        testUser.setPasswordHash(passwordEncoder.encode("password123"));
+        testUser.setPasswordHash(passwordEncoder.encode("1!Password"));
         testUser.setRole(userRole);
         testUser.setPhoneNumber("12345678");
         testUser.setFirstName("Test");
@@ -132,7 +132,7 @@ public class UserIntegrationTest {
     void loginUser_ShouldReturnToken() throws Exception {
         AuthRequestDto authRequest = new AuthRequestDto();
         authRequest.setEmail("test@example.com");
-        authRequest.setPassword("password123");
+        authRequest.setPassword("1!Password");
         authRequest.setRecaptchaToken("test-token");
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
@@ -147,7 +147,7 @@ public class UserIntegrationTest {
     void loginUser_WithInvalidCredentials_ShouldReturnForbidden() throws Exception {
         AuthRequestDto authRequest = new AuthRequestDto();
         authRequest.setEmail("test@example.com");
-        authRequest.setPassword("wrongpassword");
+        authRequest.setPassword("1!!Wrongpassword");
         authRequest.setRecaptchaToken("test-token");
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
@@ -163,7 +163,7 @@ public class UserIntegrationTest {
 
         AuthRequestDto authRequest = new AuthRequestDto();
         authRequest.setEmail("test@example.com");
-        authRequest.setPassword("password123");
+        authRequest.setPassword("1!Password");
         authRequest.setRecaptchaToken("invalid-token");
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/login")
@@ -292,4 +292,4 @@ public class UserIntegrationTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/user/13/basic-info"))
             .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
-} 
+}

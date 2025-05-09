@@ -31,12 +31,13 @@ public class AuthRequestDto {
   private String email;
 
   /**
-   * The user's password. Must be between 8 and 100 characters and contain only allowed characters.
+   * The user's password. Must be between 8 and 100 characters long and contain at least one letter,
+   * one digit, and one special character.
    * Allowed characters include letters, numbers, and Unicode symbols.
    */
   @Size(min = 8, max = 100, message = "Password must be at between 8 and 100 characters long")
   @Pattern(
-      regexp = "^[A-Za-z0-9\\p{L}\\p{M}\\p{P}\\p{S}]+$",
+      regexp = "^(?=.*[\\p{L}])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}$",
       message = "invalid password format"
   )
   private String password;
