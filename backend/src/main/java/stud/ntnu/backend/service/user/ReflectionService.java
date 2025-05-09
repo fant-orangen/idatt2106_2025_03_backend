@@ -1,5 +1,6 @@
 package stud.ntnu.backend.service.user;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,28 +27,13 @@ import java.util.stream.Collectors;
  * reflections.
  */
 @Service
+@RequiredArgsConstructor
 public class ReflectionService {
 
   private final ReflectionRepository reflectionRepository;
   private final UserRepository userRepository;
   private final CrisisEventRepository crisisEventRepository;
   private final GroupService groupService;
-
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param reflectionRepository  repository for reflection operations
-   * @param userRepository        repository for user operations
-   * @param crisisEventRepository repository for crisis event operations
-   * @param groupService          service for group operations
-   */
-  public ReflectionService(ReflectionRepository reflectionRepository, UserRepository userRepository,
-      CrisisEventRepository crisisEventRepository, GroupService groupService) {
-    this.reflectionRepository = reflectionRepository;
-    this.userRepository = userRepository;
-    this.crisisEventRepository = crisisEventRepository;
-    this.groupService = groupService;
-  }
 
   /**
    * Retrieves all reflections.

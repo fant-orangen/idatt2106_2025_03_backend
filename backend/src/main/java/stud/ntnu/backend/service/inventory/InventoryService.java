@@ -24,12 +24,14 @@ import stud.ntnu.backend.util.SearchUtil;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Service for managing household inventory and products. Handles creation, retrieval, updating, and
  * deletion of inventory items and products.
  */
 @Service
+@RequiredArgsConstructor
 public class InventoryService {
 
   private final ProductRepository productRepository;
@@ -40,37 +42,6 @@ public class InventoryService {
   private final SearchUtil searchUtil;
   private final ApplicationEventPublisher eventPublisher;
   private final HouseholdMemberRepository householdMemberRepository;
-
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param productRepository         repository for product operations
-   * @param userRepository            repository for user operations
-   * @param productBatchRepository    repository for product batch operations
-   * @param productTypeRepository     repository for product type operations
-   * @param householdRepository       repository for household operations
-   * @param searchUtil                utility for search operations
-   * @param eventPublisher            publisher for inventory change events
-   * @param householdMemberRepository repository for household member operations
-   */
-  public InventoryService(
-      ProductRepository productRepository,
-      UserRepository userRepository,
-      ProductBatchRepository productBatchRepository,
-      ProductTypeRepository productTypeRepository,
-      HouseholdRepository householdRepository,
-      SearchUtil searchUtil,
-      ApplicationEventPublisher eventPublisher,
-      HouseholdMemberRepository householdMemberRepository) {
-    this.productRepository = productRepository;
-    this.userRepository = userRepository;
-    this.productBatchRepository = productBatchRepository;
-    this.productTypeRepository = productTypeRepository;
-    this.householdRepository = householdRepository;
-    this.searchUtil = searchUtil;
-    this.eventPublisher = eventPublisher;
-    this.householdMemberRepository = householdMemberRepository;
-  }
 
 
   /**

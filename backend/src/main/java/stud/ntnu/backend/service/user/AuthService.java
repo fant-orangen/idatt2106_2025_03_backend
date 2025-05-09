@@ -25,12 +25,14 @@ import stud.ntnu.backend.model.user.Notification;
 import stud.ntnu.backend.model.user.NotificationPreference;
 import stud.ntnu.backend.repository.user.NotificationPreferenceRepository;
 import stud.ntnu.backend.validation.PasswordValidator;
+import lombok.RequiredArgsConstructor;
 
 
 /**
  * Service for handling authentication-related operations.
  */
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
   private final AuthenticationManager authenticationManager;
@@ -41,22 +43,6 @@ public class AuthService {
   private final EmailTokenRepository emailTokenRepository;
   private final TwoFactorCodeService twoFactorCodeService;
   private final NotificationPreferenceRepository notificationPreferenceRepository;
-
-  public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil,
-      UserRepository userRepository, PasswordEncoder passwordEncoder,
-      EmailService emailService,
-      EmailTokenRepository emailTokenRepository,
-      TwoFactorCodeService twoFactorCodeService,
-      NotificationPreferenceRepository notificationPreferenceRepository) {
-    this.authenticationManager = authenticationManager;
-    this.jwtUtil = jwtUtil;
-    this.userRepository = userRepository;
-    this.passwordEncoder = passwordEncoder;
-    this.emailService = emailService;
-    this.emailTokenRepository = emailTokenRepository;
-    this.twoFactorCodeService = twoFactorCodeService;
-    this.notificationPreferenceRepository = notificationPreferenceRepository;
-  }
 
   /**
    * Authenticate a user and generate a JWT token.

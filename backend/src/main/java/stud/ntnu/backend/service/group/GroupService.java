@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
 
 import stud.ntnu.backend.dto.group.GroupSummaryDto;
 import stud.ntnu.backend.dto.household.HouseholdDto;
@@ -35,6 +36,7 @@ import stud.ntnu.backend.service.inventory.InventoryService;
  * Provides functionality for managing group memberships and household associations.
  */
 @Service
+@RequiredArgsConstructor
 public class GroupService {
 
   private final GroupRepository groupRepository;
@@ -46,38 +48,6 @@ public class GroupService {
   private final GroupInventoryContributionRepository groupInventoryContributionRepository;
   private final HouseholdRepository householdRepository;
   private final GroupInvitationRepository groupInvitationRepository;
-
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param groupRepository                      repository for group operations
-   * @param groupMembershipRepository            repository for group membership operations
-   * @param inventoryService                     service for inventory operations
-   * @param householdAdminRepository             repository for household admin operations
-   * @param userRepository                       repository for user operations
-   * @param productTypeRepository                repository for product type operations
-   * @param groupInventoryContributionRepository repository for group inventory contribution operations
-   * @param householdRepository                  repository for household operations
-   * @param groupInvitationRepository            repository for group invitation operations
-   */
-  @Autowired
-  public GroupService(GroupRepository groupRepository,
-      GroupMembershipRepository groupMembershipRepository, InventoryService inventoryService,
-      HouseholdAdminRepository householdAdminRepository, UserRepository userRepository,
-      ProductTypeRepository productTypeRepository,
-      GroupInventoryContributionRepository groupInventoryContributionRepository,
-      HouseholdRepository householdRepository,
-      GroupInvitationRepository groupInvitationRepository) {
-    this.groupRepository = groupRepository;
-    this.groupMembershipRepository = groupMembershipRepository;
-    this.inventoryService = inventoryService;
-    this.householdAdminRepository = householdAdminRepository;
-    this.userRepository = userRepository;
-    this.productTypeRepository = productTypeRepository;
-    this.groupInventoryContributionRepository = groupInventoryContributionRepository;
-    this.householdRepository = householdRepository;
-    this.groupInvitationRepository = groupInvitationRepository;
-  }
 
   /**
    * Retrieves all groups in the system.

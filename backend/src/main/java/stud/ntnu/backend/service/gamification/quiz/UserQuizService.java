@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
 import stud.ntnu.backend.dto.quiz.CreateUserQuizAnswerDto;
 import stud.ntnu.backend.dto.quiz.QuizAttemptSummaryDto;
 import stud.ntnu.backend.dto.quiz.QuizPreviewDto;
@@ -32,6 +33,7 @@ import stud.ntnu.backend.repository.gamification.quiz.UserQuizAttemptRepository;
  * attempt summaries and statistics.
  */
 @Service
+@RequiredArgsConstructor
 public class UserQuizService {
 
   private final QuizRepository quizRepository;
@@ -39,28 +41,6 @@ public class UserQuizService {
   private final UserQuizAnswerRepository userQuizAnswerRepository;
   private final QuizQuestionRepository quizQuestionRepository;
   private final QuizAnswerRepository quizAnswerRepository;
-
-  /**
-   * Constructs a new UserQuizService with the required repositories.
-   *
-   * @param quizRepository            the quiz repository
-   * @param userQuizAttemptRepository the user quiz attempt repository
-   * @param userQuizAnswerRepository  the user quiz answer repository
-   * @param quizQuestionRepository    the quiz question repository
-   * @param quizAnswerRepository      the quiz answer repository
-   */
-  @Autowired
-  public UserQuizService(QuizRepository quizRepository,
-      UserQuizAttemptRepository userQuizAttemptRepository,
-      UserQuizAnswerRepository userQuizAnswerRepository,
-      QuizQuestionRepository quizQuestionRepository,
-      QuizAnswerRepository quizAnswerRepository) {
-    this.quizRepository = quizRepository;
-    this.userQuizAttemptRepository = userQuizAttemptRepository;
-    this.userQuizAnswerRepository = userQuizAnswerRepository;
-    this.quizQuestionRepository = quizQuestionRepository;
-    this.quizAnswerRepository = quizAnswerRepository;
-  }
 
   /**
    * Creates a new user quiz attempt and saves it to the repository. The attempt is marked with the

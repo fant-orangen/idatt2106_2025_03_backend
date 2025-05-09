@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.model.user.TwoFactorCode;
 import stud.ntnu.backend.repository.user.TwoFactorCodeRepository;
 import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 
 /**
  * <h2>TwoFactorCodeService</h2>
@@ -17,24 +18,13 @@ import org.springframework.beans.factory.annotation.Value;
  * codes.</p>
  */
 @Service
+@RequiredArgsConstructor
 public class TwoFactorCodeService {
 
   @Value("${twofactor.code.expiration.minutes}")
   private int codeExpirationMinutes;
   private final EmailService emailService;
   private final TwoFactorCodeRepository twoFactorCodeRepository;
-
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param twoFactorCodeRepository repository for two-factor codes
-   * @param emailService            service for sending emails
-   */
-  public TwoFactorCodeService(TwoFactorCodeRepository twoFactorCodeRepository,
-      EmailService emailService) {
-    this.twoFactorCodeRepository = twoFactorCodeRepository;
-    this.emailService = emailService;
-  }
 
   /**
    * Generates a random 6-digit verification code.

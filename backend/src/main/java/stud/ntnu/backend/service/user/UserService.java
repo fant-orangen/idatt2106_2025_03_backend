@@ -1,6 +1,7 @@
 package stud.ntnu.backend.service.user;
 
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.repository.user.EmailTokenRepository;
 import stud.ntnu.backend.repository.user.SafetyConfirmationRepository;
@@ -27,6 +28,7 @@ import java.util.UUID;
  * creation is handled by AuthService.
  */
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
   private final UserRepository userRepository;
@@ -34,27 +36,6 @@ public class UserService {
   private final SafetyConfirmationRepository safetyConfirmationRepository;
   private final EmailService emailService;
   private final NotificationService notificationService;
-
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param userRepository               repository for user operations
-   * @param emailTokenRepository         repository for email tokens
-   * @param safetyConfirmationRepository repository for safety confirmations
-   * @param emailService                 service for sending emails
-   * @param notificationService          service for creating notifications
-   */
-  public UserService(UserRepository userRepository,
-      EmailTokenRepository emailTokenRepository,
-      SafetyConfirmationRepository safetyConfirmationRepository,
-      EmailService emailService,
-      NotificationService notificationService) {
-    this.userRepository = userRepository;
-    this.emailTokenRepository = emailTokenRepository;
-    this.safetyConfirmationRepository = safetyConfirmationRepository;
-    this.emailService = emailService;
-    this.notificationService = notificationService;
-  }
 
   /**
    * Retrieves all users.
