@@ -97,7 +97,7 @@ class UserQuizServiceTest {
             attempt.setCompletedAt(LocalDateTime.now());
             
             Page<UserQuizAttempt> attemptPage = new PageImpl<>(List.of(attempt));
-            when(userQuizAttemptRepository.findByUserIdAndQuizId(userId, quizId, pageable))
+            when(userQuizAttemptRepository.findByUserIdAndQuizIdOrderByIdDesc(userId, quizId, pageable))
                 .thenReturn(attemptPage);
 
             // Act
@@ -116,12 +116,12 @@ class UserQuizServiceTest {
             Long quizId = 1L;
             Integer userId = 1;
             Pageable pageable = PageRequest.of(0, 10);
-            
-            when(userQuizAttemptRepository.findByUserIdAndQuizId(userId, quizId, pageable))
-                .thenReturn(Page.empty());
+
+            when(userQuizAttemptRepository.findByUserIdAndQuizIdOrderByIdDesc(userId, quizId, pageable))
+                .thenReturn(Page.empty(pageable));
 
             // Act
-            Page<QuizAttemptSummaryDto> result = userQuizService.getQuizAttemptsByQuizId(quizId, userId, pageable);
+        Page<QuizAttemptSummaryDto> result = userQuizService.getQuizAttemptsByQuizId(quizId, userId, pageable);
 
             // Assert
             assertNotNull(result);

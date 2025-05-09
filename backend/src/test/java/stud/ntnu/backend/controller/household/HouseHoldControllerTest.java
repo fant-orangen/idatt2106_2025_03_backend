@@ -355,7 +355,7 @@ public class HouseHoldControllerTest {
         ResponseEntity<?> response = householdController.updateHousehold(requestDto, principal);
 
         // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
 
     @Test

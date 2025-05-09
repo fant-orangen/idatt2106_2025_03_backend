@@ -596,7 +596,7 @@ public class NotificationServiceTest {
 
                 String messageTemplate = "🚨 Kriselarsel: 'Test Crisis' (høy alvorlighetsgrad). Du varsles fordi {reason} er innenfor faresonen. Startet %s.";
 
-                when(userService.getAllUsers()).thenReturn(Arrays.asList(user1, user2));
+                when(userRepository.findAll()).thenReturn(Arrays.asList(user1, user2));
 
                 // Mock createNotification to return a valid notification
                 Notification mockNotification = new Notification(
@@ -626,7 +626,7 @@ public class NotificationServiceTest {
                     notificationService.sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true);
 
                     // Assert
-                    verify(userService).getAllUsers();
+                    verify(userRepository).findAll();
                     verify(notificationService).createNotification(
                             eq(user1),
                             eq(Notification.PreferenceType.crisis_alert),
@@ -670,7 +670,7 @@ public class NotificationServiceTest {
 
                 String messageTemplate = "🚨 Kriselarsel: 'Test Crisis' (høy alvorlighetsgrad). Du varsles fordi {reason} er innenfor faresonen. Startet %s.";
 
-                when(userService.getAllUsers()).thenReturn(Collections.singletonList(user));
+                when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
 
                 // Mock createNotification to return a valid notification
                 Notification mockNotification = new Notification(
@@ -700,7 +700,7 @@ public class NotificationServiceTest {
                     notificationService.sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true);
 
                     // Assert
-                    verify(userService).getAllUsers();
+                    verify(userRepository).findAll();
                     verify(notificationService).createNotification(
                             eq(user),
                             eq(Notification.PreferenceType.crisis_alert),
@@ -737,7 +737,7 @@ public class NotificationServiceTest {
 
                 String messageTemplate = "🚨 Kriselarsel: 'Test Crisis' (høy alvorlighetsgrad). Du varsles fordi {reason} er innenfor faresonen. Startet %s.";
 
-                when(userService.getAllUsers()).thenReturn(Collections.singletonList(user));
+                when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
 
                 // Mock createNotification to return a valid notification
                 Notification mockNotification = new Notification(
@@ -763,7 +763,7 @@ public class NotificationServiceTest {
                     notificationService.sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true);
 
                     // Assert
-                    verify(userService).getAllUsers();
+                    verify(userRepository).findAll();
                     verify(notificationService).createNotification(
                             eq(user),
                             eq(Notification.PreferenceType.crisis_alert),
@@ -791,7 +791,7 @@ public class NotificationServiceTest {
                 notificationService.sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true);
 
                 // Assert
-                verify(userService, never()).getAllUsers();
+                verify(userRepository, never()).findAll();
                 verify(notificationService, never()).createNotification(
                         any(User.class),
                         any(),
@@ -812,13 +812,13 @@ public class NotificationServiceTest {
 
                 String messageTemplate = "Test message template";
 
-                when(userService.getAllUsers()).thenReturn(Collections.emptyList());
+                when(userRepository.findAll()).thenReturn(Collections.emptyList());
 
                 // Act
                 notificationService.sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true);
 
                 // Assert
-                verify(userService).getAllUsers();
+                verify(userRepository).findAll();
                 verify(notificationService, never()).createNotification(
                         any(User.class),
                         any(),
@@ -843,13 +843,13 @@ public class NotificationServiceTest {
 
                 String messageTemplate = "Test message template";
 
-                when(userService.getAllUsers()).thenReturn(Collections.singletonList(user));
+                when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
 
                 // Act
                 notificationService.sendCrisisEventNotificationsInternal(crisisEvent, messageTemplate, true);
 
                 // Assert
-                verify(userService).getAllUsers();
+                verify(userRepository).findAll();
                 verify(notificationService, never()).createNotification(
                         any(User.class),
                         any(),
