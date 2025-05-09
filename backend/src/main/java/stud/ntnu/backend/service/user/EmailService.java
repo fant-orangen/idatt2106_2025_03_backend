@@ -30,6 +30,12 @@ public class EmailService {
   private final EmailTokenRepository emailTokenRepository;
   private final MessageSource messageSource;
 
+  @Value("${app.backend.url}")
+  private String backendUrl;
+
+  @Value("${app.frontend.url}")
+  private String frontendUrl;
+
   /**
    * Constructs the EmailService with necessary dependencies injected by Spring.
    *
@@ -72,7 +78,7 @@ public class EmailService {
       message.setTo(user.getEmail());
 
       String userName = (user.getName() != null ? user.getName() : "Bruker/User");
-      String verificationUrl = "http://localhost:8080/api/auth/verify?token=" + token;
+      String verificationUrl = backendUrl + "/api/auth/verify?token=" + token;
 
       message.setSubject(messageSource.getMessage("verification.email.subject", null,
           LocaleContextHolder.getLocale()));
@@ -145,7 +151,7 @@ public class EmailService {
       helper.setTo(user.getEmail());
 
       String userName = (user.getName() != null ? user.getName() : "Bruker/User");
-      String resetPasswordUrl = "http://localhost:5173/reset-password/" + token;
+      String resetPasswordUrl = frontendUrl + "/reset-password/" + token;
 
       helper.setSubject(messageSource.getMessage("password.reset.subject", null, LocaleContextHolder.getLocale()));
       helper.setText(messageSource.getMessage("password.reset.body",

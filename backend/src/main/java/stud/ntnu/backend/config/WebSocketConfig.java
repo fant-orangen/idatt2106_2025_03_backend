@@ -52,7 +52,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry.addEndpoint("/ws") // endpoint clients will connect to
         .setAllowedOriginPatterns("http://localhost:5173",
-            "http://localhost:8080") // allow specific origins
+            "http://localhost:8080", "https://krisefikser.netlify.app") // allow specific origins
         .withSockJS(); // fallback for older browsers
   }
 }
