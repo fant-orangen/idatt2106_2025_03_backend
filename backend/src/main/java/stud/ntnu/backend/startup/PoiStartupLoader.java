@@ -14,7 +14,6 @@ import stud.ntnu.backend.service.map.PoiImportService;
  * are available for use immediately after startup.
  */
 @Component
-@ConditionalOnProperty(name = "poi.startup.enabled", havingValue = "true", matchIfMissing = false)
 @RequiredArgsConstructor
 public class PoiStartupLoader {
 
