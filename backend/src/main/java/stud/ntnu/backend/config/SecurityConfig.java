@@ -118,9 +118,11 @@ public class SecurityConfig {
                 // Authenticated user endpoints
                 .requestMatchers("/api/user/**").authenticated()
                 .requestMatchers("/topic/**", "/app/**").authenticated()
+                .requestMatchers("/api/quizzes/**").authenticated()
 
                 // Admin endpoints
                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPERADMIN")
+                .requestMatchers("/api/quizzes/admin/**").hasAnyRole("ADMIN", "SUPERADMIN")
 
                 // Super admin endpoints
                 .requestMatchers("/api/super-admin/**").hasRole("SUPERADMIN")

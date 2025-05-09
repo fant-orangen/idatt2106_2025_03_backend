@@ -1,9 +1,16 @@
 package stud.ntnu.backend.controller.user;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.security.Principal;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +41,7 @@ import stud.ntnu.backend.service.user.UserService;
  */
 @RestController
 @RequestMapping("/api/user/reflections")
+@Tag(name = "Reflections", description = "Operations for managing user-generated crisis reflections")
 public class ReflectionController {
 
   private final ReflectionService reflectionService;
@@ -61,6 +69,13 @@ public class ReflectionController {
    * @param pageable  pagination parameters
    * @return ResponseEntity containing a page of the user's reflections
    */
+  @Operation(summary = "Get personal reflections", description = "Retrieves all personal reflections for the authenticated user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved personal reflections", 
+          content = @Content(schema = @Schema(implementation = ReflectionResponseDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - user not found", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @GetMapping("/my")
   public ResponseEntity<Page<ReflectionResponseDto>> getMyReflections(
       Principal principal,
@@ -84,6 +99,13 @@ public class ReflectionController {
    * @param pageable  pagination parameters
    * @return ResponseEntity containing a page of shared reflections
    */
+  @Operation(summary = "Get shared reflections", description = "Retrieves all shared reflections visible to the authenticated user, including those shared with the user's household and groups.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved shared reflections", 
+          content = @Content(schema = @Schema(implementation = ReflectionResponseDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - user not found", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @GetMapping("/shared")
   public ResponseEntity<Page<ReflectionResponseDto>> getSharedReflections(
       Principal principal,
@@ -108,6 +130,13 @@ public class ReflectionController {
    * @return ResponseEntity containing a page of household reflections or 400 if user has no
    * household
    */
+  @Operation(summary = "Get household reflections", description = "Retrieves all shared reflections from the user's household. Requires the user to be a member of a household.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved household reflections", 
+          content = @Content(schema = @Schema(implementation = ReflectionResponseDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - user not found or not in a household", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @GetMapping("/household")
   public ResponseEntity<Page<ReflectionResponseDto>> getHouseholdReflections(
       Principal principal,
@@ -136,6 +165,13 @@ public class ReflectionController {
    * @param pageable  pagination parameters
    * @return ResponseEntity containing a page of group reflections
    */
+  @Operation(summary = "Get group reflections", description = "Retrieves all shared reflections from all groups the user's household is a member of.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully retrieved group reflections", 
+          content = @Content(schema = @Schema(implementation = ReflectionResponseDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - user not found", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @GetMapping("/groups")
   public ResponseEntity<Page<ReflectionResponseDto>> getGroupReflections(
       Principal principal,
@@ -160,6 +196,13 @@ public class ReflectionController {
    * @param principal           the authenticated user's principal
    * @return ResponseEntity containing the created reflection
    */
+  @Operation(summary = "Create reflection", description = "Creates a new reflection for the authenticated user.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully created reflection", 
+          content = @Content(schema = @Schema(implementation = ReflectionResponseDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid reflection data or user not found", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PostMapping
   public ResponseEntity<ReflectionResponseDto> createReflection(
       @Valid @RequestBody CreateReflectionDto createReflectionDto,
@@ -183,6 +226,15 @@ public class ReflectionController {
    * @param principal           the authenticated user's principal
    * @return ResponseEntity containing the updated reflection, or 403 if not authorized
    */
+  @Operation(summary = "Update reflection", description = "Updates an existing reflection. Only the owner of the reflection can update it.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully updated reflection", 
+          content = @Content(schema = @Schema(implementation = ReflectionResponseDto.class))),
+      @ApiResponse(responseCode = "400", description = "Bad request - invalid reflection data or user not found", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user not authorized to update this reflection", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @PutMapping("/{id}")
   public ResponseEntity<ReflectionResponseDto> updateReflection(
       @PathVariable Integer id,
@@ -209,6 +261,14 @@ public class ReflectionController {
    * @param principal the authenticated user's principal
    * @return ResponseEntity with status 200 if successful, 403 if not authorized, 400 if error
    */
+  @Operation(summary = "Delete reflection", description = "Soft deletes a reflection by marking it as deleted. Only the owner of the reflection can delete it.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Successfully deleted reflection"),
+      @ApiResponse(responseCode = "400", description = "Bad request - reflection not found or user not found", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string"))),
+      @ApiResponse(responseCode = "403", description = "Forbidden - user not authorized to delete this reflection", 
+          content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, schema = @Schema(type = "string")))
+  })
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteReflection(
       @PathVariable Integer id,
