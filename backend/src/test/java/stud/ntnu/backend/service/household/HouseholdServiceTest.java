@@ -129,7 +129,7 @@ public class HouseholdServiceTest {
         regularUser.setLastName("User");
 
         // Set up test household
-        testHousehold = new Household("Test Household", "123 Test St", 3);
+        testHousehold = new Household("Test Household", "Oslo, Norway", 3);
         testHousehold.setId(1);
         testHousehold.setLatitude(new BigDecimal("60.0"));
         testHousehold.setLongitude(new BigDecimal("10.0"));
@@ -145,7 +145,7 @@ public class HouseholdServiceTest {
         testEmptyMember.setHousehold(testHousehold);
 
         // Set up create request DTO
-        createRequestDto = new HouseholdCreateRequestDto("New Household", "456 New St", 2, null, null);
+        createRequestDto = new HouseholdCreateRequestDto("New Household", "Oslo, Norway", 2, null, null);
 
         // Set up security context
         SecurityContextHolder.setContext(securityContext);
@@ -200,13 +200,13 @@ public class HouseholdServiceTest {
             Household result = householdService.updateHousehold(
                 adminUser.getEmail(),
                 "Updated Name",
-                "Updated Address"
+                "Oslo, Norway"
             );
 
             // Assert
             assertNotNull(result);
             assertEquals("Updated Name", result.getName());
-            assertEquals("Updated Address", result.getAddress());
+            assertEquals("Oslo, Norway", result.getAddress());
             verify(householdRepository).save(any());
         }
 
@@ -220,7 +220,7 @@ public class HouseholdServiceTest {
                 householdService.updateHousehold(
                     regularUser.getEmail(),
                     "Updated Name",
-                    "Updated Address"
+                    "Oslo, Norway"
                 )
             );
             verify(householdRepository, never()).save(any());

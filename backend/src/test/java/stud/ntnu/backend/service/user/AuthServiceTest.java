@@ -179,7 +179,7 @@ class AuthServiceTest {
 
         @Test
         @DisplayName("Valid registration should create user and send verification email")
-        void validRegistrationShouldCreateUserAndSendEmail() {
+        void validRegistrationShouldCreateUserAndSendEmail()  throws MessagingException {
             // Given
             RegisterRequestDto request = createValidRegistrationRequest();
 
