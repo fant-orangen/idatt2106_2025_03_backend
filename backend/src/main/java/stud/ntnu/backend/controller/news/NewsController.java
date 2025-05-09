@@ -172,8 +172,8 @@ public class NewsController {
   }
 
   /**
-   * Get the newest news articles, ordered by published date (newest first).
-   * This endpoint is publicly accessible and only returns published articles.
+   * Get the newest news articles, ordered by published date (newest first). This endpoint is
+   * publicly accessible and only returns published articles.
    *
    * @param pageable pagination information
    * @return ResponseEntity with a page of news articles

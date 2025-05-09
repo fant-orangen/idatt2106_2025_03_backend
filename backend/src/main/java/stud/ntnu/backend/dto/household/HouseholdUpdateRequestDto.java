@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Data Transfer Object (DTO) representing the request payload for updating a household.
- * This class contains the fields that can be modified when updating an existing household.
- * All fields are required and must not be blank.
+ * Data Transfer Object (DTO) representing the request payload for updating a household. This class
+ * contains the fields that can be modified when updating an existing household. All fields are
+ * required and must not be blank.
  */
 @Getter
 @Setter
@@ -17,17 +17,15 @@ import lombok.Setter;
 @AllArgsConstructor
 public class HouseholdUpdateRequestDto {
 
-    /**
-     * The name of the household.
-     * Must not be blank.
-     */
-    @NotBlank(message = "Name is required")
-    private String name;
+  /**
+   * The name of the household. Must not be blank.
+   */
+  @NotBlank(message = "Name is required")
+  private String name;
 
-    /**
-     * The physical address of the household.
-     * Must not be blank.
-     */
-    @NotBlank(message = "Address is required")
-    private String address;
+  /**
+   * The physical address of the household. Must not be blank.
+   */
+  @NotBlank(message = "Address is required")
+  private String address;
 }

@@ -17,8 +17,8 @@ import stud.ntnu.backend.model.map.ScenarioTheme;
 import stud.ntnu.backend.model.user.User;
 
 /**
- * Repository interface for managing CrisisEvent entities in the database.
- * Provides methods for querying, updating, and managing crisis events.
+ * Repository interface for managing CrisisEvent entities in the database. Provides methods for
+ * querying, updating, and managing crisis events.
  */
 @Repository
 public interface CrisisEventRepository extends JpaRepository<CrisisEvent, Integer> {
@@ -78,16 +78,16 @@ public interface CrisisEventRepository extends JpaRepository<CrisisEvent, Intege
   List<CrisisEvent> findByActiveTrueAndScenarioTheme(ScenarioTheme scenarioTheme);
 
   /**
-   * Updates the fields of a crisis event.
-   * Updates include name, description, severity, location coordinates, radius, and timestamp.
+   * Updates the fields of a crisis event. Updates include name, description, severity, location
+   * coordinates, radius, and timestamp.
    *
-   * @param id The ID of the crisis event to update
-   * @param name The new name of the crisis event
+   * @param id          The ID of the crisis event to update
+   * @param name        The new name of the crisis event
    * @param description The new description of the crisis event
-   * @param severity The new severity level
-   * @param latitude The new latitude coordinate
-   * @param longitude The new longitude coordinate
-   * @param radius The new radius value
+   * @param severity    The new severity level
+   * @param latitude    The new latitude coordinate
+   * @param longitude   The new longitude coordinate
+   * @param radius      The new radius value
    */
   @Modifying
   @Query("UPDATE CrisisEvent c SET c.name = :name, c.description = :description, " +

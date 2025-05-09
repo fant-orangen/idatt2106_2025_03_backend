@@ -15,92 +15,100 @@ import stud.ntnu.backend.model.group.GroupMembership;
 import stud.ntnu.backend.model.group.GroupMembershipId;
 
 /**
- * Repository interface for managing GroupMembership entities.
- * Provides methods for querying and managing group memberships, including current and historical memberships.
+ * Repository interface for managing GroupMembership entities. Provides methods for querying and
+ * managing group memberships, including current and historical memberships.
  */
 @Repository
-public interface GroupMembershipRepository extends JpaRepository<GroupMembership, GroupMembershipId> {
-    
-    /**
-     * Finds the first group membership for a specific household.
-     *
-     * @param householdId The ID of the household
-     * @return An Optional containing the first GroupMembership if found, empty otherwise
-     */
-    Optional<GroupMembership> findFirstByHousehold_Id(Integer householdId);
+public interface GroupMembershipRepository extends
+    JpaRepository<GroupMembership, GroupMembershipId> {
 
-    /**
-     * Finds the current group membership for a specific household.
-     * A membership is considered current if the leftAt date is null or in the future.
-     *
-     * @param householdId The ID of the household
-     * @param now The current timestamp
-     * @return An Optional containing the current GroupMembership if found, empty otherwise
-     */
-    @Query("SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId AND (gm.leftAt IS NULL OR gm.leftAt > :now)")
-    Optional<GroupMembership> findCurrentByHouseholdId(@Param("householdId") Integer householdId, @Param("now") LocalDateTime now);
+  /**
+   * Finds the first group membership for a specific household.
+   *
+   * @param householdId The ID of the household
+   * @return An Optional containing the first GroupMembership if found, empty otherwise
+   */
+  Optional<GroupMembership> findFirstByHousehold_Id(Integer householdId);
 
-    /**
-     * Finds all current group memberships for a specific household with pagination.
-     * A membership is considered current if the leftAt date is null or in the future.
-     *
-     * @param householdId The ID of the household
-     * @param now The current timestamp
-     * @param pageable The pagination information
-     * @return A page of current GroupMembership objects
-     */
-    @Query("SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId AND (gm.leftAt IS NULL OR gm.leftAt > :now)")
-    Page<GroupMembership> findAllCurrentByHouseholdId(@Param("householdId") Integer householdId, @Param("now") LocalDateTime now, Pageable pageable);
+  /**
+   * Finds the current group membership for a specific household. A membership is considered current
+   * if the leftAt date is null or in the future.
+   *
+   * @param householdId The ID of the household
+   * @param now         The current timestamp
+   * @return An Optional containing the current GroupMembership if found, empty otherwise
+   */
+  @Query("SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId AND (gm.leftAt IS NULL OR gm.leftAt > :now)")
+  Optional<GroupMembership> findCurrentByHouseholdId(@Param("householdId") Integer householdId,
+      @Param("now") LocalDateTime now);
 
-    /**
-     * Finds all current group memberships for a specific group.
-     * A membership is considered current if the leftAt date is null or in the future.
-     *
-     * @param groupId The ID of the group
-     * @param now The current timestamp
-     * @return A list of current GroupMembership objects
-     */
-    @Query("SELECT gm FROM GroupMembership gm WHERE gm.group.id = :groupId AND (gm.leftAt IS NULL OR gm.leftAt > :now)")
-    List<GroupMembership> findAllCurrentByGroupId(@Param("groupId") Integer groupId, @Param("now") LocalDateTime now);
+  /**
+   * Finds all current group memberships for a specific household with pagination. A membership is
+   * considered current if the leftAt date is null or in the future.
+   *
+   * @param householdId The ID of the household
+   * @param now         The current timestamp
+   * @param pageable    The pagination information
+   * @return A page of current GroupMembership objects
+   */
+  @Query("SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId AND (gm.leftAt IS NULL OR gm.leftAt > :now)")
+  Page<GroupMembership> findAllCurrentByHouseholdId(@Param("householdId") Integer householdId,
+      @Param("now") LocalDateTime now, Pageable pageable);
 
-    /**
-     * Finds the current group membership for a specific household and group.
-     * A membership is considered current if the leftAt date is null or in the future.
-     *
-     * @param householdId The ID of the household
-     * @param groupId The ID of the group
-     * @param now The current timestamp
-     * @return An Optional containing the current GroupMembership if found, empty otherwise
-     */
-    @Query("SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId AND gm.group.id = :groupId AND (gm.leftAt IS NULL OR gm.leftAt > :now)")
-    Optional<GroupMembership> findCurrentByHouseholdIdAndGroupId(@Param("householdId") Integer householdId, @Param("groupId") Integer groupId, @Param("now") LocalDateTime now);
+  /**
+   * Finds all current group memberships for a specific group. A membership is considered current if
+   * the leftAt date is null or in the future.
+   *
+   * @param groupId The ID of the group
+   * @param now     The current timestamp
+   * @return A list of current GroupMembership objects
+   */
+  @Query("SELECT gm FROM GroupMembership gm WHERE gm.group.id = :groupId AND (gm.leftAt IS NULL OR gm.leftAt > :now)")
+  List<GroupMembership> findAllCurrentByGroupId(@Param("groupId") Integer groupId,
+      @Param("now") LocalDateTime now);
 
-    /**
-     * Finds all current group memberships for a specific household where the group is active.
-     * A membership is considered current if the leftAt date is null or in the future.
-     *
-     * @param householdId The ID of the household
-     * @param now The current timestamp
-     * @param pageable The pagination information
-     * @return A page of current GroupMembership objects for active groups
-     */
-    @Query("SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId AND (gm.leftAt IS NULL OR gm.leftAt > :now) AND gm.group.status = 'active'")
-    Page<GroupMembership> findAllCurrentByHouseholdIdAndGroupStatus(
-        @Param("householdId") Integer householdId, 
-        @Param("now") LocalDateTime now,
-        Pageable pageable);
-    /**
-     * Checks if there exists a non-expired, pending invitation for a household to join a group.
-     * An invitation is considered pending if it hasn't been accepted or declined,
-     * and non-expired if its expiration date is in the future.
-     *
-     * @param groupId The ID of the group
-     * @param householdId The ID of the household
-     * @param now The current timestamp to check against
-     * @return true if a valid pending invitation exists, false otherwise
-     */
-    @Query("SELECT CASE WHEN COUNT(gi) > 0 THEN true ELSE false END FROM GroupInvitation gi " +
-           "WHERE gi.group.id = :groupId AND gi.invitedHousehold.id = :householdId " +
-           "AND gi.expiresAt > :now AND gi.acceptedAt IS NULL AND gi.declinedAt IS NULL")
-    boolean existsByGroupIdAndHouseholdIdAndInvitationNotExpired(Integer groupId, Integer householdId, LocalDateTime now);
+  /**
+   * Finds the current group membership for a specific household and group. A membership is
+   * considered current if the leftAt date is null or in the future.
+   *
+   * @param householdId The ID of the household
+   * @param groupId     The ID of the group
+   * @param now         The current timestamp
+   * @return An Optional containing the current GroupMembership if found, empty otherwise
+   */
+  @Query("SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId AND gm.group.id = :groupId AND (gm.leftAt IS NULL OR gm.leftAt > :now)")
+  Optional<GroupMembership> findCurrentByHouseholdIdAndGroupId(
+      @Param("householdId") Integer householdId, @Param("groupId") Integer groupId,
+      @Param("now") LocalDateTime now);
+
+  /**
+   * Finds all current group memberships for a specific household where the group is active. A
+   * membership is considered current if the leftAt date is null or in the future.
+   *
+   * @param householdId The ID of the household
+   * @param now         The current timestamp
+   * @param pageable    The pagination information
+   * @return A page of current GroupMembership objects for active groups
+   */
+  @Query("SELECT gm FROM GroupMembership gm WHERE gm.household.id = :householdId AND (gm.leftAt IS NULL OR gm.leftAt > :now) AND gm.group.status = 'active'")
+  Page<GroupMembership> findAllCurrentByHouseholdIdAndGroupStatus(
+      @Param("householdId") Integer householdId,
+      @Param("now") LocalDateTime now,
+      Pageable pageable);
+
+  /**
+   * Checks if there exists a non-expired, pending invitation for a household to join a group. An
+   * invitation is considered pending if it hasn't been accepted or declined, and non-expired if its
+   * expiration date is in the future.
+   *
+   * @param groupId     The ID of the group
+   * @param householdId The ID of the household
+   * @param now         The current timestamp to check against
+   * @return true if a valid pending invitation exists, false otherwise
+   */
+  @Query("SELECT CASE WHEN COUNT(gi) > 0 THEN true ELSE false END FROM GroupInvitation gi " +
+      "WHERE gi.group.id = :groupId AND gi.invitedHousehold.id = :householdId " +
+      "AND gi.expiresAt > :now AND gi.acceptedAt IS NULL AND gi.declinedAt IS NULL")
+  boolean existsByGroupIdAndHouseholdIdAndInvitationNotExpired(Integer groupId, Integer householdId,
+      LocalDateTime now);
 }

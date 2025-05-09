@@ -73,25 +73,26 @@ public class MeetingPlaceService {
   }
 
   /**
-   * Creates a new meeting place with the provided details.
-   * If an address is provided but coordinates are not, the address will be geocoded to obtain coordinates.
-   * This operation is transactional to ensure data consistency.
+   * Creates a new meeting place with the provided details. If an address is provided but
+   * coordinates are not, the address will be geocoded to obtain coordinates. This operation is
+   * transactional to ensure data consistency.
    *
-   * @param createDto the DTO containing the meeting place creation details
+   * @param createDto   the DTO containing the meeting place creation details
    * @param currentUser the user creating the meeting place
    * @return the newly created meeting place
    */
   @Transactional
   public MeetingPlace createMeetingPlace(CreateMeetingPlaceDto createDto, User currentUser) {
     // If address is provided but not coordinates, convert address to coordinates
-    if (createDto.getAddress() != null && (createDto.getLatitude() == null || createDto.getLongitude() == null)) {
+    if (createDto.getAddress() != null && (createDto.getLatitude() == null
+        || createDto.getLongitude() == null)) {
       CoordinatesItemDto coordinates = LocationUtil.getCoordinatesByAddress(createDto.getAddress());
       // Create meeting place with converted coordinates
       MeetingPlace meetingPlace = new MeetingPlace(
-        createDto.getName(),
-        coordinates.getLatitude(),
-        coordinates.getLongitude(),
-        currentUser
+          createDto.getName(),
+          coordinates.getLatitude(),
+          coordinates.getLongitude(),
+          currentUser
       );
       meetingPlace.setAddress(createDto.getAddress());
       return meetingPlaceRepository.save(meetingPlace);
@@ -99,10 +100,10 @@ public class MeetingPlaceService {
 
     // If coordinates are provided directly
     MeetingPlace meetingPlace = new MeetingPlace(
-      createDto.getName(),
-      createDto.getLatitude(),
-      createDto.getLongitude(),
-      currentUser
+        createDto.getName(),
+        createDto.getLatitude(),
+        createDto.getLongitude(),
+        currentUser
     );
     meetingPlace.setAddress(createDto.getAddress());
 
@@ -110,8 +111,8 @@ public class MeetingPlaceService {
   }
 
   /**
-   * Archives a meeting place by setting its status to "archived".
-   * This operation is transactional to ensure data consistency.
+   * Archives a meeting place by setting its status to "archived". This operation is transactional
+   * to ensure data consistency.
    *
    * @param id the ID of the meeting place to archive
    * @return the archived meeting place
@@ -120,14 +121,14 @@ public class MeetingPlaceService {
   @Transactional
   public MeetingPlace archiveMeetingPlace(Integer id) {
     MeetingPlace meetingPlace = meetingPlaceRepository.findById(id)
-      .orElseThrow(() -> new IllegalStateException("Meeting place not found"));
+        .orElseThrow(() -> new IllegalStateException("Meeting place not found"));
     meetingPlace.setStatus("archived");
     return meetingPlaceRepository.save(meetingPlace);
   }
 
   /**
-   * Activates a meeting place by setting its status to "active".
-   * This operation is transactional to ensure data consistency.
+   * Activates a meeting place by setting its status to "active". This operation is transactional to
+   * ensure data consistency.
    *
    * @param id the ID of the meeting place to activate
    * @return the activated meeting place
@@ -136,31 +137,33 @@ public class MeetingPlaceService {
   @Transactional
   public MeetingPlace activateMeetingPlace(Integer id) {
     MeetingPlace meetingPlace = meetingPlaceRepository.findById(id)
-      .orElseThrow(() -> new IllegalStateException("Meeting place not found"));
+        .orElseThrow(() -> new IllegalStateException("Meeting place not found"));
     meetingPlace.setStatus("active");
     return meetingPlaceRepository.save(meetingPlace);
   }
+
   /**
    * Retrieves a list of active meeting places within a specified distance from given coordinates.
-   * The distance calculation is performed using the Haversine formula through LocationUtil.
-   * Only meeting places with "active" status are considered.
+   * The distance calculation is performed using the Haversine formula through LocationUtil. Only
+   * meeting places with "active" status are considered.
    *
-   * @param latitude the latitude coordinate of the center point
-   * @param longitude the longitude coordinate of the center point
+   * @param latitude      the latitude coordinate of the center point
+   * @param longitude     the longitude coordinate of the center point
    * @param maxDistanceKm the maximum distance in kilometers from the center point
    * @return a list of meeting places within the specified distance
    */
-  public List<MeetingPlace> getNearbyMeetingPlaces(BigDecimal latitude, BigDecimal longitude, double maxDistanceKm) {
+  public List<MeetingPlace> getNearbyMeetingPlaces(BigDecimal latitude, BigDecimal longitude,
+      double maxDistanceKm) {
     List<MeetingPlace> allMeetingPlaces = meetingPlaceRepository.findByStatus("active");
-    
+
     return allMeetingPlaces.stream()
-      .filter(place -> LocationUtil.calculateDistance(
-        latitude.doubleValue(),
-        longitude.doubleValue(),
-        place.getLatitude().doubleValue(),
-        place.getLongitude().doubleValue()
-      ) <= maxDistanceKm * 1000) // Convert km to meters
-      .toList();
+        .filter(place -> LocationUtil.calculateDistance(
+            latitude.doubleValue(),
+            longitude.doubleValue(),
+            place.getLatitude().doubleValue(),
+            place.getLongitude().doubleValue()
+        ) <= maxDistanceKm * 1000) // Convert km to meters
+        .toList();
   }
 
   /**

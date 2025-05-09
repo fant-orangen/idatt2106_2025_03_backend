@@ -26,12 +26,12 @@ import stud.ntnu.backend.service.crisis.ScenarioThemeService;
 import stud.ntnu.backend.service.user.UserService;
 
 /**
- * REST controller for managing crisis scenario themes.
- * Provides endpoints for creating, updating, and retrieving scenario themes like power outages
- * or floods, along with their associated educational and preparedness content.
+ * REST controller for managing crisis scenario themes. Provides endpoints for creating, updating,
+ * and retrieving scenario themes like power outages or floods, along with their associated
+ * educational and preparedness content.
  * <p>
- * This controller supports both public access for retrieving theme information and
- * administrative access for creating and updating themes.
+ * This controller supports both public access for retrieving theme information and administrative
+ * access for creating and updating themes.
  */
 @RestController
 @RequestMapping("/api")
@@ -44,7 +44,7 @@ public class ScenarioThemeController {
    * Constructs a new ScenarioThemeController with the required services.
    *
    * @param scenarioThemeService service for managing scenario themes
-   * @param userService service for managing users
+   * @param userService          service for managing users
    */
   public ScenarioThemeController(ScenarioThemeService scenarioThemeService,
       UserService userService) {
@@ -55,13 +55,11 @@ public class ScenarioThemeController {
   /**
    * Creates a new scenario theme. Only users with ADMIN or SUPERADMIN roles are allowed.
    *
-   * @param createScenarioThemeDto the scenario theme information including name, description,
-   *                              and optional instructions
-   * @param principal the Principal object representing the current user
-   * @return ResponseEntity with:
-   *         - 200 OK and the created scenario theme if successful
-   *         - 403 Forbidden if unauthorized
-   *         - 400 Bad Request with error message if creation fails
+   * @param createScenarioThemeDto the scenario theme information including name, description, and
+   *                               optional instructions
+   * @param principal              the Principal object representing the current user
+   * @return ResponseEntity with: - 200 OK and the created scenario theme if successful - 403
+   * Forbidden if unauthorized - 400 Bad Request with error message if creation fails
    */
   @PostMapping(path = "/admin/scenario-themes")
   public ResponseEntity<?> createScenarioTheme(
@@ -85,13 +83,11 @@ public class ScenarioThemeController {
   /**
    * Updates an existing scenario theme. Only users with ADMIN or SUPERADMIN roles are allowed.
    *
-   * @param updateScenarioThemeDto the scenario theme update information including id and
-   *                              optional name, description, and instructions
-   * @param principal the Principal object representing the current user
-   * @return ResponseEntity with:
-   *         - 200 OK and the updated scenario theme if successful
-   *         - 403 Forbidden if unauthorized
-   *         - 400 Bad Request with error message if update fails
+   * @param updateScenarioThemeDto the scenario theme update information including id and optional
+   *                               name, description, and instructions
+   * @param principal              the Principal object representing the current user
+   * @return ResponseEntity with: - 200 OK and the updated scenario theme if successful - 403
+   * Forbidden if unauthorized - 400 Bad Request with error message if update fails
    */
   @PatchMapping(path = "/admin/scenario-themes")
   public ResponseEntity<?> updateScenarioTheme(
@@ -122,8 +118,8 @@ public class ScenarioThemeController {
   }
 
   /**
-   * Gets a list of all scenario themes with just their names and IDs.
-   * This is a lightweight endpoint for UI components that only need basic theme information.
+   * Gets a list of all scenario themes with just their names and IDs. This is a lightweight
+   * endpoint for UI components that only need basic theme information.
    *
    * @return ResponseEntity containing a list of ScenarioThemeNameDto objects
    */
@@ -137,9 +133,8 @@ public class ScenarioThemeController {
    * Gets detailed information about a specific scenario theme by its ID.
    *
    * @param id the ID of the scenario theme to retrieve
-   * @return ResponseEntity with:
-   *         - 200 OK and ScenarioThemeDetailsDto if found
-   *         - 404 Not Found if the theme doesn't exist
+   * @return ResponseEntity with: - 200 OK and ScenarioThemeDetailsDto if found - 404 Not Found if
+   * the theme doesn't exist
    */
   @GetMapping("/public/scenario-themes/{id}")
   public ResponseEntity<ScenarioThemeDetailsDto> getScenarioTheme(@PathVariable Integer id) {
@@ -152,9 +147,8 @@ public class ScenarioThemeController {
    * Gets just the name of a specific scenario theme by its ID.
    *
    * @param id the ID of the scenario theme to retrieve
-   * @return ResponseEntity with:
-   *         - 200 OK and ScenarioThemeNameDto if found
-   *         - 404 Not Found if the theme doesn't exist
+   * @return ResponseEntity with: - 200 OK and ScenarioThemeNameDto if found - 404 Not Found if the
+   * theme doesn't exist
    */
   @GetMapping("/public/scenario-themes/{id}/name")
   public ResponseEntity<ScenarioThemeNameDto> getScenarioThemeName(@PathVariable Integer id) {

@@ -159,8 +159,8 @@ public class ScenarioThemeService {
   }
 
   /**
-   * Gets a list of all scenario themes with just their IDs and names.
-   * This is a lightweight endpoint for UI components that only need basic theme information.
+   * Gets a list of all scenario themes with just their IDs and names. This is a lightweight
+   * endpoint for UI components that only need basic theme information.
    *
    * @return List of ScenarioThemeNameDto containing only IDs and names
    */

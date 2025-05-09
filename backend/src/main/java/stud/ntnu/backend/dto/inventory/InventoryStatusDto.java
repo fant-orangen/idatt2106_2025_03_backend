@@ -45,14 +45,14 @@ public class InventoryStatusDto {
   /**
    * A map containing the count of each product type in the household's inventory.
    * <p>
-   * Key: Product type name
-   * Value: Current count of that product type
+   * Key: Product type name Value: Current count of that product type
    * </p>
    */
   private Map<String, Integer> productTypeCounts;
 
   /**
-   * A list of product type status objects, each representing the status of a specific product type.
+   * A list of product type status objects, each representing the status of a specific product
+   * type.
    * <p>
    * Each status object contains detailed information about the current count, recommended count,
    * and whether the amount is sufficient.

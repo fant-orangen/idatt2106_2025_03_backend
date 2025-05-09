@@ -31,255 +31,249 @@ import stud.ntnu.backend.service.user.UserService;
 import stud.ntnu.backend.util.LocationUtil;
 
 /**
- * Controller responsible for managing Points of Interest (POIs) operations.
- * Provides endpoints for creating, reading, updating, and deleting POIs,
- * as well as searching and filtering POIs based on various criteria.
- * POIs include resources like emergency shelters, defibrillators, and food stations.
+ * Controller responsible for managing Points of Interest (POIs) operations. Provides endpoints for
+ * creating, reading, updating, and deleting POIs, as well as searching and filtering POIs based on
+ * various criteria. POIs include resources like emergency shelters, defibrillators, and food
+ * stations.
  */
 @RestController
 @RequestMapping("/api")
 public class PoiController {
 
-    private final PoiService poiService;
-    private final UserService userService;
+  private final PoiService poiService;
+  private final UserService userService;
 
-    /**
-     * Constructs a new PoiController with the required services.
-     *
-     * @param poiService service handling POI-related operations
-     * @param userService service handling user-related operations
-     */
-    public PoiController(PoiService poiService, UserService userService) {
-        this.poiService = poiService;
-        this.userService = userService;
+  /**
+   * Constructs a new PoiController with the required services.
+   *
+   * @param poiService  service handling POI-related operations
+   * @param userService service handling user-related operations
+   */
+  public PoiController(PoiService poiService, UserService userService) {
+    this.poiService = poiService;
+    this.userService = userService;
+  }
+
+  /**
+   * Retrieves all public points of interest. This endpoint is accessible without authentication.
+   *
+   * @return List of POIs converted to DTOs for public consumption
+   */
+  @GetMapping("/public/poi/public")
+  public List<PoiItemDto> getPublicPointsOfInterest() {
+    return poiService.getAllPointsOfInterest()
+        .stream()
+        .map(PoiItemDto::fromEntity)
+        .toList();
+  }
+
+  /**
+   * Retrieves a paginated and sorted list of POI previews. This endpoint is accessible without
+   * authentication.
+   *
+   * @param page zero-based page index (default 0)
+   * @param size number of items per page (default 10)
+   * @param sort sorting criteria in format "property,direction" (default "id,asc")
+   * @return ResponseEntity containing a page of POI previews
+   */
+  @GetMapping("public/poi/previews")
+  public ResponseEntity<?> getPoiPreviews(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(defaultValue = "id,asc") String sort) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")[0]).ascending());
+    if (sort.endsWith(",desc")) {
+      pageable = PageRequest.of(page, size, Sort.by(sort.split(",")[0]).descending());
     }
+    return ResponseEntity.ok(poiService.getPoiPreviews(pageable));
+  }
 
-    /**
-     * Retrieves all public points of interest.
-     * This endpoint is accessible without authentication.
-     *
-     * @return List of POIs converted to DTOs for public consumption
-     */
-    @GetMapping("/public/poi/public")
-    public List<PoiItemDto> getPublicPointsOfInterest() {
-        return poiService.getAllPointsOfInterest()
-            .stream()
-            .map(PoiItemDto::fromEntity)
-            .toList();
+  /**
+   * Retrieves all POIs of a specific type. This endpoint is accessible without authentication.
+   *
+   * @param id the type ID to filter POIs by
+   * @return List of POIs of the specified type
+   * @throws IllegalArgumentException if the type ID is invalid
+   */
+  @GetMapping("/public/poi/type/{id}")
+  public List<PoiItemDto> getPointsOfInterestByTypeId(@PathVariable int id) {
+    return poiService.getPointsOfInterestByTypeId(id)
+        .stream()
+        .map(PoiItemDto::fromEntity)
+        .toList();
+  }
+
+  /**
+   * Retrieves a specific POI by its ID. This endpoint is accessible without authentication.
+   *
+   * @param id the ID of the POI to retrieve
+   * @return the POI if found, null otherwise
+   */
+  @GetMapping("/public/poi/{id}")
+  public PoiItemDto getPointOfInterestById(@PathVariable int id) {
+    return poiService.getPointOfInterestById(id)
+        .map(PoiItemDto::fromEntity)
+        .orElse(null);
+  }
+
+  /**
+   * Finds POIs within a specified distance from a given location. Optionally filters by POI type.
+   * This endpoint is accessible without authentication.
+   *
+   * @param id        optional type ID to filter POIs by
+   * @param latitude  latitude of the center point
+   * @param longitude longitude of the center point
+   * @param distance  maximum distance in meters from the center point
+   * @return List of POIs within the specified distance
+   */
+  @GetMapping("/public/poi/type/nearby")
+  public List<PoiItemDto> getPointsOfInterestByTypeIdAndDistance(
+      @RequestParam(required = false) Integer id,
+      @RequestParam double latitude,
+      @RequestParam double longitude,
+      @RequestParam double distance) {
+    return (id == null ? poiService.getAllPointsOfInterest()
+        : poiService.getPointsOfInterestByTypeId(id))
+        .stream()
+        .filter(poi -> LocationUtil.calculateDistance(latitude, longitude,
+            poi.getLatitude().doubleValue(), poi.getLongitude().doubleValue()) <= distance)
+        .map(PoiItemDto::fromEntity)
+        .toList();
+  }
+
+  /**
+   * Finds the nearest POI of a specific type from a given location. This endpoint is accessible
+   * without authentication.
+   *
+   * @param id        type ID to filter POIs by
+   * @param latitude  latitude of the reference point
+   * @param longitude longitude of the reference point
+   * @return the nearest POI of the specified type, or null if none found
+   * @throws IllegalArgumentException if the type ID is invalid
+   */
+  @GetMapping("/public/poi/type/nearest/{id}")
+  public PoiItemDto getNearestPointOfInterestByType(
+      @PathVariable int id,
+      @RequestParam double latitude,
+      @RequestParam double longitude) {
+    PointOfInterest nearestPoi = PoiService.findNearestPoi(latitude, longitude,
+        poiService.getPointsOfInterestByTypeId(id));
+    return nearestPoi != null ? PoiItemDto.fromEntity(nearestPoi) : null;
+  }
+
+  /**
+   * Creates a new POI. This endpoint is restricted to admin users only.
+   *
+   * @param createPoiDto DTO containing the POI information
+   * @param principal    the authenticated user's principal
+   * @return ResponseEntity containing the created POI if successful, or an error message
+   * @throws IllegalArgumentException if the POI data is invalid
+   * @throws IllegalStateException    if the user is not found
+   */
+  @PostMapping("/admin/poi")
+  public ResponseEntity<?> createPointOfInterest(
+      @Valid @RequestBody CreatePoiDto createPoiDto,
+      Principal principal) {
+    try {
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+        return ResponseEntity.status(403).body("Only administrators can create points of interest");
+      }
+
+      String email = principal.getName();
+      User currentUser = userService.getUserByEmail(email)
+          .orElseThrow(() -> new IllegalStateException("User not found"));
+
+      PointOfInterest savedPoi = poiService.createPointOfInterest(createPoiDto, currentUser);
+      return ResponseEntity.ok(PoiItemDto.fromEntity(savedPoi));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
 
-    /**
-     * Retrieves a paginated and sorted list of POI previews.
-     * This endpoint is accessible without authentication.
-     *
-     * @param page zero-based page index (default 0)
-     * @param size number of items per page (default 10)
-     * @param sort sorting criteria in format "property,direction" (default "id,asc")
-     * @return ResponseEntity containing a page of POI previews
-     */
-    @GetMapping("public/poi/previews")
-    public ResponseEntity<?> getPoiPreviews(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id,asc") String sort) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")[0]).ascending());
-        if (sort.endsWith(",desc")) {
-            pageable = PageRequest.of(page, size, Sort.by(sort.split(",")[0]).descending());
-        }
-        return ResponseEntity.ok(poiService.getPoiPreviews(pageable));
+  /**
+   * Updates an existing POI. This endpoint is restricted to admin users only.
+   *
+   * @param id           the ID of the POI to update
+   * @param updatePoiDto DTO containing the updated POI information
+   * @param principal    the authenticated user's principal
+   * @return ResponseEntity containing the updated POI if successful, or an error message
+   * @throws IllegalArgumentException if the POI doesn't exist or the data is invalid
+   */
+  @PutMapping("/admin/poi/{id}")
+  public ResponseEntity<?> updatePointOfInterest(
+      @PathVariable Integer id,
+      @RequestBody UpdatePoiDto updatePoiDto,
+      Principal principal) {
+    try {
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+        return ResponseEntity.status(403).body("Only administrators can update points of interest");
+      }
+
+      PointOfInterest updatedPoi = poiService.updatePointOfInterest(id, updatePoiDto);
+      return ResponseEntity.ok(PoiItemDto.fromEntity(updatedPoi));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
 
-    /**
-     * Retrieves all POIs of a specific type.
-     * This endpoint is accessible without authentication.
-     *
-     * @param id the type ID to filter POIs by
-     * @return List of POIs of the specified type
-     * @throws IllegalArgumentException if the type ID is invalid
-     */
-    @GetMapping("/public/poi/type/{id}")
-    public List<PoiItemDto> getPointsOfInterestByTypeId(@PathVariable int id) {
-        return poiService.getPointsOfInterestByTypeId(id)
-            .stream()
-            .map(PoiItemDto::fromEntity)
-            .toList();
+  /**
+   * Deletes a POI. This endpoint is restricted to admin users only.
+   *
+   * @param id        the ID of the POI to delete
+   * @param principal the authenticated user's principal
+   * @return ResponseEntity with success message if successful, or an error message
+   * @throws IllegalArgumentException if the POI doesn't exist
+   */
+  @DeleteMapping("/admin/poi/{id}")
+  public ResponseEntity<?> deletePointOfInterest(
+      @PathVariable Integer id,
+      Principal principal) {
+    try {
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+        return ResponseEntity.status(403).body("Only administrators can delete points of interest");
+      }
+
+      poiService.deletePointOfInterest(id);
+      return ResponseEntity.ok("Point of interest deleted successfully");
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
 
-    /**
-     * Retrieves a specific POI by its ID.
-     * This endpoint is accessible without authentication.
-     *
-     * @param id the ID of the POI to retrieve
-     * @return the POI if found, null otherwise
-     */
-    @GetMapping("/public/poi/{id}")
-    public PoiItemDto getPointOfInterestById(@PathVariable int id) {
-        return poiService.getPointOfInterestById(id)
-            .map(PoiItemDto::fromEntity)
-            .orElse(null);
-    }
+  /**
+   * Retrieves all available POI types. This endpoint is accessible without authentication.
+   *
+   * @return List of all POI types in the system
+   */
+  @GetMapping("/public/poi/types")
+  public List<PoiType> getAllPoiTypes() {
+    return poiService.getAllPoiTypes();
+  }
 
-    /**
-     * Finds POIs within a specified distance from a given location.
-     * Optionally filters by POI type.
-     * This endpoint is accessible without authentication.
-     *
-     * @param id optional type ID to filter POIs by
-     * @param latitude latitude of the center point
-     * @param longitude longitude of the center point
-     * @param distance maximum distance in meters from the center point
-     * @return List of POIs within the specified distance
-     */
-    @GetMapping("/public/poi/type/nearby")
-    public List<PoiItemDto> getPointsOfInterestByTypeIdAndDistance(
-            @RequestParam(required = false) Integer id,
-            @RequestParam double latitude,
-            @RequestParam double longitude,
-            @RequestParam double distance) {
-        return (id == null ? poiService.getAllPointsOfInterest()
-            : poiService.getPointsOfInterestByTypeId(id))
-            .stream()
-            .filter(poi -> LocationUtil.calculateDistance(latitude, longitude,
-                poi.getLatitude().doubleValue(), poi.getLongitude().doubleValue()) <= distance)
-            .map(PoiItemDto::fromEntity)
-            .toList();
-    }
+  /**
+   * Searches for POIs by name using case-insensitive substring matching. Results are paginated and
+   * sorted. This endpoint is accessible without authentication.
+   *
+   * @param q    search term to match against POI names
+   * @param page zero-based page index (default 0)
+   * @param size number of items per page (default 10)
+   * @param sort sorting criteria in format "property,direction" (default "id,desc")
+   * @return Page of POIs matching the search criteria
+   */
+  @GetMapping("/public/poi/search")
+  public Page<PoiItemDto> searchPois(
+      @RequestParam("q") String q,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(defaultValue = "id,desc") String sort) {
+    String[] parts = sort.split(",");
+    Sort.Direction dir = parts.length > 1 && parts[1].equalsIgnoreCase("desc")
+        ? Sort.Direction.DESC
+        : Sort.Direction.ASC;
+    Pageable pageable = PageRequest.of(page, size, Sort.by(dir, parts[0]));
 
-    /**
-     * Finds the nearest POI of a specific type from a given location.
-     * This endpoint is accessible without authentication.
-     *
-     * @param id type ID to filter POIs by
-     * @param latitude latitude of the reference point
-     * @param longitude longitude of the reference point
-     * @return the nearest POI of the specified type, or null if none found
-     * @throws IllegalArgumentException if the type ID is invalid
-     */
-    @GetMapping("/public/poi/type/nearest/{id}")
-    public PoiItemDto getNearestPointOfInterestByType(
-            @PathVariable int id,
-            @RequestParam double latitude,
-            @RequestParam double longitude) {
-        PointOfInterest nearestPoi = PoiService.findNearestPoi(latitude, longitude,
-            poiService.getPointsOfInterestByTypeId(id));
-        return nearestPoi != null ? PoiItemDto.fromEntity(nearestPoi) : null;
-    }
-
-    /**
-     * Creates a new POI. This endpoint is restricted to admin users only.
-     *
-     * @param createPoiDto DTO containing the POI information
-     * @param principal the authenticated user's principal
-     * @return ResponseEntity containing the created POI if successful, or an error message
-     * @throws IllegalArgumentException if the POI data is invalid
-     * @throws IllegalStateException if the user is not found
-     */
-    @PostMapping("/admin/poi")
-    public ResponseEntity<?> createPointOfInterest(
-            @Valid @RequestBody CreatePoiDto createPoiDto,
-            Principal principal) {
-        try {
-            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
-                return ResponseEntity.status(403).body("Only administrators can create points of interest");
-            }
-
-            String email = principal.getName();
-            User currentUser = userService.getUserByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("User not found"));
-
-            PointOfInterest savedPoi = poiService.createPointOfInterest(createPoiDto, currentUser);
-            return ResponseEntity.ok(PoiItemDto.fromEntity(savedPoi));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    /**
-     * Updates an existing POI. This endpoint is restricted to admin users only.
-     *
-     * @param id the ID of the POI to update
-     * @param updatePoiDto DTO containing the updated POI information
-     * @param principal the authenticated user's principal
-     * @return ResponseEntity containing the updated POI if successful, or an error message
-     * @throws IllegalArgumentException if the POI doesn't exist or the data is invalid
-     */
-    @PutMapping("/admin/poi/{id}")
-    public ResponseEntity<?> updatePointOfInterest(
-            @PathVariable Integer id,
-            @RequestBody UpdatePoiDto updatePoiDto,
-            Principal principal) {
-        try {
-            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
-                return ResponseEntity.status(403).body("Only administrators can update points of interest");
-            }
-
-            PointOfInterest updatedPoi = poiService.updatePointOfInterest(id, updatePoiDto);
-            return ResponseEntity.ok(PoiItemDto.fromEntity(updatedPoi));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    /**
-     * Deletes a POI. This endpoint is restricted to admin users only.
-     *
-     * @param id the ID of the POI to delete
-     * @param principal the authenticated user's principal
-     * @return ResponseEntity with success message if successful, or an error message
-     * @throws IllegalArgumentException if the POI doesn't exist
-     */
-    @DeleteMapping("/admin/poi/{id}")
-    public ResponseEntity<?> deletePointOfInterest(
-            @PathVariable Integer id,
-            Principal principal) {
-        try {
-            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
-                return ResponseEntity.status(403).body("Only administrators can delete points of interest");
-            }
-
-            poiService.deletePointOfInterest(id);
-            return ResponseEntity.ok("Point of interest deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    /**
-     * Retrieves all available POI types.
-     * This endpoint is accessible without authentication.
-     *
-     * @return List of all POI types in the system
-     */
-    @GetMapping("/public/poi/types")
-    public List<PoiType> getAllPoiTypes() {
-        return poiService.getAllPoiTypes();
-    }
-
-    /**
-     * Searches for POIs by name using case-insensitive substring matching.
-     * Results are paginated and sorted.
-     * This endpoint is accessible without authentication.
-     *
-     * @param q search term to match against POI names
-     * @param page zero-based page index (default 0)
-     * @param size number of items per page (default 10)
-     * @param sort sorting criteria in format "property,direction" (default "id,desc")
-     * @return Page of POIs matching the search criteria
-     */
-    @GetMapping("/public/poi/search")
-    public Page<PoiItemDto> searchPois(
-            @RequestParam("q") String q,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id,desc") String sort) {
-        String[] parts = sort.split(",");
-        Sort.Direction dir = parts.length > 1 && parts[1].equalsIgnoreCase("desc")
-            ? Sort.Direction.DESC
-            : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(dir, parts[0]));
-
-        return poiService
-            .searchPoisByName(q, pageable)
-            .map(PoiItemDto::fromEntity);
-    }
+    return poiService
+        .searchPoisByName(q, pageable)
+        .map(PoiItemDto::fromEntity);
+  }
 }

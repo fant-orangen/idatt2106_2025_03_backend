@@ -45,7 +45,8 @@ public class HouseholdController {
   private final InvitationService invitationService;
   private final UserRepository userRepository;
 
-  public HouseholdController(HouseholdService householdService, InvitationService invitationService, UserRepository userRepository) {
+  public HouseholdController(HouseholdService householdService, InvitationService invitationService,
+      UserRepository userRepository) {
     this.householdService = householdService;
     this.invitationService = invitationService;
     this.userRepository = userRepository;
@@ -172,13 +173,14 @@ public class HouseholdController {
    * Gets only non-admin members of the current user's household.
    *
    * @param principal the Principal object representing the current user
-   * @return ResponseEntity with the list of non-admin household members if successful, or 404 if the user has
-   * no household
+   * @return ResponseEntity with the list of non-admin household members if successful, or 404 if
+   * the user has no household
    */
   @GetMapping("/members/non-admin")
   public ResponseEntity<?> getNonAdminHouseholdMembers(Principal principal) {
     try {
-      List<HouseholdMemberDto> members = householdService.getNonAdminHouseholdMembers(principal.getName());
+      List<HouseholdMemberDto> members = householdService.getNonAdminHouseholdMembers(
+          principal.getName());
       return ResponseEntity.ok(members);
     } catch (IllegalStateException e) {
       if (e.getMessage().equals("User doesn't have a household")) {
@@ -238,8 +240,8 @@ public class HouseholdController {
    *
    * @param memberId  the ID of the empty household member to remove
    * @param principal the Principal object representing the current user
-   * @return ResponseEntity with success message if successful, or an error message if the user is not
-   * found, doesn't have a household, or the member doesn't belong to the user's household
+   * @return ResponseEntity with success message if successful, or an error message if the user is
+   * not found, doesn't have a household, or the member doesn't belong to the user's household
    */
   @DeleteMapping("/members/empty/{memberId}")
   public ResponseEntity<?> removeEmptyHouseholdMember(
@@ -260,15 +262,16 @@ public class HouseholdController {
    * Gets all pending invitations for the current user's household.
    *
    * @param principal the Principal object representing the current user
-   * @return ResponseEntity with the list of pending invitations if successful, or 404 if the user has
-   * no household
+   * @return ResponseEntity with the list of pending invitations if successful, or 404 if the user
+   * has no household
    */
   @GetMapping("/pending-invitations")
   public ResponseEntity<?> getPendingInvitations(Principal principal) {
     try {
       // Get the user's household ID
       HouseholdDto household = householdService.getCurrentUserHousehold(principal.getName());
-      List<Invitation> invitations = householdService.getPendingInvitationsForHousehold(household.getId());
+      List<Invitation> invitations = householdService.getPendingInvitationsForHousehold(
+          household.getId());
       return ResponseEntity.ok(invitations);
     } catch (IllegalStateException e) {
       if (e.getMessage().equals("User doesn't have a household")) {
@@ -279,13 +282,13 @@ public class HouseholdController {
   }
 
   /**
-   * Cancels a pending invitation by token. Only household admins can cancel invitations.
-   * Matches the frontend endpoint: /api/user/households/invitations/{token}
+   * Cancels a pending invitation by token. Only household admins can cancel invitations. Matches
+   * the frontend endpoint: /api/user/households/invitations/{token}
    *
-   * @param token the token of the invitation to cancel
+   * @param token     the token of the invitation to cancel
    * @param principal the Principal object representing the current user (admin)
-   * @return ResponseEntity with success message if successful, or an error message if the user is not
-   * found, is not an admin, or the invitation is not found
+   * @return ResponseEntity with success message if successful, or an error message if the user is
+   * not found, is not an admin, or the invitation is not found
    */
   @DeleteMapping("/invitations/{token}")
   public ResponseEntity<?> cancelInvitation(
@@ -367,12 +370,12 @@ public class HouseholdController {
   }
 
   /**
-   * Hard deletes the current user's household. Only household admins can delete households.
-   * This permanently removes the household and all related data from the database.
+   * Hard deletes the current user's household. Only household admins can delete households. This
+   * permanently removes the household and all related data from the database.
    *
    * @param principal the Principal object representing the current user (admin)
-   * @return ResponseEntity with success message if successful, or an error message if the user is not
-   * found, doesn't have a household, or is not an admin
+   * @return ResponseEntity with success message if successful, or an error message if the user is
+   * not found, doesn't have a household, or is not an admin
    */
   @DeleteMapping("/delete")
   public ResponseEntity<?> deleteHousehold(Principal principal) {
@@ -387,12 +390,13 @@ public class HouseholdController {
   }
 
   /**
-   * Updates the current user's household name and address. Only household admins can update households.
+   * Updates the current user's household name and address. Only household admins can update
+   * households.
    *
    * @param updateRequestDto the household update request containing the new name and address
-   * @param principal the Principal object representing the current user (admin)
-   * @return ResponseEntity with the updated household if successful, or an error message if the user is not
-   * found, doesn't have a household, or is not an admin
+   * @param principal        the Principal object representing the current user (admin)
+   * @return ResponseEntity with the updated household if successful, or an error message if the
+   * user is not found, doesn't have a household, or is not an admin
    */
   @PutMapping("/update")
   public ResponseEntity<?> updateHousehold(

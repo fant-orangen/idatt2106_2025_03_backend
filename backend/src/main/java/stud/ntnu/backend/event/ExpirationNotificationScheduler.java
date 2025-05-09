@@ -30,8 +30,8 @@ import stud.ntnu.backend.service.user.NotificationService;
 public class ExpirationNotificationScheduler {
 
   /**
-   * Flag to enable test mode, which runs checks every 15 seconds instead of daily.
-   * Should be set to false in production.
+   * Flag to enable test mode, which runs checks every 15 seconds instead of daily. Should be set to
+   * false in production.
    */
   private static final boolean TEST_MODE = false;
 
@@ -71,9 +71,9 @@ public class ExpirationNotificationScheduler {
   private static final Locale LOCALE = Locale.forLanguageTag("nb-NO");
 
   /**
-   * Scheduled task that runs daily at 1 AM to check for expiring and expired products.
-   * Sends notifications to users based on their notification preferences.
-   * This method will only run if test mode is disabled.
+   * Scheduled task that runs daily at 1 AM to check for expiring and expired products. Sends
+   * notifications to users based on their notification preferences. This method will only run if
+   * test mode is disabled.
    */
   @Scheduled(cron = "0 0 1 * * ?")
   public void checkExpiringProducts() {
@@ -84,8 +84,8 @@ public class ExpirationNotificationScheduler {
   }
 
   /**
-   * Scheduled task that runs every 15 seconds for testing purposes.
-   * This method will only run if test mode is enabled.
+   * Scheduled task that runs every 15 seconds for testing purposes. This method will only run if
+   * test mode is enabled.
    */
   @Scheduled(fixedRate = 15000)
   public void testModeCheckExpiringProducts() {
@@ -96,9 +96,9 @@ public class ExpirationNotificationScheduler {
   }
 
   /**
-   * Core method containing the expiration check logic.
-   * Extracted to avoid duplication between the daily and test mode schedulers.
-   * Checks for both expired products and products expiring within the next week.
+   * Core method containing the expiration check logic. Extracted to avoid duplication between the
+   * daily and test mode schedulers. Checks for both expired products and products expiring within
+   * the next week.
    */
   private void performExpirationCheck() {
     try {
@@ -117,7 +117,8 @@ public class ExpirationNotificationScheduler {
   }
 
   /**
-   * Processes expiring or expired batches and sends notifications to users in the affected households.
+   * Processes expiring or expired batches and sends notifications to users in the affected
+   * households.
    *
    * @param batches   The list of product batches to process
    * @param isExpired Whether these are expired batches (true) or expiring batches (false)
@@ -166,10 +167,12 @@ public class ExpirationNotificationScheduler {
       String unit = batch.getProductType().getUnit();
       String date = batch.getExpirationTime().format(DATE_FORMATTER);
 
-      String messageKey = isExpired ? "notification.expired.single" : "notification.expiring.single";
+      String messageKey =
+          isExpired ? "notification.expired.single" : "notification.expiring.single";
       return getMessage(messageKey, productName, quantity, unit, date);
     } else {
-      String messageKey = isExpired ? "notification.expired.multiple" : "notification.expiring.multiple";
+      String messageKey =
+          isExpired ? "notification.expired.multiple" : "notification.expiring.multiple";
       return getMessage(messageKey, batchSize);
     }
   }

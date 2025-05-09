@@ -28,7 +28,7 @@ public class AuthController {
 
   /**
    * Validates the JWT token from the Authorization header.
-   * 
+   *
    * @return ResponseEntity with status 200 OK if token is valid, 401 Unauthorized otherwise
    */
   @GetMapping("/validate")
@@ -38,21 +38,21 @@ public class AuthController {
 
   /**
    * Authenticates a user and generates a JWT token.
-   * 
+   *
    * @param authRequest the authentication request containing email and password
    * @return ResponseEntity containing the JWT token and user information
    */
   @PostMapping("/login")
   public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
     AuthResponseDto authResponse = authService.login(authRequest);
-    return authResponse.getIsUsing2FA() 
+    return authResponse.getIsUsing2FA()
         ? ResponseEntity.status(202).body(authResponse)
         : ResponseEntity.ok(authResponse);
   }
 
   /**
    * Registers a new user with the USER role.
-   * 
+   *
    * @param registrationRequest the registration request containing user details
    * @return ResponseEntity with status 200 OK if successful, 400 Bad Request if registration fails
    */
@@ -68,7 +68,7 @@ public class AuthController {
 
   /**
    * Handles email verification using a token sent via email.
-   * 
+   *
    * @param token the verification token from the request parameter
    * @return ResponseEntity indicating success or failure of the verification
    */
@@ -87,9 +87,10 @@ public class AuthController {
 
   /**
    * Initiates the 2FA process by sending a verification code to the user's email.
-   * 
+   *
    * @param request the request containing the user's email
-   * @return ResponseEntity with status 200 OK if successful, 500 Internal Server Error if sending fails
+   * @return ResponseEntity with status 200 OK if successful, 500 Internal Server Error if sending
+   * fails
    */
   @PostMapping("/send-2fa")
   public ResponseEntity<?> send2FACode(@RequestBody @Valid Send2FACodeRequestDto request) {
@@ -103,7 +104,7 @@ public class AuthController {
 
   /**
    * Completes the 2FA process by verifying the code sent to the user's email.
-   * 
+   *
    * @param request the request containing the user's email and verification code
    * @return ResponseEntity with status 200 OK if successful, 400 Bad Request if code is invalid
    */
@@ -121,7 +122,7 @@ public class AuthController {
 
   /**
    * Initiates the password reset process by sending a reset link to the user's email.
-   * 
+   *
    * @param request the request containing the user's email
    * @return ResponseEntity with status 200 OK and a success message
    */
@@ -129,9 +130,11 @@ public class AuthController {
   public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDto request) {
     try {
       authService.forgotPassword(request.getEmail());
-      return ResponseEntity.ok("If your email exists in our system, you will receive a password reset link.");
+      return ResponseEntity.ok(
+          "If your email exists in our system, you will receive a password reset link.");
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.ok("If your email exists in our system, you will receive a password reset link.");
+      return ResponseEntity.ok(
+          "If your email exists in our system, you will receive a password reset link.");
     } catch (Exception e) {
       return ResponseEntity.status(500).body("Failed to process forgot password request.");
     }
@@ -139,7 +142,7 @@ public class AuthController {
 
   /**
    * Resets a user's password using a valid reset token.
-   * 
+   *
    * @param request the request containing the reset token and new password
    * @return ResponseEntity with status 200 OK if successful, 400 Bad Request if token is invalid
    */
@@ -157,9 +160,10 @@ public class AuthController {
 
   /**
    * Changes the password for the currently authenticated user.
-   * 
+   *
    * @param request the request containing the new password
-   * @return ResponseEntity with status 200 OK if successful, 400 Bad Request if password change fails
+   * @return ResponseEntity with status 200 OK if successful, 400 Bad Request if password change
+   * fails
    */
   @PatchMapping("/change-password")
   public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordDto request) {

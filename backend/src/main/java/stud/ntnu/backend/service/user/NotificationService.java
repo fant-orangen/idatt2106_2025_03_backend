@@ -41,11 +41,11 @@ public class NotificationService {
   /**
    * Constructs the NotificationService with necessary dependencies.
    *
-   * @param notificationRepository Repository for notification data access.
+   * @param notificationRepository           Repository for notification data access.
    * @param notificationPreferenceRepository Repository for notification preference data access.
-   * @param userRepository         Repository for user data access.
-   * @param messagingTemplate      Template for sending messages via WebSocket.
-   * @param messageSource          MessageSource for internationalization.
+   * @param userRepository                   Repository for user data access.
+   * @param messagingTemplate                Template for sending messages via WebSocket.
+   * @param messageSource                    MessageSource for internationalization.
    */
   @Autowired
   public NotificationService(NotificationRepository notificationRepository,
@@ -152,15 +152,16 @@ public class NotificationService {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found with email: " + email));
 
-    List<Notification> unreadNotifications = notificationRepository.findByUserIdAndReadAtIsNull(user.getId());
+    List<Notification> unreadNotifications = notificationRepository.findByUserIdAndReadAtIsNull(
+        user.getId());
     int count = unreadNotifications.size();
-    
+
     if (count > 0) {
       LocalDateTime now = LocalDateTime.now();
       unreadNotifications.forEach(notification -> notification.setReadAt(now));
       notificationRepository.saveAll(unreadNotifications);
     }
-    
+
     return count;
   }
 
@@ -175,7 +176,7 @@ public class NotificationService {
   public boolean hasUnreadNotifications(String email) {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalStateException("User not found with email: " + email));
-    
+
     return notificationRepository.existsByUserIdAndReadAtIsNull(user.getId());
   }
 
@@ -495,12 +496,12 @@ public class NotificationService {
   }
 
   /**
-   * Changes a user's notification preference for a specific type.
-   * If the preference doesn't exist, creates a new one with the specified setting.
+   * Changes a user's notification preference for a specific type. If the preference doesn't exist,
+   * creates a new one with the specified setting.
    *
-   * @param user The user whose preference to change
+   * @param user           The user whose preference to change
    * @param preferenceType The type of notification preference as a string
-   * @param enable Whether to enable or disable the preference
+   * @param enable         Whether to enable or disable the preference
    */
   @Transactional
   public void changeNotificationPreference(User user, String preferenceType, boolean enable) {
@@ -515,17 +516,17 @@ public class NotificationService {
             .build());
 
     if (preference.getId() != null) {
-        preference.setEnabled(enable);
-        preference.setUpdatedAt(LocalDateTime.now());
+      preference.setEnabled(enable);
+      preference.setUpdatedAt(LocalDateTime.now());
     }
-    
+
     notificationPreferenceRepository.save(preference);
   }
 
   /**
    * Creates a safety request notification for a user.
    *
-   * @param receivingUser The user receiving the notification
+   * @param receivingUser      The user receiving the notification
    * @param requestingUserName The name of the user requesting safety confirmation
    */
   public void createSafetyRequestNotification(User receivingUser, String requestingUserName) {
@@ -534,7 +535,7 @@ public class NotificationService {
         new Object[]{requestingUserName},
         LocaleContextHolder.getLocale()
     );
-    
+
     Notification notification = createNotification(
         receivingUser,
         Notification.PreferenceType.safety_request,
@@ -542,7 +543,7 @@ public class NotificationService {
         null,
         message
     );
-    
+
     sendNotification(notification);
   }
 }
