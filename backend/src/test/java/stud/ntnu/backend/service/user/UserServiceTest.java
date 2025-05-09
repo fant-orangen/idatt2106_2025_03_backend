@@ -2,6 +2,7 @@ package stud.ntnu.backend.service.user;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.model.user.Role;
 import stud.ntnu.backend.model.user.SafetyConfirmation;
+import stud.ntnu.backend.model.user.EmailToken;
 import stud.ntnu.backend.repository.user.UserRepository;
 import stud.ntnu.backend.repository.user.EmailTokenRepository;
 import stud.ntnu.backend.repository.user.SafetyConfirmationRepository;
@@ -435,6 +437,130 @@ public class UserServiceTest {
             assertThrows(IllegalStateException.class, () -> userService.isSafe(userId));
             verify(userRepository).findById(userId);
             verify(safetyConfirmationRepository, never()).findByUser(any());
+        }
+
+        @Nested
+        class RequestSafetyConfirmationTests {
+            private User requestingUser;
+            private Household household;
+            private List<User> householdMembers;
+
+            @BeforeEach
+            void setUp() {
+                // Create test household
+                household = new Household();
+                household.setId(1);
+
+                // Create requesting user
+                requestingUser = new User();
+                requestingUser.setId(1);
+                requestingUser.setEmail("test@example.com");
+                requestingUser.setName("Test User");
+                requestingUser.setHousehold(household);
+
+                // Create other household members
+                User member1 = new User();
+                member1.setId(2);
+                member1.setEmail("member1@example.com");
+                member1.setName("Member 1");
+                member1.setHousehold(household);
+
+                User member2 = new User();
+                member2.setId(3);
+                member2.setEmail("member2@example.com");
+                member2.setName("Member 2");
+                member2.setHousehold(household);
+
+                householdMembers = Arrays.asList(requestingUser, member1, member2);
+            }
+
+            @Test
+            void shouldSuccessfullyRequestSafetyConfirmation() {
+                // Arrange
+                when(userRepository.findByEmail(requestingUser.getEmail())).thenReturn(Optional.of(requestingUser));
+                when(userRepository.findByHousehold(household)).thenReturn(householdMembers);
+                when(emailTokenRepository.save(any(EmailToken.class))).thenAnswer(i -> i.getArgument(0));
+
+                // Act
+                userService.requestSafetyConfirmation(requestingUser.getEmail());
+
+                // Assert
+                verify(safetyConfirmationRepository).deleteByUser(requestingUser);
+                verify(safetyConfirmationRepository).save(argThat(confirmation -> 
+                    confirmation.getUser().equals(requestingUser) && 
+                    confirmation.getIsSafe() && 
+                    confirmation.getSafeAt() != null
+                ));
+
+                // Verify email tokens were created for other members
+                verify(emailTokenRepository, times(2)).save(argThat(token ->
+                    token.getType() == EmailToken.TokenType.SAFETY_CONFIRMATION &&
+                    token.getExpiresAt() != null &&
+                    !token.getUser().equals(requestingUser)
+                ));
+
+                // Verify emails were sent
+                verify(emailService, times(2)).sendSafetyConfirmationEmail(
+                    eq(requestingUser),
+                    argThat(user -> !user.equals(requestingUser)),
+                    anyString()
+                );
+
+                // Verify notifications were created
+                verify(notificationService, times(2)).createSafetyRequestNotification(
+                    argThat(user -> !user.equals(requestingUser)),
+                    eq(requestingUser.getName())
+                );
+            }
+
+            @Test
+            void shouldThrowExceptionWhenUserNotFound() {
+                // Arrange
+                String nonExistentEmail = "nonexistent@example.com";
+                when(userRepository.findByEmail(nonExistentEmail)).thenReturn(Optional.empty());
+
+                // Act & Assert
+                assertThrows(IllegalStateException.class, () -> 
+                    userService.requestSafetyConfirmation(nonExistentEmail)
+                );
+                verify(safetyConfirmationRepository, never()).deleteByUser(any());
+                verify(emailService, never()).sendSafetyConfirmationEmail(any(), any(), any());
+            }
+
+            @Test
+            void shouldThrowExceptionWhenUserNotInHousehold() {
+                // Arrange
+                User userWithoutHousehold = new User();
+                userWithoutHousehold.setEmail("nohousehold@example.com");
+                when(userRepository.findByEmail(userWithoutHousehold.getEmail()))
+                    .thenReturn(Optional.of(userWithoutHousehold));
+
+                // Act & Assert
+                assertThrows(IllegalStateException.class, () -> 
+                    userService.requestSafetyConfirmation(userWithoutHousehold.getEmail())
+                );
+                verify(safetyConfirmationRepository, never()).deleteByUser(any());
+                verify(emailService, never()).sendSafetyConfirmationEmail(any(), any(), any());
+            }
+
+            @Test
+            void shouldThrowExceptionWhenNoOtherHouseholdMembers() {
+                // Arrange
+                when(userRepository.findByEmail(requestingUser.getEmail())).thenReturn(Optional.of(requestingUser));
+                when(userRepository.findByHousehold(household)).thenReturn(Collections.singletonList(requestingUser));
+
+                // Act & Assert
+                assertThrows(IllegalStateException.class, () -> 
+                    userService.requestSafetyConfirmation(requestingUser.getEmail())
+                );
+                
+                // Verify that deleteByUser was called once for the requesting user
+                verify(safetyConfirmationRepository).deleteByUser(requestingUser);
+                
+                // Verify that no email tokens were created and no emails were sent
+                verify(emailTokenRepository, never()).save(any());
+                verify(emailService, never()).sendSafetyConfirmationEmail(any(), any(), any());
+            }
         }
     }
 } 
