@@ -14,6 +14,7 @@ import stud.ntnu.backend.service.map.PoiImportService;
  * are available for use immediately after startup.
  */
 @Component
+@Profile("!test & !unit-test")
 @RequiredArgsConstructor
 public class PoiStartupLoader {
 
