@@ -125,6 +125,11 @@ public class HouseholdService {
       throw new IllegalStateException("Only household admins can update households");
     }
 
+    // Check if the new name is different from current name and if it already exists
+    if (!name.equals(household.getName()) && householdRepository.existsByName(name)) {
+      throw new IllegalStateException("A household with this name already exists");
+    }
+
     // Update the household
     household.setName(name);
     household.setAddress(address);
