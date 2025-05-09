@@ -45,10 +45,6 @@ public class TwoFactorCodeService {
      * @return A random 6-digit integer.
      */
     public Integer generateVerificationCode() {
-      return 100000 + new Random().nextInt(900000); // Ensures a 6-digit integer
-    }
-
-
         int code = 100000 + new Random().nextInt(900000);
         System.out.println("Generated verification code: " + code);
         return code;
