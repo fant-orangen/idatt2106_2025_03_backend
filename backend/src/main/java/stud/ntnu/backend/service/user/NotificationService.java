@@ -1,5 +1,6 @@
 package stud.ntnu.backend.service.user;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -501,6 +502,17 @@ public class NotificationService {
 
     notificationPreferenceRepository.save(preference);
   }
+
+    /**
+     * Retrieves a user's notification preferences.
+     *
+     * @param user The user whose preferences to retrieve
+     * @return An Optional containing a list of NotificationPreference objects, or empty if none exist.
+     */
+    @Transactional(readOnly = true)
+    public List<NotificationPreference> getUserNotificationPreferences(User user) {
+        return notificationPreferenceRepository.findByUser(user);
+    }
 
   /**
    * Creates a safety request notification for a user.

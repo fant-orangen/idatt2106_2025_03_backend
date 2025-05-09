@@ -1,5 +1,6 @@
 package stud.ntnu.backend.repository.user;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import stud.ntnu.backend.model.user.Notification;
@@ -22,4 +23,9 @@ public interface NotificationPreferenceRepository extends
    */
   Optional<NotificationPreference> findByUserAndPreferenceType(User user,
       Notification.PreferenceType preferenceType);
+
+  /**
+   * Gets the notification preferences for a specific user.
+   */
+    List<NotificationPreference> findByUser(User user);
 }
