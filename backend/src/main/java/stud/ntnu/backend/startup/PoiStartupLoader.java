@@ -33,7 +33,7 @@ public class PoiStartupLoader {
     poiImportService.importGroceryStoresFromOverpass();
     poiImportService.importPoliceStationsFromOverpass();
     poiImportService.importPharmaciesFromOverpass();
-    poiImportService.importFireStationsFromOverpass();
+    //poiImportService.importFireStationsFromOverpass();
     
   }
 }
