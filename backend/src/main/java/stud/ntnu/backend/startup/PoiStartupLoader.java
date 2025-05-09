@@ -26,14 +26,14 @@ public class PoiStartupLoader {
    */
   @EventListener(ApplicationReadyEvent.class)
   public void onApplicationReady() {
-    
-    poiImportService.importGasStationsFromOverpass();
-    poiImportService.importHospitalsFromOverpass();
-    poiImportService.importSheltersFromOverpass();
-    poiImportService.importGroceryStoresFromOverpass();
-    poiImportService.importPoliceStationsFromOverpass();
-    poiImportService.importPharmaciesFromOverpass();
-    poiImportService.importFireStationsFromOverpass();
-    
+    if (Boolean.getBoolean("poi.startup.enabled")) {
+      poiImportService.importGasStationsFromOverpass();
+      poiImportService.importHospitalsFromOverpass();
+      poiImportService.importSheltersFromOverpass();
+      poiImportService.importGroceryStoresFromOverpass();
+      poiImportService.importPoliceStationsFromOverpass();
+      poiImportService.importPharmaciesFromOverpass();
+      poiImportService.importFireStationsFromOverpass();
+    }
   }
 }
