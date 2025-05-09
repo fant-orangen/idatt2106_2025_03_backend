@@ -25,7 +25,7 @@ public class CreateReflectionDto {
     @NotBlank(message = "Content is required")
     private String content;
 
-    /**
+  /**
      * Indicates whether the reflection is shared or private.
      * Must not be null.
      */

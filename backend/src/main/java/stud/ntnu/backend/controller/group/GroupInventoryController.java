@@ -25,13 +25,12 @@ import stud.ntnu.backend.service.group.GroupService;
 /**
  * REST controller for managing group inventory operations.
  * <p>
- * This controller handles all operations related to group inventory management, including:
- * - Contributing product batches to group inventories
- * - Viewing and searching contributed product types
- * - Managing contributed batches
- * - Calculating total units contributed
+ * This controller handles all operations related to group inventory management, including: -
+ * Contributing product batches to group inventories - Viewing and searching contributed product
+ * types - Managing contributed batches - Calculating total units contributed
  * <p>
- * All endpoints require user authentication and operate on behalf of the authenticated user's household.
+ * All endpoints require user authentication and operate on behalf of the authenticated user's
+ * household.
  */
 @RestController
 @RequestMapping("/api")
@@ -48,12 +47,14 @@ public class GroupInventoryController {
   }
 
   /**
-   * Retrieves a paginated list of all product types that have batches contributed to the specified group.
+   * Retrieves a paginated list of all product types that have batches contributed to the specified
+   * group.
    *
-   * @param groupId The ID of the group to search within
-   * @param pageable Pagination parameters (page number, size, sorting)
+   * @param groupId   The ID of the group to search within
+   * @param pageable  Pagination parameters (page number, size, sorting)
    * @param principal The authenticated user making the request
-   * @return ResponseEntity containing a page of ProductTypeDto objects, or 400 Bad Request if groupId is null
+   * @return ResponseEntity containing a page of ProductTypeDto objects, or 400 Bad Request if
+   * groupId is null
    */
   @GetMapping("/user/groups/inventory/product-types")
   public ResponseEntity<Page<ProductTypeDto>> getContributedProductTypes(
@@ -71,12 +72,14 @@ public class GroupInventoryController {
   }
 
   /**
-   * Retrieves all product batches of a specific type that are currently contributed to the specified group.
+   * Retrieves all product batches of a specific type that are currently contributed to the
+   * specified group.
    *
-   * @param groupId The ID of the group to search within
+   * @param groupId       The ID of the group to search within
    * @param productTypeId The ID of the product type to filter by
-   * @param pageable Pagination parameters (page number, size, sorting)
-   * @return ResponseEntity containing a page of ProductBatchDto objects, or 400 Bad Request if parameters are invalid
+   * @param pageable      Pagination parameters (page number, size, sorting)
+   * @return ResponseEntity containing a page of ProductBatchDto objects, or 400 Bad Request if
+   * parameters are invalid
    */
   @GetMapping("/user/groups/inventory/product-types/batches")
   public ResponseEntity<Page<ProductBatchDto>> getContributedProductBatchesByType(
@@ -92,16 +95,14 @@ public class GroupInventoryController {
   }
 
   /**
-   * Removes a contributed product batch from a group.
-   * Only allowed if the batch was contributed by the user's household.
+   * Removes a contributed product batch from a group. Only allowed if the batch was contributed by
+   * the user's household.
    *
    * @param productBatchId The ID of the product batch to remove
-   * @param principal The authenticated user making the request
-   * @return ResponseEntity with:
-   *         - 200 OK if successfully removed
-   *         - 400 Bad Request if productBatchId is null
-   *         - 403 Forbidden if user is not authorized
-   *         - 404 Not Found if batch doesn't exist
+   * @param principal      The authenticated user making the request
+   * @return ResponseEntity with: - 200 OK if successfully removed - 400 Bad Request if
+   * productBatchId is null - 403 Forbidden if user is not authorized - 404 Not Found if batch
+   * doesn't exist
    */
   @PatchMapping("/user/groups/inventory/product-batches/{productBatchId}")
   public ResponseEntity<?> removeContributedBatch(
@@ -111,7 +112,8 @@ public class GroupInventoryController {
       return ResponseEntity.badRequest().build();
     }
     try {
-      boolean removed = groupInventoryService.removeContributedBatch(productBatchId, principal.getName());
+      boolean removed = groupInventoryService.removeContributedBatch(productBatchId,
+          principal.getName());
       if (!removed) {
         return ResponseEntity.notFound().build();
       }
@@ -124,16 +126,14 @@ public class GroupInventoryController {
   }
 
   /**
-   * Adds a product batch to a group's inventory.
-   * Only allowed if the user's household is a member of the group.
+   * Adds a product batch to a group's inventory. Only allowed if the user's household is a member
+   * of the group.
    *
-   * @param request The request containing batchId and groupId
+   * @param request   The request containing batchId and groupId
    * @param principal The authenticated user making the request
-   * @return ResponseEntity with:
-   *         - 200 OK if successfully added
-   *         - 403 Forbidden if user is not a group member
-   *         - 404 Not Found if request parameters are null
-   *         - 409 Conflict if batch cannot be added
+   * @return ResponseEntity with: - 200 OK if successfully added - 403 Forbidden if user is not a
+   * group member - 404 Not Found if request parameters are null - 409 Conflict if batch cannot be
+   * added
    */
   @PostMapping("/user/groups/inventory")
   public ResponseEntity<?> addBatchToGroup(@RequestBody AddBatchToGroupRequestDto request,
@@ -155,13 +155,15 @@ public class GroupInventoryController {
   }
 
   /**
-   * Searches for product types that have batches contributed to the specified group by the current user's household.
+   * Searches for product types that have batches contributed to the specified group by the current
+   * user's household.
    *
-   * @param groupId The ID of the group to search within
-   * @param search The search term to filter product types by name
-   * @param pageable Pagination parameters (page number, size, sorting)
+   * @param groupId   The ID of the group to search within
+   * @param search    The search term to filter product types by name
+   * @param pageable  Pagination parameters (page number, size, sorting)
    * @param principal The authenticated user making the request
-   * @return ResponseEntity containing a page of matching ProductTypeDto objects, or 400 Bad Request if parameters are invalid
+   * @return ResponseEntity containing a page of matching ProductTypeDto objects, or 400 Bad Request
+   * if parameters are invalid
    */
   @GetMapping("/user/groups/inventory/product-types/search")
   public ResponseEntity<Page<ProductTypeDto>> searchContributedProductTypes(
@@ -182,18 +184,18 @@ public class GroupInventoryController {
   }
 
   /**
-   * Checks if a specific product batch is currently contributed to any group by the user's household.
+   * Checks if a specific product batch is currently contributed to any group by the user's
+   * household.
    *
    * @param productBatchId The ID of the product batch to check
-   * @param principal The authenticated user making the request
-   * @return ResponseEntity containing:
-   *         - true if the batch is contributed to a group
-   *         - false if not contributed or if an error occurs
-   *         - 400 Bad Request if productBatchId is null
-   *         - 403 Forbidden if an error occurs during the check
+   * @param principal      The authenticated user making the request
+   * @return ResponseEntity containing: - true if the batch is contributed to a group - false if not
+   * contributed or if an error occurs - 400 Bad Request if productBatchId is null - 403 Forbidden
+   * if an error occurs during the check
    */
   @GetMapping("user/groups/inventory/{productBatchId}/contributed")
-  public ResponseEntity<Boolean> isContributedToGroup(@PathVariable Integer productBatchId, Principal principal) {
+  public ResponseEntity<Boolean> isContributedToGroup(@PathVariable Integer productBatchId,
+      Principal principal) {
     if (Objects.isNull(productBatchId)) {
       return ResponseEntity.badRequest().build();
     }
@@ -207,14 +209,13 @@ public class GroupInventoryController {
   }
 
   /**
-   * Calculates the total number of units of a specific product type contributed to a group across all households.
+   * Calculates the total number of units of a specific product type contributed to a group across
+   * all households.
    *
    * @param productTypeId The ID of the product type to calculate totals for
-   * @param groupId The ID of the group to calculate totals within
-   * @return ResponseEntity containing:
-   *         - The total number of units if successful
-   *         - 0 if an error occurs
-   *         - 400 Bad Request if parameters are invalid
+   * @param groupId       The ID of the group to calculate totals within
+   * @return ResponseEntity containing: - The total number of units if successful - 0 if an error
+   * occurs - 400 Bad Request if parameters are invalid
    */
   @GetMapping("user/groups/inventory/product-types/sum")
   public ResponseEntity<Integer> getTotalUnitsForProductType(

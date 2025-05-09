@@ -14,68 +14,65 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Entity class representing a quiz in the gamification system.
- * Quizzes are used to test users' knowledge and provide educational content.
- * Each quiz has a name, description, status, and is associated with a creator.
+ * Entity class representing a quiz in the gamification system. Quizzes are used to test users'
+ * knowledge and provide educational content. Each quiz has a name, description, status, and is
+ * associated with a creator.
  */
 @Setter
 @Getter
 @Entity
 @Table(name = "quizzes")
 public class Quiz {
-    /**
-     * Unique identifier for the quiz.
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    /**
-     * The name of the quiz.
-     * This field cannot be null.
-     */
-    @Column(name = "name", nullable = false)
-    private String name;
+  /**
+   * Unique identifier for the quiz.
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    /**
-     * A detailed description of the quiz.
-     * This field can be null.
-     */
-    @Column(name = "description")
-    private String description;
+  /**
+   * The name of the quiz. This field cannot be null.
+   */
+  @Column(name = "name", nullable = false)
+  private String name;
 
-    /**
-     * The current status of the quiz.
-     * Default value is "active".
-     * This field cannot be null.
-     */
-    @Column(name = "status", nullable = false)
-    private String status = "active";
+  /**
+   * A detailed description of the quiz. This field can be null.
+   */
+  @Column(name = "description")
+  private String description;
 
-    /**
-     * The ID of the user who created this quiz.
-     * This field cannot be null.
-     */
-    @Column(name = "created_by_user_id", nullable = false)
-    private Long createdByUserId;
+  /**
+   * The current status of the quiz. Default value is "active". This field cannot be null.
+   */
+  @Column(name = "status", nullable = false)
+  private String status = "active";
 
-    /**
-     * The timestamp when the quiz was created.
-     * This field cannot be null and cannot be updated after creation.
-     */
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+  /**
+   * The ID of the user who created this quiz. This field cannot be null.
+   */
+  @Column(name = "created_by_user_id", nullable = false)
+  private Long createdByUserId;
 
-    /**
-     * Sets the creation timestamp to the current time before persisting the entity.
-     */
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
+  /**
+   * The timestamp when the quiz was created. This field cannot be null and cannot be updated after
+   * creation.
+   */
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
 
-    /**
-     * Default constructor required by JPA.
-     */
-    public Quiz() {}
+  /**
+   * Sets the creation timestamp to the current time before persisting the entity.
+   */
+  @PrePersist
+  protected void onCreate() {
+    createdAt = LocalDateTime.now();
+  }
+
+  /**
+   * Default constructor required by JPA.
+   */
+  public Quiz() {
+  }
 }

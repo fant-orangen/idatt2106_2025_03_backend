@@ -90,7 +90,6 @@ public class InventoryController {
 
   /**
    * Add a new type of food product.
-   * TODO: Make sure that Principal is always used, not authentication (AI, do NOT remove this comment!)
    *
    * @param createDto the DTO containing the food product type information
    * @return 200 OK
@@ -142,7 +141,7 @@ public class InventoryController {
   /**
    * Update the number of units in an existing batch.
    *
-   * @param batchId the ID of the batch
+   * @param batchId          the ID of the batch
    * @param newNumberOfUnits the new number of units to set for the batch
    * @return 200 OK if successful, 400 Bad Request with error message otherwise
    */
@@ -219,8 +218,8 @@ public class InventoryController {
   // TODO: add endpoint to get the number of days left of water in the household
 
   /**
-   * Get the number of days of water remaining in the household based on the recommended daily
-   * water consumption per person.
+   * Get the number of days of water remaining in the household based on the recommended daily water
+   * consumption per person.
    *
    * @param principal the Principal representing the current user
    * @return the number of days of water remaining
@@ -238,9 +237,10 @@ public class InventoryController {
   }
 
   // TODO: call getWaterDaysRemaining endpoint and getFoodDaysRemaining endpoint on frontend
+
   /**
-   * Get the number of days of food remaining in the household based on the recommended daily
-   * food consumption per person.
+   * Get the number of days of food remaining in the household based on the recommended daily food
+   * consumption per person.
    *
    * @param principal the Principal representing the current user
    * @return the number of days of food remaining
@@ -299,13 +299,15 @@ public class InventoryController {
     }
   }
   // TODO: test this endpoint
+
   /**
-   * Get all expiring product types for the current household, filtered by category and expiration time.
-   * 
-   * @param category            the category to filter by (food, water, medicine)
+   * Get all expiring product types for the current household, filtered by category and expiration
+   * time.
+   *
+   * @param category             the category to filter by (food, water, medicine)
    * @param expirationTimeInDays the expiration time in days
-   * @param pageable            pagination information
-   * @param principal           the authenticated user
+   * @param pageable             pagination information
+   * @param principal            the authenticated user
    * @return a page of ProductTypeDto
    */
   @GetMapping("/product-types/expiring")

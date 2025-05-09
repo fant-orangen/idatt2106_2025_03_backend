@@ -12,9 +12,8 @@ import java.security.Principal;
 import java.util.List;
 
 /**
- * REST controller for super administrator operations.
- * Provides endpoints for managing admin users, including retrieving admin information,
- * adding and revoking admin privileges.
+ * REST controller for super administrator operations. Provides endpoints for managing admin users,
+ * including retrieving admin information, adding and revoking admin privileges.
  */
 @RestController
 @RequestMapping("/api/super-admin")
@@ -27,25 +26,25 @@ public class SuperAdminController {
    * Constructs a new SuperAdminController with the required services.
    *
    * @param superAdminService service for super admin operations
-   * @param userService service for user operations
+   * @param userService       service for user operations
    */
   public SuperAdminController(SuperAdminService superAdminService, UserService userService) {
     this.superAdminService = superAdminService;
     this.userService = userService;
   }
 
-  /** Error message for unauthorized access attempts */
+  /**
+   * Error message for unauthorized access attempts
+   */
   private static final String ONLY_SUPER_ADMIN = "Only super-administrators can access this resource";
 
   /**
-   * Retrieves all administrators in the system.
-   * Only accessible by super administrators.
+   * Retrieves all administrators in the system. Only accessible by super administrators.
    *
    * @param principal the authenticated user making the request
-   * @return ResponseEntity containing either:
-   *         - List of UserInfoDto objects representing all admins
-   *         - 403 Forbidden response if unauthorized
-   *         - 400 Bad Request with error message if operation fails
+   * @return ResponseEntity containing either: - List of UserInfoDto objects representing all admins
+   * - 403 Forbidden response if unauthorized - 400 Bad Request with error message if operation
+   * fails
    */
   @GetMapping("/all")
   public ResponseEntity<?> getAdmins(Principal principal) {
@@ -62,15 +61,12 @@ public class SuperAdminController {
   }
 
   /**
-   * Retrieves user information by email address.
-   * Only accessible by super administrators.
+   * Retrieves user information by email address. Only accessible by super administrators.
    *
    * @param principal the authenticated user making the request
-   * @param email the email address of the user to look up
-   * @return ResponseEntity containing either:
-   *         - UserInfoDto with user's email and ID
-   *         - 403 Forbidden response if unauthorized
-   *         - 400 Bad Request with error message if user not found
+   * @param email     the email address of the user to look up
+   * @return ResponseEntity containing either: - UserInfoDto with user's email and ID - 403
+   * Forbidden response if unauthorized - 400 Bad Request with error message if user not found
    */
   @GetMapping("/user-info/{email}")
   public ResponseEntity<?> getIdByEmail(Principal principal, @PathVariable String email) {
@@ -89,15 +85,13 @@ public class SuperAdminController {
   }
 
   /**
-   * Revokes administrator privileges from a user.
-   * Only accessible by super administrators.
+   * Revokes administrator privileges from a user. Only accessible by super administrators.
    *
    * @param principal the authenticated user making the request
-   * @param id the ID of the user to revoke admin privileges from
-   * @return ResponseEntity containing either:
-   *         - Success message if admin access is revoked
-   *         - 403 Forbidden response if unauthorized
-   *         - 400 Bad Request with error message if user not found or not an admin
+   * @param id        the ID of the user to revoke admin privileges from
+   * @return ResponseEntity containing either: - Success message if admin access is revoked - 403
+   * Forbidden response if unauthorized - 400 Bad Request with error message if user not found or
+   * not an admin
    */
   @PutMapping("/revoke/{id}")
   public ResponseEntity<?> revokeAdminAccess(Principal principal, @PathVariable Integer id) {
@@ -120,15 +114,13 @@ public class SuperAdminController {
   }
 
   /**
-   * Grants administrator privileges to a user.
-   * Only accessible by super administrators.
+   * Grants administrator privileges to a user. Only accessible by super administrators.
    *
    * @param principal the authenticated user making the request
-   * @param id the ID of the user to grant admin privileges to
-   * @return ResponseEntity containing either:
-   *         - Success message if admin access is granted
-   *         - 403 Forbidden response if unauthorized
-   *         - 400 Bad Request with error message if user not found or already an admin
+   * @param id        the ID of the user to grant admin privileges to
+   * @return ResponseEntity containing either: - Success message if admin access is granted - 403
+   * Forbidden response if unauthorized - 400 Bad Request with error message if user not found or
+   * already an admin
    */
   @PutMapping("/add/{id}")
   public ResponseEntity<?> addAdminAccess(Principal principal, @PathVariable Integer id) {

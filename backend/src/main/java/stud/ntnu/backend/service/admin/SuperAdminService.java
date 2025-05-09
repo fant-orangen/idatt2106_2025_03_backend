@@ -11,8 +11,8 @@ import stud.ntnu.backend.repository.user.RoleRepository;
 import stud.ntnu.backend.service.user.UserService;
 
 /**
- * Service for managing super admin operations. This service provides methods to retrieve, add, and revoke
- * admin access for users in the system.
+ * Service for managing super admin operations. This service provides methods to retrieve, add, and
+ * revoke admin access for users in the system.
  */
 @Service
 public class SuperAdminService {
@@ -23,7 +23,7 @@ public class SuperAdminService {
   /**
    * Constructs a new SuperAdminService with the required dependencies.
    *
-   * @param userService the service for managing users
+   * @param userService    the service for managing users
    * @param roleRepository the repository for managing roles
    */
   public SuperAdminService(UserService userService, RoleRepository roleRepository) {
@@ -62,8 +62,8 @@ public class SuperAdminService {
   }
 
   /**
-   * Grants admin access to a user by changing their role to admin.
-   * Note: 2FA activation logic needs to be implemented.
+   * Grants admin access to a user by changing their role to admin. Note: 2FA activation logic needs
+   * to be implemented.
    *
    * @param id the ID of the user to grant admin access to
    * @throws RuntimeException if the user or ADMIN role is not found

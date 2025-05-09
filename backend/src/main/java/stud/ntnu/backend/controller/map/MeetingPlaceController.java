@@ -42,191 +42,182 @@ import stud.ntnu.backend.service.user.UserService;
 @RequestMapping("/api")
 public class MeetingPlaceController {
 
-    private final MeetingPlaceService meetingPlaceService;
-    private final UserService userService;
+  private final MeetingPlaceService meetingPlaceService;
+  private final UserService userService;
 
-    /**
-     * Constructs a new MeetingPlaceController with the required services.
-     *
-     * @param meetingPlaceService service for managing meeting places
-     * @param userService service for user operations
-     */
-    public MeetingPlaceController(MeetingPlaceService meetingPlaceService, UserService userService) {
-        this.meetingPlaceService = meetingPlaceService;
-        this.userService = userService;
+  /**
+   * Constructs a new MeetingPlaceController with the required services.
+   *
+   * @param meetingPlaceService service for managing meeting places
+   * @param userService         service for user operations
+   */
+  public MeetingPlaceController(MeetingPlaceService meetingPlaceService, UserService userService) {
+    this.meetingPlaceService = meetingPlaceService;
+    this.userService = userService;
+  }
+
+  /**
+   * Creates a new meeting place. Only accessible by administrators.
+   * <p>
+   * Note: Address to coordinates conversion is not yet implemented.
+   *
+   * @param createDto the DTO containing meeting place information
+   * @param principal the authenticated user making the request
+   * @return ResponseEntity containing: - 200 OK with the created meeting place if successful - 403
+   * Forbidden if user is not an admin - 400 Bad Request if creation fails
+   */
+  @PostMapping("/admin/meeting-places")
+  public ResponseEntity<?> createMeetingPlace(
+      @Valid @RequestBody CreateMeetingPlaceDto createDto,
+      Principal principal) {
+    try {
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+        return ResponseEntity.status(403).body("Only administrators can create meeting places");
+      }
+
+      User currentUser = userService.getUserByEmail(principal.getName())
+          .orElseThrow(() -> new IllegalStateException("User not found"));
+
+      MeetingPlace savedPlace = meetingPlaceService.createMeetingPlace(createDto, currentUser);
+      return ResponseEntity.ok(MeetingPlaceDto.fromEntity(savedPlace));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
 
-    /**
-     * Creates a new meeting place. Only accessible by administrators.
-     * <p>
-     * Note: Address to coordinates conversion is not yet implemented.
-     *
-     * @param createDto the DTO containing meeting place information
-     * @param principal the authenticated user making the request
-     * @return ResponseEntity containing:
-     *         - 200 OK with the created meeting place if successful
-     *         - 403 Forbidden if user is not an admin
-     *         - 400 Bad Request if creation fails
-     */
-    @PostMapping("/admin/meeting-places")
-    public ResponseEntity<?> createMeetingPlace(
-            @Valid @RequestBody CreateMeetingPlaceDto createDto,
-            Principal principal) {
-        try {
-            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
-                return ResponseEntity.status(403).body("Only administrators can create meeting places");
-            }
+  /**
+   * Archives a meeting place. Only accessible by administrators.
+   *
+   * @param id        the ID of the meeting place to archive
+   * @param principal the authenticated user making the request
+   * @return ResponseEntity containing: - 200 OK with the archived meeting place if successful - 403
+   * Forbidden if user is not an admin - 400 Bad Request if archiving fails
+   */
+  @PatchMapping("/admin/meeting-places/{id}/archive")
+  public ResponseEntity<?> archiveMeetingPlace(
+      @PathVariable Integer id,
+      Principal principal) {
+    try {
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+        return ResponseEntity.status(403).body("Only administrators can archive meeting places");
+      }
 
-            User currentUser = userService.getUserByEmail(principal.getName())
-                    .orElseThrow(() -> new IllegalStateException("User not found"));
-
-            MeetingPlace savedPlace = meetingPlaceService.createMeetingPlace(createDto, currentUser);
-            return ResponseEntity.ok(MeetingPlaceDto.fromEntity(savedPlace));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+      MeetingPlace archivedPlace = meetingPlaceService.archiveMeetingPlace(id);
+      return ResponseEntity.ok(MeetingPlaceDto.fromEntity(archivedPlace));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
 
-    /**
-     * Archives a meeting place. Only accessible by administrators.
-     *
-     * @param id the ID of the meeting place to archive
-     * @param principal the authenticated user making the request
-     * @return ResponseEntity containing:
-     *         - 200 OK with the archived meeting place if successful
-     *         - 403 Forbidden if user is not an admin
-     *         - 400 Bad Request if archiving fails
-     */
-    @PatchMapping("/admin/meeting-places/{id}/archive")
-    public ResponseEntity<?> archiveMeetingPlace(
-            @PathVariable Integer id,
-            Principal principal) {
-        try {
-            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
-                return ResponseEntity.status(403).body("Only administrators can archive meeting places");
-            }
+  /**
+   * Activates a meeting place. Only accessible by administrators.
+   *
+   * @param id        the ID of the meeting place to activate
+   * @param principal the authenticated user making the request
+   * @return ResponseEntity containing: - 200 OK with the activated meeting place if successful -
+   * 403 Forbidden if user is not an admin - 400 Bad Request if activation fails
+   */
+  @PatchMapping("/admin/meeting-places/{id}/activate")
+  public ResponseEntity<?> activateMeetingPlace(
+      @PathVariable Integer id,
+      Principal principal) {
+    try {
+      if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
+        return ResponseEntity.status(403).body("Only administrators can activate meeting places");
+      }
 
-            MeetingPlace archivedPlace = meetingPlaceService.archiveMeetingPlace(id);
-            return ResponseEntity.ok(MeetingPlaceDto.fromEntity(archivedPlace));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+      MeetingPlace activatedPlace = meetingPlaceService.activateMeetingPlace(id);
+      return ResponseEntity.ok(MeetingPlaceDto.fromEntity(activatedPlace));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
+  }
 
-    /**
-     * Activates a meeting place. Only accessible by administrators.
-     *
-     * @param id the ID of the meeting place to activate
-     * @param principal the authenticated user making the request
-     * @return ResponseEntity containing:
-     *         - 200 OK with the activated meeting place if successful
-     *         - 403 Forbidden if user is not an admin
-     *         - 400 Bad Request if activation fails
-     */
-    @PatchMapping("/admin/meeting-places/{id}/activate")
-    public ResponseEntity<?> activateMeetingPlace(
-            @PathVariable Integer id,
-            Principal principal) {
-        try {
-            if (!AdminChecker.isCurrentUserAdmin(principal, userService)) {
-                return ResponseEntity.status(403).body("Only administrators can activate meeting places");
-            }
-
-            MeetingPlace activatedPlace = meetingPlaceService.activateMeetingPlace(id);
-            return ResponseEntity.ok(MeetingPlaceDto.fromEntity(activatedPlace));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+  /**
+   * Retrieves all active meeting places within a specified distance of a location.
+   *
+   * @param latitude   the latitude of the center point
+   * @param longitude  the longitude of the center point
+   * @param distanceKm the search radius in kilometers (defaults to 10.0)
+   * @return ResponseEntity containing: - 200 OK with list of nearby meeting places if successful -
+   * 400 Bad Request if retrieval fails
+   */
+  @GetMapping("/public/meeting-places/nearby")
+  public ResponseEntity<List<MeetingPlaceDto>> getNearbyMeetingPlaces(
+      @RequestParam BigDecimal latitude,
+      @RequestParam BigDecimal longitude,
+      @RequestParam(required = false, defaultValue = "10.0") double distanceKm) {
+    try {
+      List<MeetingPlace> nearbyPlaces = meetingPlaceService.getNearbyMeetingPlaces(
+          latitude, longitude, distanceKm);
+      List<MeetingPlaceDto> dtos = nearbyPlaces.stream()
+          .map(MeetingPlaceDto::fromEntity)
+          .toList();
+      return ResponseEntity.ok(dtos);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().build();
     }
+  }
 
-    /**
-     * Retrieves all active meeting places within a specified distance of a location.
-     *
-     * @param latitude the latitude of the center point
-     * @param longitude the longitude of the center point
-     * @param distanceKm the search radius in kilometers (defaults to 10.0)
-     * @return ResponseEntity containing:
-     *         - 200 OK with list of nearby meeting places if successful
-     *         - 400 Bad Request if retrieval fails
-     */
-    @GetMapping("/public/meeting-places/nearby")
-    public ResponseEntity<List<MeetingPlaceDto>> getNearbyMeetingPlaces(
-            @RequestParam BigDecimal latitude,
-            @RequestParam BigDecimal longitude,
-            @RequestParam(required = false, defaultValue = "10.0") double distanceKm) {
-        try {
-            List<MeetingPlace> nearbyPlaces = meetingPlaceService.getNearbyMeetingPlaces(
-                    latitude, longitude, distanceKm);
-            List<MeetingPlaceDto> dtos = nearbyPlaces.stream()
-                    .map(MeetingPlaceDto::fromEntity)
-                    .toList();
-            return ResponseEntity.ok(dtos);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+  /**
+   * Retrieves a paginated list of all meeting places.
+   *
+   * @param page the page number (0-based, defaults to 0)
+   * @param size the number of items per page (defaults to 10)
+   * @return ResponseEntity containing: - 200 OK with paginated list of meeting places if successful
+   * - 400 Bad Request if retrieval fails
+   */
+  @GetMapping("/public/meeting-places/all")
+  public ResponseEntity<Page<MeetingPlaceDto>> getAllMeetingPlaces(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+    try {
+      Page<MeetingPlace> meetingPlaces = meetingPlaceService.getAllMeetingPlacesPaginated(page,
+          size);
+      Page<MeetingPlaceDto> dtos = meetingPlaces.map(MeetingPlaceDto::fromEntity);
+      return ResponseEntity.ok(dtos);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().build();
     }
+  }
 
-    /**
-     * Retrieves a paginated list of all meeting places.
-     *
-     * @param page the page number (0-based, defaults to 0)
-     * @param size the number of items per page (defaults to 10)
-     * @return ResponseEntity containing:
-     *         - 200 OK with paginated list of meeting places if successful
-     *         - 400 Bad Request if retrieval fails
-     */
-    @GetMapping("/public/meeting-places/all")
-    public ResponseEntity<Page<MeetingPlaceDto>> getAllMeetingPlaces(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        try {
-            Page<MeetingPlace> meetingPlaces = meetingPlaceService.getAllMeetingPlacesPaginated(page, size);
-            Page<MeetingPlaceDto> dtos = meetingPlaces.map(MeetingPlaceDto::fromEntity);
-            return ResponseEntity.ok(dtos);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+  /**
+   * Retrieves a paginated list of meeting place previews.
+   *
+   * @param page the page number (0-based, defaults to 0)
+   * @param size the number of items per page (defaults to 10)
+   * @return ResponseEntity containing: - 200 OK with paginated list of meeting place previews if
+   * successful - 400 Bad Request if retrieval fails
+   */
+  @GetMapping("/public/meeting-places/all/previews")
+  public ResponseEntity<Page<MeetingPlacePreviewDto>> getAllMeetingPlacePreviews(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+    try {
+      Page<MeetingPlacePreviewDto> previews = meetingPlaceService.getAllMeetingPlacePreviewsPaginated(
+          page, size);
+      return ResponseEntity.ok(previews);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().build();
     }
+  }
 
-    /**
-     * Retrieves a paginated list of meeting place previews.
-     *
-     * @param page the page number (0-based, defaults to 0)
-     * @param size the number of items per page (defaults to 10)
-     * @return ResponseEntity containing:
-     *         - 200 OK with paginated list of meeting place previews if successful
-     *         - 400 Bad Request if retrieval fails
-     */
-    @GetMapping("/public/meeting-places/all/previews")
-    public ResponseEntity<Page<MeetingPlacePreviewDto>> getAllMeetingPlacePreviews(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        try {
-            Page<MeetingPlacePreviewDto> previews = meetingPlaceService.getAllMeetingPlacePreviewsPaginated(page, size);
-            return ResponseEntity.ok(previews);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+  /**
+   * Retrieves a specific meeting place by its ID.
+   *
+   * @param id the ID of the meeting place to retrieve
+   * @return ResponseEntity containing: - 200 OK with the meeting place if found - 404 Not Found if
+   * the meeting place doesn't exist - 400 Bad Request if retrieval fails
+   */
+  @GetMapping("/public/meeting-places/{id}")
+  public ResponseEntity<MeetingPlaceDto> getMeetingPlaceById(@PathVariable Integer id) {
+    try {
+      return meetingPlaceService.getMeetingPlaceById(id)
+          .map(MeetingPlaceDto::fromEntity)
+          .map(ResponseEntity::ok)
+          .orElse(ResponseEntity.notFound().build());
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().build();
     }
-
-    /**
-     * Retrieves a specific meeting place by its ID.
-     *
-     * @param id the ID of the meeting place to retrieve
-     * @return ResponseEntity containing:
-     *         - 200 OK with the meeting place if found
-     *         - 404 Not Found if the meeting place doesn't exist
-     *         - 400 Bad Request if retrieval fails
-     */
-    @GetMapping("/public/meeting-places/{id}")
-    public ResponseEntity<MeetingPlaceDto> getMeetingPlaceById(@PathVariable Integer id) {
-        try {
-            return meetingPlaceService.getMeetingPlaceById(id)
-                .map(MeetingPlaceDto::fromEntity)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
+  }
 }

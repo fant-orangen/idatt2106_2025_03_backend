@@ -1,6 +1,7 @@
 package stud.ntnu.backend.service.group;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -14,10 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 import stud.ntnu.backend.dto.group.GroupSummaryDto;
 import stud.ntnu.backend.dto.household.HouseholdDto;
 import stud.ntnu.backend.model.group.Group;
+import stud.ntnu.backend.model.group.GroupInvitation;
 import stud.ntnu.backend.model.group.GroupMembership;
 import stud.ntnu.backend.model.household.Household;
 import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.group.GroupInventoryContributionRepository;
+import stud.ntnu.backend.repository.group.GroupInvitationRepository;
 import stud.ntnu.backend.repository.group.GroupMembershipRepository;
 import stud.ntnu.backend.repository.group.GroupRepository;
 import stud.ntnu.backend.repository.household.HouseholdAdminRepository;
@@ -41,6 +44,7 @@ public class GroupService {
   private final ProductTypeRepository productTypeRepository;
   private final GroupInventoryContributionRepository groupInventoryContributionRepository;
   private final HouseholdRepository householdRepository;
+  private final GroupInvitationRepository groupInvitationRepository;
 
   /**
    * Constructor for dependency injection.
@@ -53,6 +57,7 @@ public class GroupService {
    * @param productTypeRepository                repository for product type operations
    * @param groupInventoryContributionRepository repository for group inventory contribution operations
    * @param householdRepository                  repository for household operations
+   * @param groupInvitationRepository            repository for group invitation operations
    */
   @Autowired
   public GroupService(GroupRepository groupRepository,
@@ -60,7 +65,8 @@ public class GroupService {
       HouseholdAdminRepository householdAdminRepository, UserRepository userRepository,
       ProductTypeRepository productTypeRepository,
       GroupInventoryContributionRepository groupInventoryContributionRepository,
-      HouseholdRepository householdRepository) {
+      HouseholdRepository householdRepository,
+      GroupInvitationRepository groupInvitationRepository) {
     this.groupRepository = groupRepository;
     this.groupMembershipRepository = groupMembershipRepository;
     this.inventoryService = inventoryService;
@@ -69,6 +75,7 @@ public class GroupService {
     this.productTypeRepository = productTypeRepository;
     this.groupInventoryContributionRepository = groupInventoryContributionRepository;
     this.householdRepository = householdRepository;
+    this.groupInvitationRepository = groupInvitationRepository;
   }
 
   /**
@@ -266,6 +273,170 @@ public class GroupService {
     // Create and save the membership
     GroupMembership membership = new GroupMembership(group, householdOpt.get(), user);
     groupMembershipRepository.save(membership);
+
+    return true;
+  }
+
+  /**
+   * Creates an invitation for a household to join a group.
+   * The invitation will expire in one month.
+   *
+   * @param householdName the name of the household to invite
+   * @param groupId the ID of the group to invite to
+   * @param inviterEmail the email of the user sending the invitation
+   * @return true if invitation was created successfully, false if household or group not found
+   */
+  @Transactional
+  public boolean inviteHouseholdToGroup(String householdName, Integer groupId, String inviterEmail) {
+    // Find the inviter user
+    User inviter = userRepository.findByEmail(inviterEmail)
+        .orElseThrow(() -> new IllegalStateException("Inviter not found"));
+
+    // Find the group
+    Group group = groupRepository.findById(groupId)
+        .orElseThrow(() -> new IllegalStateException("Group not found"));
+
+    // Find the household by name
+    Household targetHousehold = householdRepository.findByName(householdName)
+        .orElseThrow(() -> new IllegalStateException("Household not found"));
+
+    // Check if the household is already a member of the group
+    boolean isAlreadyMember = groupMembershipRepository
+        .findCurrentByHouseholdIdAndGroupId(targetHousehold.getId(), groupId, LocalDateTime.now())
+        .isPresent();
+    
+    if (isAlreadyMember) {
+      throw new IllegalStateException("Household is already a member of this group");
+    }
+
+    // Check if there's already a pending invitation
+    boolean hasPendingInvitation = groupInvitationRepository
+        .existsPendingInvitation(groupId, targetHousehold.getId(), LocalDateTime.now());
+    
+    if (hasPendingInvitation) {
+      throw new IllegalStateException("There is already a pending invitation for this household");
+    }
+
+    // Create the invitation
+    GroupInvitation invitation = new GroupInvitation(
+        group,
+        inviterEmail,
+        targetHousehold,
+        LocalDateTime.now().plus(1, ChronoUnit.MONTHS)
+    );
+
+    // Save the invitation
+    groupInvitationRepository.save(invitation);
+
+    return true;
+  }
+
+  /**
+   * Gets all pending group invitations for the user's household.
+   * An invitation is considered pending if it:
+   * - Has not been accepted (accepted_at is null)
+   * - Has not been declined (declined_at is null)
+   * - Has not expired (expires_at is in the future)
+   *
+   * @param userEmail the email of the user
+   * @return List of pending GroupInvitation objects
+   */
+  public List<GroupInvitation> getPendingInvitations(String userEmail) {
+    // Get the user's household ID
+    Integer householdId = getHouseholdIdByUserEmail(userEmail);
+    if (householdId == null) {
+      return List.of(); // Return empty list if user has no household
+    }
+
+    LocalDateTime now = LocalDateTime.now();
+    return groupInvitationRepository.findPendingInvitationsForHousehold(
+        householdId,
+        now
+    );
+  }
+
+  /**
+   * Accepts a group invitation if the user is a member of the invited household.
+   * Creates a new group membership when accepting.
+   *
+   * @param invitationId ID of the invitation to accept
+   * @param userEmail email of the user accepting the invitation
+   * @return true if accepted successfully, false if invitation not found
+   * @throws IllegalStateException if user is not authorized or invitation is not pending
+   */
+  @Transactional
+  public boolean acceptInvitation(Integer invitationId, String userEmail) {
+    // Get user's household ID
+    Integer userHouseholdId = getHouseholdIdByUserEmail(userEmail);
+    if (userHouseholdId == null) {
+      throw new IllegalStateException("User is not a member of any household");
+    }
+
+    // Find the invitation
+    GroupInvitation invitation = groupInvitationRepository.findById(invitationId)
+        .orElseThrow(() -> new IllegalStateException("Invitation not found"));
+
+    // Check if invitation is for user's household
+    if (!userHouseholdId.equals(invitation.getInvitedHousehold().getId())) {
+      throw new IllegalStateException("User is not authorized to accept this invitation");
+    }
+
+    // Check if invitation is still pending
+    if (!invitation.isPending()) {
+      throw new IllegalStateException("Invitation is no longer pending");
+    }
+
+    // Accept the invitation
+    invitation.accept();
+    groupInvitationRepository.save(invitation);
+
+    // Create group membership
+    User inviter = userRepository.findByEmail(invitation.getInviterEmail())
+        .orElseThrow(() -> new IllegalStateException("Inviter not found"));
+    
+    GroupMembership membership = new GroupMembership(
+        invitation.getGroup(),
+        invitation.getInvitedHousehold(),
+        inviter
+    );
+    groupMembershipRepository.save(membership);
+
+    return true;
+  }
+
+  /**
+   * Rejects a group invitation if the user is a member of the invited household.
+   *
+   * @param invitationId ID of the invitation to reject
+   * @param userEmail email of the user rejecting the invitation
+   * @return true if rejected successfully, false if invitation not found
+   * @throws IllegalStateException if user is not authorized or invitation is not pending
+   */
+  @Transactional
+  public boolean rejectInvitation(Integer invitationId, String userEmail) {
+    // Get user's household ID
+    Integer userHouseholdId = getHouseholdIdByUserEmail(userEmail);
+    if (userHouseholdId == null) {
+      throw new IllegalStateException("User is not a member of any household");
+    }
+
+    // Find the invitation
+    GroupInvitation invitation = groupInvitationRepository.findById(invitationId)
+        .orElseThrow(() -> new IllegalStateException("Invitation not found"));
+
+    // Check if invitation is for user's household
+    if (!userHouseholdId.equals(invitation.getInvitedHousehold().getId())) {
+      throw new IllegalStateException("User is not authorized to reject this invitation");
+    }
+
+    // Check if invitation is still pending
+    if (!invitation.isPending()) {
+      throw new IllegalStateException("Invitation is no longer pending");
+    }
+
+    // Reject the invitation
+    invitation.decline();
+    groupInvitationRepository.save(invitation);
 
     return true;
   }

@@ -26,12 +26,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Service responsible for importing Points of Interest (POIs) from the Overpass API
- * and saving them into the application's database. Supports importing various types
- * of POIs such as gas stations, hospitals, shelters, and grocery stores.
+ * Service responsible for importing Points of Interest (POIs) from the Overpass API and saving them
+ * into the application's database. Supports importing various types of POIs such as gas stations,
+ * hospitals, shelters, and grocery stores.
  * <p>
- * This service is typically triggered at application startup to ensure that
- * system-managed POIs are available for use.
+ * This service is typically triggered at application startup to ensure that system-managed POIs are
+ * available for use.
  */
 @Slf4j
 @Service
@@ -79,6 +79,7 @@ public class PoiImportService {
   @Data
   @AllArgsConstructor
   private static class OpeningHours {
+
     private final String openFrom;
     private final String openTo;
   }
@@ -86,9 +87,11 @@ public class PoiImportService {
   /**
    * Parses opening hours string from OpenStreetMap format to separate opening and closing times.
    * Only considers weekday (Monday-Friday) hours for simplicity.
-   * 
-   * @param openingHoursStr OpenStreetMap opening hours string (e.g. "Mo-Fr 07:00-20:30, Sa 08:00-20:30")
-   * @return OpeningHours object containing weekday opening and closing times, or null if no valid times found
+   *
+   * @param openingHoursStr OpenStreetMap opening hours string (e.g. "Mo-Fr 07:00-20:30, Sa
+   *                        08:00-20:30")
+   * @return OpeningHours object containing weekday opening and closing times, or null if no valid
+   * times found
    */
   private OpeningHours parseOpeningHours(String openingHoursStr) {
     if (openingHoursStr == null || openingHoursStr.isEmpty()) {
@@ -109,8 +112,8 @@ public class PoiImportService {
   }
 
   /**
-   * Imports gas stations from the Overpass API and saves them as POIs in the database.
-   * Only POIs with amenity "fuel" are imported.
+   * Imports gas stations from the Overpass API and saves them as POIs in the database. Only POIs
+   * with amenity "fuel" are imported.
    */
   @Transactional
   public void importGasStationsFromOverpass() {
@@ -130,8 +133,8 @@ public class PoiImportService {
   }
 
   /**
-   * Imports hospitals from the Overpass API and saves them as POIs in the database.
-   * Only POIs with amenity "hospital" are imported.
+   * Imports hospitals from the Overpass API and saves them as POIs in the database. Only POIs with
+   * amenity "hospital" are imported.
    */
   @Transactional
   public void importHospitalsFromOverpass() {
@@ -151,8 +154,8 @@ public class PoiImportService {
   }
 
   /**
-   * Imports shelters from the Overpass API and saves them as POIs in the database.
-   * POIs with amenity "shelter" or emergency "shelter" are imported.
+   * Imports shelters from the Overpass API and saves them as POIs in the database. POIs with
+   * amenity "shelter" or emergency "shelter" are imported.
    */
   @Transactional
   public void importSheltersFromOverpass() {
@@ -173,9 +176,10 @@ public class PoiImportService {
   }
 
   // TODO: Also import opening hours if possible
+
   /**
-   * Imports grocery stores from the Overpass API and saves them as POIs in the database.
-   * POIs with shop type "supermarket", "grocery", or "convenience" are imported.
+   * Imports grocery stores from the Overpass API and saves them as POIs in the database. POIs with
+   * shop type "supermarket", "grocery", or "convenience" are imported.
    */
   @Transactional
   public void importGroceryStoresFromOverpass() {
@@ -195,8 +199,8 @@ public class PoiImportService {
   }
 
   /**
-   * Imports police stations from the Overpass API and saves them as POIs in the database.
-   * Only POIs with amenity "police" are imported.
+   * Imports police stations from the Overpass API and saves them as POIs in the database. Only POIs
+   * with amenity "police" are imported.
    */
   @Transactional
   public void importPoliceStationsFromOverpass() {
@@ -216,8 +220,8 @@ public class PoiImportService {
   }
 
   /**
-   * Imports pharmacies from the Overpass API and saves them as POIs in the database.
-   * Includes POIs with either amenity="pharmacy" or healthcare="pharmacy".
+   * Imports pharmacies from the Overpass API and saves them as POIs in the database. Includes POIs
+   * with either amenity="pharmacy" or healthcare="pharmacy".
    */
   @Transactional
   public void importPharmaciesFromOverpass() {
@@ -238,8 +242,8 @@ public class PoiImportService {
   }
 
   /**
-   * Imports fire stations from the Overpass API and saves them as POIs in the database.
-   * Only POIs with amenity "fire_station" are imported.
+   * Imports fire stations from the Overpass API and saves them as POIs in the database. Only POIs
+   * with amenity "fire_station" are imported.
    */
   @Transactional
   public void importFireStationsFromOverpass() {
@@ -259,8 +263,7 @@ public class PoiImportService {
   }
 
   /**
-   * Placeholder for future use or for importing all POI types.
-   * Currently does nothing.
+   * Placeholder for future use or for importing all POI types. Currently does nothing.
    */
   @Transactional
   public void importPoisFromOverpass() {
@@ -309,11 +312,11 @@ public class PoiImportService {
         continue;
       }
       String name = nameExtractor.extract(el, typeName);
-      
+
       // Extract opening hours and address from tags
       Map<String, String> tags = el.tags;
       String openingHoursStr = tags != null ? tags.get("opening_hours") : null;
-      
+
       // Build address from available address tags
       StringBuilder address = new StringBuilder();
       if (tags != null) {
@@ -321,7 +324,7 @@ public class PoiImportService {
         String housenumber = tags.get("addr:housenumber");
         String postcode = tags.get("addr:postcode");
         String city = tags.get("addr:city");
-        
+
         if (street != null) {
           address.append(street);
           if (housenumber != null) {
@@ -342,7 +345,7 @@ public class PoiImportService {
       }
 
       PointOfInterest poi = new PointOfInterest(poiType, name, lat, lon, adminUser);
-      
+
       // Parse and set opening hours if available
       if (openingHoursStr != null) {
         OpeningHours hours = parseOpeningHours(openingHoursStr);
@@ -351,11 +354,11 @@ public class PoiImportService {
           poi.setOpenTo(hours.getOpenTo());
         }
       }
-      
+
       if (address.length() > 0) {
         poi.setAddress(address.toString());
       }
-      
+
       poiRepository.save(poi);
     }
   }
@@ -365,6 +368,7 @@ public class PoiImportService {
    */
   @FunctionalInterface
   private interface QuerySupplier {
+
     /**
      * Returns the Overpass query string.
      *
@@ -378,6 +382,7 @@ public class PoiImportService {
    */
   @FunctionalInterface
   private interface NameExtractor {
+
     /**
      * Extracts the name of the POI from the OverpassElement and type name.
      *
@@ -460,8 +465,8 @@ public class PoiImportService {
   }
 
   /**
-   * Builds the Overpass query string for pharmacies in Norway.
-   * Includes both amenity=pharmacy and healthcare=pharmacy tags.
+   * Builds the Overpass query string for pharmacies in Norway. Includes both amenity=pharmacy and
+   * healthcare=pharmacy tags.
    *
    * @return the Overpass query string for pharmacies
    */
@@ -489,8 +494,7 @@ public class PoiImportService {
   }
 
   /**
-   * Represents the response from the Overpass API.
-   * Contains a list of OverpassElement objects.
+   * Represents the response from the Overpass API. Contains a list of OverpassElement objects.
    */
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
@@ -504,8 +508,8 @@ public class PoiImportService {
   }
 
   /**
-   * Represents an element in the Overpass API response.
-   * Can be a node or way, and may contain tags and center coordinates.
+   * Represents an element in the Overpass API response. Can be a node or way, and may contain tags
+   * and center coordinates.
    */
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)

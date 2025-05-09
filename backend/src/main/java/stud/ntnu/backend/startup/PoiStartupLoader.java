@@ -7,10 +7,9 @@ import org.springframework.stereotype.Component;
 import stud.ntnu.backend.service.map.PoiImportService;
 
 /**
- * Loads Points of Interest (POIs) from Overpass API into the database
- * when the application is ready. This ensures that the system-managed
- * POIs (such as hospitals, gas stations, and shelters) are available
- * for use immediately after startup.
+ * Loads Points of Interest (POIs) from Overpass API into the database when the application is
+ * ready. This ensures that the system-managed POIs (such as hospitals, gas stations, and shelters)
+ * are available for use immediately after startup.
  */
 @Component
 @RequiredArgsConstructor
@@ -22,8 +21,8 @@ public class PoiStartupLoader {
   private final PoiImportService poiImportService;
 
   /**
-   * Event listener that triggers after the Spring Boot application is fully started.
-   * Invokes the import of POIs from Overpass API.
+   * Event listener that triggers after the Spring Boot application is fully started. Invokes the
+   * import of POIs from Overpass API.
    */
   @EventListener(ApplicationReadyEvent.class)
   public void onApplicationReady() {

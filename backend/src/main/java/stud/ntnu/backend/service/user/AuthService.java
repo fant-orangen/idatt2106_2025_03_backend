@@ -141,8 +141,8 @@ public class AuthService {
 
     // Create notification preferences for all types
     for (Notification.PreferenceType preferenceType : Notification.PreferenceType.values()) {
-        NotificationPreference preference = new NotificationPreference(savedUser, preferenceType);
-        notificationPreferenceRepository.save(preference);
+      NotificationPreference preference = new NotificationPreference(savedUser, preferenceType);
+      notificationPreferenceRepository.save(preference);
     }
 
     // Generate verification token
@@ -301,28 +301,30 @@ public class AuthService {
     emailToken.setUsedAt(LocalDateTime.now());
     emailTokenRepository.save(emailToken);
   }
-    /**
-     * Changes the password for the currently authenticated user.
-     *
-     * @param changePasswordDto DTO containing the old and new passwords
-     * @throws IllegalArgumentException if the old password does not match
-     */
-    @Transactional
-    public void changePassword(ChangePasswordDto changePasswordDto) {
-      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-      String email = authentication.getName();
 
-      User user = userRepository.findByEmail(email)
-              .orElseThrow(() -> new IllegalArgumentException("No user found with email: " + email));
+  /**
+   * Changes the password for the currently authenticated user.
+   *
+   * @param changePasswordDto DTO containing the old and new passwords
+   * @throws IllegalArgumentException if the old password does not match
+   */
+  @Transactional
+  public void changePassword(ChangePasswordDto changePasswordDto) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getName();
 
-      if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), user.getPasswordHash())) {
-        throw new IllegalArgumentException("Failed to authenticate user");
-      }
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new IllegalArgumentException("No user found with email: " + email));
 
-      PasswordValidator.validate(changePasswordDto.getOldPassword(), changePasswordDto.getNewPassword(),
-              changePasswordDto.getConfirmNewPassword());
-
-      user.setPasswordHash(passwordEncoder.encode(changePasswordDto.getNewPassword()));
-      userRepository.save(user);
+    if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), user.getPasswordHash())) {
+      throw new IllegalArgumentException("Failed to authenticate user");
     }
+
+    PasswordValidator.validate(changePasswordDto.getOldPassword(),
+        changePasswordDto.getNewPassword(),
+        changePasswordDto.getConfirmNewPassword());
+
+    user.setPasswordHash(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+    userRepository.save(user);
+  }
 }

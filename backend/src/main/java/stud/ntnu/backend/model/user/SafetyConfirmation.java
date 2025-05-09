@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Entity class representing a safety confirmation record in the system.
- * This class stores information about a user's safety status at a specific time.
+ * Entity class representing a safety confirmation record in the system. This class stores
+ * information about a user's safety status at a specific time.
  */
 @Entity
 @Table(name = "safety_confirmations")
@@ -24,42 +24,42 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SafetyConfirmation {
 
-    /**
-     * Unique identifier for the safety confirmation record.
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+  /**
+   * Unique identifier for the safety confirmation record.
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    /**
-     * The user associated with this safety confirmation.
-     */
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+  /**
+   * The user associated with this safety confirmation.
+   */
+  @ManyToOne
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
-    /**
-     * Indicates whether the user was safe at the time of confirmation.
-     */
-    @Column(name = "is_safe", nullable = false)
-    private Boolean isSafe;
+  /**
+   * Indicates whether the user was safe at the time of confirmation.
+   */
+  @Column(name = "is_safe", nullable = false)
+  private Boolean isSafe;
 
-    /**
-     * The timestamp when the safety status was confirmed.
-     */
-    @Column(name = "safe_at", nullable = false)
-    private LocalDateTime safeAt;
+  /**
+   * The timestamp when the safety status was confirmed.
+   */
+  @Column(name = "safe_at", nullable = false)
+  private LocalDateTime safeAt;
 
-    /**
-     * Constructs a new SafetyConfirmation with the specified user, safety status, and timestamp.
-     *
-     * @param user The user associated with this safety confirmation
-     * @param isSafe The safety status of the user
-     * @param safeAt The timestamp of the safety confirmation
-     */
-    public SafetyConfirmation(User user, Boolean isSafe, LocalDateTime safeAt) {
-        this.user = user;
-        this.isSafe = isSafe;
-        this.safeAt = safeAt;
-    }
+  /**
+   * Constructs a new SafetyConfirmation with the specified user, safety status, and timestamp.
+   *
+   * @param user   The user associated with this safety confirmation
+   * @param isSafe The safety status of the user
+   * @param safeAt The timestamp of the safety confirmation
+   */
+  public SafetyConfirmation(User user, Boolean isSafe, LocalDateTime safeAt) {
+    this.user = user;
+    this.isSafe = isSafe;
+    this.safeAt = safeAt;
+  }
 }

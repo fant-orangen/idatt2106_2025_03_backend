@@ -60,11 +60,11 @@ public class AuthController {
         // Proceed with login if reCAPTCHA is valid
         AuthResponseDto authResponse = authService.login(authRequest);
 
-        if (authResponse.getIsUsing2FA()) {
-            return ResponseEntity.status(202).body(authResponse);
-        }
-        return ResponseEntity.ok(authResponse);
+      return authResponse.getIsUsing2FA()
+          ? ResponseEntity.status(202).body(authResponse)
+          : ResponseEntity.ok(authResponse);
     }
+
 
   /**
    * Registers a new user with the USER role.
@@ -105,7 +105,8 @@ public class AuthController {
    * Initiates the 2FA process by sending a verification code to the user's email.
    *
    * @param request the request containing the user's email
-   * @return ResponseEntity with status 200 OK if successful, 500 Internal Server Error if sending fails
+   * @return ResponseEntity with status 200 OK if successful, 500 Internal Server Error if sending
+   * fails
    */
   @PostMapping("/send-2fa")
   public ResponseEntity<?> send2FACode(@RequestBody @Valid Send2FACodeRequestDto request) {
@@ -145,9 +146,11 @@ public class AuthController {
   public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDto request) {
     try {
       authService.forgotPassword(request.getEmail());
-      return ResponseEntity.ok("If your email exists in our system, you will receive a password reset link.");
+      return ResponseEntity.ok(
+          "If your email exists in our system, you will receive a password reset link.");
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.ok("If your email exists in our system, you will receive a password reset link.");
+      return ResponseEntity.ok(
+          "If your email exists in our system, you will receive a password reset link.");
     } catch (Exception e) {
       return ResponseEntity.status(500).body("Failed to process forgot password request.");
     }
@@ -175,7 +178,8 @@ public class AuthController {
    * Changes the password for the currently authenticated user.
    *
    * @param request the request containing the new password
-   * @return ResponseEntity with status 200 OK if successful, 400 Bad Request if password change fails
+   * @return ResponseEntity with status 200 OK if successful, 400 Bad Request if password change
+   * fails
    */
   @PatchMapping("/change-password")
   public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordDto request) {
