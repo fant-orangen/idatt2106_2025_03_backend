@@ -7,6 +7,11 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
@@ -54,7 +59,8 @@ public class TestSecurityConfig {
                     .requestMatchers("/api/super-admin/**").hasRole("SUPERADMIN")
 
                     .anyRequest().authenticated()
-            );
+            )
+            .exceptionHandling(exception -> exception.accessDeniedHandler(customAccessDeniedHandler()));
         http.headers(headers ->
             headers.frameOptions(frameOptions -> frameOptions.disable()));
         return http.build();
@@ -81,5 +87,16 @@ public class TestSecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    @Bean
+    public AccessDeniedHandler customAccessDeniedHandler() {
+        return new AccessDeniedHandler() {
+            @Override
+            public void handle(HttpServletRequest request, HttpServletResponse response, org.springframework.security.access.AccessDeniedException accessDeniedException) throws IOException, ServletException {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.getWriter().write(accessDeniedException.getMessage());
+            }
+        };
     }
 }
