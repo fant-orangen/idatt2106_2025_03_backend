@@ -16,10 +16,10 @@ import stud.ntnu.backend.util.JwtUtil;
 import java.io.IOException;
 
 /**
- * A Spring Security filter that intercepts incoming HTTP requests to validate JWT tokens.
- * This filter extends OncePerRequestFilter to ensure it is executed only once per request.
- * It extracts the JWT token from the Authorization header, validates it, and sets up the
- * Spring Security context if the token is valid.
+ * A Spring Security filter that intercepts incoming HTTP requests to validate JWT tokens. This
+ * filter extends OncePerRequestFilter to ensure it is executed only once per request. It extracts
+ * the JWT token from the Authorization header, validates it, and sets up the Spring Security
+ * context if the token is valid.
  *
  * <p>The filter performs the following steps:
  * <ol>
@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   /**
    * Constructs a new JwtAuthenticationFilter with the required dependencies.
    *
-   * @param jwtUtil the utility class for JWT operations
+   * @param jwtUtil            the utility class for JWT operations
    * @param userDetailsService the service for loading user details
    */
   public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
@@ -51,8 +51,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
 
   /**
-   * Processes each HTTP request to validate the JWT token and set up authentication.
-   * This method is called for every request that matches the filter's URL pattern.
+   * Processes each HTTP request to validate the JWT token and set up authentication. This method is
+   * called for every request that matches the filter's URL pattern.
    *
    * <p>The method:
    * <ol>
@@ -63,11 +63,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
    *   <li>If valid, creates an authentication token and sets it in the security context</li>
    * </ol>
    *
-   * @param request the HTTP request to process
-   * @param response the HTTP response
+   * @param request     the HTTP request to process
+   * @param response    the HTTP response
    * @param filterChain the filter chain to continue processing
    * @throws ServletException if an error occurs during servlet processing
-   * @throws IOException if an I/O error occurs
+   * @throws IOException      if an I/O error occurs
    */
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,

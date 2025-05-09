@@ -15,23 +15,23 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateUserQuizAnswerDto {
 
-    /**
-     * The unique identifier of the user's quiz attempt.
-     */
-    private Long userQuizAttemptId;
+  /**
+   * The unique identifier of the user's quiz attempt.
+   */
+  private Long userQuizAttemptId;
 
-    /**
-     * The unique identifier of the quiz.
-     */
-    private Long quizId;
+  /**
+   * The unique identifier of the quiz.
+   */
+  private Long quizId;
 
-    /**
-     * The unique identifier of the question being answered.
-     */
-    private Long questionId;
+  /**
+   * The unique identifier of the question being answered.
+   */
+  private Long questionId;
 
-    /**
-     * The unique identifier of the selected answer.
-     */
-    private Long answerId;
+  /**
+   * The unique identifier of the selected answer.
+   */
+  private Long answerId;
 }

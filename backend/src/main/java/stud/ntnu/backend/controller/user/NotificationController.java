@@ -30,12 +30,10 @@ import stud.ntnu.backend.service.user.UserService;
 /**
  * REST controller for managing user notifications.
  * <p>
- * This controller handles all notification-related operations including:
- * - Retrieving paginated notifications for users
- * - Marking notifications as read (single or all)
- * - Checking for unread notifications
- * - Managing system-wide notifications (admin only)
- * - Configuring notification preferences
+ * This controller handles all notification-related operations including: - Retrieving paginated
+ * notifications for users - Marking notifications as read (single or all) - Checking for unread
+ * notifications - Managing system-wide notifications (admin only) - Configuring notification
+ * preferences
  * <p>
  * All endpoints require user authentication and operate on behalf of the authenticated user.
  */
@@ -51,8 +49,8 @@ public class NotificationController {
    * Constructs a new NotificationController with required dependencies.
    *
    * @param notificationService service for notification operations
-   * @param userService service for user operations
-   * @param messagingTemplate template for WebSocket messaging
+   * @param userService         service for user operations
+   * @param messagingTemplate   template for WebSocket messaging
    */
   public NotificationController(NotificationService notificationService,
       UserService userService,
@@ -66,8 +64,9 @@ public class NotificationController {
    * Retrieves paginated notifications for the current user.
    *
    * @param principal the authenticated user's principal
-   * @param pageable pagination parameters (page number, size, sorting)
-   * @return ResponseEntity containing a page of NotificationDto objects, or 400 Bad Request if an error occurs
+   * @param pageable  pagination parameters (page number, size, sorting)
+   * @return ResponseEntity containing a page of NotificationDto objects, or 400 Bad Request if an
+   * error occurs
    */
   @GetMapping("/user/notifications")
   public ResponseEntity<?> getNotifications(Principal principal, Pageable pageable) {
@@ -89,10 +88,10 @@ public class NotificationController {
   /**
    * Marks a specific notification as read for the current user.
    *
-   * @param id the ID of the notification to mark as read
+   * @param id        the ID of the notification to mark as read
    * @param principal the authenticated user's principal
    * @return ResponseEntity containing the updated NotificationDto, 403 Forbidden if unauthorized,
-   *         or 400 Bad Request if an error occurs
+   * or 400 Bad Request if an error occurs
    */
   @PutMapping("/user/notifications/{id}/read")
   public ResponseEntity<?> markAsRead(@PathVariable Integer id, Principal principal) {
@@ -119,13 +118,13 @@ public class NotificationController {
    * @param principal the authenticated user's principal
    * @return ResponseEntity with status 200 OK if successful, or 400 Bad Request if an error occurs
    */
-  @PatchMapping("/user/notifications/read-all") 
+  @PatchMapping("/user/notifications/read-all")
   public ResponseEntity<?> markAllAsRead(Principal principal) {
     try {
       String email = principal.getName();
       notificationService.markAllNotificationsAsRead(email);
       return ResponseEntity.ok().build();
-    } catch(Exception e) {
+    } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -134,7 +133,8 @@ public class NotificationController {
    * Checks if the current user has any unread notifications.
    *
    * @param principal the authenticated user's principal
-   * @return ResponseEntity containing a boolean indicating unread status, or 400 Bad Request if an error occurs
+   * @return ResponseEntity containing a boolean indicating unread status, or 400 Bad Request if an
+   * error occurs
    */
   @GetMapping("/user/notifications/any-unread")
   public ResponseEntity<?> anyUnread(Principal principal) {
@@ -142,7 +142,7 @@ public class NotificationController {
       String email = principal.getName();
       boolean hasUnread = notificationService.hasUnreadNotifications(email);
       return ResponseEntity.ok(hasUnread);
-    } catch(Exception e) {
+    } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
@@ -150,7 +150,7 @@ public class NotificationController {
   /**
    * Sends a notification to a specific WebSocket topic.
    *
-   * @param topic the WebSocket topic to send the notification to
+   * @param topic   the WebSocket topic to send the notification to
    * @param payload the notification payload to send
    */
   public void sendNotification(String topic, Object payload) {
@@ -160,13 +160,13 @@ public class NotificationController {
   /**
    * Creates a system-wide notification visible to all users.
    * <p>
-   * This endpoint is restricted to users with ADMIN or SUPERADMIN roles.
-   * The notification is created for all users and sent via WebSocket.
+   * This endpoint is restricted to users with ADMIN or SUPERADMIN roles. The notification is
+   * created for all users and sent via WebSocket.
    *
    * @param createDto the DTO containing the notification description
    * @param principal the authenticated user's principal
-   * @return ResponseEntity with status 200 OK if successful, 403 Forbidden if unauthorized,
-   *         or 400 Bad Request if an error occurs
+   * @return ResponseEntity with status 200 OK if successful, 403 Forbidden if unauthorized, or 400
+   * Bad Request if an error occurs
    */
   @PostMapping("/admin/notifications/system")
   public ResponseEntity<?> createSystemNotification(
@@ -195,9 +195,9 @@ public class NotificationController {
   /**
    * Updates a user's notification preference for a specific notification type.
    *
-   * @param principal the authenticated user's principal
+   * @param principal      the authenticated user's principal
    * @param preferenceType the type of notification preference to modify
-   * @param enable whether to enable or disable the preference
+   * @param enable         whether to enable or disable the preference
    * @return ResponseEntity with status 200 OK if successful, or 400 Bad Request if an error occurs
    */
   @PatchMapping("/user/notifications/preferences/{preferenceType}")
@@ -209,7 +209,7 @@ public class NotificationController {
       String email = principal.getName();
       User currentUser = userService.getUserByEmail(email)
           .orElseThrow(() -> new IllegalStateException("User not found"));
-      
+
       notificationService.changeNotificationPreference(currentUser, preferenceType, enable);
       return ResponseEntity.ok().build();
     } catch (Exception e) {

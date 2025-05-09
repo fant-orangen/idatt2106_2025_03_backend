@@ -12,9 +12,9 @@ import stud.ntnu.backend.model.user.User;
 import stud.ntnu.backend.repository.user.UserRepository;
 
 /**
- * Custom implementation of UserDetailsService that loads user details from the database.
- * This service is responsible for retrieving user information during authentication
- * and converting it into Spring Security's UserDetails format.
+ * Custom implementation of UserDetailsService that loads user details from the database. This
+ * service is responsible for retrieving user information during authentication and converting it
+ * into Spring Security's UserDetails format.
  */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

@@ -19,9 +19,9 @@ import stud.ntnu.backend.service.inventory.InventoryService;
 import stud.ntnu.backend.service.user.NotificationService;
 
 /**
- * Event listener that handles inventory change events and sends notifications to users when
- * their household's supplies are running low.
- * 
+ * Event listener that handles inventory change events and sends notifications to users when their
+ * household's supplies are running low.
+ * <p>
  * This listener monitors both water and food supplies, calculating the number of days of supply
  * remaining based on daily requirements. When supplies fall below the warning threshold,
  * notifications are sent to all users in the household who have enabled supply alerts.
@@ -56,21 +56,19 @@ public class InventoryEventListener {
   private final MessageSource messageSource;
 
   /**
-   * The number of days of supply remaining that triggers a warning notification.
-   * When supplies fall below this threshold, users will be notified.
+   * The number of days of supply remaining that triggers a warning notification. When supplies fall
+   * below this threshold, users will be notified.
    */
   private static final int DAYS_WARNING_THRESHOLD = 7;
 
   /**
    * Handles inventory change events by checking if supplies are running low and sending
    * notifications to household members if necessary.
-   * 
-   * This method:
-   * 1. Calculates daily water and calorie requirements for the household
-   * 2. Gets current inventory levels for water and food
-   * 3. Calculates days of supply remaining
-   * 4. If supplies are below threshold, sends notifications to household members
-   * 
+   * <p>
+   * This method: 1. Calculates daily water and calorie requirements for the household 2. Gets
+   * current inventory levels for water and food 3. Calculates days of supply remaining 4. If
+   * supplies are below threshold, sends notifications to household members
+   *
    * @param event The inventory change event containing the household ID
    */
   @Async
@@ -108,7 +106,7 @@ public class InventoryEventListener {
         // Check if user has enabled notifications for remaining supply alerts
         Optional<NotificationPreference> preference = notificationPreferenceRepository
             .findByUserAndPreferenceType(user, Notification.PreferenceType.remaining_supply_alert);
-        
+
         if (preference.isEmpty() || preference.get().isEnabled()) {
           Notification notification = notificationService.createNotification(
               user,
@@ -138,7 +136,7 @@ public class InventoryEventListener {
         // Check if user has enabled notifications for remaining supply alerts
         Optional<NotificationPreference> preference = notificationPreferenceRepository
             .findByUserAndPreferenceType(user, Notification.PreferenceType.remaining_supply_alert);
-        
+
         if (preference.isEmpty() || preference.get().isEnabled()) {
           Notification notification = notificationService.createNotification(
               user,

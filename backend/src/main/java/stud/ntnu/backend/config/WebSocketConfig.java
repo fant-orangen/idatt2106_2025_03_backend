@@ -7,9 +7,9 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 /**
- * Configuration class for WebSocket messaging in the application.
- * This class configures the WebSocket message broker and STOMP endpoints
- * for real-time communication between the server and clients.
+ * Configuration class for WebSocket messaging in the application. This class configures the
+ * WebSocket message broker and STOMP endpoints for real-time communication between the server and
+ * clients.
  *
  * <p>The configuration includes:
  * <ul>
@@ -24,8 +24,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   /**
-   * Configures the message broker for WebSocket communication.
-   * Sets up the following:
+   * Configures the message broker for WebSocket communication. Sets up the following:
    * <ul>
    *   <li>Simple broker for pub/sub messaging on "/topic"</li>
    *   <li>Application destination prefix for client-to-server messages on "/app"</li>
@@ -40,8 +39,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   }
 
   /**
-   * Registers STOMP endpoints for WebSocket connections.
-   * Configures:
+   * Registers STOMP endpoints for WebSocket connections. Configures:
    * <ul>
    *   <li>WebSocket endpoint at "/ws"</li>
    *   <li>Allowed origins for CORS (localhost:5173 and localhost:8080)</li>

@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Data Transfer Object (DTO) representing a user's history.
- * This class encapsulates both completed gamification activities and reflections
- * associated with a user, providing a comprehensive view of their engagement history.
+ * Data Transfer Object (DTO) representing a user's history. This class encapsulates both completed
+ * gamification activities and reflections associated with a user, providing a comprehensive view of
+ * their engagement history.
  */
 @Getter
 @Setter
@@ -18,87 +18,86 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserHistoryDto {
 
-    /**
-     * List of completed gamification activities for the user.
-     */
-    private List<GamificationActivityDto> completedActivities;
+  /**
+   * List of completed gamification activities for the user.
+   */
+  private List<GamificationActivityDto> completedActivities;
+
+  /**
+   * List of reflections created by the user.
+   */
+  private List<ReflectionDto> reflections;
+
+  /**
+   * Data Transfer Object (DTO) representing a completed gamification activity. This class
+   * encapsulates the details of an activity that a user has completed, including its
+   * identification, description, and completion information.
+   */
+  @Getter
+  @Setter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class GamificationActivityDto {
 
     /**
-     * List of reflections created by the user.
+     * Unique identifier for the activity.
      */
-    private List<ReflectionDto> reflections;
+    private Integer id;
 
     /**
-     * Data Transfer Object (DTO) representing a completed gamification activity.
-     * This class encapsulates the details of an activity that a user has completed,
-     * including its identification, description, and completion information.
+     * Title of the completed activity.
      */
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class GamificationActivityDto {
-
-        /**
-         * Unique identifier for the activity.
-         */
-        private Integer id;
-
-        /**
-         * Title of the completed activity.
-         */
-        private String title;
-
-        /**
-         * Detailed description of the activity.
-         */
-        private String description;
-
-        /**
-         * Points earned for completing this activity.
-         */
-        private Integer points;
-
-        /**
-         * Timestamp when the activity was completed.
-         */
-        private String completedAt;
-    }
+    private String title;
 
     /**
-     * Data Transfer Object (DTO) representing a user reflection.
-     * This class encapsulates the content and metadata of a reflection entry,
-     * including its sharing status and creation timestamp.
+     * Detailed description of the activity.
      */
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ReflectionDto {
+    private String description;
 
-        /**
-         * Unique identifier for the reflection.
-         */
-        private Integer id;
+    /**
+     * Points earned for completing this activity.
+     */
+    private Integer points;
 
-        /**
-         * Title of the reflection.
-         */
-        private String title;
+    /**
+     * Timestamp when the activity was completed.
+     */
+    private String completedAt;
+  }
 
-        /**
-         * Main content of the reflection.
-         */
-        private String content;
+  /**
+   * Data Transfer Object (DTO) representing a user reflection. This class encapsulates the content
+   * and metadata of a reflection entry, including its sharing status and creation timestamp.
+   */
+  @Getter
+  @Setter
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class ReflectionDto {
 
-        /**
-         * Indicates whether the reflection is shared or private.
-         */
-        private Boolean shared;
+    /**
+     * Unique identifier for the reflection.
+     */
+    private Integer id;
 
-        /**
-         * Timestamp when the reflection was created.
-         */
-        private String createdAt;
-    }
+    /**
+     * Title of the reflection.
+     */
+    private String title;
+
+    /**
+     * Main content of the reflection.
+     */
+    private String content;
+
+    /**
+     * Indicates whether the reflection is shared or private.
+     */
+    private Boolean shared;
+
+    /**
+     * Timestamp when the reflection was created.
+     */
+    private String createdAt;
+  }
 }

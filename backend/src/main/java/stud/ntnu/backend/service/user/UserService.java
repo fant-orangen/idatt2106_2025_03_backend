@@ -38,17 +38,17 @@ public class UserService {
   /**
    * Constructor for dependency injection.
    *
-   * @param userRepository repository for user operations
-   * @param emailTokenRepository repository for email tokens
+   * @param userRepository               repository for user operations
+   * @param emailTokenRepository         repository for email tokens
    * @param safetyConfirmationRepository repository for safety confirmations
-   * @param emailService service for sending emails
-   * @param notificationService service for creating notifications
+   * @param emailService                 service for sending emails
+   * @param notificationService          service for creating notifications
    */
   public UserService(UserRepository userRepository,
-                    EmailTokenRepository emailTokenRepository,
-                    SafetyConfirmationRepository safetyConfirmationRepository,
-                    EmailService emailService,
-                    NotificationService notificationService) {
+      EmailTokenRepository emailTokenRepository,
+      SafetyConfirmationRepository safetyConfirmationRepository,
+      EmailService emailService,
+      NotificationService notificationService) {
     this.userRepository = userRepository;
     this.emailTokenRepository = emailTokenRepository;
     this.safetyConfirmationRepository = safetyConfirmationRepository;
@@ -252,7 +252,7 @@ public class UserService {
    *
    * @param token The safety confirmation token
    * @throws IllegalArgumentException if the token is invalid
-   * @throws IllegalStateException if the token has expired
+   * @throws IllegalStateException    if the token has expired
    */
   @Transactional
   public void confirmSafety(String token) {
@@ -282,8 +282,8 @@ public class UserService {
   }
 
   /**
-   * Requests safety confirmation from all other members of the user's household.
-   * Each member will receive an email with a unique token to confirm their safety.
+   * Requests safety confirmation from all other members of the user's household. Each member will
+   * receive an email with a unique token to confirm their safety.
    *
    * @param email The email of the user requesting safety confirmation
    * @throws IllegalStateException if the user is not found or does not belong to a household
@@ -294,7 +294,8 @@ public class UserService {
         .orElseThrow(() -> new IllegalStateException("Bruker ikke funnet. / User not found."));
 
     if (requestingUser.getHousehold() == null) {
-      throw new IllegalStateException("Du må være medlem av en husstand for å be om sikkerhetsbekreftelser. / You must be a member of a household to request safety confirmations.");
+      throw new IllegalStateException(
+          "Du må være medlem av en husstand for å be om sikkerhetsbekreftelser. / You must be a member of a household to request safety confirmations.");
     }
 
     // Automatically mark the requesting user as safe
@@ -302,14 +303,16 @@ public class UserService {
     // Delete any existing safety confirmations for the requesting user
     safetyConfirmationRepository.deleteByUser(requestingUser);
     // Create new safety confirmation for the requesting user
-    SafetyConfirmation requestingUserConfirmation = new SafetyConfirmation(requestingUser, true, now);
+    SafetyConfirmation requestingUserConfirmation = new SafetyConfirmation(requestingUser, true,
+        now);
     safetyConfirmationRepository.save(requestingUserConfirmation);
 
     List<User> householdMembers = userRepository.findByHousehold(requestingUser.getHousehold());
     if (householdMembers.isEmpty() || householdMembers.size() == 1) {
-      throw new IllegalStateException("Ingen andre medlemmer i husstanden. / No other members in the household.");
+      throw new IllegalStateException(
+          "Ingen andre medlemmer i husstanden. / No other members in the household.");
     }
-    
+
     try {
       for (User member : householdMembers) {
         // Skip sending to the requesting user
@@ -334,7 +337,8 @@ public class UserService {
         emailService.sendSafetyConfirmationEmail(requestingUser, member, token);
 
         // Create notification for the safety request
-        String requestingUserName = requestingUser.getName() != null ? requestingUser.getName() : "et husstandsmedlem";
+        String requestingUserName =
+            requestingUser.getName() != null ? requestingUser.getName() : "et husstandsmedlem";
         notificationService.createSafetyRequestNotification(member, requestingUserName);
       }
     } catch (Exception e) {
@@ -357,7 +361,7 @@ public class UserService {
     // Check if user has a safety confirmation where is_safe is true
     Optional<SafetyConfirmation> safetyConfirmation = safetyConfirmationRepository.findByUser(
         userRepository.getReferenceById(userId));
-    
+
     if (!safetyConfirmation.isPresent() || !safetyConfirmation.get().getIsSafe()) {
       return false;
     }
@@ -365,7 +369,7 @@ public class UserService {
     // Check if the confirmation is less than 24 hours old
     LocalDateTime confirmationTime = safetyConfirmation.get().getSafeAt();
     LocalDateTime oneDayAgo = LocalDateTime.now().minusHours(24);
-    
+
     return confirmationTime.isAfter(oneDayAgo);
   }
 }

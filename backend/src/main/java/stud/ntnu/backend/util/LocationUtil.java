@@ -160,7 +160,8 @@ public class LocationUtil {
    * @param user         the user to check
    * @param crisisEvent  the crisis event
    * @param distanceInKm the distance in kilometers
-   * @return true if the crisis event is within the specified distance of the user's household location
+   * @return true if the crisis event is within the specified distance of the user's household
+   * location
    */
   public static boolean isCrisisEventNearUser(User user, CrisisEvent crisisEvent,
       double distanceInKm) {

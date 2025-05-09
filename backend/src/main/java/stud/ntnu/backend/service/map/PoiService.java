@@ -40,7 +40,7 @@ public class PoiService {
       PoiTypeRepository poiTypeRepository, SearchUtil searchUtil) {
     this.pointOfInterestRepository = pointOfInterestRepository;
     this.poiTypeRepository = poiTypeRepository;
-    this.searchUtil                = searchUtil;
+    this.searchUtil = searchUtil;
   }
 
   //Constants
@@ -55,12 +55,12 @@ public class PoiService {
     return pointOfInterestRepository.findAll();
   }
 
-    /**
-     * Retrieves a preview of all points of interest with pagination.
-     *
-     * @param pageable the pagination information
-     * @return a paginated list of points of interest previews
-     */
+  /**
+   * Retrieves a preview of all points of interest with pagination.
+   *
+   * @param pageable the pagination information
+   * @return a paginated list of points of interest previews
+   */
   @Transactional(readOnly = true)
   public Page<PoiPreviewDto> getPoiPreviews(Pageable pageable) {
     // Fetch paginated POIs
@@ -68,11 +68,12 @@ public class PoiService {
 
     // Map entities to PoiPreviewDto
     return poiPage.map(poi -> new PoiPreviewDto(
-            poi.getId(),
-            poi.getName(),
-            poi.getPoiType().getName()
+        poi.getId(),
+        poi.getName(),
+        poi.getPoiType().getName()
     ));
   }
+
   /**
    * Retrieves a point of interest by its ID.
    *
@@ -274,22 +275,23 @@ public class PoiService {
     // Save directly using the repository
     return pointOfInterestRepository.save(poi);
   }
-    /**
-      * Perform a case‐insensitive, paged search for POIs by their name.
-      * Delegates to SearchUtil for safe JPQL construction and execution.
-      *
-      * @param nameQuery substring to match in PointOfInterest.name; blank or null ⇒ empty page
-      * @param pageable  page index, size, and sort criteria
-      * @return a Page of matching PointOfInterest entities
-      * @throws IllegalArgumentException if the entity or field is invalid (developer error)
-      */
-        @Transactional(readOnly = true)
-        public Page<PointOfInterest> searchPoisByName(String nameQuery, Pageable pageable) {
-              return searchUtil.searchByDescription(
-                    PointOfInterest.class,
-                    "name",
-                    nameQuery,
-                    pageable
-                      );
-            }
+
+  /**
+   * Perform a case‐insensitive, paged search for POIs by their name. Delegates to SearchUtil for
+   * safe JPQL construction and execution.
+   *
+   * @param nameQuery substring to match in PointOfInterest.name; blank or null ⇒ empty page
+   * @param pageable  page index, size, and sort criteria
+   * @return a Page of matching PointOfInterest entities
+   * @throws IllegalArgumentException if the entity or field is invalid (developer error)
+   */
+  @Transactional(readOnly = true)
+  public Page<PointOfInterest> searchPoisByName(String nameQuery, Pageable pageable) {
+    return searchUtil.searchByDescription(
+        PointOfInterest.class,
+        "name",
+        nameQuery,
+        pageable
+    );
+  }
 }

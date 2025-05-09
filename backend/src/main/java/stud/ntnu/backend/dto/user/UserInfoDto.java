@@ -6,8 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Data Transfer Object (DTO) representing basic user identification information.
- * This class encapsulates essential user identifiers including email and user ID.
+ * Data Transfer Object (DTO) representing basic user identification information. This class
+ * encapsulates essential user identifiers including email and user ID.
  */
 @Getter
 @Setter
@@ -15,13 +15,13 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserInfoDto {
 
-    /**
-     * The user's email address.
-     */
-    private String email;
+  /**
+   * The user's email address.
+   */
+  private String email;
 
-    /**
-     * The unique identifier for the user.
-     */
-    private Integer userId;
+  /**
+   * The unique identifier for the user.
+   */
+  private Integer userId;
 }

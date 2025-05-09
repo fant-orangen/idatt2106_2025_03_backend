@@ -19,9 +19,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Represents a type of point of interest in the system.
- * This entity defines categories or classifications for points of interest,
- * such as restaurants, museums, parks, etc.
+ * Represents a type of point of interest in the system. This entity defines categories or
+ * classifications for points of interest, such as restaurants, museums, parks, etc.
  */
 @Entity
 @Table(name = "poi_types")
@@ -32,34 +31,33 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PoiType {
 
-    /**
-     * Unique identifier for the point of interest type.
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+  /**
+   * Unique identifier for the point of interest type.
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    /**
-     * The name of the point of interest type.
-     * Must be unique and cannot exceed 100 characters.
-     */
-    @Column(name = "name", nullable = false, unique = true, length = 100)
-    private String name;
+  /**
+   * The name of the point of interest type. Must be unique and cannot exceed 100 characters.
+   */
+  @Column(name = "name", nullable = false, unique = true, length = 100)
+  private String name;
 
-    /**
-     * List of points of interest associated with this type.
-     * This relationship is ignored during JSON serialization to prevent circular references.
-     */
-    @JsonIgnore
-    @OneToMany(mappedBy = "poiType")
-    private List<PointOfInterest> pointsOfInterest;
+  /**
+   * List of points of interest associated with this type. This relationship is ignored during JSON
+   * serialization to prevent circular references.
+   */
+  @JsonIgnore
+  @OneToMany(mappedBy = "poiType")
+  private List<PointOfInterest> pointsOfInterest;
 
-    /**
-     * Constructs a new point of interest type with the specified name.
-     *
-     * @param name The name of the point of interest type
-     */
-    public PoiType(String name) {
-        this.name = name;
-    }
+  /**
+   * Constructs a new point of interest type with the specified name.
+   *
+   * @param name The name of the point of interest type
+   */
+  public PoiType(String name) {
+    this.name = name;
+  }
 }
