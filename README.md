@@ -40,6 +40,17 @@ mvn spring-boot:run
 
 The application will start on `http://localhost:8080`
 
+If you encounter the Error 429 Too Many Requests on POST request for "https://overpass-api.de/api/interpreter"
+navigate to `src/main/java/stud/ntnu/backend/service/map/PoiImportService.java` and comment out:       
+```bash
+poiImportService.importSheltersFromOverpass();
+poiImportService.importGroceryStoresFromOverpass();
+poiImportService.importPoliceStationsFromOverpass();
+poiImportService.importPharmaciesFromOverpass();
+poiImportService.importFireStationsFromOverpass();
+```
+Methods in the onApplicationReady() method.
+
 ### Docker Deployment
 The project includes a Dockerfile for containerized deployment:
 
